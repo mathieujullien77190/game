@@ -1,0 +1,1 @@
+- utilise les alias quand necessaire, si dans le meme dossier ./ sinon alias
