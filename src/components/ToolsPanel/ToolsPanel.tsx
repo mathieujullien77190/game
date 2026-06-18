@@ -1,34 +1,24 @@
 import { useState } from "react";
-import { useShallow } from "zustand/react/shallow";
-import LineTab from "components/LineTab";
-import StartTab from "components/StartTab";
-import BallTab from "components/BallTab";
-import { useStore } from "store/useStore";
+import LineTab from "components/tabs/LineTab";
+import StartTab from "components/tabs/StartTab";
+import ArrivalTab from "components/tabs/ArrivalTab";
+import SwitchTab from "components/tabs/SwitchTab";
+import BallTab from "components/tabs/BallTab";
+import JsonTab from "components/tabs/JsonTab";
 import type { Tab } from "./types";
-import { serializeLevel } from "./helpers";
 import * as S from "./UI";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "line", label: "Line" },
   { id: "start", label: "Start" },
+  { id: "arrival", label: "Arrival" },
+  { id: "switch", label: "Switch" },
   { id: "ball", label: "Ball" },
   { id: "json", label: "JSON" },
 ];
 
 export const ToolsPanel = () => {
   const [activeTab, setActiveTab] = useState<Tab>("line");
-
-  const { lines, starts, balls, linkActive, clearLines } = useStore(
-    useShallow((s) => ({
-      lines: s.lines,
-      starts: s.starts,
-      balls: s.balls,
-      linkActive: s.linkActive,
-      clearLines: s.clearLines,
-    }))
-  );
-
-  const json = serializeLevel(lines, starts, balls, linkActive);
 
   return (
     <S.Wrapper>
@@ -46,13 +36,10 @@ export const ToolsPanel = () => {
       <S.Content>
         {activeTab === "line" && <LineTab />}
         {activeTab === "start" && <StartTab />}
+        {activeTab === "arrival" && <ArrivalTab />}
+        {activeTab === "switch" && <SwitchTab />}
         {activeTab === "ball" && <BallTab />}
-        {activeTab === "json" && (
-          <S.JsonWrapper>
-            <S.JsonTextarea readOnly value={json} />
-            <S.ClearButton onClick={clearLines}>clear</S.ClearButton>
-          </S.JsonWrapper>
-        )}
+        {activeTab === "json" && <JsonTab />}
       </S.Content>
     </S.Wrapper>
   );

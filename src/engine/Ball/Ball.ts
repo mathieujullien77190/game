@@ -16,9 +16,11 @@ export type BallColor = (typeof BALL_PALETTE)[number];
 export class Ball {
   id: string;
   color: string;
+  speed: number;
 
-  constructor(id: string, color: string = BALL_PALETTE[0]) {
+  constructor(id: string, color: string = BALL_PALETTE[0], speed: number = 1) {
     this.id = id;
     this.color = color;
+    this.speed = speed;
   }
 }

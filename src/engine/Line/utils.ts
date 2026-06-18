@@ -1,22 +1,25 @@
 import type { Point } from "engine/types";
 
+const round = (p: Point): Point => ({ x: Math.round(p.x), y: Math.round(p.y) });
+
 export const computePoints = (start: Point, end: Point, step: number): Point[] => {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  if (distance === 0) return [{ ...start }];
+  if (distance === 0) return [round(start)];
 
   const points: Point[] = [];
   const count = Math.floor(distance / step);
 
   for (let i = 0; i <= count; i++) {
     const t = (i * step) / distance;
-    points.push({ x: start.x + dx * t, y: start.y + dy * t });
+    points.push(round({ x: start.x + dx * t, y: start.y + dy * t }));
   }
 
-  if (points[points.length - 1].x !== end.x || points[points.length - 1].y !== end.y) {
-    points.push({ ...end });
+  const last = points[points.length - 1];
+  if (last.x !== end.x || last.y !== end.y) {
+    points.push(round(end));
   }
 
   return points;
@@ -47,7 +50,7 @@ export const computeBezierPoints = (
   const points: Point[] = [];
 
   for (let i = 0; i <= count; i++) {
-    points.push(bezierPoint(start, control, end, i / count));
+    points.push(round(bezierPoint(start, control, end, i / count)));
   }
 
   return points;

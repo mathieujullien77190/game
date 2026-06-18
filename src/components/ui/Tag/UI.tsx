@@ -15,6 +15,7 @@ export const Chip = styled.span<{
   text-decoration: ${({ $inactive }) => ($inactive ? "line-through" : "none")};
   cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
   border: ${({ $clickable }) => ($clickable ? "1px solid #e5e7eb" : "none")};
+  align-self: flex-start;
   user-select: none;
 
   ${({ $clickable }) => $clickable && "&:hover { border-color: #9ca3af; }"}

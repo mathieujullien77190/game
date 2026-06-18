@@ -1,32 +1,21 @@
-import Line from "./Line";
-import type { Point } from "./types";
-import { COLORS } from "./colors";
+import Line from "engine/Line";
+import type { Point } from "engine/types";
+import { COLORS } from "engine/colors";
 
-export const drawStartEditor = (
+export const drawLineSimple = (
   ctx: CanvasRenderingContext2D,
-  point: Point,
-  hovered = false,
+  line: Line,
 ): void => {
-  const radius = hovered ? 13 : 10;
-  ctx.fillStyle = COLORS.departure;
-  ctx.beginPath();
-  ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = COLORS.departureBorder;
+  ctx.strokeStyle = "#000000";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+  ctx.moveTo(line.start.x, line.start.y);
+  if (line.control) {
+    ctx.quadraticCurveTo(line.control.x, line.control.y, line.end.x, line.end.y);
+  } else {
+    ctx.lineTo(line.end.x, line.end.y);
+  }
   ctx.stroke();
-};
-
-export const drawStartPreview = (
-  ctx: CanvasRenderingContext2D,
-  point: Point,
-): void => {
-  ctx.fillStyle = "#000000";
-  ctx.beginPath();
-  ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
-  ctx.fill();
 };
 
 export const drawLineReal = (
@@ -151,7 +140,7 @@ export const drawHoverPoint = (
   ctx.strokeStyle = "#9ca3af";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+  ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
   ctx.stroke();
 };
 
@@ -162,7 +151,7 @@ export const drawPendingStart = (
   ctx.strokeStyle = COLORS.anchorStart;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+  ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
   ctx.stroke();
 };
 
@@ -173,6 +162,6 @@ export const drawPendingEnd = (
   ctx.strokeStyle = COLORS.anchorEnd;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+  ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
   ctx.stroke();
 };

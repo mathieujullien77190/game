@@ -7,4 +7,6 @@ export const COLORS = {
   pointCurveBg: "#f3e8ff",
   departure: "#f59e0b",
   departureBorder: "#d97706",
+  arrival: "#22c55e",
+  arrivalBorder: "#16a34a",
 } as const;

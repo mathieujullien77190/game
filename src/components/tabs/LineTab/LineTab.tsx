@@ -3,8 +3,9 @@ import { useStore } from "store/useStore";
 import { computeLinks } from "engine/Link";
 import { COLORS } from "engine/colors";
 import ItemRow from "components/ItemRow";
-import { Tag } from "components/Tag";
-import Button from "components/Button";
+import { Tag } from "components/ui/Tag";
+import { TagLine } from "components/ui/TagLine";
+import Button from "components/ui/Button";
 import { buildAnchorMap } from "./helpers";
 import * as S from "./UI";
 
@@ -18,7 +19,6 @@ export const LineTab = () => {
     setPendingEnd,
     removeLine,
     toggleLinkActive,
-    setHoveredLineId,
   } = useStore(
     useShallow((s) => ({
       lines: s.lines,
@@ -29,7 +29,6 @@ export const LineTab = () => {
       setPendingEnd: s.setPendingEnd,
       removeLine: s.removeLine,
       toggleLinkActive: s.toggleLinkActive,
-      setHoveredLineId: s.setHoveredLineId,
     })),
   );
 
@@ -67,12 +66,10 @@ export const LineTab = () => {
               <ItemRow
                 key={line.id}
                 onDelete={() => removeLine(index)}
-                onMouseEnter={() => setHoveredLineId(line.id)}
-                onMouseLeave={() => setHoveredLineId(null)}
               >
                 <S.LineLabel>
                   <S.LineId>
-                    {line.id}
+                    <TagLine lineId={line.id} large />
                     <Tag color="#374151" bg="#f3f4f6">
                       {line.type}
                     </Tag>
@@ -84,15 +81,13 @@ export const LineTab = () => {
                       </Tag>
                       {connections.start.length > 0 ? (
                         connections.start.map(({ lineId, linkId, active }) => (
-                          <Tag
+                          <TagLine
                             key={linkId}
-                            color="#374151"
-                            bg="#f9fafb"
+                            lineId={lineId}
                             active={active}
+                            muted
                             onClick={() => toggleLinkActive(linkId)}
-                          >
-                            {lineId}
-                          </Tag>
+                          />
                         ))
                       ) : (
                         <S.Empty>—</S.Empty>
@@ -104,15 +99,13 @@ export const LineTab = () => {
                       </Tag>
                       {connections.end.length > 0 ? (
                         connections.end.map(({ lineId, linkId, active }) => (
-                          <Tag
+                          <TagLine
                             key={linkId}
-                            color="#374151"
-                            bg="#f9fafb"
+                            lineId={lineId}
                             active={active}
+                            muted
                             onClick={() => toggleLinkActive(linkId)}
-                          >
-                            {lineId}
-                          </Tag>
+                          />
                         ))
                       ) : (
                         <S.Empty>—</S.Empty>

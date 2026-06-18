@@ -1,18 +1,9 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import type { Manager } from "engine/Manager";
+import { FPS } from "engine/constants";
 
-export const useCanvasDrawPreview = (manager: Manager) => {
+export const useCanvasDrawPreview = (manager: Manager, isPreview: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    manager.drawAllPreview(ctx);
-  }, [manager]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -20,15 +11,37 @@ export const useCanvasDrawPreview = (manager: Manager) => {
     const observer = new ResizeObserver(() => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      draw();
     });
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [draw]);
+  }, []);
 
   useEffect(() => {
-    draw();
-  }, [draw]);
+    if (!isPreview) {
+      manager.resetSim();
+      return;
+    }
+    manager.initSim();
+    const id = setInterval(() => manager.tickSim(), 1000 / FPS);
+    return () => clearInterval(id);
+  }, [isPreview, manager]);
+
+  useEffect(() => {
+    if (!isPreview) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let rafId: number;
+    const draw = () => {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        manager.drawAllPreview(ctx);
+      }
+      rafId = requestAnimationFrame(draw);
+    };
+    rafId = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(rafId);
+  }, [isPreview, manager]);
 
   return canvasRef;
 };

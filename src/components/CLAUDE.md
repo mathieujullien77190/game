@@ -14,6 +14,19 @@ ComponentName/
 
 `types.ts`, `constants.ts` et `helpers.ts` sont optionnels.
 
+## Dossiers génériques
+
+```
+components/
+  ui/        → primitives d'affichage réutilisables (Tag, Button…)
+  form/      → contrôles de formulaire réutilisables (NumberInput…)
+  tabs/      → onglets du panneau d'outils (LineTab, StartTab, BallTab…)
+```
+
+Tout composant générique va dans `ui/` ou `form/` selon sa nature.
+Les onglets vont dans `tabs/`.
+Les composants métier restent à la racine de `components/`.
+
 ## Règles
 
 - Tout en arrow functions

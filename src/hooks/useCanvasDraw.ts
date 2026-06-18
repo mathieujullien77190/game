@@ -8,7 +8,7 @@ import {
   drawHoverPoint,
   drawPendingStart,
   drawPendingEnd,
-} from "engine/draw";
+} from "engine/draw/Line/draw";
 
 export const useCanvasDraw = (
   manager: Manager,
@@ -18,6 +18,9 @@ export const useCanvasDraw = (
   showGrid: boolean,
   hoveredLineId: string | null,
   hoveredStartId: string | null,
+  hoveredArrivalId: string | null,
+  hoveredLinkId: string | null,
+  hoveredSwitchId: string | null,
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -31,7 +34,7 @@ export const useCanvasDraw = (
 
     if (showGrid) drawGrid(ctx, canvas.width, canvas.height);
 
-    manager.drawAll(ctx, hoveredLineId ?? undefined, hoveredStartId ?? undefined);
+    manager.drawAll(ctx, hoveredLineId ?? undefined, hoveredStartId ?? undefined, hoveredArrivalId ?? undefined, hoveredLinkId ?? undefined, hoveredSwitchId ?? undefined);
 
     if (pendingStart && pendingEnd && hoveredPoint) {
       drawCurvePreview(ctx, pendingStart, pendingEnd, hoveredPoint);
@@ -42,7 +45,7 @@ export const useCanvasDraw = (
 
     if (hoveredPoint) drawHoverPoint(ctx, hoveredPoint);
     if (pendingStart) drawPendingStart(ctx, pendingStart);
-  }, [manager, pendingStart, pendingEnd, hoveredPoint, showGrid, hoveredLineId, hoveredStartId]);
+  }, [manager, pendingStart, pendingEnd, hoveredPoint, showGrid, hoveredLineId, hoveredStartId, hoveredArrivalId, hoveredLinkId, hoveredSwitchId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

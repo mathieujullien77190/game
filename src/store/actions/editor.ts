@@ -1,6 +1,9 @@
 import Line from "engine/Line";
 import { Start } from "engine/Start";
+import { Arrival } from "engine/Arrival";
+import { Switch } from "engine/Switch";
 import { Ball, BALL_PALETTE } from "engine/Ball";
+import { computeLinks } from "engine/Link";
 import type { Point, LineRef } from "engine/types";
 import type { Set, Store } from "store/types";
 
@@ -10,8 +13,14 @@ export const setMode = (set: Set) => (mode: Store["mode"]) =>
 export const setHoveredLineId = (set: Set) => (id: string | null) =>
   set(() => ({ hoveredLineId: id }));
 
+export const setHoveredLinkId = (set: Set) => (id: string | null) =>
+  set(() => ({ hoveredLinkId: id }));
+
 export const setHoveredStartId = (set: Set) => (id: string | null) =>
   set(() => ({ hoveredStartId: id }));
+
+export const setHoveredArrivalId = (set: Set) => (id: string | null) =>
+  set(() => ({ hoveredArrivalId: id }));
 
 export const setPendingStart = (set: Set) => (point: Point | null) =>
   set(() => ({ pendingStart: point }));
@@ -37,6 +46,81 @@ export const addStart = (set: Set) => (position: LineRef) =>
 export const removeStart = (set: Set) => (index: number) =>
   set((state) => ({ starts: state.starts.filter((_, i) => i !== index) }));
 
+export const updateStartDelay = (set: Set) => (index: number, delayMs: number) =>
+  set((state) => ({
+    starts: state.starts.map((s, i) =>
+      i !== index ? s : new Start(s.id, s.position, delayMs)
+    ),
+  }));
+
+export const addArrival = (set: Set) => (position: LineRef) =>
+  set((state) => ({
+    arrivals: [...state.arrivals, new Arrival(`arrival${state.nextArrivalId}`, position)],
+    nextArrivalId: state.nextArrivalId + 1,
+  }));
+
+export const removeArrival = (set: Set) => (index: number) =>
+  set((state) => ({ arrivals: state.arrivals.filter((_, i) => i !== index) }));
+
+export const addSwitch = (set: Set) => (position: LineRef) =>
+  set((state) => ({
+    switches: [...state.switches, new Switch(`switch${state.nextSwitchId}`, position)],
+    nextSwitchId: state.nextSwitchId + 1,
+  }));
+
+export const removeSwitch = (set: Set) => (index: number) =>
+  set((state) => ({ switches: state.switches.filter((_, i) => i !== index) }));
+
+export const setHoveredSwitchId = (set: Set) => (id: string | null) =>
+  set(() => ({ hoveredSwitchId: id }));
+
+const setSwitchInputLine = (set: Set) => (switchId: string, inputLine: LineRef | null) =>
+  set((state) => {
+    const newSwitches = state.switches.map((s) =>
+      s.id !== switchId ? s : new Switch(s.id, s.position, s.activeIndex, inputLine),
+    );
+
+    if (!inputLine) return { switches: newSwitches };
+
+    const posLine = state.lines.find((l) => l.id === inputLine.id);
+    if (!posLine) return { switches: newSwitches };
+    const pt = inputLine.anchor === "start" ? posLine.start : posLine.end;
+
+    const links = computeLinks(state.lines, state.linkActive);
+    const newLinkActive = { ...state.linkActive };
+    for (const lk of links) {
+      const l1 = state.lines.find((l) => l.id === lk.line1.id);
+      const l2 = state.lines.find((l) => l.id === lk.line2.id);
+      if (!l1 || !l2) continue;
+      const p1 = lk.line1.anchor === "start" ? l1.start : l1.end;
+      const p2 = lk.line2.anchor === "start" ? l2.start : l2.end;
+      const atPoint = (p1.x === pt.x && p1.y === pt.y) || (p2.x === pt.x && p2.y === pt.y);
+      if (!atPoint) continue;
+      const involvesInput =
+        (lk.line1.id === inputLine.id && lk.line1.anchor === inputLine.anchor) ||
+        (lk.line2.id === inputLine.id && lk.line2.anchor === inputLine.anchor);
+      if (!involvesInput) newLinkActive[lk.id] = false;
+    }
+
+    return { switches: newSwitches, linkActive: newLinkActive };
+  });
+
+export { setSwitchInputLine };
+
+export const setSwitchActiveLink = (set: Set) => (position: LineRef, activeLinkId: string) =>
+  set((state) => {
+    const links = computeLinks(state.lines, state.linkActive);
+    const atAnchor = links.filter(
+      (lk) =>
+        (lk.line1.id === position.id && lk.line1.anchor === position.anchor) ||
+        (lk.line2.id === position.id && lk.line2.anchor === position.anchor),
+    );
+    const newLinkActive = { ...state.linkActive };
+    for (const lk of atAnchor) newLinkActive[lk.id] = false;
+    newLinkActive[activeLinkId] = true;
+    return { linkActive: newLinkActive };
+  });
+
 export const addBall = (set: Set) => () =>
   set((state) => ({
     balls: [...state.balls, new Ball(`ball${state.nextBallId}`, BALL_PALETTE[0])],
@@ -48,14 +132,22 @@ export const removeBall = (set: Set) => (index: number) =>
 
 export const setBallColor = (set: Set) => (index: number, color: string) =>
   set((state) => ({
-    balls: state.balls.map((b, i) => (i !== index ? b : new Ball(b.id, color))),
+    balls: state.balls.map((b, i) => (i !== index ? b : new Ball(b.id, color, b.speed))),
+  }));
+
+export const setBallSpeed = (set: Set) => (index: number, speed: number) =>
+  set((state) => ({
+    balls: state.balls.map((b, i) => (i !== index ? b : new Ball(b.id, b.color, speed))),
   }));
 
 export const toggleGrid = (set: Set) => () =>
   set((state) => ({ showGrid: !state.showGrid }));
 
 export const clearLines = (set: Set) => () =>
-  set(() => ({ lines: [], nextLineId: 1, linkActive: {}, starts: [], nextStartId: 1 }));
+  set(() => ({ lines: [], nextLineId: 1, linkActive: {}, starts: [], nextStartId: 1, arrivals: [], nextArrivalId: 1, switches: [], nextSwitchId: 1 }));
+
+export const setLinkActives = (set: Set) => (updates: Record<string, boolean>) =>
+  set((state) => ({ linkActive: { ...state.linkActive, ...updates } }));
 
 export const toggleLinkActive = (set: Set) => (linkId: string) =>
   set((state) => ({

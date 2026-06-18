@@ -17,5 +17,7 @@ export const getHint = (
     return "Click to set control point";
   }
   if (mode === "addStart") return "Click on a line anchor";
+  if (mode === "addArrival") return "Click on a line anchor";
+  if (mode === "addSwitch") return "Click on a line anchor";
   return null;
 };

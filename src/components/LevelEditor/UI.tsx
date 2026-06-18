@@ -97,6 +97,13 @@ const OverlayButton = styled.button`
 
 export const GridButton = styled(OverlayButton)``;
 
+export const RestartButton = styled(OverlayButton)`
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ef4444;
+  &:hover { background: rgba(239, 68, 68, 0.22); }
+`;
+
 export const ViewToggle = styled(OverlayButton)<{ $preview: boolean }>`
   background: ${({ $preview }) =>
     $preview ? "rgba(17, 24, 39, 0.88)" : "rgba(255, 255, 255, 0.92)"};

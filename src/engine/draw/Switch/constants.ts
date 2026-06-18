@@ -1,0 +1,1 @@
+export const SWITCH_ANIM_DURATION_MS = 300;
