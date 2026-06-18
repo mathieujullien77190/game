@@ -19,9 +19,15 @@ ComponentName/
 ```
 components/
   ui/        → primitives d'affichage réutilisables (Tag, Button…)
-  form/      → contrôles de formulaire réutilisables (NumberInput…)
+  form/      → contrôles de formulaire réutilisables (Field, NumberInput, ColorPicker…)
   tabs/      → onglets du panneau d'outils (LineTab, StartTab, BallTab…)
 ```
+
+## Composants form
+
+- `Field` — label (10px monospace gris, uppercase) au-dessus d'un children quelconque. À utiliser comme wrapper pour tout champ nommé.
+- `NumberInput` — accepte `label?` : si fourni, se wrape automatiquement dans `Field`.
+- `ColorPicker` — accepte `label?` : si fourni, se wrape automatiquement dans `Field`.
 
 Tout composant générique va dans `ui/` ou `form/` selon sa nature.
 Les onglets vont dans `tabs/`.

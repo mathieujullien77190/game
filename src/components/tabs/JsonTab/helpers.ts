@@ -21,6 +21,7 @@ export const serializeLevel = (
         start: l.start,
         end: l.end,
         ...(l.control && { control: l.control }),
+        color: l.color,
       })),
       links: computeLinks(lines, linkActive).map((lk) => ({
         id: lk.id,
@@ -32,8 +33,7 @@ export const serializeLevel = (
       arrivals: arrivals.map((a) => ({ id: a.id, position: a.position })),
       switches: switches.map((s) => ({
         id: s.id,
-        position: s.position,
-        ...(s.inputLine && { enter: s.inputLine }),
+        input: s.input,
       })),
       balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
     },

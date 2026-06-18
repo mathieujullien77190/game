@@ -1,15 +1,17 @@
 import type { LineRef } from "engine/types";
 
+export type SwitchAnim = { fromAngle: number; diff: number; t: number; duration: number };
+
 export class Switch {
   id: string;
-  position: LineRef;
+  input: LineRef;
   activeIndex: number;
-  inputLine: LineRef | null;
 
-  constructor(id: string, position: LineRef, activeIndex = 0, inputLine: LineRef | null = null) {
+  static readonly ANIM_DURATION_MS = 300;
+
+  constructor(id: string, input: LineRef, activeIndex = 0) {
     this.id = id;
-    this.position = position;
+    this.input = input;
     this.activeIndex = activeIndex;
-    this.inputLine = inputLine;
   }
 }

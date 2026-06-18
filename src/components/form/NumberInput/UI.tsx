@@ -6,12 +6,6 @@ export const Row = styled.div`
   gap: 4px;
 `;
 
-export const Label = styled.span`
-  font-size: 10px;
-  color: #6b7280;
-  font-family: monospace;
-`;
-
 export const Input = styled.input`
   width: 56px;
   font-size: 10px;

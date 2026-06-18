@@ -1,9 +1,10 @@
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "store/useStore";
-import { BALL_PALETTE } from "engine/Ball";
+import { PALETTE } from "engine/colors";
 import ItemRow from "components/ItemRow";
 import Button from "components/ui/Button";
 import { NumberInput } from "components/form/NumberInput";
+import { ColorPicker } from "components/form/ColorPicker";
 import * as S from "./UI";
 
 export const BallTab = () => {
@@ -31,17 +32,11 @@ export const BallTab = () => {
                 <S.BallPreview $color={ball.color} />
                 <S.BallId>{ball.id}</S.BallId>
               </S.BallHeader>
-              <S.ColorPalette>
-                {BALL_PALETTE.map((color) => (
-                  <S.ColorSwatch
-                    key={color}
-                    type="button"
-                    $color={color}
-                    $selected={ball.color === color}
-                    onClick={() => setBallColor(index, color)}
-                  />
-                ))}
-              </S.ColorPalette>
+              <ColorPicker
+                palette={PALETTE}
+                value={ball.color}
+                onChange={(color) => setBallColor(index, color)}
+              />
               <NumberInput
                 label="speed"
                 value={ball.speed}

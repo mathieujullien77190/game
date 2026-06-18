@@ -15,11 +15,11 @@ import {
   removeSwitch,
   setHoveredSwitchId,
   setSwitchActiveLink,
-  setSwitchInputLine,
   setPendingStart,
   setPendingEnd,
   addLine,
   removeLine,
+  setLineColor,
   addStart,
   removeStart,
   addArrival,
@@ -54,8 +54,8 @@ const loadLines = (): Line[] => {
   try {
     const raw = localStorage.getItem(LS_LINES);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; start: Point; end: Point; control?: Point }[];
-    return data.map(({ id, start, end, control }) => new Line(id, start, end, control));
+    const data = JSON.parse(raw) as { id: string; start: Point; end: Point; control?: Point; color?: string }[];
+    return data.map(({ id, start, end, control, color }) => new Line(id, start, end, control, color));
   } catch {
     return [];
   }
@@ -123,8 +123,8 @@ const loadSwitches = (): Switch[] => {
   try {
     const raw = localStorage.getItem(LS_SWITCHES);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; position: LineRef; enter?: LineRef | null }[];
-    return data.map(({ id, position, enter }) => new Switch(id, position, 0, enter ?? null));
+    const data = JSON.parse(raw) as { id: string; input?: LineRef; position?: LineRef; enter?: LineRef }[];
+    return data.map(({ id, input, position, enter }) => new Switch(id, input ?? enter ?? position!));
   } catch {
     return [];
   }
@@ -189,6 +189,7 @@ export const useStore = create<Store>((set) => ({
   setPendingEnd: setPendingEnd(set),
   addLine: addLine(set),
   removeLine: removeLine(set),
+  setLineColor: setLineColor(set),
   addStart: addStart(set),
   removeStart: removeStart(set),
   addArrival: addArrival(set),
@@ -197,7 +198,6 @@ export const useStore = create<Store>((set) => ({
   removeSwitch: removeSwitch(set),
   setHoveredSwitchId: setHoveredSwitchId(set),
   setSwitchActiveLink: setSwitchActiveLink(set),
-  setSwitchInputLine: setSwitchInputLine(set),
   addBall: addBall(set),
   removeBall: removeBall(set),
   setBallColor: setBallColor(set),
@@ -215,7 +215,7 @@ useStore.subscribe((state) => {
   localStorage.setItem(
     LS_LINES,
     JSON.stringify(
-      state.lines.map((l) => ({ id: l.id, start: l.start, end: l.end, control: l.control }))
+      state.lines.map((l) => ({ id: l.id, start: l.start, end: l.end, control: l.control, color: l.color }))
     )
   );
   localStorage.setItem(LS_NEXT_ID, String(state.nextLineId));
@@ -232,7 +232,7 @@ useStore.subscribe((state) => {
   localStorage.setItem(LS_NEXT_ARRIVAL_ID, String(state.nextArrivalId));
   localStorage.setItem(
     LS_SWITCHES,
-    JSON.stringify(state.switches.map((s) => ({ id: s.id, position: s.position, enter: s.inputLine ?? null })))
+    JSON.stringify(state.switches.map((s) => ({ id: s.id, input: s.input })))
   );
   localStorage.setItem(LS_NEXT_SWITCH_ID, String(state.nextSwitchId));
   localStorage.setItem(

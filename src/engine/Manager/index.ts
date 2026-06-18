@@ -1,2 +1,3 @@
-export { Manager } from "./Manager";
-export type { LevelJSON, AnchorTarget } from "./Manager";
+export { EditorManager } from "./EditorManager";
+export { PreviewManager } from "./PreviewManager";
+export type { LevelJSON, AnchorTarget } from "./routing";

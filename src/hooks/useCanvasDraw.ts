@@ -1,17 +1,11 @@
 import { useEffect, useRef, useCallback } from "react";
-import type { Manager } from "engine/Manager";
+import type { EditorManager } from "engine/Manager";
 import type { Point } from "engine/types";
 import { drawGrid } from "engine/grid";
-import {
-  drawPreviewLine,
-  drawCurvePreview,
-  drawHoverPoint,
-  drawPendingStart,
-  drawPendingEnd,
-} from "engine/draw/Line/draw";
+import { LineEditor } from "engine/Line";
 
 export const useCanvasDraw = (
-  manager: Manager,
+  manager: EditorManager,
   pendingStart: Point | null,
   pendingEnd: Point | null,
   hoveredPoint: Point | null,
@@ -37,14 +31,14 @@ export const useCanvasDraw = (
     manager.drawAll(ctx, hoveredLineId ?? undefined, hoveredStartId ?? undefined, hoveredArrivalId ?? undefined, hoveredLinkId ?? undefined, hoveredSwitchId ?? undefined);
 
     if (pendingStart && pendingEnd && hoveredPoint) {
-      drawCurvePreview(ctx, pendingStart, pendingEnd, hoveredPoint);
-      drawPendingEnd(ctx, pendingEnd);
+      LineEditor.drawCurvePreview(ctx, pendingStart, pendingEnd, hoveredPoint);
+      LineEditor.drawPendingEnd(ctx, pendingEnd);
     } else if (pendingStart && hoveredPoint) {
-      drawPreviewLine(ctx, pendingStart, hoveredPoint);
+      LineEditor.drawPreview(ctx, pendingStart, hoveredPoint);
     }
 
-    if (hoveredPoint) drawHoverPoint(ctx, hoveredPoint);
-    if (pendingStart) drawPendingStart(ctx, pendingStart);
+    if (hoveredPoint) LineEditor.drawHoverPoint(ctx, hoveredPoint);
+    if (pendingStart) LineEditor.drawPendingStart(ctx, pendingStart);
   }, [manager, pendingStart, pendingEnd, hoveredPoint, showGrid, hoveredLineId, hoveredStartId, hoveredArrivalId, hoveredLinkId, hoveredSwitchId]);
 
   useEffect(() => {

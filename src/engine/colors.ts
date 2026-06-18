@@ -1,4 +1,24 @@
-export const COLORS = {
+export const DEFAULT_COLOR = "#000000";
+
+export const PALETTE = [
+  "#000000",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#14b8a6",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#f43f5e",
+  "#6b7280",
+] as const;
+
+export type GameColor = (typeof PALETTE)[number];
+
+export const DEFAULT_BALL_COLOR = "#ef4444";
+
+export const EDITOR_COLORS = {
   anchorStart: "#2563eb",
   anchorStartBg: "#dbeafe",
   anchorEnd: "#16a34a",

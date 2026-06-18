@@ -4,24 +4,19 @@
 
 ```
 engine/
-  types.ts        → types partagés (Point…)
+  types.ts        → types partagés (Point, LineRef, Anchor…)
+  colors.ts       → PALETTE, DEFAULT_COLOR, DEFAULT_BALL_COLOR, EDITOR_COLORS
+  constants.ts    → FPS, etc.
   grid.ts         → utilitaires grille
-  draw/
-    index.ts      → re-exports publics
-    EntityName/
-      draw.ts       → fonctions de rendu canvas statiques
-      animation.ts  → fonctions de rendu canvas animées (optionnel)
-      constants.ts  → constantes visuelles (durées, rayons…) (optionnel)
   EntityName/
-    EntityName.ts → classe
-    utils.ts      → logique pure
-    index.ts      → export default
+    EntityName.ts → classe avec méthodes de rendu et logique pure intégrées
+    index.ts      → export default (et types si besoin)
 ```
 
 ## Règles
 
 - Tout en arrow functions — pas de `function` declarations
 - Pas de logique React — uniquement du code pur (calculs, canvas)
-- Une fonction par élément visuel dans `draw.ts`, signature `(ctx, ...) => void`
-- Pas de magic numbers — toujours exporter les constantes
-- Durées d'animation en ms dans `constants.ts` de l'entité — step calculé via `1000 / (duration * FPS)`
+- Rendu canvas intégré dans la classe : méthodes d'instance pour le rendu contextualisé, `static` pour le rendu générique
+- Pas de magic numbers — constantes exportées depuis `colors.ts` ou `constants.ts`
+- Durées d'animation en ms comme `static readonly` sur la classe — step calculé via `1000 / (duration * FPS)`

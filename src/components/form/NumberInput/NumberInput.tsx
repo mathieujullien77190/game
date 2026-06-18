@@ -1,9 +1,9 @@
+import { Field } from "components/form/Field";
 import type { Props } from "./types";
 import * as S from "./UI";
 
-export const NumberInput = ({ value, onChange, label, unit, min, max, step = 1 }: Props) => (
+const InputRow = ({ value, onChange, unit, min, max, step = 1 }: Omit<Props, "label">) => (
   <S.Row>
-    {label && <S.Label>{label}</S.Label>}
     <S.Input
       type="number"
       value={value}
@@ -19,3 +19,12 @@ export const NumberInput = ({ value, onChange, label, unit, min, max, step = 1 }
     {unit && <S.Unit>{unit}</S.Unit>}
   </S.Row>
 );
+
+export const NumberInput = ({ label, ...rest }: Props) =>
+  label ? (
+    <Field label={label}>
+      <InputRow {...rest} />
+    </Field>
+  ) : (
+    <InputRow {...rest} />
+  );

@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "store/useStore";
-import { COLORS } from "engine/colors";
+import { EDITOR_COLORS } from "engine/colors";
 import ItemRow from "components/ItemRow";
 import { Tag } from "components/ui/Tag";
 import Button from "components/ui/Button";
@@ -26,7 +26,7 @@ export const ArrivalTab = () => {
   return (
     <S.Wrapper>
       <Button
-        color={mode === "addArrival" ? "#ef4444" : COLORS.arrival}
+        color={mode === "addArrival" ? "#ef4444" : EDITOR_COLORS.arrival}
         onClick={() => setMode(mode === "addArrival" ? "idle" : "addArrival")}
       >
         {mode === "addArrival" ? "Cancel" : "Add Arrival"}
@@ -42,7 +42,7 @@ export const ArrivalTab = () => {
           >
             <S.ArrivalInfo>
               <S.ArrivalId>{a.id}</S.ArrivalId>
-              <Tag color={COLORS.arrivalBorder} bg="#dcfce7">
+              <Tag color={EDITOR_COLORS.arrivalBorder} bg="#dcfce7">
                 {a.position.id} [{a.position.anchor}]
               </Tag>
             </S.ArrivalInfo>

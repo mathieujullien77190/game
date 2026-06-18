@@ -20,30 +20,23 @@ export const SwitchInfo = styled.div`
   gap: 4px;
 `;
 
+export const SwitchHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 export const SwitchId = styled.span`
   font-size: 13px;
   font-family: monospace;
   color: #374151;
 `;
 
+
 export const Empty = styled.span`
   font-size: 11px;
   color: #d1d5db;
   font-family: monospace;
-`;
-
-export const InputLineSelector = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 4px;
-`;
-
-export const InputLineLabel = styled.span`
-  font-size: 10px;
-  font-family: monospace;
-  color: #9ca3af;
-  text-transform: uppercase;
 `;
 
 export const InputLineOptions = styled.div`
@@ -68,18 +61,13 @@ export const InputLineOption = styled.button<{ $active: boolean }>`
 
 export const LinkOption = styled.button<{ $active: boolean }>`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
-  padding: 4px 8px;
-  border: 1px solid ${({ $active }) => ($active ? "#374151" : "#e5e7eb")};
-  border-radius: 4px;
-  background: ${({ $active }) => ($active ? "#f3f4f6" : "transparent")};
+  padding: 2px 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
   text-align: left;
-  width: 100%;
-  &:hover {
-    border-color: #9ca3af;
-  }
 `;
 
 export const LinkDot = styled.span<{ $active: boolean }>`

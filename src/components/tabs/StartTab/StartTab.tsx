@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "store/useStore";
-import { COLORS } from "engine/colors";
+import { EDITOR_COLORS } from "engine/colors";
 import ItemRow from "components/ItemRow";
 import { Tag } from "components/ui/Tag";
 import Button from "components/ui/Button";
@@ -29,7 +29,7 @@ export const StartTab = () => {
   return (
     <S.Wrapper>
       <Button
-        color={mode === "addStart" ? "#ef4444" : COLORS.departure}
+        color={mode === "addStart" ? "#ef4444" : EDITOR_COLORS.departure}
         onClick={() => setMode(mode === "addStart" ? "idle" : "addStart")}
       >
         {mode === "addStart" ? "Cancel" : "Add Start"}
@@ -45,7 +45,7 @@ export const StartTab = () => {
           >
             <S.StartInfo>
               <S.StartId>{s.id}</S.StartId>
-              <Tag color={COLORS.departureBorder} bg="#fef3c7">
+              <Tag color={EDITOR_COLORS.departureBorder} bg="#fef3c7">
                 {s.position.id} [{s.position.anchor}]
               </Tag>
               <NumberInput

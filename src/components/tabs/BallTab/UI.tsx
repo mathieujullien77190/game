@@ -41,28 +41,6 @@ export const BallId = styled.span`
   color: #374151;
 `;
 
-export const ColorPalette = styled.div`
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-`;
-
-export const ColorSwatch = styled.button<{ $color: string; $selected: boolean }>`
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: ${({ $color }) => $color};
-  border: 2px solid ${({ $selected }) => ($selected ? "#1e293b" : "transparent")};
-  outline: ${({ $selected }) => ($selected ? "2px solid #ffffff" : "none")};
-  outline-offset: -3px;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  transition: transform 0.1s;
-
-  &:hover { transform: scale(1.2); }
-`;
-
 export const Empty = styled.span`
   font-size: 11px;
   color: #d1d5db;

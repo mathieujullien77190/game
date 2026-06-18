@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import type { Manager } from "engine/Manager";
+import type { PreviewManager } from "engine/Manager";
 import { FPS } from "engine/constants";
 
-export const useCanvasDrawPreview = (manager: Manager, isPreview: boolean) => {
+export const useCanvasDrawPreview = (manager: PreviewManager | null, isPreview: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -17,8 +17,8 @@ export const useCanvasDrawPreview = (manager: Manager, isPreview: boolean) => {
   }, []);
 
   useEffect(() => {
-    if (!isPreview) {
-      manager.resetSim();
+    if (!isPreview || !manager) {
+      manager?.resetSim();
       return;
     }
     manager.initSim();
@@ -27,7 +27,7 @@ export const useCanvasDrawPreview = (manager: Manager, isPreview: boolean) => {
   }, [isPreview, manager]);
 
   useEffect(() => {
-    if (!isPreview) return;
+    if (!isPreview || !manager) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     let rafId: number;

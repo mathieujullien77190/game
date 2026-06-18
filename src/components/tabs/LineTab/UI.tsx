@@ -46,6 +46,12 @@ export const AnchorGroup = styled.div`
   flex-wrap: wrap;
 `;
 
+export const Hr = styled.hr`
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0;
+`;
+
 export const Empty = styled.span`
   font-size: 10px;
   color: #d1d5db;

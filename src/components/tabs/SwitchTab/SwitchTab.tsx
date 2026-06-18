@@ -4,24 +4,12 @@ import { computeLinks } from "engine/Link";
 import type { Switch } from "engine/Switch";
 import type { Link } from "engine/Link";
 import type Line from "engine/Line";
-import type { LineRef } from "engine/types";
 import ItemRow from "components/ItemRow";
 import Button from "components/ui/Button";
 import { TagLine } from "components/ui/TagLine";
 import { TagLink } from "components/ui/TagLink";
+import { Field } from "components/form/Field";
 import * as S from "./UI";
-
-const getLineRefsAtPoint = (lines: Line[], position: LineRef): LineRef[] => {
-  const posLine = lines.find((l) => l.id === position.id);
-  if (!posLine) return [];
-  const pt = position.anchor === "start" ? posLine.start : posLine.end;
-  const refs: LineRef[] = [];
-  for (const line of lines) {
-    if (line.start.x === pt.x && line.start.y === pt.y) refs.push({ id: line.id, anchor: "start" });
-    if (line.end.x === pt.x && line.end.y === pt.y) refs.push({ id: line.id, anchor: "end" });
-  }
-  return refs;
-};
 
 const getLinksAtPoint = (links: Link[], lines: Line[], position: LineRef): Link[] => {
   const posLine = lines.find((l) => l.id === position.id);
@@ -56,7 +44,6 @@ export const SwitchTab = () => {
     removeSwitch,
     setHoveredSwitchId,
     toggleLinkActive,
-    setSwitchInputLine,
   } = useStore(
     useShallow((s) => ({
       switches: s.switches,
@@ -67,7 +54,6 @@ export const SwitchTab = () => {
       removeSwitch: s.removeSwitch,
       setHoveredSwitchId: s.setHoveredSwitchId,
       toggleLinkActive: s.toggleLinkActive,
-      setSwitchInputLine: s.setSwitchInputLine,
     })),
   );
 
@@ -84,11 +70,8 @@ export const SwitchTab = () => {
       <S.SwitchList>
         {switches.length === 0 && <S.Empty>No switches</S.Empty>}
         {switches.map((sw: Switch, index) => {
-          const lineRefs = getLineRefsAtPoint(lines, sw.position);
-          const allAtPoint = getLinksAtPoint(allLinks, lines, sw.position);
-          const displayedLinks = sw.inputLine
-            ? getLinksForInput(allAtPoint, sw.inputLine)
-            : allAtPoint;
+          const allAtPoint = getLinksAtPoint(allLinks, lines, sw.input);
+          const displayedLinks = getLinksForInput(allAtPoint, sw.input);
 
           return (
             <ItemRow
@@ -98,35 +81,22 @@ export const SwitchTab = () => {
               onMouseLeave={() => setHoveredSwitchId(null)}
             >
               <S.SwitchInfo>
-                <S.SwitchId>{sw.id}</S.SwitchId>
-                <S.InputLineSelector>
-                  <S.InputLineLabel>Entrée</S.InputLineLabel>
-                  <S.InputLineOptions>
-                    {lineRefs.map((ref) => {
-                      const isSelected = sw.inputLine !== null && refKey(sw.inputLine) === refKey(ref);
-                      return (
-                        <TagLine
-                          key={refKey(ref)}
-                          lineId={ref.id}
-                          anchor={ref.anchor}
-                          selected={isSelected}
-                          onClick={() => setSwitchInputLine(sw.id, isSelected ? null : ref)}
-                        />
-                      );
-                    })}
-                  </S.InputLineOptions>
-                </S.InputLineSelector>
-                {displayedLinks.length === 0 && <S.Empty>No links</S.Empty>}
-                {displayedLinks.map((lk) => (
-                  <S.LinkOption
-                    key={lk.id}
-                    $active={lk.active}
-                    onClick={() => toggleLinkActive(lk.id)}
-                  >
-                    <S.LinkDot $active={lk.active} />
-                    <TagLink linkId={lk.id} active={lk.active} />
-                  </S.LinkOption>
-                ))}
+                <S.SwitchHeader>
+                  <S.SwitchId>{sw.id}</S.SwitchId>
+                  <TagLine lineId={sw.input.id} anchor={sw.input.anchor} selected={false} />
+                </S.SwitchHeader>
+                <Field label="Links">
+                  {displayedLinks.length === 0 && <S.Empty>No links</S.Empty>}
+                  {displayedLinks.map((lk) => (
+                    <S.LinkOption
+                      key={lk.id}
+                      $active={lk.active}
+                      onClick={() => toggleLinkActive(lk.id)}
+                    >
+                      <TagLink linkId={lk.id} active={lk.active} />
+                    </S.LinkOption>
+                  ))}
+                </Field>
               </S.SwitchInfo>
             </ItemRow>
           );

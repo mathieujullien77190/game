@@ -4,7 +4,7 @@ import { useStore } from "store/useStore";
 import { useCanvasDraw } from "hooks/useCanvasDraw";
 import { useCanvasDrawPreview } from "hooks/useCanvasDrawPreview";
 import { snapToGrid } from "engine/grid";
-import { Manager } from "engine/Manager";
+import { EditorManager, PreviewManager } from "engine/Manager";
 import { computeLinks } from "engine/Link";
 import type { Point } from "engine/types";
 import ToolsPanel from "components/ToolsPanel";
@@ -73,48 +73,52 @@ export const LevelEditor = () => {
   const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
   const [leftWidth, setLeftWidth] = useState<number | null>(null);
   const [isPreview, setIsPreview] = useState(false);
+  const [previewManager, setPreviewManager] = useState<PreviewManager | null>(null);
   const dragRef = useRef<Drag | null>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const layoutRef = useRef<HTMLDivElement>(null);
 
-  const manager = useMemo(
-    () =>
-      new Manager({
-        lines: lines.map((l) => ({
-          id: l.id,
-          type: l.type,
-          start: l.start,
-          end: l.end,
-          control: l.control,
-        })),
-        links: computeLinks(lines, linkActive).map((lk) => ({
-          id: lk.id,
-          active: lk.active,
-          line1: lk.line1,
-          line2: lk.line2,
-        })),
-        starts: starts.map((s) => ({
-          id: s.id,
-          position: s.position,
-          delay: s.delay,
-        })),
-        arrivals: arrivals.map((a) => ({ id: a.id, position: a.position })),
-        switches: switches.map((sw) => ({
-          id: sw.id,
-          position: sw.position,
-          enter: sw.inputLine,
-        })),
-        balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
-      }),
+  const levelJSON = useMemo(
+    () => ({
+      lines: lines.map((l) => ({
+        id: l.id,
+        type: l.type,
+        start: l.start,
+        end: l.end,
+        control: l.control,
+        color: l.color,
+      })),
+      links: computeLinks(lines, linkActive).map((lk) => ({
+        id: lk.id,
+        active: lk.active,
+        line1: lk.line1,
+        line2: lk.line2,
+      })),
+      starts: starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay })),
+      arrivals: arrivals.map((a) => ({ id: a.id, position: a.position })),
+      switches: switches.map((sw) => ({ id: sw.id, input: sw.input })),
+      balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
+    }),
     [lines, linkActive, starts, arrivals, switches, balls],
   );
 
+  const editorManager = useMemo(() => new EditorManager(levelJSON), [levelJSON]);
+
   useEffect(() => {
-    console.log("manager", manager);
-  }, [manager]);
+    if (isPreview) {
+      setPreviewManager(new PreviewManager(levelJSON));
+    } else {
+      setPreviewManager(null);
+    }
+  }, [isPreview]);
+
+  useEffect(() => {
+    (window as any).previewManager = previewManager;
+    console.log("previewManager", previewManager);
+  }, [previewManager]);
 
   const editorCanvasRef = useCanvasDraw(
-    manager,
+    editorManager,
     pendingStart,
     pendingEnd,
     hoveredPoint,
@@ -125,7 +129,7 @@ export const LevelEditor = () => {
     hoveredLinkId,
     hoveredSwitchId,
   );
-  const previewCanvasRef = useCanvasDrawPreview(manager, isPreview);
+  const previewCanvasRef = useCanvasDrawPreview(previewManager, isPreview);
 
   const getPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point | null => {
     const canvas = editorCanvasRef.current;
@@ -264,16 +268,18 @@ export const LevelEditor = () => {
   };
 
   const handlePreviewClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const pm = previewManager;
+    if (!pm) return;
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const point = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    for (const [switchId, sw] of Object.entries(manager.switches)) {
-      const line = manager.lines[sw.position.id];
+    for (const [switchId, sw] of Object.entries(pm.switches)) {
+      const line = pm.lines[sw.input.id];
       if (!line) continue;
-      const swPoint = sw.position.anchor === "start" ? line.start : line.end;
+      const swPoint = sw.input.anchor === "start" ? line.start : line.end;
       if (dist(point, swPoint) < 15) {
-        manager.cycleSwitch(switchId);
+        pm.cycleSwitch(switchId);
         break;
       }
     }
@@ -314,8 +320,8 @@ export const LevelEditor = () => {
             {isPreview && (
               <S.RestartButton
                 onClick={() => {
-                  manager.resetSim();
-                  manager.initSim();
+                  previewManager?.resetSim();
+                  previewManager?.initSim();
                 }}
               >
                 Restart

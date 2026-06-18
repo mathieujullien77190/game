@@ -2,7 +2,8 @@ import Line from "engine/Line";
 import { Start } from "engine/Start";
 import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
-import { Ball, BALL_PALETTE } from "engine/Ball";
+import { Ball } from "engine/Ball";
+import { DEFAULT_BALL_COLOR } from "engine/colors";
 import { computeLinks } from "engine/Link";
 import type { Point, LineRef } from "engine/types";
 import type { Set, Store } from "store/types";
@@ -62,9 +63,9 @@ export const addArrival = (set: Set) => (position: LineRef) =>
 export const removeArrival = (set: Set) => (index: number) =>
   set((state) => ({ arrivals: state.arrivals.filter((_, i) => i !== index) }));
 
-export const addSwitch = (set: Set) => (position: LineRef) =>
+export const addSwitch = (set: Set) => (input: LineRef) =>
   set((state) => ({
-    switches: [...state.switches, new Switch(`switch${state.nextSwitchId}`, position)],
+    switches: [...state.switches, new Switch(`switch${state.nextSwitchId}`, input)],
     nextSwitchId: state.nextSwitchId + 1,
   }));
 
@@ -73,39 +74,6 @@ export const removeSwitch = (set: Set) => (index: number) =>
 
 export const setHoveredSwitchId = (set: Set) => (id: string | null) =>
   set(() => ({ hoveredSwitchId: id }));
-
-const setSwitchInputLine = (set: Set) => (switchId: string, inputLine: LineRef | null) =>
-  set((state) => {
-    const newSwitches = state.switches.map((s) =>
-      s.id !== switchId ? s : new Switch(s.id, s.position, s.activeIndex, inputLine),
-    );
-
-    if (!inputLine) return { switches: newSwitches };
-
-    const posLine = state.lines.find((l) => l.id === inputLine.id);
-    if (!posLine) return { switches: newSwitches };
-    const pt = inputLine.anchor === "start" ? posLine.start : posLine.end;
-
-    const links = computeLinks(state.lines, state.linkActive);
-    const newLinkActive = { ...state.linkActive };
-    for (const lk of links) {
-      const l1 = state.lines.find((l) => l.id === lk.line1.id);
-      const l2 = state.lines.find((l) => l.id === lk.line2.id);
-      if (!l1 || !l2) continue;
-      const p1 = lk.line1.anchor === "start" ? l1.start : l1.end;
-      const p2 = lk.line2.anchor === "start" ? l2.start : l2.end;
-      const atPoint = (p1.x === pt.x && p1.y === pt.y) || (p2.x === pt.x && p2.y === pt.y);
-      if (!atPoint) continue;
-      const involvesInput =
-        (lk.line1.id === inputLine.id && lk.line1.anchor === inputLine.anchor) ||
-        (lk.line2.id === inputLine.id && lk.line2.anchor === inputLine.anchor);
-      if (!involvesInput) newLinkActive[lk.id] = false;
-    }
-
-    return { switches: newSwitches, linkActive: newLinkActive };
-  });
-
-export { setSwitchInputLine };
 
 export const setSwitchActiveLink = (set: Set) => (position: LineRef, activeLinkId: string) =>
   set((state) => {
@@ -121,9 +89,16 @@ export const setSwitchActiveLink = (set: Set) => (position: LineRef, activeLinkI
     return { linkActive: newLinkActive };
   });
 
+export const setLineColor = (set: Set) => (index: number, color: string) =>
+  set((state) => ({
+    lines: state.lines.map((l, i) =>
+      i !== index ? l : new Line(l.id, l.start, l.end, l.control, color)
+    ),
+  }));
+
 export const addBall = (set: Set) => () =>
   set((state) => ({
-    balls: [...state.balls, new Ball(`ball${state.nextBallId}`, BALL_PALETTE[0])],
+    balls: [...state.balls, new Ball(`ball${state.nextBallId}`, DEFAULT_BALL_COLOR)],
     nextBallId: state.nextBallId + 1,
   }));
 
