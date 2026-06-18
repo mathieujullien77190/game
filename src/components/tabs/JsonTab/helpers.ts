@@ -2,6 +2,7 @@ import type Line from "engine/Line";
 import type { Start } from "engine/Start";
 import type { Arrival } from "engine/Arrival";
 import type { Switch } from "engine/Switch";
+import type { Painter } from "engine/Painter";
 import type { Ball } from "engine/Ball";
 import { computeLinks } from "engine/Link";
 
@@ -10,6 +11,7 @@ export const serializeLevel = (
   starts: Start[],
   arrivals: Arrival[],
   switches: Switch[],
+  painters: Painter[],
   balls: Ball[],
   linkActive: Record<string, boolean>,
 ) =>
@@ -34,6 +36,11 @@ export const serializeLevel = (
       switches: switches.map((s) => ({
         id: s.id,
         input: s.input,
+      })),
+      painters: painters.map((p) => ({
+        id: p.id,
+        input: p.input,
+        color: p.color,
       })),
       balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
     },

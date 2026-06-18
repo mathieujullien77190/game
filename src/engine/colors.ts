@@ -18,6 +18,14 @@ export type GameColor = (typeof PALETTE)[number];
 
 export const DEFAULT_BALL_COLOR = "#ef4444";
 
+export const lerpColor = (a: string, b: string, t: number): string => {
+  const p = (hex: string, o: number) => parseInt(hex.slice(o, o + 2), 16);
+  const r = Math.round(p(a, 1) + (p(b, 1) - p(a, 1)) * t);
+  const g = Math.round(p(a, 3) + (p(b, 3) - p(a, 3)) * t);
+  const bl = Math.round(p(a, 5) + (p(b, 5) - p(a, 5)) * t);
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${bl.toString(16).padStart(2, "0")}`;
+};
+
 export const EDITOR_COLORS = {
   anchorStart: "#2563eb",
   anchorStartBg: "#dbeafe",

@@ -2,10 +2,11 @@ import type Line from "engine/Line";
 import type { Start } from "engine/Start";
 import type { Arrival } from "engine/Arrival";
 import type { Switch } from "engine/Switch";
+import type { Painter } from "engine/Painter";
 import type { Ball } from "engine/Ball";
 import type { Point, LineRef } from "engine/types";
 
-export type EditorMode = "idle" | "addLine" | "addCurve" | "addStart" | "addArrival" | "addSwitch";
+export type EditorMode = "idle" | "addLine" | "addCurve" | "addStart" | "addArrival" | "addSwitch" | "addPainter";
 
 export type StoreState = {
   lines: Line[];
@@ -16,6 +17,8 @@ export type StoreState = {
   nextArrivalId: number;
   switches: Switch[];
   nextSwitchId: number;
+  painters: Painter[];
+  nextPainterId: number;
   balls: Ball[];
   nextBallId: number;
   mode: EditorMode;
@@ -27,6 +30,7 @@ export type StoreState = {
   hoveredStartId: string | null;
   hoveredArrivalId: string | null;
   hoveredSwitchId: string | null;
+  hoveredPainterId: string | null;
   linkActive: Record<string, boolean>;
 };
 
@@ -48,6 +52,10 @@ export type StoreActions = {
   addSwitch: (position: LineRef) => void;
   removeSwitch: (index: number) => void;
   setHoveredSwitchId: (id: string | null) => void;
+  addPainter: (input: LineRef) => void;
+  removePainter: (index: number) => void;
+  setPainterColor: (index: number, color: string) => void;
+  setHoveredPainterId: (id: string | null) => void;
   setSwitchActiveLink: (position: LineRef, activeLinkId: string) => void;
   setLinkActives: (updates: Record<string, boolean>) => void;
   setLineColor: (index: number, color: string) => void;

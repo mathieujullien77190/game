@@ -4,19 +4,20 @@ import { serializeLevel } from "./helpers";
 import * as S from "./UI";
 
 export const JsonTab = () => {
-  const { lines, starts, arrivals, switches, balls, linkActive, clearLines } = useStore(
+  const { lines, starts, arrivals, switches, painters, balls, linkActive, clearLines } = useStore(
     useShallow((s) => ({
       lines: s.lines,
       starts: s.starts,
       arrivals: s.arrivals,
       switches: s.switches,
+      painters: s.painters,
       balls: s.balls,
       linkActive: s.linkActive,
       clearLines: s.clearLines,
     })),
   );
 
-  const json = serializeLevel(lines, starts, arrivals, switches, balls, linkActive);
+  const json = serializeLevel(lines, starts, arrivals, switches, painters, balls, linkActive);
 
   return (
     <S.Wrapper>

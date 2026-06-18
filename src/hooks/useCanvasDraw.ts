@@ -15,6 +15,7 @@ export const useCanvasDraw = (
   hoveredArrivalId: string | null,
   hoveredLinkId: string | null,
   hoveredSwitchId: string | null,
+  hoveredPainterId: string | null,
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -28,7 +29,15 @@ export const useCanvasDraw = (
 
     if (showGrid) drawGrid(ctx, canvas.width, canvas.height);
 
-    manager.drawAll(ctx, hoveredLineId ?? undefined, hoveredStartId ?? undefined, hoveredArrivalId ?? undefined, hoveredLinkId ?? undefined, hoveredSwitchId ?? undefined);
+    manager.drawAll(
+      ctx,
+      hoveredLineId ?? undefined,
+      hoveredStartId ?? undefined,
+      hoveredArrivalId ?? undefined,
+      hoveredLinkId ?? undefined,
+      hoveredSwitchId ?? undefined,
+      hoveredPainterId ?? undefined,
+    );
 
     if (pendingStart && pendingEnd && hoveredPoint) {
       LineEditor.drawCurvePreview(ctx, pendingStart, pendingEnd, hoveredPoint);
@@ -39,7 +48,7 @@ export const useCanvasDraw = (
 
     if (hoveredPoint) LineEditor.drawHoverPoint(ctx, hoveredPoint);
     if (pendingStart) LineEditor.drawPendingStart(ctx, pendingStart);
-  }, [manager, pendingStart, pendingEnd, hoveredPoint, showGrid, hoveredLineId, hoveredStartId, hoveredArrivalId, hoveredLinkId, hoveredSwitchId]);
+  }, [manager, pendingStart, pendingEnd, hoveredPoint, showGrid, hoveredLineId, hoveredStartId, hoveredArrivalId, hoveredLinkId, hoveredSwitchId, hoveredPainterId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

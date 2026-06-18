@@ -8,12 +8,14 @@ import { ArrivalEditor } from "engine/Arrival";
 import { Ball } from "engine/Ball";
 import { SwitchEditor } from "engine/Switch";
 import type { SwitchAnim } from "engine/Switch";
+import { PainterEditor } from "engine/Painter";
 import { buildRouting, cycleSwitch as cycleSwitchUtil } from "./routing";
 import type { LevelJSON, AnchorTarget } from "./routing";
 
 export class EditorManager {
   lines: Record<string, LineEditor>;
   switches: Record<string, SwitchEditor>;
+  painters: Record<string, PainterEditor>;
   starts: Record<string, Start>;
   arrivals: Record<string, Arrival>;
   balls: Ball[];
@@ -37,6 +39,7 @@ export class EditorManager {
     this.arrivalPaths = routing.arrivalPaths;
     this.initialSwitchIndices = routing.initialSwitchIndices;
     this.switches = routing.switches;
+    this.painters = routing.painters;
 
     this.starts = {};
     for (const d of json.starts ?? []) {
@@ -79,11 +82,19 @@ export class EditorManager {
     hoveredArrivalId?: string,
     hoveredLinkId?: string,
     hoveredSwitchId?: string,
+    hoveredPainterId?: string,
   ): void {
     const hoveredLink = hoveredLinkId ? this.links[hoveredLinkId] : null;
     const isLineHighlighted = (id: string) =>
       id === highlightedId ||
       (hoveredLink != null && (hoveredLink.line1.id === id || hoveredLink.line2.id === id));
+
+    for (const id of Object.keys(this.painters)) {
+      const p = this.painters[id];
+      const point = this.getAnchorPoint(p.input);
+      if (!point) continue;
+      p.drawEditor(ctx, point, id === hoveredPainterId);
+    }
 
     for (const id of Object.keys(this.switches)) {
       const sw = this.switches[id];

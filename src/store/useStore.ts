@@ -3,6 +3,7 @@ import Line from "engine/Line";
 import { Start } from "engine/Start";
 import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
+import { Painter } from "engine/Painter";
 import { Ball } from "engine/Ball";
 import type { Point, LineRef } from "engine/types";
 import {
@@ -15,6 +16,10 @@ import {
   removeSwitch,
   setHoveredSwitchId,
   setSwitchActiveLink,
+  addPainter,
+  removePainter,
+  setPainterColor,
+  setHoveredPainterId,
   setPendingStart,
   setPendingEnd,
   addLine,
@@ -47,6 +52,8 @@ const LS_ARRIVALS = "game-editor-arrivals";
 const LS_NEXT_ARRIVAL_ID = "game-editor-next-arrival-id";
 const LS_SWITCHES = "game-editor-switches";
 const LS_NEXT_SWITCH_ID = "game-editor-next-switch-id";
+const LS_PAINTERS = "game-editor-painters";
+const LS_NEXT_PAINTER_ID = "game-editor-next-painter-id";
 const LS_BALLS = "game-editor-balls";
 const LS_NEXT_BALL_ID = "game-editor-next-ball-id";
 
@@ -56,27 +63,15 @@ const loadLines = (): Line[] => {
     if (!raw) return [];
     const data = JSON.parse(raw) as { id: string; start: Point; end: Point; control?: Point; color?: string }[];
     return data.map(({ id, start, end, control, color }) => new Line(id, start, end, control, color));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 };
 
 const loadNextLineId = (): number => {
-  try {
-    const raw = localStorage.getItem(LS_NEXT_ID);
-    return raw ? parseInt(raw, 10) : 1;
-  } catch {
-    return 1;
-  }
+  try { const raw = localStorage.getItem(LS_NEXT_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
 const loadLinkActive = (): Record<string, boolean> => {
-  try {
-    const raw = localStorage.getItem(LS_LINK_ACTIVE);
-    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
-  } catch {
-    return {};
-  }
+  try { const raw = localStorage.getItem(LS_LINK_ACTIVE); return raw ? (JSON.parse(raw) as Record<string, boolean>) : {}; } catch { return {}; }
 };
 
 const loadStarts = (): Start[] => {
@@ -85,18 +80,11 @@ const loadStarts = (): Start[] => {
     if (!raw) return [];
     const data = JSON.parse(raw) as { id: string; position: LineRef; delay?: number }[];
     return data.map(({ id, position, delay }) => new Start(id, position, delay ?? 0));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 };
 
 const loadNextStartId = (): number => {
-  try {
-    const raw = localStorage.getItem(LS_NEXT_START_ID);
-    return raw ? parseInt(raw, 10) : 1;
-  } catch {
-    return 1;
-  }
+  try { const raw = localStorage.getItem(LS_NEXT_START_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
 const loadArrivals = (): Arrival[] => {
@@ -105,18 +93,11 @@ const loadArrivals = (): Arrival[] => {
     if (!raw) return [];
     const data = JSON.parse(raw) as { id: string; position: LineRef }[];
     return data.map(({ id, position }) => new Arrival(id, position));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 };
 
 const loadNextArrivalId = (): number => {
-  try {
-    const raw = localStorage.getItem(LS_NEXT_ARRIVAL_ID);
-    return raw ? parseInt(raw, 10) : 1;
-  } catch {
-    return 1;
-  }
+  try { const raw = localStorage.getItem(LS_NEXT_ARRIVAL_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
 const loadSwitches = (): Switch[] => {
@@ -125,18 +106,24 @@ const loadSwitches = (): Switch[] => {
     if (!raw) return [];
     const data = JSON.parse(raw) as { id: string; input?: LineRef; position?: LineRef; enter?: LineRef }[];
     return data.map(({ id, input, position, enter }) => new Switch(id, input ?? enter ?? position!));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 };
 
 const loadNextSwitchId = (): number => {
+  try { const raw = localStorage.getItem(LS_NEXT_SWITCH_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
+};
+
+const loadPainters = (): Painter[] => {
   try {
-    const raw = localStorage.getItem(LS_NEXT_SWITCH_ID);
-    return raw ? parseInt(raw, 10) : 1;
-  } catch {
-    return 1;
-  }
+    const raw = localStorage.getItem(LS_PAINTERS);
+    if (!raw) return [];
+    const data = JSON.parse(raw) as { id: string; input: LineRef; color: string }[];
+    return data.map(({ id, input, color }) => new Painter(id, input, color));
+  } catch { return []; }
+};
+
+const loadNextPainterId = (): number => {
+  try { const raw = localStorage.getItem(LS_NEXT_PAINTER_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
 const loadBalls = (): Ball[] => {
@@ -145,18 +132,11 @@ const loadBalls = (): Ball[] => {
     if (!raw) return [];
     const data = JSON.parse(raw) as { id: string; color: string; speed?: number }[];
     return data.map(({ id, color, speed }) => new Ball(id, color, speed ?? 1));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 };
 
 const loadNextBallId = (): number => {
-  try {
-    const raw = localStorage.getItem(LS_NEXT_BALL_ID);
-    return raw ? parseInt(raw, 10) : 1;
-  } catch {
-    return 1;
-  }
+  try { const raw = localStorage.getItem(LS_NEXT_BALL_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
 export const useStore = create<Store>((set) => ({
@@ -168,6 +148,8 @@ export const useStore = create<Store>((set) => ({
   nextArrivalId: loadNextArrivalId(),
   switches: loadSwitches(),
   nextSwitchId: loadNextSwitchId(),
+  painters: loadPainters(),
+  nextPainterId: loadNextPainterId(),
   balls: loadBalls(),
   nextBallId: loadNextBallId(),
   mode: "idle",
@@ -179,6 +161,7 @@ export const useStore = create<Store>((set) => ({
   hoveredStartId: null,
   hoveredArrivalId: null,
   hoveredSwitchId: null,
+  hoveredPainterId: null,
   linkActive: loadLinkActive(),
   setMode: setMode(set),
   setHoveredLineId: setHoveredLineId(set),
@@ -197,6 +180,10 @@ export const useStore = create<Store>((set) => ({
   addSwitch: addSwitch(set),
   removeSwitch: removeSwitch(set),
   setHoveredSwitchId: setHoveredSwitchId(set),
+  addPainter: addPainter(set),
+  removePainter: removePainter(set),
+  setPainterColor: setPainterColor(set),
+  setHoveredPainterId: setHoveredPainterId(set),
   setSwitchActiveLink: setSwitchActiveLink(set),
   addBall: addBall(set),
   removeBall: removeBall(set),
@@ -212,32 +199,29 @@ export const useStore = create<Store>((set) => ({
 }));
 
 useStore.subscribe((state) => {
-  localStorage.setItem(
-    LS_LINES,
-    JSON.stringify(
-      state.lines.map((l) => ({ id: l.id, start: l.start, end: l.end, control: l.control, color: l.color }))
-    )
-  );
+  localStorage.setItem(LS_LINES, JSON.stringify(
+    state.lines.map((l) => ({ id: l.id, start: l.start, end: l.end, control: l.control, color: l.color }))
+  ));
   localStorage.setItem(LS_NEXT_ID, String(state.nextLineId));
   localStorage.setItem(LS_LINK_ACTIVE, JSON.stringify(state.linkActive));
-  localStorage.setItem(
-    LS_STARTS,
-    JSON.stringify(state.starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay })))
-  );
+  localStorage.setItem(LS_STARTS, JSON.stringify(
+    state.starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay }))
+  ));
   localStorage.setItem(LS_NEXT_START_ID, String(state.nextStartId));
-  localStorage.setItem(
-    LS_ARRIVALS,
-    JSON.stringify(state.arrivals.map((a) => ({ id: a.id, position: a.position })))
-  );
+  localStorage.setItem(LS_ARRIVALS, JSON.stringify(
+    state.arrivals.map((a) => ({ id: a.id, position: a.position }))
+  ));
   localStorage.setItem(LS_NEXT_ARRIVAL_ID, String(state.nextArrivalId));
-  localStorage.setItem(
-    LS_SWITCHES,
-    JSON.stringify(state.switches.map((s) => ({ id: s.id, input: s.input })))
-  );
+  localStorage.setItem(LS_SWITCHES, JSON.stringify(
+    state.switches.map((s) => ({ id: s.id, input: s.input }))
+  ));
   localStorage.setItem(LS_NEXT_SWITCH_ID, String(state.nextSwitchId));
-  localStorage.setItem(
-    LS_BALLS,
-    JSON.stringify(state.balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })))
-  );
+  localStorage.setItem(LS_PAINTERS, JSON.stringify(
+    state.painters.map((p) => ({ id: p.id, input: p.input, color: p.color }))
+  ));
+  localStorage.setItem(LS_NEXT_PAINTER_ID, String(state.nextPainterId));
+  localStorage.setItem(LS_BALLS, JSON.stringify(
+    state.balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed }))
+  ));
   localStorage.setItem(LS_NEXT_BALL_ID, String(state.nextBallId));
 });

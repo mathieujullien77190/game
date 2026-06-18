@@ -1,2 +1,2 @@
 export { initSimulation, tick } from "./simulation";
-export type { BallInstance, SimulationState } from "./types";
+export type { BallInstance, HeldBall, SimulationState } from "./types";

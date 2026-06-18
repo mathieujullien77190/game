@@ -18,6 +18,7 @@ export const LevelEditor = () => {
     starts,
     arrivals,
     switches,
+    painters,
     balls,
     mode,
     pendingStart,
@@ -28,11 +29,13 @@ export const LevelEditor = () => {
     hoveredArrivalId,
     hoveredLinkId,
     hoveredSwitchId,
+    hoveredPainterId,
     linkActive,
     addLine,
     addStart,
     addArrival,
     addSwitch,
+    addPainter,
     setPendingStart,
     setPendingEnd,
     setMode,
@@ -45,6 +48,7 @@ export const LevelEditor = () => {
       starts: s.starts,
       arrivals: s.arrivals,
       switches: s.switches,
+      painters: s.painters,
       balls: s.balls,
       mode: s.mode,
       pendingStart: s.pendingStart,
@@ -55,12 +59,14 @@ export const LevelEditor = () => {
       hoveredArrivalId: s.hoveredArrivalId,
       hoveredLinkId: s.hoveredLinkId,
       hoveredSwitchId: s.hoveredSwitchId,
+      hoveredPainterId: s.hoveredPainterId,
       linkActive: s.linkActive,
       setLinkActives: s.setLinkActives,
       addLine: s.addLine,
       addStart: s.addStart,
       addArrival: s.addArrival,
       addSwitch: s.addSwitch,
+      addPainter: s.addPainter,
       setPendingStart: s.setPendingStart,
       setPendingEnd: s.setPendingEnd,
       setMode: s.setMode,
@@ -97,9 +103,10 @@ export const LevelEditor = () => {
       starts: starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay })),
       arrivals: arrivals.map((a) => ({ id: a.id, position: a.position })),
       switches: switches.map((sw) => ({ id: sw.id, input: sw.input })),
+      painters: painters.map((p) => ({ id: p.id, input: p.input, color: p.color })),
       balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
     }),
-    [lines, linkActive, starts, arrivals, switches, balls],
+    [lines, linkActive, starts, arrivals, switches, painters, balls],
   );
 
   const editorManager = useMemo(() => new EditorManager(levelJSON), [levelJSON]);
@@ -128,6 +135,7 @@ export const LevelEditor = () => {
     hoveredArrivalId,
     hoveredLinkId,
     hoveredSwitchId,
+    hoveredPainterId,
   );
   const previewCanvasRef = useCanvasDrawPreview(previewManager, isPreview);
 
@@ -260,6 +268,19 @@ export const LevelEditor = () => {
         }
         if (dist(point, line.end) < 15) {
           addSwitch({ id: line.id, anchor: "end" });
+          setMode("idle");
+          return;
+        }
+      }
+    } else if (mode === "addPainter") {
+      for (const line of lines) {
+        if (dist(point, line.start) < 15) {
+          addPainter({ id: line.id, anchor: "start" });
+          setMode("idle");
+          return;
+        }
+        if (dist(point, line.end) < 15) {
+          addPainter({ id: line.id, anchor: "end" });
           setMode("idle");
           return;
         }

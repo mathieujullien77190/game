@@ -2,8 +2,9 @@ import Line from "engine/Line";
 import { Start } from "engine/Start";
 import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
+import { Painter } from "engine/Painter";
 import { Ball } from "engine/Ball";
-import { DEFAULT_BALL_COLOR } from "engine/colors";
+import { DEFAULT_BALL_COLOR, DEFAULT_BALL_COLOR as DEFAULT_PAINTER_COLOR } from "engine/colors";
 import { computeLinks } from "engine/Link";
 import type { Point, LineRef } from "engine/types";
 import type { Set, Store } from "store/types";
@@ -75,6 +76,25 @@ export const removeSwitch = (set: Set) => (index: number) =>
 export const setHoveredSwitchId = (set: Set) => (id: string | null) =>
   set(() => ({ hoveredSwitchId: id }));
 
+export const addPainter = (set: Set) => (input: LineRef) =>
+  set((state) => ({
+    painters: [...state.painters, new Painter(`painter${state.nextPainterId}`, input, DEFAULT_PAINTER_COLOR)],
+    nextPainterId: state.nextPainterId + 1,
+  }));
+
+export const removePainter = (set: Set) => (index: number) =>
+  set((state) => ({ painters: state.painters.filter((_, i) => i !== index) }));
+
+export const setPainterColor = (set: Set) => (index: number, color: string) =>
+  set((state) => ({
+    painters: state.painters.map((p, i) =>
+      i !== index ? p : new Painter(p.id, p.input, color)
+    ),
+  }));
+
+export const setHoveredPainterId = (set: Set) => (id: string | null) =>
+  set(() => ({ hoveredPainterId: id }));
+
 export const setSwitchActiveLink = (set: Set) => (position: LineRef, activeLinkId: string) =>
   set((state) => {
     const links = computeLinks(state.lines, state.linkActive);
@@ -119,7 +139,7 @@ export const toggleGrid = (set: Set) => () =>
   set((state) => ({ showGrid: !state.showGrid }));
 
 export const clearLines = (set: Set) => () =>
-  set(() => ({ lines: [], nextLineId: 1, linkActive: {}, starts: [], nextStartId: 1, arrivals: [], nextArrivalId: 1, switches: [], nextSwitchId: 1 }));
+  set(() => ({ lines: [], nextLineId: 1, linkActive: {}, starts: [], nextStartId: 1, arrivals: [], nextArrivalId: 1, switches: [], nextSwitchId: 1, painters: [], nextPainterId: 1 }));
 
 export const setLinkActives = (set: Set) => (updates: Record<string, boolean>) =>
   set((state) => ({ linkActive: { ...state.linkActive, ...updates } }));

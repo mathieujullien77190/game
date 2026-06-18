@@ -3,12 +3,14 @@ import Link from "engine/Link";
 import type { Anchor, LineRef, Point } from "engine/types";
 import { Switch, SwitchEditor } from "engine/Switch";
 import type { SwitchAnim } from "engine/Switch";
+import { PainterEditor } from "engine/Painter";
 
 type LineData = { id: string; type: LineType; start: Point; end: Point; control?: Point; color?: string };
 type LinkData = { id: string; active: boolean; line1: LineRef; line2: LineRef };
 type StartData = { id: string; position: LineRef; delay?: number };
 type ArrivalData = { id: string; position: LineRef };
 type SwitchData = { id: string; input: LineRef };
+type PainterData = { id: string; input: LineRef; color: string };
 type BallData = { id: string; color: string; speed: number };
 
 export type LevelJSON = {
@@ -17,6 +19,7 @@ export type LevelJSON = {
   starts: StartData[];
   arrivals?: ArrivalData[];
   switches?: SwitchData[];
+  painters?: PainterData[];
   balls?: BallData[];
 };
 
@@ -29,15 +32,19 @@ export type RoutingTables = {
   arrivalPaths: Record<string, string>;
   initialSwitchIndices: Record<string, number>;
   switches: Record<string, SwitchEditor>;
+  painters: Record<string, PainterEditor>;
+  painterMap: Record<string, string>;
 };
 
-export const buildRouting = (json: Pick<LevelJSON, "links" | "arrivals" | "switches">): RoutingTables => {
+export const buildRouting = (json: Pick<LevelJSON, "links" | "arrivals" | "switches" | "painters">): RoutingTables => {
   const links: Record<string, Link> = {};
   const activePaths: Record<string, AnchorTarget> = {};
   const allPaths: Record<string, AnchorTarget[]> = {};
   const arrivalPaths: Record<string, string> = {};
   const initialSwitchIndices: Record<string, number> = {};
   const switches: Record<string, SwitchEditor> = {};
+  const painters: Record<string, PainterEditor> = {};
+  const painterMap: Record<string, string> = {};
 
   for (const d of json.links) {
     links[d.id] = new Link(d.id, d.line1, d.line2, d.active);
@@ -74,7 +81,12 @@ export const buildRouting = (json: Pick<LevelJSON, "links" | "arrivals" | "switc
     initialSwitchIndices[d.id] = sw.activeIndex;
   }
 
-  return { links, activePaths, allPaths, arrivalPaths, initialSwitchIndices, switches };
+  for (const d of json.painters ?? []) {
+    painters[d.id] = new PainterEditor(d.id, d.input, d.color);
+    painterMap[`${d.input.id}::${d.input.anchor}`] = d.color;
+  }
+
+  return { links, activePaths, allPaths, arrivalPaths, initialSwitchIndices, switches, painters, painterMap };
 };
 
 const getOutputAngle = (

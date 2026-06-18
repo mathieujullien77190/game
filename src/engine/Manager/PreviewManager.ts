@@ -9,6 +9,9 @@ import { Ball } from "engine/Ball";
 import { BallPreview } from "engine/Ball";
 import { SwitchPreview } from "engine/Switch";
 import type { SwitchAnim } from "engine/Switch";
+import { PainterPreview } from "engine/Painter";
+import { lerpColor } from "engine/colors";
+import { PAINTER_HOLD_MS } from "engine/constants";
 import { buildRouting, cycleSwitch as cycleSwitchUtil } from "./routing";
 import type { LevelJSON, AnchorTarget } from "./routing";
 import { initSimulation, tick } from "engine/Simulation";
@@ -17,12 +20,14 @@ import type { SimulationState } from "engine/Simulation";
 export class PreviewManager {
   lines: Record<string, LinePreview>;
   switches: Record<string, SwitchPreview>;
+  painters: Record<string, PainterPreview>;
   starts: Record<string, Start>;
   arrivals: Record<string, Arrival>;
   balls: Ball[];
   activePaths: Record<string, AnchorTarget>;
   allPaths: Record<string, AnchorTarget[]>;
   arrivalPaths: Record<string, string>;
+  painterMap: Record<string, string>;
   private initialSwitchIndices: Record<string, number>;
   private switchAnims: Record<string, SwitchAnim> = {};
   sim: SimulationState | null = null;
@@ -30,23 +35,24 @@ export class PreviewManager {
   constructor(json: LevelJSON) {
     this.lines = {};
     for (const d of json.lines) {
-      this.lines[d.id] = new LinePreview(
-        d.id,
-        d.start,
-        d.end,
-        d.control,
-        d.color,
-      );
+      this.lines[d.id] = new LinePreview(d.id, d.start, d.end, d.control, d.color);
     }
 
     const routing = buildRouting(json);
     this.activePaths = routing.activePaths;
     this.allPaths = routing.allPaths;
     this.arrivalPaths = routing.arrivalPaths;
+    this.painterMap = routing.painterMap;
     this.initialSwitchIndices = routing.initialSwitchIndices;
+
     this.switches = {};
     for (const [id, sw] of Object.entries(routing.switches)) {
       this.switches[id] = new SwitchPreview(id, sw.input, sw.activeIndex);
+    }
+
+    this.painters = {};
+    for (const [id, p] of Object.entries(routing.painters)) {
+      this.painters[id] = new PainterPreview(id, p.input, p.color);
     }
 
     this.starts = {};
@@ -87,7 +93,7 @@ export class PreviewManager {
       this.lines as unknown as Record<string, Line>,
       this.activePaths,
       this.arrivalPaths,
-      this.allPaths,
+      this.painterMap,
     );
   }
 
@@ -111,6 +117,43 @@ export class PreviewManager {
   private drawPreviewLines(ctx: CanvasRenderingContext2D): void {
     for (const line of Object.values(this.lines)) {
       line.drawSimple(ctx);
+    }
+  }
+
+  private drawPreviewPainters(ctx: CanvasRenderingContext2D): void {
+    const heldInfo = new Map<string, { progress: number; fromColor: string }>();
+    if (this.sim) {
+      for (const h of this.sim.held) {
+        const key = `${h.ball.lineId}::${h.anchor}`;
+        const t = Math.max(0, Math.min(1, (this.sim.elapsed - h.startAt) / PAINTER_HOLD_MS));
+        heldInfo.set(key, { progress: t, fromColor: h.fromColor });
+      }
+    }
+    for (const p of Object.values(this.painters)) {
+      const point = this.getAnchorPoint(p.input);
+      if (!point) continue;
+      const key = `${p.input.id}::${p.input.anchor}`;
+      const info = heldInfo.get(key);
+      p.drawPreview(ctx, point, info?.progress, info?.fromColor);
+
+      const line = this.lines[p.input.id];
+      if (line) {
+        const other = p.input.anchor === "start"
+          ? (line.control ?? line.end)
+          : (line.control ?? line.start);
+        const dx = other.x - point.x;
+        const dy = other.y - point.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const dotX = point.x + (dx / len) * 8;
+        const dotY = point.y + (dy / len) * 8;
+        ctx.fillStyle = info !== undefined ? "#ef4444" : "#22c55e";
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
     }
   }
 
@@ -140,23 +183,27 @@ export class PreviewManager {
         continue;
       }
       const point = sw.input.anchor === "start" ? posLine.start : posLine.end;
-      sw.drawAnim(
-        ctx,
-        anim,
-        point,
-        this.lines as unknown as Record<string, Line>,
-      );
+      sw.drawAnim(ctx, anim, point, this.lines as unknown as Record<string, Line>);
       if (anim.t >= 1) delete this.switchAnims[swId];
     }
   }
 
   private drawPreviewBalls(ctx: CanvasRenderingContext2D): void {
-    if (this.sim)
-      BallPreview.drawAll(
-        ctx,
-        this.sim.active,
-        this.lines as unknown as Record<string, Line>,
-      );
+    if (!this.sim) return;
+    BallPreview.drawAll(ctx, this.sim.active, this.lines as unknown as Record<string, Line>);
+    for (const { ball, anchor, fromColor, startAt, releaseAt } of this.sim.held) {
+      const line = this.lines[ball.lineId];
+      if (!line) continue;
+      const pt = anchor === "start" ? line.start : line.end;
+      const t = Math.max(0, Math.min(1, (this.sim.elapsed - startAt) / (releaseAt - startAt)));
+      ctx.fillStyle = lerpColor(fromColor, ball.color, t);
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
   }
 
   private drawPreviewStarts(ctx: CanvasRenderingContext2D): void {
@@ -172,12 +219,7 @@ export class PreviewManager {
       const countdown = nextPending
         ? Math.max(0, (nextPending.launchAt - elapsed) / 1000)
         : null;
-      StartPreview.drawPreviewWithBall(
-        ctx,
-        point,
-        nextPending?.color ?? null,
-        countdown,
-      );
+      StartPreview.drawPreviewWithBall(ctx, point, nextPending?.color ?? null, countdown);
     }
   }
 
@@ -187,8 +229,7 @@ export class PreviewManager {
       if (!line) continue;
       const point = arrival.position.anchor === "start" ? line.start : line.end;
       ArrivalPreview.drawPreview(ctx, point);
-      const arrivedHere =
-        this.sim?.arrived.filter((a) => a.arrivalId === arrival.id) ?? [];
+      const arrivedHere = this.sim?.arrived.filter((a) => a.arrivalId === arrival.id) ?? [];
       for (const a of arrivedHere) {
         ctx.fillStyle = a.color;
         ctx.beginPath();
@@ -208,5 +249,6 @@ export class PreviewManager {
     this.drawPreviewBalls(ctx);
     this.drawPreviewStarts(ctx);
     this.drawPreviewArrivals(ctx);
+    this.drawPreviewPainters(ctx);
   }
 }
