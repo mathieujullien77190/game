@@ -26,19 +26,29 @@ export const TokenHeader = styled.div`
   gap: 8px;
 `;
 
-export const TokenPreview = styled.div<{ $color: string }>`
+export const TokenPreview = styled.div<{ $color: string; $shape: "circle" | "square" | "triangle" }>`
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background: ${({ $color }) => $color};
   flex-shrink: 0;
+  background: ${({ $color }) => $color};
   box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: ${({ $shape }) => ($shape === "circle" ? "50%" : $shape === "square" ? "3px" : "0")};
+  clip-path: ${({ $shape }) =>
+    $shape === "triangle"
+      ? "polygon(50% 0%, 0% 100%, 100% 100%)"
+      : "none"};
 `;
 
 export const TokenId = styled.span`
   font-size: 13px;
   font-family: monospace;
   color: #374151;
+`;
+
+export const Hr = styled.hr`
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0;
 `;
 
 export const Empty = styled.span`

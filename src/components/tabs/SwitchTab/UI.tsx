@@ -33,6 +33,12 @@ export const SwitchId = styled.span`
 `;
 
 
+export const Hr = styled.hr`
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0;
+`;
+
 export const Empty = styled.span`
   font-size: 11px;
   color: #d1d5db;

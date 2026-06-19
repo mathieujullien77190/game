@@ -9,13 +9,15 @@ export class Line {
   end: Point;
   control?: Point;
   color: string;
+  screenId?: string;
   points: Point[];
   segments: number[];
 
   static step = 10;
 
-  constructor(id: string, start: Point, end: Point, control?: Point, color: string = "#000000") {
+  constructor(id: string, start: Point, end: Point, control?: Point, color: string = "#000000", screenId?: string) {
     this.id = id;
+    this.screenId = screenId;
     this.type = control ? "curve" : "straight";
     this.start = start;
     this.end = end;

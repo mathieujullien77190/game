@@ -5,6 +5,7 @@ import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
 import { Painter } from "engine/Painter";
 import { Token } from "engine/Token";
+import { Screen } from "engine/Screen";
 import type { Point, LineRef } from "engine/types";
 import {
   setMode,
@@ -14,6 +15,7 @@ import {
   setHoveredArrivalId,
   addSwitch,
   removeSwitch,
+  setSwitchInput,
   setHoveredSwitchId,
   setSwitchActiveLink,
   addPainter,
@@ -34,6 +36,9 @@ import {
   setTokenColor,
   setTokenSpeed,
   setTokenShape,
+  addScreen,
+  removeScreen,
+  setActiveScreenId,
   importLevel,
   toggleGrid,
   setLinkActives,
@@ -58,13 +63,15 @@ const LS_PAINTERS = "game-editor-painters";
 const LS_NEXT_PAINTER_ID = "game-editor-next-painter-id";
 const LS_TOKENS = "game-editor-tokens";
 const LS_NEXT_TOKEN_ID = "game-editor-next-token-id";
+const LS_SCREENS = "game-editor-screens";
+const LS_NEXT_SCREEN_ID = "game-editor-next-screen-id";
 
 const loadLines = (): Line[] => {
   try {
     const raw = localStorage.getItem(LS_LINES);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; start: Point; end: Point; control?: Point; color?: string }[];
-    return data.map(({ id, start, end, control, color }) => new Line(id, start, end, control, color));
+    const data = JSON.parse(raw) as { id: string; start: Point; end: Point; control?: Point; color?: string; screenId?: string }[];
+    return data.map(({ id, start, end, control, color, screenId }) => new Line(id, start, end, control, color, screenId));
   } catch { return []; }
 };
 
@@ -80,8 +87,8 @@ const loadStarts = (): Start[] => {
   try {
     const raw = localStorage.getItem(LS_STARTS);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; position: LineRef; delay?: number }[];
-    return data.map(({ id, position, delay }) => new Start(id, position, delay ?? 0));
+    const data = JSON.parse(raw) as { id: string; position: LineRef; delay?: number; screenId?: string }[];
+    return data.map(({ id, position, delay, screenId }) => new Start(id, position, delay ?? 0, screenId));
   } catch { return []; }
 };
 
@@ -93,8 +100,8 @@ const loadArrivals = (): Arrival[] => {
   try {
     const raw = localStorage.getItem(LS_ARRIVALS);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; position: LineRef }[];
-    return data.map(({ id, position }) => new Arrival(id, position));
+    const data = JSON.parse(raw) as { id: string; position: LineRef; screenId?: string }[];
+    return data.map(({ id, position, screenId }) => new Arrival(id, position, screenId));
   } catch { return []; }
 };
 
@@ -106,8 +113,8 @@ const loadSwitches = (): Switch[] => {
   try {
     const raw = localStorage.getItem(LS_SWITCHES);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; input?: LineRef; position?: LineRef; enter?: LineRef }[];
-    return data.map(({ id, input, position, enter }) => new Switch(id, input ?? enter ?? position!));
+    const data = JSON.parse(raw) as { id: string; input?: LineRef; position?: LineRef; enter?: LineRef; screenId?: string }[];
+    return data.map(({ id, input, position, enter, screenId }) => new Switch(id, input ?? enter ?? position!, 0, screenId));
   } catch { return []; }
 };
 
@@ -119,8 +126,8 @@ const loadPainters = (): Painter[] => {
   try {
     const raw = localStorage.getItem(LS_PAINTERS);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; input: LineRef; color: string }[];
-    return data.map(({ id, input, color }) => new Painter(id, input, color));
+    const data = JSON.parse(raw) as { id: string; input: LineRef; color: string; screenId?: string }[];
+    return data.map(({ id, input, color, screenId }) => new Painter(id, input, color, screenId));
   } catch { return []; }
 };
 
@@ -141,6 +148,19 @@ const loadNextTokenId = (): number => {
   try { const raw = localStorage.getItem(LS_NEXT_TOKEN_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
+const loadScreens = (): Screen[] => {
+  try {
+    const raw = localStorage.getItem(LS_SCREENS);
+    if (!raw) return [];
+    const data = JSON.parse(raw) as { id: string }[];
+    return data.map(({ id }) => new Screen(id));
+  } catch { return []; }
+};
+
+const loadNextScreenId = (): number => {
+  try { const raw = localStorage.getItem(LS_NEXT_SCREEN_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
+};
+
 export const useStore = create<Store>((set) => ({
   lines: loadLines(),
   nextLineId: loadNextLineId(),
@@ -154,6 +174,9 @@ export const useStore = create<Store>((set) => ({
   nextPainterId: loadNextPainterId(),
   tokens: loadTokens(),
   nextTokenId: loadNextTokenId(),
+  screens: loadScreens(),
+  nextScreenId: loadNextScreenId(),
+  activeScreenId: null,
   mode: "idle",
   pendingStart: null,
   pendingEnd: null,
@@ -181,6 +204,7 @@ export const useStore = create<Store>((set) => ({
   removeArrival: removeArrival(set),
   addSwitch: addSwitch(set),
   removeSwitch: removeSwitch(set),
+  setSwitchInput: setSwitchInput(set),
   setHoveredSwitchId: setHoveredSwitchId(set),
   addPainter: addPainter(set),
   removePainter: removePainter(set),
@@ -193,6 +217,9 @@ export const useStore = create<Store>((set) => ({
   setTokenColor: setTokenColor(set),
   setTokenSpeed: setTokenSpeed(set),
   setTokenShape: setTokenShape(set),
+  addScreen: addScreen(set),
+  removeScreen: removeScreen(set),
+  setActiveScreenId: setActiveScreenId(set),
   toggleGrid: toggleGrid(set),
   setLinkActives: setLinkActives(set),
   toggleLinkActive: toggleLinkActive(set),
@@ -204,28 +231,32 @@ export const useStore = create<Store>((set) => ({
 
 useStore.subscribe((state) => {
   localStorage.setItem(LS_LINES, JSON.stringify(
-    state.lines.map((l) => ({ id: l.id, start: l.start, end: l.end, control: l.control, color: l.color }))
+    state.lines.map((l) => ({ id: l.id, start: l.start, end: l.end, control: l.control, color: l.color, screenId: l.screenId }))
   ));
   localStorage.setItem(LS_NEXT_ID, String(state.nextLineId));
   localStorage.setItem(LS_LINK_ACTIVE, JSON.stringify(state.linkActive));
   localStorage.setItem(LS_STARTS, JSON.stringify(
-    state.starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay }))
+    state.starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay, screenId: s.screenId }))
   ));
   localStorage.setItem(LS_NEXT_START_ID, String(state.nextStartId));
   localStorage.setItem(LS_ARRIVALS, JSON.stringify(
-    state.arrivals.map((a) => ({ id: a.id, position: a.position }))
+    state.arrivals.map((a) => ({ id: a.id, position: a.position, screenId: a.screenId }))
   ));
   localStorage.setItem(LS_NEXT_ARRIVAL_ID, String(state.nextArrivalId));
   localStorage.setItem(LS_SWITCHES, JSON.stringify(
-    state.switches.map((s) => ({ id: s.id, input: s.input }))
+    state.switches.map((s) => ({ id: s.id, input: s.input, screenId: s.screenId }))
   ));
   localStorage.setItem(LS_NEXT_SWITCH_ID, String(state.nextSwitchId));
   localStorage.setItem(LS_PAINTERS, JSON.stringify(
-    state.painters.map((p) => ({ id: p.id, input: p.input, color: p.color }))
+    state.painters.map((p) => ({ id: p.id, input: p.input, color: p.color, screenId: p.screenId }))
   ));
   localStorage.setItem(LS_NEXT_PAINTER_ID, String(state.nextPainterId));
   localStorage.setItem(LS_TOKENS, JSON.stringify(
     state.tokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape }))
   ));
   localStorage.setItem(LS_NEXT_TOKEN_ID, String(state.nextTokenId));
+  localStorage.setItem(LS_SCREENS, JSON.stringify(
+    state.screens.map((s) => ({ id: s.id }))
+  ));
+  localStorage.setItem(LS_NEXT_SCREEN_ID, String(state.nextScreenId));
 });

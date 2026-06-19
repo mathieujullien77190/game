@@ -44,7 +44,11 @@ export const StartTab = () => {
             onMouseLeave={() => setHoveredStartId(null)}
           >
             <S.StartInfo>
-              <S.StartId>{s.id}</S.StartId>
+              <S.StartHeader>
+                <S.StartId>{s.id}</S.StartId>
+                <Tag color="#6366f1" bg="#eef2ff" large>{s.screenId ?? "mainScreen"}</Tag>
+              </S.StartHeader>
+              <S.Hr />
               <Tag color={EDITOR_COLORS.departureBorder} bg="#fef3c7">
                 {s.position.id} [{s.position.anchor}]
               </Tag>

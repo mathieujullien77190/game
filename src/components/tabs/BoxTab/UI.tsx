@@ -8,34 +8,16 @@ export const Wrapper = styled.div`
   overflow-y: auto;
 `;
 
-export const PainterList = styled.div`
+export const BoxList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 `;
 
-export const PainterInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
-export const PainterHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-export const PainterId = styled.span`
+export const BoxId = styled.span`
   font-size: 13px;
   font-family: monospace;
   color: #374151;
-`;
-
-export const Hr = styled.hr`
-  border: none;
-  border-top: 1px solid #e5e7eb;
-  margin: 0;
 `;
 
 export const Empty = styled.span`

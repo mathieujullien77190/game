@@ -20,6 +20,7 @@ export const LevelEditor = () => {
     switches,
     painters,
     tokens,
+    activeScreenId,
     mode,
     pendingStart,
     pendingEnd,
@@ -39,6 +40,7 @@ export const LevelEditor = () => {
     setPendingStart,
     setPendingEnd,
     setMode,
+    setActiveScreenId,
     toggleGrid,
     updateLineAnchor,
     updateLineControl,
@@ -50,6 +52,7 @@ export const LevelEditor = () => {
       switches: s.switches,
       painters: s.painters,
       tokens: s.tokens,
+      activeScreenId: s.activeScreenId,
       mode: s.mode,
       pendingStart: s.pendingStart,
       pendingEnd: s.pendingEnd,
@@ -70,11 +73,44 @@ export const LevelEditor = () => {
       setPendingStart: s.setPendingStart,
       setPendingEnd: s.setPendingEnd,
       setMode: s.setMode,
+      setActiveScreenId: s.setActiveScreenId,
       toggleGrid: s.toggleGrid,
       updateLineAnchor: s.updateLineAnchor,
       updateLineControl: s.updateLineControl,
     })),
   );
+
+  const visibleLines = useMemo(
+    () => activeScreenId !== null
+      ? lines.filter((l) => l.screenId === activeScreenId)
+      : lines.filter((l) => !l.screenId),
+    [lines, activeScreenId],
+  );
+  const visibleStarts = useMemo(
+    () => activeScreenId !== null
+      ? starts.filter((s) => s.screenId === activeScreenId)
+      : starts.filter((s) => !s.screenId),
+    [starts, activeScreenId],
+  );
+  const visibleArrivals = useMemo(
+    () => activeScreenId !== null
+      ? arrivals.filter((a) => a.screenId === activeScreenId)
+      : arrivals.filter((a) => !a.screenId),
+    [arrivals, activeScreenId],
+  );
+  const visibleSwitches = useMemo(
+    () => activeScreenId !== null
+      ? switches.filter((sw) => sw.screenId === activeScreenId)
+      : switches.filter((sw) => !sw.screenId),
+    [switches, activeScreenId],
+  );
+  const visiblePainters = useMemo(
+    () => activeScreenId !== null
+      ? painters.filter((p) => p.screenId === activeScreenId)
+      : painters.filter((p) => !p.screenId),
+    [painters, activeScreenId],
+  );
+  const visibleTokens = tokens;
 
   const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
   const [leftWidth, setLeftWidth] = useState<number | null>(null);
@@ -86,7 +122,7 @@ export const LevelEditor = () => {
 
   const levelJSON = useMemo(
     () => ({
-      lines: lines.map((l) => ({
+      lines: visibleLines.map((l) => ({
         id: l.id,
         type: l.type,
         start: l.start,
@@ -94,19 +130,19 @@ export const LevelEditor = () => {
         control: l.control,
         color: l.color,
       })),
-      links: computeLinks(lines, linkActive).map((lk) => ({
+      links: computeLinks(visibleLines, linkActive).map((lk) => ({
         id: lk.id,
         active: lk.active,
         line1: lk.line1,
         line2: lk.line2,
       })),
-      starts: starts.map((s) => ({ id: s.id, position: s.position, delay: s.delay })),
-      arrivals: arrivals.map((a) => ({ id: a.id, position: a.position })),
-      switches: switches.map((sw) => ({ id: sw.id, input: sw.input })),
-      painters: painters.map((p) => ({ id: p.id, input: p.input, color: p.color })),
-      tokens: tokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape })),
+      starts: visibleStarts.map((s) => ({ id: s.id, position: s.position, delay: s.delay })),
+      arrivals: visibleArrivals.map((a) => ({ id: a.id, position: a.position })),
+      switches: visibleSwitches.map((sw) => ({ id: sw.id, input: sw.input })),
+      painters: visiblePainters.map((p) => ({ id: p.id, input: p.input, color: p.color })),
+      tokens: visibleTokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape })),
     }),
-    [lines, linkActive, starts, arrivals, switches, painters, tokens],
+    [visibleLines, linkActive, visibleStarts, visibleArrivals, visibleSwitches, visiblePainters, visibleTokens],
   );
 
   const editorManager = useMemo(() => new EditorManager(levelJSON), [levelJSON]);
@@ -172,18 +208,19 @@ export const LevelEditor = () => {
     if (mode !== "idle") return;
     const point = getPoint(e);
     if (!point) return;
-    for (let i = 0; i < lines.length; i++) {
-      if (dist(point, lines[i].start) < 10) {
-        dragRef.current = { lineIndex: i, which: "start" };
+    for (let i = 0; i < visibleLines.length; i++) {
+      const vl = visibleLines[i];
+      if (dist(point, vl.start) < 10) {
+        dragRef.current = { lineIndex: lines.indexOf(vl), which: "start" };
         return;
       }
-      if (dist(point, lines[i].end) < 10) {
-        dragRef.current = { lineIndex: i, which: "end" };
+      if (dist(point, vl.end) < 10) {
+        dragRef.current = { lineIndex: lines.indexOf(vl), which: "end" };
         return;
       }
-      const ctrl = lines[i].control;
+      const ctrl = vl.control;
       if (ctrl && dist(point, ctrl) < 10) {
-        dragRef.current = { lineIndex: i, which: "control" };
+        dragRef.current = { lineIndex: lines.indexOf(vl), which: "control" };
         return;
       }
     }
@@ -234,7 +271,7 @@ export const LevelEditor = () => {
         setMode("idle");
       }
     } else if (mode === "addStart") {
-      for (const line of lines) {
+      for (const line of visibleLines) {
         if (dist(point, line.start) < 15) {
           addStart({ id: line.id, anchor: "start" });
           setMode("idle");
@@ -247,7 +284,7 @@ export const LevelEditor = () => {
         }
       }
     } else if (mode === "addArrival") {
-      for (const line of lines) {
+      for (const line of visibleLines) {
         if (dist(point, line.start) < 15) {
           addArrival({ id: line.id, anchor: "start" });
           setMode("idle");
@@ -260,7 +297,7 @@ export const LevelEditor = () => {
         }
       }
     } else if (mode === "addSwitch") {
-      for (const line of lines) {
+      for (const line of visibleLines) {
         if (dist(point, line.start) < 15) {
           addSwitch({ id: line.id, anchor: "start" });
           setMode("idle");
@@ -273,7 +310,7 @@ export const LevelEditor = () => {
         }
       }
     } else if (mode === "addPainter") {
-      for (const line of lines) {
+      for (const line of visibleLines) {
         if (dist(point, line.start) < 15) {
           addPainter({ id: line.id, anchor: "start" });
           setMode("idle");
@@ -306,6 +343,11 @@ export const LevelEditor = () => {
     }
   };
 
+  const handleExitScreen = () => {
+    setActiveScreenId(null);
+    setMode("idle");
+  };
+
   const handleMouseLeave = () => {
     setHoveredPoint(null);
     dragRef.current = null;
@@ -331,6 +373,12 @@ export const LevelEditor = () => {
             $visible={isPreview}
             onMouseUp={handlePreviewClick}
           />
+          {activeScreenId && !isPreview && (
+            <S.ScreenBreadcrumb>
+              {activeScreenId}
+              <S.ScreenBreadcrumbExit onClick={handleExitScreen}>×</S.ScreenBreadcrumbExit>
+            </S.ScreenBreadcrumb>
+          )}
           {hint && !isPreview && <S.HintOverlay>{hint}</S.HintOverlay>}
           <S.OverlayButtons>
             {!isPreview && (

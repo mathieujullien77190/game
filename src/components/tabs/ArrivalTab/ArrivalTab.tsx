@@ -41,7 +41,11 @@ export const ArrivalTab = () => {
             onMouseLeave={() => setHoveredArrivalId(null)}
           >
             <S.ArrivalInfo>
-              <S.ArrivalId>{a.id}</S.ArrivalId>
+              <S.ArrivalHeader>
+                <S.ArrivalId>{a.id}</S.ArrivalId>
+                <Tag color="#6366f1" bg="#eef2ff" large>{a.screenId ?? "mainScreen"}</Tag>
+              </S.ArrivalHeader>
+              <S.Hr />
               <Tag color={EDITOR_COLORS.arrivalBorder} bg="#dcfce7">
                 {a.position.id} [{a.position.anchor}]
               </Tag>

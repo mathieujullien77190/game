@@ -4,6 +4,7 @@ import type { Arrival } from "engine/Arrival";
 import type { Switch } from "engine/Switch";
 import type { Painter } from "engine/Painter";
 import type { Token } from "engine/Token";
+import type { Screen } from "engine/Screen";
 import type { Point, LineRef } from "engine/types";
 import type { LevelJSON } from "engine/Manager";
 
@@ -22,6 +23,9 @@ export type StoreState = {
   nextPainterId: number;
   tokens: Token[];
   nextTokenId: number;
+  screens: Screen[];
+  nextScreenId: number;
+  activeScreenId: string | null;
   mode: EditorMode;
   pendingStart: Point | null;
   pendingEnd: Point | null;
@@ -52,6 +56,7 @@ export type StoreActions = {
   removeArrival: (index: number) => void;
   addSwitch: (position: LineRef) => void;
   removeSwitch: (index: number) => void;
+  setSwitchInput: (index: number, input: LineRef) => void;
   setHoveredSwitchId: (id: string | null) => void;
   addPainter: (input: LineRef) => void;
   removePainter: (index: number) => void;
@@ -64,7 +69,10 @@ export type StoreActions = {
   removeToken: (index: number) => void;
   setTokenColor: (index: number, color: string) => void;
   setTokenSpeed: (index: number, speed: number) => void;
-  setTokenShape: (index: number, shape: "circle" | "square") => void;
+  setTokenShape: (index: number, shape: "circle" | "square" | "triangle") => void;
+  addScreen: () => void;
+  removeScreen: (index: number) => void;
+  setActiveScreenId: (id: string | null) => void;
   toggleGrid: () => void;
   toggleLinkActive: (linkId: string) => void;
   updateLineAnchor: (index: number, which: "start" | "end", point: Point) => void;

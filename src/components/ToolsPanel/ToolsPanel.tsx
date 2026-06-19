@@ -5,6 +5,7 @@ import ArrivalTab from "components/tabs/ArrivalTab";
 import SwitchTab from "components/tabs/SwitchTab";
 import PainterTab from "components/tabs/PainterTab";
 import TokenTab from "components/tabs/TokenTab";
+import ScreenTab from "components/tabs/ScreenTab";
 import JsonTab from "components/tabs/JsonTab";
 import type { Tab } from "./types";
 import * as S from "./UI";
@@ -16,6 +17,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "switch", label: "Switch" },
   { id: "painter", label: "Painter" },
   { id: "token", label: "Token" },
+  { id: "screen", label: "Screen" },
   { id: "json", label: "JSON" },
 ];
 
@@ -42,6 +44,7 @@ export const ToolsPanel = () => {
         {activeTab === "switch" && <SwitchTab />}
         {activeTab === "painter" && <PainterTab />}
         {activeTab === "token" && <TokenTab />}
+        {activeTab === "screen" && <ScreenTab />}
         {activeTab === "json" && <JsonTab />}
       </S.Content>
     </S.Wrapper>

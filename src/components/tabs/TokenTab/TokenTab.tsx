@@ -31,9 +31,10 @@ export const TokenTab = () => {
           <ItemRow key={token.id} onDelete={() => removeToken(index)}>
             <S.TokenContent>
               <S.TokenHeader>
-                <S.TokenPreview $color={token.color} />
+                <S.TokenPreview $color={token.color} $shape={token.shape} />
                 <S.TokenId>{token.id}</S.TokenId>
               </S.TokenHeader>
+              <S.Hr />
               <ColorPicker
                 palette={PALETTE}
                 value={token.color}
@@ -50,6 +51,7 @@ export const TokenTab = () => {
                 <S.ShapeRow>
                   <S.ShapeTag $active={token.shape === "circle"} onClick={() => setTokenShape(index, "circle")}>circle</S.ShapeTag>
                   <S.ShapeTag $active={token.shape === "square"} onClick={() => setTokenShape(index, "square")}>square</S.ShapeTag>
+                  <S.ShapeTag $active={token.shape === "triangle"} onClick={() => setTokenShape(index, "triangle")}>triangle</S.ShapeTag>
                 </S.ShapeRow>
               </Field>
             </S.TokenContent>

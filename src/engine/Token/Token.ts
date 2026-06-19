@@ -1,6 +1,6 @@
 import { DEFAULT_TOKEN_COLOR } from "engine/colors";
 
-export type TokenShape = "circle" | "square";
+export type TokenShape = "circle" | "square" | "triangle";
 
 export class Token {
   id: string;

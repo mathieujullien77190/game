@@ -193,6 +193,8 @@ export class PreviewManager {
       }
       if (token.shape === "square") {
         TokenPreview.drawSquare(ctx, pos.x, pos.y, pos.angle, color);
+      } else if (token.shape === "triangle") {
+        TokenPreview.drawTriangle(ctx, pos.x, pos.y, pos.angle, color);
       } else {
         TokenPreview.drawCircle(ctx, pos.x, pos.y, color);
       }

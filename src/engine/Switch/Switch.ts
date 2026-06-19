@@ -6,12 +6,14 @@ export class Switch {
   id: string;
   input: LineRef;
   activeIndex: number;
+  screenId?: string;
 
   static readonly ANIM_DURATION_MS = 300;
 
-  constructor(id: string, input: LineRef, activeIndex = 0) {
+  constructor(id: string, input: LineRef, activeIndex = 0, screenId?: string) {
     this.id = id;
     this.input = input;
     this.activeIndex = activeIndex;
+    this.screenId = screenId;
   }
 }

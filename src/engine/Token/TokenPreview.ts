@@ -15,15 +15,42 @@ export class TokenPreview extends Token {
 
   static drawSquare(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, color: string): void {
     const half = 6;
+    const r = 2;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
     ctx.fillStyle = color;
-    ctx.fillRect(-half, -half, half * 2, half * 2);
+    ctx.beginPath();
+    ctx.roundRect(-half, -half, half * 2, half * 2, r);
+    ctx.fill();
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 1.5;
     ctx.setLineDash([]);
-    ctx.strokeRect(-half, -half, half * 2, half * 2);
+    ctx.beginPath();
+    ctx.roundRect(-half, -half, half * 2, half * 2, r);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  static drawTriangle(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, color: string): void {
+    const R = 7;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    for (let i = 0; i < 3; i++) {
+      const a = (i * 2 * Math.PI) / 3;
+      const px = R * Math.cos(a);
+      const py = R * Math.sin(a);
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    ctx.stroke();
     ctx.restore();
   }
 

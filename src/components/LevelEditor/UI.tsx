@@ -73,6 +73,34 @@ export const HintOverlay = styled.div`
   z-index: 2;
 `;
 
+export const ScreenBreadcrumb = styled.div`
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(99, 102, 241, 0.9);
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  z-index: 2;
+`;
+
+export const ScreenBreadcrumbExit = styled.button`
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.8;
+  &:hover { opacity: 1; }
+`;
+
 export const OverlayButtons = styled.div`
   position: absolute;
   bottom: 10px;

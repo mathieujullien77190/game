@@ -77,6 +77,7 @@ export const LineTab = () => {
                     <Tag color="#374151" bg="#f3f4f6" large>
                       {line.type}
                     </Tag>
+                    <Tag color="#6366f1" bg="#eef2ff" large>{line.screenId ?? "mainScreen"}</Tag>
                   </S.LineId>
                   <S.Hr />
                   <S.Anchors>

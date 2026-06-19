@@ -4,6 +4,7 @@ import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
 import { Painter } from "engine/Painter";
 import { Token } from "engine/Token";
+import { Screen } from "engine/Screen";
 import { DEFAULT_TOKEN_COLOR, DEFAULT_TOKEN_COLOR as DEFAULT_PAINTER_COLOR } from "engine/colors";
 import { computeLinks } from "engine/Link";
 import type { Point, LineRef } from "engine/types";
@@ -33,7 +34,7 @@ export const setPendingEnd = (set: Set) => (point: Point | null) =>
 
 export const addLine = (set: Set) => (start: Point, end: Point, control?: Point) =>
   set((state) => ({
-    lines: [...state.lines, new Line(`line${state.nextLineId}`, start, end, control)],
+    lines: [...state.lines, new Line(`line${state.nextLineId}`, start, end, control, undefined, state.activeScreenId ?? undefined)],
     nextLineId: state.nextLineId + 1,
   }));
 
@@ -42,7 +43,7 @@ export const removeLine = (set: Set) => (index: number) =>
 
 export const addStart = (set: Set) => (position: LineRef) =>
   set((state) => ({
-    starts: [...state.starts, new Start(`start${state.nextStartId}`, position)],
+    starts: [...state.starts, new Start(`start${state.nextStartId}`, position, 0, state.activeScreenId ?? undefined)],
     nextStartId: state.nextStartId + 1,
   }));
 
@@ -52,13 +53,13 @@ export const removeStart = (set: Set) => (index: number) =>
 export const updateStartDelay = (set: Set) => (index: number, delayMs: number) =>
   set((state) => ({
     starts: state.starts.map((s, i) =>
-      i !== index ? s : new Start(s.id, s.position, delayMs)
+      i !== index ? s : new Start(s.id, s.position, delayMs, s.screenId)
     ),
   }));
 
 export const addArrival = (set: Set) => (position: LineRef) =>
   set((state) => ({
-    arrivals: [...state.arrivals, new Arrival(`arrival${state.nextArrivalId}`, position)],
+    arrivals: [...state.arrivals, new Arrival(`arrival${state.nextArrivalId}`, position, state.activeScreenId ?? undefined)],
     nextArrivalId: state.nextArrivalId + 1,
   }));
 
@@ -67,19 +68,26 @@ export const removeArrival = (set: Set) => (index: number) =>
 
 export const addSwitch = (set: Set) => (input: LineRef) =>
   set((state) => ({
-    switches: [...state.switches, new Switch(`switch${state.nextSwitchId}`, input)],
+    switches: [...state.switches, new Switch(`switch${state.nextSwitchId}`, input, 0, state.activeScreenId ?? undefined)],
     nextSwitchId: state.nextSwitchId + 1,
   }));
 
 export const removeSwitch = (set: Set) => (index: number) =>
   set((state) => ({ switches: state.switches.filter((_, i) => i !== index) }));
 
+export const setSwitchInput = (set: Set) => (index: number, input: LineRef) =>
+  set((state) => ({
+    switches: state.switches.map((sw, i) =>
+      i !== index ? sw : new Switch(sw.id, input, sw.activeIndex, sw.screenId)
+    ),
+  }));
+
 export const setHoveredSwitchId = (set: Set) => (id: string | null) =>
   set(() => ({ hoveredSwitchId: id }));
 
 export const addPainter = (set: Set) => (input: LineRef) =>
   set((state) => ({
-    painters: [...state.painters, new Painter(`painter${state.nextPainterId}`, input, DEFAULT_PAINTER_COLOR)],
+    painters: [...state.painters, new Painter(`painter${state.nextPainterId}`, input, DEFAULT_PAINTER_COLOR, state.activeScreenId ?? undefined)],
     nextPainterId: state.nextPainterId + 1,
   }));
 
@@ -89,7 +97,7 @@ export const removePainter = (set: Set) => (index: number) =>
 export const setPainterColor = (set: Set) => (index: number, color: string) =>
   set((state) => ({
     painters: state.painters.map((p, i) =>
-      i !== index ? p : new Painter(p.id, p.input, color)
+      i !== index ? p : new Painter(p.id, p.input, color, p.screenId)
     ),
   }));
 
@@ -113,7 +121,7 @@ export const setSwitchActiveLink = (set: Set) => (position: LineRef, activeLinkI
 export const setLineColor = (set: Set) => (index: number, color: string) =>
   set((state) => ({
     lines: state.lines.map((l, i) =>
-      i !== index ? l : new Line(l.id, l.start, l.end, l.control, color)
+      i !== index ? l : new Line(l.id, l.start, l.end, l.control, color, l.screenId)
     ),
   }));
 
@@ -136,10 +144,25 @@ export const setTokenSpeed = (set: Set) => (index: number, speed: number) =>
     tokens: state.tokens.map((t, i) => (i !== index ? t : new Token(t.id, t.color, speed, t.shape))),
   }));
 
-export const setTokenShape = (set: Set) => (index: number, shape: "circle" | "square") =>
+export const setTokenShape = (set: Set) => (index: number, shape: "circle" | "square" | "triangle") =>
   set((state) => ({
     tokens: state.tokens.map((t, i) => (i !== index ? t : new Token(t.id, t.color, t.speed, shape))),
   }));
+
+export const addScreen = (set: Set) => () =>
+  set((state) => ({
+    screens: [...state.screens, new Screen(`screen${state.nextScreenId}`)],
+    nextScreenId: state.nextScreenId + 1,
+  }));
+
+export const removeScreen = (set: Set) => (index: number) =>
+  set((state) => ({
+    screens: state.screens.filter((_, i) => i !== index),
+    activeScreenId: state.activeScreenId === state.screens[index]?.id ? null : state.activeScreenId,
+  }));
+
+export const setActiveScreenId = (set: Set) => (id: string | null) =>
+  set(() => ({ activeScreenId: id }));
 
 export const importLevel = (set: Set) => (json: LevelJSON) =>
   set(() => {
@@ -165,7 +188,14 @@ export const toggleGrid = (set: Set) => () =>
   set((state) => ({ showGrid: !state.showGrid }));
 
 export const clearLines = (set: Set) => () =>
-  set(() => ({ lines: [], nextLineId: 1, linkActive: {}, starts: [], nextStartId: 1, arrivals: [], nextArrivalId: 1, switches: [], nextSwitchId: 1, painters: [], nextPainterId: 1 }));
+  set(() => ({
+    lines: [], nextLineId: 1, linkActive: {},
+    starts: [], nextStartId: 1,
+    arrivals: [], nextArrivalId: 1,
+    switches: [], nextSwitchId: 1,
+    painters: [], nextPainterId: 1,
+    screens: [], nextScreenId: 1, activeScreenId: null,
+  }));
 
 export const setLinkActives = (set: Set) => (updates: Record<string, boolean>) =>
   set((state) => ({ linkActive: { ...state.linkActive, ...updates } }));
@@ -186,7 +216,7 @@ export const updateLineAnchor =
         if (i !== index) return l;
         const start = which === "start" ? point : l.start;
         const end = which === "end" ? point : l.end;
-        return new Line(l.id, start, end, l.control);
+        return new Line(l.id, start, end, l.control, l.color, l.screenId);
       }),
     }));
 
@@ -195,6 +225,6 @@ export const updateLineControl =
   (index: number, point: Point) =>
     set((state) => ({
       lines: state.lines.map((l, i) =>
-        i !== index ? l : new Line(l.id, l.start, l.end, point)
+        i !== index ? l : new Line(l.id, l.start, l.end, point, l.color, l.screenId)
       ),
     }));
