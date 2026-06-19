@@ -5,7 +5,7 @@ import { Start } from "engine/Start";
 import { StartEditor } from "engine/Start";
 import { Arrival } from "engine/Arrival";
 import { ArrivalEditor } from "engine/Arrival";
-import { Ball } from "engine/Ball";
+import { Token } from "engine/Token";
 import { SwitchEditor } from "engine/Switch";
 import type { SwitchAnim } from "engine/Switch";
 import { PainterEditor } from "engine/Painter";
@@ -18,7 +18,7 @@ export class EditorManager {
   painters: Record<string, PainterEditor>;
   starts: Record<string, Start>;
   arrivals: Record<string, Arrival>;
-  balls: Ball[];
+  tokens: Token[];
   links: Record<string, Link>;
   activePaths: Record<string, AnchorTarget>;
   allPaths: Record<string, AnchorTarget[]>;
@@ -51,9 +51,9 @@ export class EditorManager {
       this.arrivals[d.id] = new Arrival(d.id, d.position);
     }
 
-    this.balls = [];
-    for (const d of json.balls ?? []) {
-      this.balls.push(new Ball(d.id, d.color, d.speed));
+    this.tokens = [];
+    for (const d of json.tokens ?? []) {
+      this.tokens.push(new Token(d.id, d.color, d.speed, d.shape ?? "circle"));
     }
   }
 

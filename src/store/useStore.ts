@@ -4,7 +4,7 @@ import { Start } from "engine/Start";
 import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
 import { Painter } from "engine/Painter";
-import { Ball } from "engine/Ball";
+import { Token } from "engine/Token";
 import type { Point, LineRef } from "engine/types";
 import {
   setMode,
@@ -29,10 +29,12 @@ import {
   removeStart,
   addArrival,
   removeArrival,
-  addBall,
-  removeBall,
-  setBallColor,
-  setBallSpeed,
+  addToken,
+  removeToken,
+  setTokenColor,
+  setTokenSpeed,
+  setTokenShape,
+  importLevel,
   toggleGrid,
   setLinkActives,
   toggleLinkActive,
@@ -54,8 +56,8 @@ const LS_SWITCHES = "game-editor-switches";
 const LS_NEXT_SWITCH_ID = "game-editor-next-switch-id";
 const LS_PAINTERS = "game-editor-painters";
 const LS_NEXT_PAINTER_ID = "game-editor-next-painter-id";
-const LS_BALLS = "game-editor-balls";
-const LS_NEXT_BALL_ID = "game-editor-next-ball-id";
+const LS_TOKENS = "game-editor-tokens";
+const LS_NEXT_TOKEN_ID = "game-editor-next-token-id";
 
 const loadLines = (): Line[] => {
   try {
@@ -126,17 +128,17 @@ const loadNextPainterId = (): number => {
   try { const raw = localStorage.getItem(LS_NEXT_PAINTER_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
-const loadBalls = (): Ball[] => {
+const loadTokens = (): Token[] => {
   try {
-    const raw = localStorage.getItem(LS_BALLS);
+    const raw = localStorage.getItem(LS_TOKENS);
     if (!raw) return [];
-    const data = JSON.parse(raw) as { id: string; color: string; speed?: number }[];
-    return data.map(({ id, color, speed }) => new Ball(id, color, speed ?? 1));
+    const data = JSON.parse(raw) as { id: string; color: string; speed?: number; shape?: "circle" | "square" }[];
+    return data.map(({ id, color, speed, shape }) => new Token(id, color, speed ?? 1, shape ?? "circle"));
   } catch { return []; }
 };
 
-const loadNextBallId = (): number => {
-  try { const raw = localStorage.getItem(LS_NEXT_BALL_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
+const loadNextTokenId = (): number => {
+  try { const raw = localStorage.getItem(LS_NEXT_TOKEN_ID); return raw ? parseInt(raw, 10) : 1; } catch { return 1; }
 };
 
 export const useStore = create<Store>((set) => ({
@@ -150,8 +152,8 @@ export const useStore = create<Store>((set) => ({
   nextSwitchId: loadNextSwitchId(),
   painters: loadPainters(),
   nextPainterId: loadNextPainterId(),
-  balls: loadBalls(),
-  nextBallId: loadNextBallId(),
+  tokens: loadTokens(),
+  nextTokenId: loadNextTokenId(),
   mode: "idle",
   pendingStart: null,
   pendingEnd: null,
@@ -185,10 +187,12 @@ export const useStore = create<Store>((set) => ({
   setPainterColor: setPainterColor(set),
   setHoveredPainterId: setHoveredPainterId(set),
   setSwitchActiveLink: setSwitchActiveLink(set),
-  addBall: addBall(set),
-  removeBall: removeBall(set),
-  setBallColor: setBallColor(set),
-  setBallSpeed: setBallSpeed(set),
+  importLevel: importLevel(set),
+  addToken: addToken(set),
+  removeToken: removeToken(set),
+  setTokenColor: setTokenColor(set),
+  setTokenSpeed: setTokenSpeed(set),
+  setTokenShape: setTokenShape(set),
   toggleGrid: toggleGrid(set),
   setLinkActives: setLinkActives(set),
   toggleLinkActive: toggleLinkActive(set),
@@ -220,8 +224,8 @@ useStore.subscribe((state) => {
     state.painters.map((p) => ({ id: p.id, input: p.input, color: p.color }))
   ));
   localStorage.setItem(LS_NEXT_PAINTER_ID, String(state.nextPainterId));
-  localStorage.setItem(LS_BALLS, JSON.stringify(
-    state.balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed }))
+  localStorage.setItem(LS_TOKENS, JSON.stringify(
+    state.tokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape }))
   ));
-  localStorage.setItem(LS_NEXT_BALL_ID, String(state.nextBallId));
+  localStorage.setItem(LS_NEXT_TOKEN_ID, String(state.nextTokenId));
 });

@@ -1,45 +1,28 @@
-import type { Anchor, LineRef } from "engine/types";
-
-export type BallInstance = {
+export type TokenInstance = {
   instanceId: string;
-  ballId: string;
+  tokenId: string;
   color: string;
   speed: number;
+  shape: "circle" | "square";
   launchAt: number;
   lineId: string;
   ptIdx: number;
   segOffset: number;
   direction: 1 | -1;
+  pauseUntil?: number;
+  fromColor?: string;
 };
 
-export type PendingLaunch = {
-  instanceId: string;
-  ballId: string;
-  color: string;
-  speed: number;
-  lineRef: LineRef;
-  launchAt: number;
-};
-
-export type ArrivedBall = {
+export type ArrivedToken = {
   instanceId: string;
   arrivalId: string;
   color: string;
 };
 
-export type HeldBall = {
-  ball: BallInstance;
-  anchor: Anchor;
-  releaseAt: number;
-  fromColor: string;
-  startAt: number;
-};
-
 export type SimulationState = {
   elapsed: number;
-  active: BallInstance[];
-  pending: PendingLaunch[];
+  active: TokenInstance[];
+  pending: TokenInstance[];
   done: string[];
-  arrived: ArrivedBall[];
-  held: HeldBall[];
+  arrived: ArrivedToken[];
 };

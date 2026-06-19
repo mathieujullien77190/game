@@ -38,15 +38,16 @@ export class Line {
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance === 0) return [Line.round(start)];
+    if (distance === 0) return [{ ...Line.round(start), a: 0 }];
+    const a = Math.atan2(dy, dx);
     const points: Point[] = [];
     const count = Math.floor(distance / step);
     for (let i = 0; i <= count; i++) {
       const t = (i * step) / distance;
-      points.push(Line.round({ x: start.x + dx * t, y: start.y + dy * t }));
+      points.push({ ...Line.round({ x: start.x + dx * t, y: start.y + dy * t }), a });
     }
     const last = points[points.length - 1];
-    if (last.x !== end.x || last.y !== end.y) points.push(Line.round(end));
+    if (last.x !== end.x || last.y !== end.y) points.push({ ...Line.round(end), a });
     return points;
   }
 
@@ -70,6 +71,14 @@ export class Line {
     const points: Point[] = [];
     for (let i = 0; i <= count; i++) {
       points.push(Line.round(Line.bezierPoint(start, control, end, i / count)));
+    }
+    for (let i = 0; i < points.length - 1; i++) {
+      const nx = points[i + 1].x - points[i].x;
+      const ny = points[i + 1].y - points[i].y;
+      points[i] = { ...points[i], a: Math.atan2(ny, nx) };
+    }
+    if (points.length >= 2) {
+      points[points.length - 1] = { ...points[points.length - 1], a: points[points.length - 2].a };
     }
     return points;
   }

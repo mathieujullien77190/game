@@ -16,7 +16,7 @@ export const PALETTE = [
 
 export type GameColor = (typeof PALETTE)[number];
 
-export const DEFAULT_BALL_COLOR = "#ef4444";
+export const DEFAULT_TOKEN_COLOR = "#ef4444";
 
 export const lerpColor = (a: string, b: string, t: number): string => {
   const p = (hex: string, o: number) => parseInt(hex.slice(o, o + 2), 16);

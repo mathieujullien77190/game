@@ -4,6 +4,7 @@ export const Wrapper = styled.div`
   position: relative;
   flex: 1;
   display: flex;
+  flex-direction: column;
 `;
 
 export const Textarea = styled.textarea`
@@ -20,21 +21,35 @@ export const Textarea = styled.textarea`
   line-height: 1.5;
 `;
 
-export const ClearButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e5e7eb;
+export const ButtonRow = styled.div`
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  flex-shrink: 0;
+`;
+
+export const ActionButton = styled.button<{ $variant?: "danger" | "primary" | "neutral" }>`
+  padding: 3px 10px;
   border-radius: 4px;
   font-size: 11px;
   font-family: monospace;
-  color: #ef4444;
   cursor: pointer;
+  border: 1px solid ${({ $variant }) =>
+    $variant === "danger" ? "#ef4444" :
+    $variant === "primary" ? "#3b82f6" :
+    "#e5e7eb"};
+  background: transparent;
+  color: ${({ $variant }) =>
+    $variant === "danger" ? "#ef4444" :
+    $variant === "primary" ? "#3b82f6" :
+    "#6b7280"};
 
   &:hover {
-    background: #fef2f2;
-    border-color: #ef4444;
+    background: ${({ $variant }) =>
+      $variant === "danger" ? "#fef2f2" :
+      $variant === "primary" ? "#eff6ff" :
+      "#f9fafb"};
   }
 `;

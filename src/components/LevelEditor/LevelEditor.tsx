@@ -19,7 +19,7 @@ export const LevelEditor = () => {
     arrivals,
     switches,
     painters,
-    balls,
+    tokens,
     mode,
     pendingStart,
     pendingEnd,
@@ -49,7 +49,7 @@ export const LevelEditor = () => {
       arrivals: s.arrivals,
       switches: s.switches,
       painters: s.painters,
-      balls: s.balls,
+      tokens: s.tokens,
       mode: s.mode,
       pendingStart: s.pendingStart,
       pendingEnd: s.pendingEnd,
@@ -104,9 +104,9 @@ export const LevelEditor = () => {
       arrivals: arrivals.map((a) => ({ id: a.id, position: a.position })),
       switches: switches.map((sw) => ({ id: sw.id, input: sw.input })),
       painters: painters.map((p) => ({ id: p.id, input: p.input, color: p.color })),
-      balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
+      tokens: tokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape })),
     }),
-    [lines, linkActive, starts, arrivals, switches, painters, balls],
+    [lines, linkActive, starts, arrivals, switches, painters, tokens],
   );
 
   const editorManager = useMemo(() => new EditorManager(levelJSON), [levelJSON]);

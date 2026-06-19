@@ -3,8 +3,9 @@ import type { Start } from "engine/Start";
 import type { Arrival } from "engine/Arrival";
 import type { Switch } from "engine/Switch";
 import type { Painter } from "engine/Painter";
-import type { Ball } from "engine/Ball";
+import type { Token } from "engine/Token";
 import type { Point, LineRef } from "engine/types";
+import type { LevelJSON } from "engine/Manager";
 
 export type EditorMode = "idle" | "addLine" | "addCurve" | "addStart" | "addArrival" | "addSwitch" | "addPainter";
 
@@ -19,8 +20,8 @@ export type StoreState = {
   nextSwitchId: number;
   painters: Painter[];
   nextPainterId: number;
-  balls: Ball[];
-  nextBallId: number;
+  tokens: Token[];
+  nextTokenId: number;
   mode: EditorMode;
   pendingStart: Point | null;
   pendingEnd: Point | null;
@@ -59,15 +60,17 @@ export type StoreActions = {
   setSwitchActiveLink: (position: LineRef, activeLinkId: string) => void;
   setLinkActives: (updates: Record<string, boolean>) => void;
   setLineColor: (index: number, color: string) => void;
-  addBall: () => void;
-  removeBall: (index: number) => void;
-  setBallColor: (index: number, color: string) => void;
-  setBallSpeed: (index: number, speed: number) => void;
+  addToken: () => void;
+  removeToken: (index: number) => void;
+  setTokenColor: (index: number, color: string) => void;
+  setTokenSpeed: (index: number, speed: number) => void;
+  setTokenShape: (index: number, shape: "circle" | "square") => void;
   toggleGrid: () => void;
   toggleLinkActive: (linkId: string) => void;
   updateLineAnchor: (index: number, which: "start" | "end", point: Point) => void;
   updateLineControl: (index: number, point: Point) => void;
   clearLines: () => void;
+  importLevel: (json: LevelJSON) => void;
 };
 
 export type Store = StoreState & StoreActions;

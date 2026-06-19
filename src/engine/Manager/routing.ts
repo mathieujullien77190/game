@@ -1,7 +1,7 @@
 import type { LineType } from "engine/Line/Line";
 import Link from "engine/Link";
 import type { Anchor, LineRef, Point } from "engine/types";
-import { Switch, SwitchEditor } from "engine/Switch";
+import { Switch, SwitchEditor, SwitchPreview } from "engine/Switch";
 import type { SwitchAnim } from "engine/Switch";
 import { PainterEditor } from "engine/Painter";
 
@@ -11,7 +11,7 @@ type StartData = { id: string; position: LineRef; delay?: number };
 type ArrivalData = { id: string; position: LineRef };
 type SwitchData = { id: string; input: LineRef };
 type PainterData = { id: string; input: LineRef; color: string };
-type BallData = { id: string; color: string; speed: number };
+type TokenData = { id: string; color: string; speed: number; shape?: "circle" | "square" };
 
 export type LevelJSON = {
   lines: LineData[];
@@ -20,7 +20,7 @@ export type LevelJSON = {
   arrivals?: ArrivalData[];
   switches?: SwitchData[];
   painters?: PainterData[];
-  balls?: BallData[];
+  tokens?: TokenData[];
 };
 
 export type AnchorTarget = { id: string; anchor: Anchor };
@@ -115,7 +115,7 @@ const chooseDiff = (fromAngle: number, toAngle: number, inputAngle: number | nul
 
 export const cycleSwitch = (
   switchId: string,
-  switches: Record<string, SwitchEditor>,
+  switches: Record<string, SwitchPreview>,
   activePaths: Record<string, AnchorTarget>,
   allPaths: Record<string, AnchorTarget[]>,
   switchAnims: Record<string, SwitchAnim>,

@@ -3,7 +3,7 @@ import type { Start } from "engine/Start";
 import type { Arrival } from "engine/Arrival";
 import type { Switch } from "engine/Switch";
 import type { Painter } from "engine/Painter";
-import type { Ball } from "engine/Ball";
+import type { Token } from "engine/Token";
 import { computeLinks } from "engine/Link";
 
 export const serializeLevel = (
@@ -12,7 +12,7 @@ export const serializeLevel = (
   arrivals: Arrival[],
   switches: Switch[],
   painters: Painter[],
-  balls: Ball[],
+  tokens: Token[],
   linkActive: Record<string, boolean>,
 ) =>
   JSON.stringify(
@@ -42,7 +42,7 @@ export const serializeLevel = (
         input: p.input,
         color: p.color,
       })),
-      balls: balls.map((b) => ({ id: b.id, color: b.color, speed: b.speed })),
+      tokens: tokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape })),
     },
     null,
     2,

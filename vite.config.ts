@@ -10,6 +10,7 @@ export default defineConfig({
       "engine/":     path.resolve(__dirname, "src/engine") + "/",
       "hooks/":      path.resolve(__dirname, "src/hooks") + "/",
       "store/":      path.resolve(__dirname, "src/store") + "/",
+      "levels/":     path.resolve(__dirname, "src/levels") + "/",
     },
   },
 });

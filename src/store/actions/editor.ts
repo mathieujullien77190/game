@@ -3,10 +3,11 @@ import { Start } from "engine/Start";
 import { Arrival } from "engine/Arrival";
 import { Switch } from "engine/Switch";
 import { Painter } from "engine/Painter";
-import { Ball } from "engine/Ball";
-import { DEFAULT_BALL_COLOR, DEFAULT_BALL_COLOR as DEFAULT_PAINTER_COLOR } from "engine/colors";
+import { Token } from "engine/Token";
+import { DEFAULT_TOKEN_COLOR, DEFAULT_TOKEN_COLOR as DEFAULT_PAINTER_COLOR } from "engine/colors";
 import { computeLinks } from "engine/Link";
 import type { Point, LineRef } from "engine/types";
+import type { LevelJSON } from "engine/Manager";
 import type { Set, Store } from "store/types";
 
 export const setMode = (set: Set) => (mode: Store["mode"]) =>
@@ -116,24 +117,49 @@ export const setLineColor = (set: Set) => (index: number, color: string) =>
     ),
   }));
 
-export const addBall = (set: Set) => () =>
+export const addToken = (set: Set) => () =>
   set((state) => ({
-    balls: [...state.balls, new Ball(`ball${state.nextBallId}`, DEFAULT_BALL_COLOR)],
-    nextBallId: state.nextBallId + 1,
+    tokens: [...state.tokens, new Token(`token${state.nextTokenId}`, DEFAULT_TOKEN_COLOR)],
+    nextTokenId: state.nextTokenId + 1,
   }));
 
-export const removeBall = (set: Set) => (index: number) =>
-  set((state) => ({ balls: state.balls.filter((_, i) => i !== index) }));
+export const removeToken = (set: Set) => (index: number) =>
+  set((state) => ({ tokens: state.tokens.filter((_, i) => i !== index) }));
 
-export const setBallColor = (set: Set) => (index: number, color: string) =>
+export const setTokenColor = (set: Set) => (index: number, color: string) =>
   set((state) => ({
-    balls: state.balls.map((b, i) => (i !== index ? b : new Ball(b.id, color, b.speed))),
+    tokens: state.tokens.map((t, i) => (i !== index ? t : new Token(t.id, color, t.speed, t.shape))),
   }));
 
-export const setBallSpeed = (set: Set) => (index: number, speed: number) =>
+export const setTokenSpeed = (set: Set) => (index: number, speed: number) =>
   set((state) => ({
-    balls: state.balls.map((b, i) => (i !== index ? b : new Ball(b.id, b.color, speed))),
+    tokens: state.tokens.map((t, i) => (i !== index ? t : new Token(t.id, t.color, speed, t.shape))),
   }));
+
+export const setTokenShape = (set: Set) => (index: number, shape: "circle" | "square") =>
+  set((state) => ({
+    tokens: state.tokens.map((t, i) => (i !== index ? t : new Token(t.id, t.color, t.speed, shape))),
+  }));
+
+export const importLevel = (set: Set) => (json: LevelJSON) =>
+  set(() => {
+    const lines = json.lines.map((d) => new Line(d.id, d.start, d.end, d.control, d.color));
+    const starts = (json.starts ?? []).map((d) => new Start(d.id, d.position, d.delay ?? 0));
+    const arrivals = (json.arrivals ?? []).map((d) => new Arrival(d.id, d.position));
+    const switches = (json.switches ?? []).map((d) => new Switch(d.id, d.input));
+    const painters = (json.painters ?? []).map((d) => new Painter(d.id, d.input, d.color));
+    const tokens = (json.tokens ?? []).map((d) => new Token(d.id, d.color, d.speed ?? 1, d.shape ?? "circle"));
+    const linkActive = json.links.reduce<Record<string, boolean>>((acc, lk) => ({ ...acc, [lk.id]: lk.active }), {});
+    return {
+      lines, starts, arrivals, switches, painters, tokens, linkActive,
+      nextLineId: lines.length + 1,
+      nextStartId: starts.length + 1,
+      nextArrivalId: arrivals.length + 1,
+      nextSwitchId: switches.length + 1,
+      nextPainterId: painters.length + 1,
+      nextTokenId: tokens.length + 1,
+    };
+  });
 
 export const toggleGrid = (set: Set) => () =>
   set((state) => ({ showGrid: !state.showGrid }));

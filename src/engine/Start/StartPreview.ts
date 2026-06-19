@@ -1,39 +1,35 @@
 import type { Point } from "engine/types";
 import { Start } from "./Start";
 
-export class StartPreview extends Start {
-  static drawPreviewWithBall(
-    ctx: CanvasRenderingContext2D,
-    point: Point,
-    ballColor: string | null,
-    countdown: number | null,
-  ): void {
-    const outerR = 18;
-    const innerR = 12;
+const OUTER_R = 18;
+const INNER_R = 12;
+const RING_R = (OUTER_R + INNER_R) / 2;
+const RING_W = OUTER_R - INNER_R;
 
+export class StartPreview extends Start {
+  static drawBefore(ctx: CanvasRenderingContext2D, point: Point): void {
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
-    ctx.arc(point.x, point.y, outerR, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, INNER_R, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  static drawAfter(ctx: CanvasRenderingContext2D, point: Point, countdown: number | null): void {
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = RING_W;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, RING_R, 0, Math.PI * 2);
+    ctx.stroke();
 
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(point.x, point.y, outerR, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, OUTER_R, 0, Math.PI * 2);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(point.x, point.y, innerR, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, INNER_R, 0, Math.PI * 2);
     ctx.stroke();
-
-    if (ballColor) {
-      ctx.fillStyle = ballColor;
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
 
     if (countdown !== null && countdown > 0) {
       ctx.fillStyle = "#000000";

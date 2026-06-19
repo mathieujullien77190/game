@@ -26,7 +26,8 @@
       "engine/*": ["./src/engine/*"],
       "hooks/*": ["./src/hooks/*"],
       "store/*": ["./src/store/*"],
-      "store": ["./src/store/index"]
+      "store": ["./src/store/index"],
+      "levels/*": ["./src/levels/*"]
     }
   },
   "include": ["src"]

@@ -29,7 +29,7 @@ export const PainterTab = () => {
   return (
     <S.Wrapper>
       <Button
-        color={mode === "addPainter" ? "#ef4444" : "#6b7280"}
+        color={mode === "addPainter" ? "#ef4444" : "#ec4899"}
         onClick={() => setMode(mode === "addPainter" ? "idle" : "addPainter")}
       >
         {mode === "addPainter" ? "Cancel" : "Add Painter"}

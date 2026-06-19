@@ -1,5 +1,4 @@
 import type { Point } from "engine/types";
-import { lerpColor } from "engine/colors";
 import { Painter } from "./Painter";
 
 const SPIN_ROTATIONS = 16;
@@ -18,19 +17,18 @@ const spinEase = (t: number): number => {
 };
 
 export class PainterPreview extends Painter {
-  drawPreview(ctx: CanvasRenderingContext2D, point: Point, animProgress?: number, fromColor?: string): void {
-    const R = 8;
-
+  drawBefore(ctx: CanvasRenderingContext2D, point: Point): void {
+    const R = 12;
     ctx.setLineDash([]);
-
-    const innerColor = animProgress !== undefined && fromColor !== undefined
-      ? lerpColor(fromColor, this.color, animProgress)
-      : this.color;
-
-    ctx.fillStyle = innerColor;
+    ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(point.x, point.y, R, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  drawAfter(ctx: CanvasRenderingContext2D, point: Point, animProgress?: number): void {
+    const R = 12;
+    ctx.setLineDash([]);
 
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 1;
@@ -42,11 +40,12 @@ export class PainterPreview extends Painter {
     if (animProgress !== undefined) {
       const angle = spinEase(animProgress) * SPIN_ROTATIONS * Math.PI * 2;
       const FADE = 0.08;
-      const alpha = animProgress < FADE
-        ? animProgress / FADE
-        : animProgress > 1 - FADE
-          ? (1 - animProgress) / FADE
-          : 1;
+      const alpha =
+        animProgress < FADE
+          ? animProgress / FADE
+          : animProgress > 1 - FADE
+            ? (1 - animProgress) / FADE
+            : 1;
       ctx.globalAlpha = alpha;
       ctx.strokeStyle = this.color;
       ctx.lineWidth = 3;
