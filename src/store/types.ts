@@ -1,86 +1,40 @@
-import type Line from "engine/Line";
-import type { Start } from "engine/Start";
-import type { Arrival } from "engine/Arrival";
-import type { Switch } from "engine/Switch";
-import type { Painter } from "engine/Painter";
-import type { Token } from "engine/Token";
-import type { Screen } from "engine/Screen";
-import type { Point, LineRef } from "engine/types";
-import type { LevelJSON } from "engine/Manager";
+import type { StoreApi } from "zustand"
+import { EditorManager } from "engine/Manager/EditorManager"
+import { PreviewManager } from "engine/Manager/PreviewManager"
+import { LineEditor } from "engine/Line/LineEditor"
+import { Token } from "engine/Token/Token"
+import { Start } from "engine/Start/Start"
+import type { Point } from "engine/types"
 
-export type EditorMode = "idle" | "addLine" | "addCurve" | "addStart" | "addArrival" | "addSwitch" | "addPainter";
+export type Mode = "select" | "addLine" | "addStart"
+export type ViewMode = "editor" | "preview"
 
-export type StoreState = {
-  lines: Line[];
-  nextLineId: number;
-  starts: Start[];
-  nextStartId: number;
-  arrivals: Arrival[];
-  nextArrivalId: number;
-  switches: Switch[];
-  nextSwitchId: number;
-  painters: Painter[];
-  nextPainterId: number;
-  tokens: Token[];
-  nextTokenId: number;
-  screens: Screen[];
-  nextScreenId: number;
-  activeScreenId: string | null;
-  mode: EditorMode;
-  pendingStart: Point | null;
-  pendingEnd: Point | null;
-  showGrid: boolean;
-  hoveredLineId: string | null;
-  hoveredLinkId: string | null;
-  hoveredStartId: string | null;
-  hoveredArrivalId: string | null;
-  hoveredSwitchId: string | null;
-  hoveredPainterId: string | null;
-  linkActive: Record<string, boolean>;
-};
+export interface StoreState {
+  editorManager: EditorManager
+  previewManager: PreviewManager
+  tokens: Record<string, Token>
+  start: Start | null
+  revision: number
+  mode: Mode
+  viewMode: ViewMode
+  pendingPoint: Point | null
+}
 
-export type StoreActions = {
-  setMode: (mode: EditorMode) => void;
-  setHoveredLineId: (id: string | null) => void;
-  setHoveredLinkId: (id: string | null) => void;
-  setHoveredStartId: (id: string | null) => void;
-  setHoveredArrivalId: (id: string | null) => void;
-  setPendingStart: (point: Point | null) => void;
-  setPendingEnd: (point: Point | null) => void;
-  addLine: (start: Point, end: Point, control?: Point) => void;
-  removeLine: (index: number) => void;
-  addStart: (position: LineRef) => void;
-  removeStart: (index: number) => void;
-  updateStartDelay: (index: number, delayMs: number) => void;
-  addArrival: (position: LineRef) => void;
-  removeArrival: (index: number) => void;
-  addSwitch: (position: LineRef) => void;
-  removeSwitch: (index: number) => void;
-  setSwitchInput: (index: number, input: LineRef) => void;
-  setHoveredSwitchId: (id: string | null) => void;
-  addPainter: (input: LineRef) => void;
-  removePainter: (index: number) => void;
-  setPainterColor: (index: number, color: string) => void;
-  setHoveredPainterId: (id: string | null) => void;
-  setSwitchActiveLink: (position: LineRef, activeLinkId: string) => void;
-  setLinkActives: (updates: Record<string, boolean>) => void;
-  setLineColor: (index: number, color: string) => void;
-  addToken: () => void;
-  removeToken: (index: number) => void;
-  setTokenColor: (index: number, color: string) => void;
-  setTokenSpeed: (index: number, speed: number) => void;
-  setTokenShape: (index: number, shape: "circle" | "square" | "triangle") => void;
-  addScreen: () => void;
-  removeScreen: (index: number) => void;
-  setActiveScreenId: (id: string | null) => void;
-  toggleGrid: () => void;
-  toggleLinkActive: (linkId: string) => void;
-  updateLineAnchor: (index: number, which: "start" | "end", point: Point) => void;
-  updateLineControl: (index: number, point: Point) => void;
-  clearLines: () => void;
-  importLevel: (json: LevelJSON) => void;
-};
+export interface StoreActions {
+  addLine: (line: LineEditor) => void
+  removeLine: (id: string) => void
+  updateLineEndpoint: (id: string, endpoint: "start" | "end", point: Point) => void
+  toggleLinkActivated: (linkId: string) => void
+  addToken: (token: Token) => void
+  removeToken: (id: string) => void
+  updateToken: (id: string, patch: { color?: string; speed?: number; type?: string }) => void
+  setStart: (start: Start | null) => void
+  updateStartDelay: (delay: number) => void
+  setMode: (mode: Mode) => void
+  setViewMode: (viewMode: ViewMode) => void
+  setPendingPoint: (point: Point | null) => void
+}
 
-export type Store = StoreState & StoreActions;
+export type Store = StoreState & StoreActions
 
-export type Set = (fn: (state: Store) => Partial<Store>) => void;
+export type Set = StoreApi<Store>["setState"]

@@ -1,47 +1,26 @@
-import { useEffect, useRef } from "react";
-import type { PreviewManager } from "engine/Manager";
-import { FPS } from "engine/constants";
+import { RefObject, useEffect } from "react"
+import { PreviewManager } from "engine/Manager/PreviewManager"
 
-export const useCanvasDrawPreview = (manager: PreviewManager | null, isPreview: boolean) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
+export const useCanvasDrawPreview = (
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  manager: PreviewManager | null
+) => {
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const observer = new ResizeObserver(() => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    });
-    observer.observe(canvas);
-    return () => observer.disconnect();
-  }, []);
+    if (!manager) return
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-  useEffect(() => {
-    if (!isPreview || !manager) {
-      manager?.resetSim();
-      return;
+    let rafId: number
+    const tick = (timestamp: number) => {
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return
+      const t0 = performance.now()
+      manager.tickSim(timestamp)
+      manager.drawAllPreview(ctx)
+      manager.data.frameMs = performance.now() - t0
+      rafId = requestAnimationFrame(tick)
     }
-    manager.initSim();
-    const id = setInterval(() => manager.tickSim(), 1000 / FPS);
-    return () => clearInterval(id);
-  }, [isPreview, manager]);
-
-  useEffect(() => {
-    if (!isPreview || !manager) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    let rafId: number;
-    const draw = () => {
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        manager.drawAllPreview(ctx);
-      }
-      rafId = requestAnimationFrame(draw);
-    };
-    rafId = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(rafId);
-  }, [isPreview, manager]);
-
-  return canvasRef;
-};
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [canvasRef, manager])
+}

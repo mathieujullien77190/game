@@ -1,1 +1,1 @@
-export { ToolsPanel as default } from "./ToolsPanel";
+export { ToolsPanel as default } from "./ToolsPanel"

@@ -40,20 +40,4 @@ components/
 - `createGlobalStyle` dans `src/GlobalStyle.tsx`, monté dans `App.tsx`
 - Hint utilisateur contextuel en overlay sur le canvas, pas dans le panneau d'outils
 
-## Pattern : ajouter une entité (ex: Painter)
 
-1. **Tab** `components/tabs/EntityTab/` — bouton Add/Cancel + liste avec `ItemRow` + `onMouseEnter/Leave` pour hover
-2. **ToolsPanel** — ajouter `{ id: "entity", label: "Entity" }` dans `TABS` + import + render conditionnel
-3. **ToolsPanel/types.ts** — ajouter `"entity"` au type `Tab`
-4. **LevelEditor** — destructurer `entities`, `addEntity`, `hoveredEntityId` du store ; ajouter dans `levelJSON` useMemo ; ajouter bloc `else if (mode === "addEntity")` dans `handleMouseUp` ; passer `hoveredEntityId` à `useCanvasDraw`
-5. **useCanvasDraw** — ajouter param `hoveredEntityId`, passer à `manager.drawAll`
-
-## LevelEditor : flow entier
-
-```
-store (painters[]) → levelJSON useMemo → EditorManager → useCanvasDraw → canvas
-                                       → PreviewManager (useState) → useCanvasDrawPreview
-```
-
-`previewManager` en `useState` (pas `useRef`) — doit déclencher re-render du hook.
-`window.previewManager = previewManager` exposé pour debug console.

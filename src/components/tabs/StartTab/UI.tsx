@@ -1,45 +1,69 @@
-import styled from "styled-components";
+import styled from "styled-components"
 
-export const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  overflow-y: auto;
-`;
-
-export const StartList = styled.div`
+export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
+`
 
-export const StartInfo = styled.div`
+export const AddButton = styled.button<{ $active: boolean }>`
+  width: 100%;
+  padding: 8px 12px;
+  background: ${({ $active }) => ($active ? "#1a73e8" : "#f0f0f0")};
+  color: ${({ $active }) => ($active ? "#fff" : "#333")};
+  border: 1px solid ${({ $active }) => ($active ? "#1a73e8" : "#ddd")};
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? "#1557b0" : "#e8e8e8")};
+  }
+`
+
+export const StartCard = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
-`;
+  gap: 6px;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #333;
+  border-radius: 6px;
+`
 
 export const StartHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-`;
+  justify-content: space-between;
+`
 
-export const StartId = styled.span`
-  font-size: 13px;
+export const StartInfo = styled.span`
   font-family: monospace;
-  color: #374151;
-`;
+  font-size: 10px;
+  font-weight: bold;
+  color: #333;
+`
 
-export const Hr = styled.hr`
+export const RemoveButton = styled.button`
+  background: transparent;
   border: none;
-  border-top: 1px solid #e5e7eb;
-  margin: 0;
-`;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
 
-export const Empty = styled.span`
-  font-size: 11px;
-  color: #d1d5db;
-  font-family: monospace;
-`;
+  &:hover {
+    color: #e53935;
+  }
+`
+
+export const Divider = styled.hr`
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 0;
+`
+

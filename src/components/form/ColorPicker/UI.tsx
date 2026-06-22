@@ -1,23 +1,24 @@
-import styled from "styled-components";
+import styled from "styled-components"
 
 export const Palette = styled.div`
   display: flex;
-  gap: 4px;
   flex-wrap: wrap;
-`;
+  gap: 4px;
+`
 
 export const Swatch = styled.button<{ $color: string; $selected: boolean }>`
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: ${({ $color }) => $color};
-  border: 2px solid ${({ $selected }) => ($selected ? "#1e293b" : "transparent")};
-  outline: ${({ $selected }) => ($selected ? "2px solid #ffffff" : "none")};
-  outline-offset: -3px;
+  border: 2px solid ${({ $selected }) => ($selected ? "#fff" : "transparent")};
+  outline: 2px solid ${({ $selected, $color }) => ($selected ? $color : "transparent")};
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
   transition: transform 0.1s;
 
-  &:hover { transform: scale(1.2); }
-`;
+  &:hover {
+    transform: scale(1.2);
+  }
+`

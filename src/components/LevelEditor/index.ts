@@ -1,1 +1,1 @@
-export { LevelEditor as default } from "./LevelEditor";
+export { LevelEditor as default } from "./LevelEditor"

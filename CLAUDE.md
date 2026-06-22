@@ -22,20 +22,3 @@ src/
   components/   → React UI, LevelEditor, ToolsPanel, tabs/
 ```
 
-## Entités du niveau
-
-Chaque entité suit le pattern `Base → Preview → Editor` (voir engine/CLAUDE.md).
-
-| Entité   | Champ clé         | Rôle                                          |
-|----------|-------------------|-----------------------------------------------|
-| Line     | start, end, control | segment/courbe navigable par les balles      |
-| Link     | line1, line2, active | connexion entre 2 anchors de lignes         |
-| Start    | position: LineRef | point de départ des balles avec délai        |
-| Arrival  | position: LineRef | destination cible                            |
-| Switch   | input: LineRef    | aiguillage manuel — cycle les links actifs   |
-| Painter  | input, color      | repeint une balle et la stoppe 500ms         |
-| Ball     | color, speed      | balle lancée par chaque Start                |
-
-## Anchor key format
-
-`"lineId::anchor"` (ex: `"line1::end"`) — clé utilisée dans tous les Record de routing, arrivalPaths, painterMap.

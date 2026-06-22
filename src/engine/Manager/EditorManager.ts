@@ -1,120 +1,158 @@
-import Link from "engine/Link";
-import type { LineRef, Point } from "engine/types";
-import { LineEditor } from "engine/Line";
-import { Start } from "engine/Start";
-import { StartEditor } from "engine/Start";
-import { Arrival } from "engine/Arrival";
-import { ArrivalEditor } from "engine/Arrival";
-import { Token } from "engine/Token";
-import { SwitchEditor } from "engine/Switch";
-import type { SwitchAnim } from "engine/Switch";
-import { PainterEditor } from "engine/Painter";
-import { buildRouting, cycleSwitch as cycleSwitchUtil } from "./routing";
-import type { LevelJSON, AnchorTarget } from "./routing";
+import type { Point } from "../types"
+import { GRID_SIZE } from "../constants"
+import { LineEditor } from "../Line/LineEditor"
+import { Link } from "../Link/Link"
+import type { Start } from "../Start/Start"
+import { Manager } from "./Manager"
 
-export class EditorManager {
-  lines: Record<string, LineEditor>;
-  switches: Record<string, SwitchEditor>;
-  painters: Record<string, PainterEditor>;
-  starts: Record<string, Start>;
-  arrivals: Record<string, Arrival>;
-  tokens: Token[];
-  links: Record<string, Link>;
-  activePaths: Record<string, AnchorTarget>;
-  allPaths: Record<string, AnchorTarget[]>;
-  arrivalPaths: Record<string, string>;
-  private initialSwitchIndices: Record<string, number>;
-  private switchAnims: Record<string, SwitchAnim> = {};
+const pointsEqual = (a: Point, b: Point) => a.x === b.x && a.y === b.y
 
-  constructor(json: LevelJSON) {
-    this.lines = {};
-    for (const d of json.lines) {
-      this.lines[d.id] = new LineEditor(d.id, d.start, d.end, d.control, d.color);
+export class EditorManager extends Manager<LineEditor> {
+  data = {
+    lines: {} as Record<string, LineEditor>,
+    links: {} as Record<string, Link>,
+  }
+
+  addLine = (line: LineEditor) => {
+    for (const existing of Object.values(this.data.lines)) {
+      for (const ep1 of ["start", "end"] as const) {
+        for (const ep2 of ["start", "end"] as const) {
+          if (pointsEqual(existing[ep1], line[ep2])) {
+            const link = new Link(
+              { lineId: existing.id, endpoint: ep1 },
+              { lineId: line.id, endpoint: ep2 }
+            )
+            this.data.links[link.id] = link
+          }
+        }
+      }
     }
+    this.data.lines[line.id] = line
+  }
 
-    const routing = buildRouting(json);
-    this.links = routing.links;
-    this.activePaths = routing.activePaths;
-    this.allPaths = routing.allPaths;
-    this.arrivalPaths = routing.arrivalPaths;
-    this.initialSwitchIndices = routing.initialSwitchIndices;
-    this.switches = routing.switches;
-    this.painters = routing.painters;
-
-    this.starts = {};
-    for (const d of json.starts ?? []) {
-      this.starts[d.id] = new Start(d.id, d.position, d.delay ?? 0);
-    }
-
-    this.arrivals = {};
-    for (const d of json.arrivals ?? []) {
-      this.arrivals[d.id] = new Arrival(d.id, d.position);
-    }
-
-    this.tokens = [];
-    for (const d of json.tokens ?? []) {
-      this.tokens.push(new Token(d.id, d.color, d.speed, d.shape ?? "circle"));
+  removeLine = (id: string) => {
+    delete this.data.lines[id]
+    for (const linkId of Object.keys(this.data.links)) {
+      const link = this.data.links[linkId]
+      if (link.line1.lineId === id || link.line2.lineId === id) {
+        delete this.data.links[linkId]
+      }
     }
   }
 
-  cycleSwitch(switchId: string): void {
-    cycleSwitchUtil(switchId, this.switches, this.activePaths, this.allPaths, this.switchAnims, this.lines);
+  refreshLinksForEndpoint = (lineId: string, endpoint: "start" | "end") => {
+    for (const linkId of Object.keys(this.data.links)) {
+      const link = this.data.links[linkId]
+      if (
+        (link.line1.lineId === lineId && link.line1.endpoint === endpoint) ||
+        (link.line2.lineId === lineId && link.line2.endpoint === endpoint)
+      ) {
+        delete this.data.links[linkId]
+      }
+    }
+    const movedLine = this.data.lines[lineId]
+    if (!movedLine) return
+    const movedPoint = movedLine[endpoint]
+    for (const other of Object.values(this.data.lines)) {
+      if (other.id === lineId) continue
+      for (const ep of ["start", "end"] as const) {
+        if (pointsEqual(movedPoint, other[ep])) {
+          const link = new Link(
+            { lineId, endpoint },
+            { lineId: other.id, endpoint: ep }
+          )
+          this.data.links[link.id] = link
+        }
+      }
+    }
   }
 
-  private getAnchorPoint(ref: LineRef): Point | null {
-    const line = this.lines[ref.id];
-    if (!line) return null;
-    return ref.anchor === "start" ? line.start : line.end;
+  drawGrid = (ctx: CanvasRenderingContext2D) => {
+    const { width, height } = ctx.canvas
+    ctx.strokeStyle = "#e8e8e8"
+    ctx.lineWidth = 1
+    ctx.setLineDash([])
+    for (let x = 0; x <= width; x += GRID_SIZE) {
+      ctx.beginPath()
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, height)
+      ctx.stroke()
+    }
+    for (let y = 0; y <= height; y += GRID_SIZE) {
+      ctx.beginPath()
+      ctx.moveTo(0, y)
+      ctx.lineTo(width, y)
+      ctx.stroke()
+    }
   }
 
-  drawLine(ctx: CanvasRenderingContext2D, id: string, highlighted = false): void {
-    const line = this.lines[id];
-    if (!line) return;
-    line.drawPoints(ctx, highlighted);
-    line.drawAnchors(ctx);
-    line.drawCurveControl(ctx);
-  }
-
-  drawAll(
+  drawAll = (
     ctx: CanvasRenderingContext2D,
-    highlightedId?: string,
-    hoveredStartId?: string,
-    hoveredArrivalId?: string,
-    hoveredLinkId?: string,
-    hoveredSwitchId?: string,
-    hoveredPainterId?: string,
-  ): void {
-    const hoveredLink = hoveredLinkId ? this.links[hoveredLinkId] : null;
-    const isLineHighlighted = (id: string) =>
-      id === highlightedId ||
-      (hoveredLink != null && (hoveredLink.line1.id === id || hoveredLink.line2.id === id));
+    hoveredLineId: string | null = null,
+    snapPoint: Point | null = null,
+    pendingPoint: Point | null = null,
+    showIds = false,
+    start: Start | null = null,
+    previewStartPt: Point | null = null
+  ) => {
+    const { width, height } = ctx.canvas
+    ctx.clearRect(0, 0, width, height)
 
-    for (const id of Object.keys(this.painters)) {
-      const p = this.painters[id];
-      const point = this.getAnchorPoint(p.input);
-      if (!point) continue;
-      p.drawEditor(ctx, point, id === hoveredPainterId);
+    this.drawGrid(ctx)
+
+    for (const line of Object.values(this.data.lines)) {
+      line.draw(ctx, line.id === hoveredLineId, showIds)
     }
 
-    for (const id of Object.keys(this.switches)) {
-      const sw = this.switches[id];
-      const point = this.getAnchorPoint(sw.input);
-      if (!point) continue;
-      const key = `${sw.input.id}::${sw.input.anchor}`;
-      const activePath = this.activePaths[key] ?? null;
-      const targetLine = activePath ? (this.lines[activePath.id] ?? null) : null;
-      sw.drawEditor(ctx, point, targetLine, id === hoveredSwitchId);
+    if (start) {
+      const line = this.data.lines[start.lineId]
+      if (line) {
+        const pt = start.endpoint === "start" ? line.start : line.end
+        start.drawEditor(ctx, pt)
+      }
     }
-    for (const id of Object.keys(this.arrivals)) {
-      const point = this.getAnchorPoint(this.arrivals[id].position);
-      if (point) ArrivalEditor.drawEditor(ctx, point, id === hoveredArrivalId);
+
+    if (previewStartPt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#000"
+      ctx.beginPath()
+      ctx.arc(previewStartPt.x, previewStartPt.y, 14, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      ctx.moveTo(previewStartPt.x - 4, previewStartPt.y - 6)
+      ctx.lineTo(previewStartPt.x + 8, previewStartPt.y)
+      ctx.lineTo(previewStartPt.x - 4, previewStartPt.y + 6)
+      ctx.closePath()
+      ctx.fill()
+      ctx.globalAlpha = 1
     }
-    for (const id of Object.keys(this.starts)) {
-      const point = this.getAnchorPoint(this.starts[id].position);
-      if (point) StartEditor.drawEditor(ctx, point, id === hoveredStartId);
+
+    if (pendingPoint && snapPoint) {
+      ctx.strokeStyle = "#999"
+      ctx.lineWidth = 2
+      ctx.lineCap = "round"
+      ctx.setLineDash([6, 5])
+      ctx.beginPath()
+      ctx.moveTo(pendingPoint.x, pendingPoint.y)
+      ctx.lineTo(snapPoint.x, snapPoint.y)
+      ctx.stroke()
+      ctx.setLineDash([])
     }
-    for (const id of Object.keys(this.lines)) {
-      this.drawLine(ctx, id, isLineHighlighted(id));
+
+    if (pendingPoint) {
+      ctx.fillStyle = "#f9ab00"
+      ctx.beginPath()
+      ctx.arc(pendingPoint.x, pendingPoint.y, 5, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    if (snapPoint) {
+      const isSecond = pendingPoint !== null
+      ctx.fillStyle = isSecond ? "#1a73e8" : "#f9ab00"
+      ctx.beginPath()
+      ctx.arc(snapPoint.x, snapPoint.y, isSecond ? 7 : 5, 0, Math.PI * 2)
+      ctx.fill()
     }
   }
 }

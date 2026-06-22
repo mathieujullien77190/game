@@ -1,145 +1,137 @@
-import styled from "styled-components";
+import styled from "styled-components"
 
-export const Layout = styled.div`
+export const Container = styled.div`
   display: flex;
-  height: 100%;
-  background: #f0f2f5;
-  user-select: none;
-`;
+  flex-direction: row;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #f0f0f0;
+`
 
-export const CanvasPanel = styled.div<{ $width: number | null }>`
+export const LeftPanel = styled.div<{ $width: number }>`
+  width: ${({ $width }) => $width}px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #e8e8e8;
+  overflow: hidden;
+`
+
+export const TopBar = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+`
+
+export const ViewButton = styled.button<{ $active: boolean }>`
+  padding: 5px 14px;
+  background: ${({ $active }) => ($active ? "#333" : "transparent")};
+  color: ${({ $active }) => ($active ? "#fff" : "#666")};
+  border: 1px solid ${({ $active }) => ($active ? "#333" : "#ccc")};
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? "#333" : "#e0e0e0")};
+  }
+`
+
+export const CanvasArea = styled.div`
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
-  width: ${({ $width }) => ($width !== null ? `${$width}px` : "auto")};
-  min-width: 200px;
-  padding: 24px;
   overflow: hidden;
-`;
+`
 
-export const ResizeDivider = styled.div`
-  width: 5px;
-  flex-shrink: 0;
-  background: #d0d4dc;
-  cursor: col-resize;
-  transition: background 0.15s;
-
-  &:hover { background: #2563eb; }
-  &:active { background: #2563eb; }
-`;
-
-export const CanvasWrapper = styled.div`
+export const CanvasOuter = styled.div`
   position: relative;
-  height: 70vh;
-  width: calc(70vh * 9 / 16);
-`;
+`
 
-const BaseCanvas = styled.canvas<{ $visible: boolean }>`
-  display: block;
+export const IdsButton = styled.button<{ $active: boolean }>`
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: #ffffff;
-  border: 2px solid #c0c6d4;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
-  pointer-events: ${({ $visible }) => ($visible ? "auto" : "none")};
-  z-index: ${({ $visible }) => ($visible ? 1 : 0)};
-  transition: opacity 0.15s;
-`;
-
-export const GameCanvas = styled(BaseCanvas)<{ $addingLine: boolean }>`
-  cursor: ${({ $addingLine }) => ($addingLine ? "crosshair" : "default")};
-`;
-
-export const PreviewCanvas = styled(BaseCanvas)``;
-
-export const HintOverlay = styled.div`
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 14px;
-  background: rgba(37, 99, 235, 0.88);
-  color: #ffffff;
-  border-radius: 4px;
-  font-size: 12px;
-  font-family: monospace;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 2;
-`;
-
-export const ScreenBreadcrumb = styled.div`
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  bottom: 8px;
+  right: 8px;
   padding: 4px 10px;
-  background: rgba(99, 102, 241, 0.9);
-  color: #ffffff;
+  background: ${({ $active }) => ($active ? "#333" : "rgba(255,255,255,0.85)")};
+  color: ${({ $active }) => ($active ? "#fff" : "#666")};
+  border: 1px solid ${({ $active }) => ($active ? "#333" : "#ccc")};
   border-radius: 4px;
-  font-size: 11px;
-  font-family: monospace;
-  z-index: 2;
-`;
-
-export const ScreenBreadcrumbExit = styled.button`
-  background: none;
-  border: none;
-  color: #ffffff;
   cursor: pointer;
-  font-size: 13px;
-  padding: 0;
-  line-height: 1;
-  opacity: 0.8;
-  &:hover { opacity: 1; }
-`;
-
-export const OverlayButtons = styled.div`
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  display: flex;
-  gap: 6px;
-  z-index: 2;
-`;
-
-const OverlayButton = styled.button`
-  padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #d0d4dc;
-  border-radius: 4px;
-  font-size: 11px;
   font-family: monospace;
-  color: #374151;
-  cursor: pointer;
-
-  &:hover { background: #f0f2f5; }
-`;
-
-export const GridButton = styled(OverlayButton)``;
-
-export const RestartButton = styled(OverlayButton)`
-  background: rgba(239, 68, 68, 0.12);
-  border-color: #ef4444;
-  color: #ef4444;
-  &:hover { background: rgba(239, 68, 68, 0.22); }
-`;
-
-export const ViewToggle = styled(OverlayButton)<{ $preview: boolean }>`
-  background: ${({ $preview }) =>
-    $preview ? "rgba(17, 24, 39, 0.88)" : "rgba(255, 255, 255, 0.92)"};
-  color: ${({ $preview }) => ($preview ? "#ffffff" : "#374151")};
-  border-color: ${({ $preview }) => ($preview ? "#111827" : "#d0d4dc")};
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  z-index: 10;
 
   &:hover {
-    background: ${({ $preview }) =>
-      $preview ? "rgba(17, 24, 39, 0.72)" : "#f0f2f5"};
+    background: ${({ $active }) => ($active ? "#444" : "#e0e0e0")};
   }
-`;
+`
+
+export const CanvasWrapper = styled.div<{ $w: number; $h: number }>`
+  position: relative;
+  width: ${({ $w }) => $w}px;
+  height: ${({ $h }) => $h}px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+`
+
+export const StyledCanvas = styled.canvas<{ $scale: number; $cursor: string; $visible: boolean }>`
+  display: ${({ $visible }) => ($visible ? "block" : "none")};
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(${({ $scale }) => $scale});
+  transform-origin: top left;
+  background: #fff;
+  cursor: ${({ $cursor }) => $cursor};
+`
+
+export const Divider = styled.div`
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: #d0d0d0;
+  user-select: none;
+
+  &:hover {
+    background: #aaa;
+  }
+`
+
+export const RightArea = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  position: relative;
+`
+
+export const RightPanel = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+  overflow: hidden;
+`
+
+export const Overlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: all;
+  z-index: 100;
+`

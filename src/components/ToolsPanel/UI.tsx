@@ -1,37 +1,38 @@
-import styled from "styled-components";
+import styled from "styled-components"
 
-export const Wrapper = styled.div`
-  flex: 1;
+export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  background: #f8f9fb;
-`;
+  height: 100%;
+`
 
 export const TabBar = styled.div`
   display: flex;
-  border-bottom: 1px solid #d0d4dc;
-  background: #ffffff;
-`;
+  flex-direction: row;
+  flex-shrink: 0;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+`
 
-export const Tab = styled.button<{ $active: boolean }>`
-  padding: 12px 20px;
-  background: none;
+export const TabButton = styled.button<{ $active: boolean }>`
+  padding: 9px 16px;
+  background: transparent;
+  color: ${({ $active }) => ($active ? "#1a73e8" : "#888")};
   border: none;
-  border-bottom: 2px solid ${({ $active }) => ($active ? "#2563eb" : "transparent")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#6b7280")};
-  font-size: 14px;
-  font-weight: 500;
-  font-family: monospace;
+  border-bottom: 2px solid ${({ $active }) => ($active ? "#1a73e8" : "transparent")};
   cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 
   &:hover {
-    color: #2563eb;
+    color: ${({ $active }) => ($active ? "#1a73e8" : "#444")};
   }
-`;
+`
 
-export const Content = styled.div`
+export const TabContent = styled.div`
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-`;
+  overflow-y: auto;
+  padding: 12px;
+`

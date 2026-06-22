@@ -1,412 +1,256 @@
-import { useState, useRef, useMemo, useEffect } from "react";
-import { useShallow } from "zustand/react/shallow";
-import { useStore } from "store/useStore";
-import { useCanvasDraw } from "hooks/useCanvasDraw";
-import { useCanvasDrawPreview } from "hooks/useCanvasDrawPreview";
-import { snapToGrid } from "engine/grid";
-import { EditorManager, PreviewManager } from "engine/Manager";
-import { computeLinks } from "engine/Link";
-import type { Point } from "engine/types";
-import ToolsPanel from "components/ToolsPanel";
-import type { Drag } from "./types";
-import { dist, getHint } from "./helpers";
-import * as S from "./UI";
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useShallow } from "zustand/react/shallow"
+import { LineEditor } from "engine/Line/LineEditor"
+import { Start } from "engine/Start/Start"
+import { GRID_SIZE } from "engine/constants"
+import type { Point } from "engine/types"
+import { useStore } from "store"
+import { useCanvasDraw } from "hooks/useCanvasDraw"
+import { useCanvasDrawPreview } from "hooks/useCanvasDrawPreview"
+import * as S from "./UI"
+import ToolsPanel from "components/ToolsPanel"
+
+const CANVAS_W = 405
+const CANVAS_H = 720
+const PADDING = 24
+const HIT_RADIUS = 10
+
+const snapToGrid = (p: Point): Point => ({
+  x: Math.round(p.x / GRID_SIZE) * GRID_SIZE,
+  y: Math.round(p.y / GRID_SIZE) * GRID_SIZE,
+})
+
+const findEndpointAt = (lines: LineEditor[], point: Point) => {
+  for (const line of lines) {
+    const dsx = point.x - line.start.x
+    const dsy = point.y - line.start.y
+    if (Math.sqrt(dsx * dsx + dsy * dsy) <= HIT_RADIUS)
+      return { lineId: line.id, endpoint: "start" as const }
+    const dex = point.x - line.end.x
+    const dey = point.y - line.end.y
+    if (Math.sqrt(dex * dex + dey * dey) <= HIT_RADIUS)
+      return { lineId: line.id, endpoint: "end" as const }
+  }
+  return null
+}
 
 export const LevelEditor = () => {
+  const [leftWidth, setLeftWidth] = useState(() => Math.round(window.innerWidth * 0.3))
+  const [scale, setScale] = useState(1)
+  const [snapPoint, setSnapPoint] = useState<Point | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [hoverNearEndpoint, setHoverNearEndpoint] = useState(false)
+  const [showIds, setShowIds] = useState(false)
+  const [addStartSnap, setAddStartSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
+
+  const leftRef = useRef<HTMLDivElement>(null)
+  const canvasAreaRef = useRef<HTMLDivElement>(null)
+  const editorCanvasRef = useRef<HTMLCanvasElement>(null)
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
+  const dragging = useRef(false)
+  const draggingEndpoint = useRef<{ lineId: string; endpoint: "start" | "end" } | null>(null)
+
   const {
-    lines,
-    starts,
-    arrivals,
-    switches,
-    painters,
-    tokens,
-    activeScreenId,
-    mode,
-    pendingStart,
-    pendingEnd,
-    showGrid,
-    hoveredLineId,
-    hoveredStartId,
-    hoveredArrivalId,
-    hoveredLinkId,
-    hoveredSwitchId,
-    hoveredPainterId,
-    linkActive,
-    addLine,
-    addStart,
-    addArrival,
-    addSwitch,
-    addPainter,
-    setPendingStart,
-    setPendingEnd,
-    setMode,
-    setActiveScreenId,
-    toggleGrid,
-    updateLineAnchor,
-    updateLineControl,
+    editorManager, previewManager, revision,
+    mode, viewMode, pendingPoint, start,
+    addLine, setPendingPoint, setMode, setViewMode, updateLineEndpoint, setStart,
   } = useStore(
     useShallow((s) => ({
-      lines: s.lines,
-      starts: s.starts,
-      arrivals: s.arrivals,
-      switches: s.switches,
-      painters: s.painters,
-      tokens: s.tokens,
-      activeScreenId: s.activeScreenId,
+      editorManager: s.editorManager,
+      previewManager: s.previewManager,
+      revision: s.revision,
       mode: s.mode,
-      pendingStart: s.pendingStart,
-      pendingEnd: s.pendingEnd,
-      showGrid: s.showGrid,
-      hoveredLineId: s.hoveredLineId,
-      hoveredStartId: s.hoveredStartId,
-      hoveredArrivalId: s.hoveredArrivalId,
-      hoveredLinkId: s.hoveredLinkId,
-      hoveredSwitchId: s.hoveredSwitchId,
-      hoveredPainterId: s.hoveredPainterId,
-      linkActive: s.linkActive,
-      setLinkActives: s.setLinkActives,
+      viewMode: s.viewMode,
+      pendingPoint: s.pendingPoint,
+      start: s.start,
       addLine: s.addLine,
-      addStart: s.addStart,
-      addArrival: s.addArrival,
-      addSwitch: s.addSwitch,
-      addPainter: s.addPainter,
-      setPendingStart: s.setPendingStart,
-      setPendingEnd: s.setPendingEnd,
+      setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
-      setActiveScreenId: s.setActiveScreenId,
-      toggleGrid: s.toggleGrid,
-      updateLineAnchor: s.updateLineAnchor,
-      updateLineControl: s.updateLineControl,
-    })),
-  );
+      setViewMode: s.setViewMode,
+      updateLineEndpoint: s.updateLineEndpoint,
+      setStart: s.setStart,
+    }))
+  )
 
-  const visibleLines = useMemo(
-    () => activeScreenId !== null
-      ? lines.filter((l) => l.screenId === activeScreenId)
-      : lines.filter((l) => !l.screenId),
-    [lines, activeScreenId],
-  );
-  const visibleStarts = useMemo(
-    () => activeScreenId !== null
-      ? starts.filter((s) => s.screenId === activeScreenId)
-      : starts.filter((s) => !s.screenId),
-    [starts, activeScreenId],
-  );
-  const visibleArrivals = useMemo(
-    () => activeScreenId !== null
-      ? arrivals.filter((a) => a.screenId === activeScreenId)
-      : arrivals.filter((a) => !a.screenId),
-    [arrivals, activeScreenId],
-  );
-  const visibleSwitches = useMemo(
-    () => activeScreenId !== null
-      ? switches.filter((sw) => sw.screenId === activeScreenId)
-      : switches.filter((sw) => !sw.screenId),
-    [switches, activeScreenId],
-  );
-  const visiblePainters = useMemo(
-    () => activeScreenId !== null
-      ? painters.filter((p) => p.screenId === activeScreenId)
-      : painters.filter((p) => !p.screenId),
-    [painters, activeScreenId],
-  );
-  const visibleTokens = tokens;
-
-  const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
-  const [leftWidth, setLeftWidth] = useState<number | null>(null);
-  const [isPreview, setIsPreview] = useState(false);
-  const [previewManager, setPreviewManager] = useState<PreviewManager | null>(null);
-  const dragRef = useRef<Drag | null>(null);
-  const leftPanelRef = useRef<HTMLDivElement>(null);
-  const layoutRef = useRef<HTMLDivElement>(null);
-
-  const levelJSON = useMemo(
-    () => ({
-      lines: visibleLines.map((l) => ({
-        id: l.id,
-        type: l.type,
-        start: l.start,
-        end: l.end,
-        control: l.control,
-        color: l.color,
-      })),
-      links: computeLinks(visibleLines, linkActive).map((lk) => ({
-        id: lk.id,
-        active: lk.active,
-        line1: lk.line1,
-        line2: lk.line2,
-      })),
-      starts: visibleStarts.map((s) => ({ id: s.id, position: s.position, delay: s.delay })),
-      arrivals: visibleArrivals.map((a) => ({ id: a.id, position: a.position })),
-      switches: visibleSwitches.map((sw) => ({ id: sw.id, input: sw.input })),
-      painters: visiblePainters.map((p) => ({ id: p.id, input: p.input, color: p.color })),
-      tokens: visibleTokens.map((t) => ({ id: t.id, color: t.color, speed: t.speed, shape: t.shape })),
-    }),
-    [visibleLines, linkActive, visibleStarts, visibleArrivals, visibleSwitches, visiblePainters, visibleTokens],
-  );
-
-  const editorManager = useMemo(() => new EditorManager(levelJSON), [levelJSON]);
+  useCanvasDraw(
+    editorCanvasRef, editorManager, revision,
+    null,
+    mode === "addLine" ? snapPoint : null,
+    pendingPoint,
+    showIds,
+    start,
+    mode === "addStart" ? (addStartSnap?.pt ?? null) : null
+  )
+  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null)
 
   useEffect(() => {
-    if (isPreview) {
-      setPreviewManager(new PreviewManager(levelJSON));
-    } else {
-      setPreviewManager(null);
+    const el = canvasAreaRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      const s = Math.min(
+        (width - PADDING * 2) / CANVAS_W,
+        (height - PADDING * 2) / CANVAS_H
+      )
+      setScale(Math.max(0.1, s))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const onDividerMouseDown = useCallback(() => {
+    dragging.current = true
+    const onMove = (e: MouseEvent) => {
+      if (!dragging.current) return
+      setLeftWidth(Math.max(120, Math.min(e.clientX, window.innerWidth - 120)))
     }
-  }, [isPreview]);
-
-  useEffect(() => {
-    (window as any).previewManager = previewManager;
-    console.log("previewManager", previewManager);
-  }, [previewManager]);
-
-  const editorCanvasRef = useCanvasDraw(
-    editorManager,
-    pendingStart,
-    pendingEnd,
-    hoveredPoint,
-    showGrid,
-    hoveredLineId,
-    hoveredStartId,
-    hoveredArrivalId,
-    hoveredLinkId,
-    hoveredSwitchId,
-    hoveredPainterId,
-  );
-  const previewCanvasRef = useCanvasDrawPreview(previewManager, isPreview);
-
-  const getPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point | null => {
-    const canvas = editorCanvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
-
-  const handleDividerMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth =
-      leftPanelRef.current?.getBoundingClientRect().width ?? 400;
-
-    const onMouseMove = (ev: MouseEvent) => {
-      const total = layoutRef.current?.getBoundingClientRect().width ?? 800;
-      setLeftWidth(
-        Math.max(200, Math.min(total - 200, startWidth + ev.clientX - startX)),
-      );
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (mode !== "idle") return;
-    const point = getPoint(e);
-    if (!point) return;
-    for (let i = 0; i < visibleLines.length; i++) {
-      const vl = visibleLines[i];
-      if (dist(point, vl.start) < 10) {
-        dragRef.current = { lineIndex: lines.indexOf(vl), which: "start" };
-        return;
-      }
-      if (dist(point, vl.end) < 10) {
-        dragRef.current = { lineIndex: lines.indexOf(vl), which: "end" };
-        return;
-      }
-      const ctrl = vl.control;
-      if (ctrl && dist(point, ctrl) < 10) {
-        dragRef.current = { lineIndex: lines.indexOf(vl), which: "control" };
-        return;
-      }
+    const onUp = () => {
+      dragging.current = false
+      window.removeEventListener("mousemove", onMove)
+      window.removeEventListener("mouseup", onUp)
     }
-  };
+    window.addEventListener("mousemove", onMove)
+    window.addEventListener("mouseup", onUp)
+  }, [])
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const point = getPoint(e);
-    if (!point) return;
-    const snapped = snapToGrid(point);
-    setHoveredPoint(snapped);
-    if (dragRef.current) {
-      const { lineIndex, which } = dragRef.current;
-      if (which === "control") {
-        updateLineControl(lineIndex, snapped);
-      } else {
-        updateLineAnchor(lineIndex, which, snapped);
-      }
+  const getCanvasPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    return {
+      x: (e.clientX - rect.left) * (CANVAS_W / rect.width),
+      y: (e.clientY - rect.top) * (CANVAS_H / rect.height),
     }
-  };
+  }
 
-  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (dragRef.current) {
-      dragRef.current = null;
-      return;
+  const onCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (mode !== "select") return
+    const point = getCanvasPoint(e)
+    const hit = findEndpointAt(Object.values(editorManager.data.lines),point)
+    if (hit) {
+      draggingEndpoint.current = hit
+      setIsDragging(true)
     }
+  }, [mode, editorManager])
 
-    const point = getPoint(e);
-    if (!point) return;
-    const snapped = snapToGrid(point);
-
-    if (mode === "addLine") {
-      if (!pendingStart) {
-        setPendingStart(snapped);
-      } else {
-        addLine(pendingStart, snapped);
-        setPendingStart(null);
-        setMode("idle");
-      }
-    } else if (mode === "addCurve") {
-      if (!pendingStart) {
-        setPendingStart(snapped);
-      } else if (!pendingEnd) {
-        setPendingEnd(snapped);
-      } else {
-        addLine(pendingStart, pendingEnd, snapped);
-        setPendingStart(null);
-        setPendingEnd(null);
-        setMode("idle");
-      }
+  const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const raw = getCanvasPoint(e)
+    const point = snapToGrid(raw)
+    if (draggingEndpoint.current) {
+      updateLineEndpoint(draggingEndpoint.current.lineId, draggingEndpoint.current.endpoint, point)
     } else if (mode === "addStart") {
-      for (const line of visibleLines) {
-        if (dist(point, line.start) < 15) {
-          addStart({ id: line.id, anchor: "start" });
-          setMode("idle");
-          return;
-        }
-        if (dist(point, line.end) < 15) {
-          addStart({ id: line.id, anchor: "end" });
-          setMode("idle");
-          return;
-        }
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddStartSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddStartSnap(null)
+        setHoverNearEndpoint(false)
       }
-    } else if (mode === "addArrival") {
-      for (const line of visibleLines) {
-        if (dist(point, line.start) < 15) {
-          addArrival({ id: line.id, anchor: "start" });
-          setMode("idle");
-          return;
-        }
-        if (dist(point, line.end) < 15) {
-          addArrival({ id: line.id, anchor: "end" });
-          setMode("idle");
-          return;
-        }
-      }
-    } else if (mode === "addSwitch") {
-      for (const line of visibleLines) {
-        if (dist(point, line.start) < 15) {
-          addSwitch({ id: line.id, anchor: "start" });
-          setMode("idle");
-          return;
-        }
-        if (dist(point, line.end) < 15) {
-          addSwitch({ id: line.id, anchor: "end" });
-          setMode("idle");
-          return;
-        }
-      }
-    } else if (mode === "addPainter") {
-      for (const line of visibleLines) {
-        if (dist(point, line.start) < 15) {
-          addPainter({ id: line.id, anchor: "start" });
-          setMode("idle");
-          return;
-        }
-        if (dist(point, line.end) < 15) {
-          addPainter({ id: line.id, anchor: "end" });
-          setMode("idle");
-          return;
-        }
+    } else {
+      setSnapPoint(point)
+      if (mode === "select") {
+        setHoverNearEndpoint(findEndpointAt(Object.values(editorManager.data.lines), raw) !== null)
       }
     }
-  };
+  }, [mode, editorManager, updateLineEndpoint])
 
-  const handlePreviewClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const pm = previewManager;
-    if (!pm) return;
-    const canvas = previewCanvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const point = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    for (const [switchId, sw] of Object.entries(pm.switches)) {
-      const line = pm.lines[sw.input.id];
-      if (!line) continue;
-      const swPoint = sw.input.anchor === "start" ? line.start : line.end;
-      if (dist(point, swPoint) < 15) {
-        pm.cycleSwitch(switchId);
-        break;
+  const onCanvasMouseUp = useCallback(() => {
+    draggingEndpoint.current = null
+    setIsDragging(false)
+  }, [])
+
+  const onMouseLeave = useCallback(() => {
+    setSnapPoint(null)
+    setAddStartSnap(null)
+    setHoverNearEndpoint(false)
+    draggingEndpoint.current = null
+    setIsDragging(false)
+  }, [])
+
+  const onCanvasClick = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (mode === "addStart") {
+        if (addStartSnap) {
+          setStart(new Start(addStartSnap.lineId, addStartSnap.endpoint, start?.delay ?? 0))
+          setAddStartSnap(null)
+          setMode("select")
+        }
+        return
       }
-    }
-  };
+      if (mode !== "addLine") return
+      const point = snapToGrid(getCanvasPoint(e))
+      if (!pendingPoint) {
+        setPendingPoint(point)
+      } else {
+        addLine(new LineEditor(pendingPoint, point))
+        setPendingPoint(null)
+        setMode("select")
+      }
+    },
+    [mode, pendingPoint, addStartSnap, start, addLine, setPendingPoint, setMode, setStart]
+  )
 
-  const handleExitScreen = () => {
-    setActiveScreenId(null);
-    setMode("idle");
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredPoint(null);
-    dragRef.current = null;
-  };
-
-  const hint = getHint(mode, pendingStart, pendingEnd);
+  const canvasCursor = mode === "addLine"
+    ? "none"
+    : mode === "addStart"
+      ? (hoverNearEndpoint ? "pointer" : "crosshair")
+      : isDragging
+        ? "grabbing"
+        : hoverNearEndpoint
+          ? "grab"
+          : "crosshair"
 
   return (
-    <S.Layout ref={layoutRef}>
-      <S.CanvasPanel ref={leftPanelRef} $width={leftWidth}>
-        <S.CanvasWrapper>
-          <S.GameCanvas
-            ref={editorCanvasRef}
-            $visible={!isPreview}
-            $addingLine={mode !== "idle"}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-          />
-          <S.PreviewCanvas
-            ref={previewCanvasRef}
-            $visible={isPreview}
-            onMouseUp={handlePreviewClick}
-          />
-          {activeScreenId && !isPreview && (
-            <S.ScreenBreadcrumb>
-              {activeScreenId}
-              <S.ScreenBreadcrumbExit onClick={handleExitScreen}>×</S.ScreenBreadcrumbExit>
-            </S.ScreenBreadcrumb>
-          )}
-          {hint && !isPreview && <S.HintOverlay>{hint}</S.HintOverlay>}
-          <S.OverlayButtons>
-            {!isPreview && (
-              <S.GridButton onClick={toggleGrid}>
-                {showGrid ? "Hide grid" : "Show grid"}
-              </S.GridButton>
+    <S.Container>
+      <S.LeftPanel $width={leftWidth} ref={leftRef}>
+        <S.TopBar>
+          <S.ViewButton $active={viewMode === "editor"} onClick={() => setViewMode("editor")}>
+            Editor
+          </S.ViewButton>
+          <S.ViewButton $active={viewMode === "preview"} onClick={() => setViewMode("preview")}>
+            Preview
+          </S.ViewButton>
+        </S.TopBar>
+        <S.CanvasArea ref={canvasAreaRef}>
+          <S.CanvasOuter>
+            <S.CanvasWrapper $w={CANVAS_W * scale} $h={CANVAS_H * scale}>
+              <S.StyledCanvas
+                ref={editorCanvasRef}
+                width={CANVAS_W}
+                height={CANVAS_H}
+                $scale={scale}
+                $cursor={canvasCursor}
+                $visible={viewMode === "editor"}
+                onMouseDown={onCanvasMouseDown}
+                onMouseMove={onMouseMove}
+                onMouseUp={onCanvasMouseUp}
+                onMouseLeave={onMouseLeave}
+                onClick={onCanvasClick}
+              />
+              <S.StyledCanvas
+                ref={previewCanvasRef}
+                width={CANVAS_W}
+                height={CANVAS_H}
+                $scale={scale}
+                $cursor="default"
+                $visible={viewMode === "preview"}
+              />
+            </S.CanvasWrapper>
+            {viewMode === "editor" && (
+              <S.IdsButton $active={showIds} onClick={() => setShowIds((v) => !v)}>
+                IDs
+              </S.IdsButton>
             )}
-            {isPreview && (
-              <S.RestartButton
-                onClick={() => {
-                  previewManager?.resetSim();
-                  previewManager?.initSim();
-                }}
-              >
-                Restart
-              </S.RestartButton>
-            )}
-            <S.ViewToggle
-              $preview={isPreview}
-              onClick={() => setIsPreview((v) => !v)}
-            >
-              {isPreview ? "Editor" : "Preview"}
-            </S.ViewToggle>
-          </S.OverlayButtons>
-        </S.CanvasWrapper>
-      </S.CanvasPanel>
-      <S.ResizeDivider onMouseDown={handleDividerMouseDown} />
-      <ToolsPanel />
-    </S.Layout>
-  );
-};
+          </S.CanvasOuter>
+        </S.CanvasArea>
+      </S.LeftPanel>
+      <S.RightArea>
+        <S.Divider onMouseDown={onDividerMouseDown} />
+        <S.RightPanel>
+          <ToolsPanel />
+        </S.RightPanel>
+        {viewMode === "preview" && <S.Overlay />}
+      </S.RightArea>
+    </S.Container>
+  )
+}

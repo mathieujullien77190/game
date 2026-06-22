@@ -1,60 +1,32 @@
-import { useState, useEffect } from "react";
-import { useShallow } from "zustand/react/shallow";
-import { useStore } from "store/useStore";
-import { serializeLevel } from "./helpers";
-import demoLevel from "levels/demo";
-import * as S from "./UI";
+import { useShallow } from "zustand/react/shallow"
+import { useStore } from "store"
+import * as S from "./UI"
 
 export const JsonTab = () => {
-  const { lines, starts, arrivals, switches, painters, tokens, linkActive, clearLines, importLevel } = useStore(
-    useShallow((s) => ({
-      lines: s.lines,
-      starts: s.starts,
-      arrivals: s.arrivals,
-      switches: s.switches,
-      painters: s.painters,
-      tokens: s.tokens,
-      linkActive: s.linkActive,
-      clearLines: s.clearLines,
-      importLevel: s.importLevel,
-    })),
-  );
+  const { editorManager, tokens, start, revision } = useStore(
+    useShallow((s) => ({ editorManager: s.editorManager, tokens: s.tokens, start: s.start, revision: s.revision }))
+  )
 
-  const json = serializeLevel(lines, starts, arrivals, switches, painters, tokens, linkActive);
-  const [localJson, setLocalJson] = useState(json);
-  const [dirty, setDirty] = useState(false);
+  const json = JSON.stringify(
+    {
+      lines: Object.values(editorManager.data.lines).map((l) => ({ id: l.id, start: l.start, end: l.end })),
+      links: Object.values(editorManager.data.links).map((lk) => ({
+        id: lk.id,
+        line1: lk.line1,
+        line2: lk.line2,
+        activated: lk.activated,
+      })),
+      tokens: Object.values(tokens).map((t) => ({
+        id: t.id,
+        color: t.color,
+        type: t.type,
+        speed: t.speed,
+      })),
+      start: start ? { lineId: start.lineId, endpoint: start.endpoint, delay: start.delay } : null,
+    },
+    null,
+    2
+  )
 
-  useEffect(() => {
-    if (!dirty) setLocalJson(json);
-  }, [json, dirty]);
-
-  const handleImport = () => {
-    try {
-      importLevel(JSON.parse(localJson));
-      setDirty(false);
-    } catch {
-      // invalid JSON — do nothing
-    }
-  };
-
-  const handleLoadDemo = () => {
-    importLevel(demoLevel);
-    setDirty(false);
-  };
-
-  return (
-    <S.Wrapper>
-      <S.Textarea
-        value={localJson}
-        onChange={(e) => { setLocalJson(e.target.value); setDirty(true); }}
-        spellCheck={false}
-      />
-      <S.ButtonRow>
-        <S.ActionButton $variant="primary" onClick={handleLoadDemo}>load demo</S.ActionButton>
-        {dirty && <S.ActionButton $variant="primary" onClick={handleImport}>apply</S.ActionButton>}
-        {dirty && <S.ActionButton $variant="neutral" onClick={() => { setLocalJson(json); setDirty(false); }}>reset</S.ActionButton>}
-        <S.ActionButton $variant="danger" onClick={clearLines} style={{ marginLeft: "auto" }}>clear</S.ActionButton>
-      </S.ButtonRow>
-    </S.Wrapper>
-  );
-};
+  return <S.Pre key={revision}>{json}</S.Pre>
+}

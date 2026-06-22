@@ -1,16 +1,14 @@
-import { Line } from "./Line";
+import { Line } from "./Line"
 
 export class LinePreview extends Line {
-  drawSimple(ctx: CanvasRenderingContext2D, color?: string): void {
-    ctx.strokeStyle = color ?? this.color;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(this.start.x, this.start.y);
-    if (this.control) {
-      ctx.quadraticCurveTo(this.control.x, this.control.y, this.end.x, this.end.y);
-    } else {
-      ctx.lineTo(this.end.x, this.end.y);
-    }
-    ctx.stroke();
+  draw = (ctx: CanvasRenderingContext2D) => {
+    ctx.strokeStyle = "#333"
+    ctx.lineWidth = 2
+    ctx.lineCap = "round"
+    ctx.setLineDash([])
+    ctx.beginPath()
+    ctx.moveTo(this.start.x, this.start.y)
+    ctx.lineTo(this.end.x, this.end.y)
+    ctx.stroke()
   }
 }

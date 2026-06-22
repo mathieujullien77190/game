@@ -1,63 +1,65 @@
-import { useShallow } from "zustand/react/shallow";
-import { useStore } from "store/useStore";
-import { PALETTE } from "engine/colors";
-import ItemRow from "components/ItemRow";
-import Button from "components/ui/Button";
-import { Field } from "components/form/Field";
-import { NumberInput } from "components/form/NumberInput";
-import { ColorPicker } from "components/form/ColorPicker";
-import * as S from "./UI";
+import { useShallow } from "zustand/react/shallow"
+import { Token, TOKEN_COLORS, type TokenColor, type TokenType } from "engine/Token/Token"
+import { ColorPicker } from "components/form/ColorPicker"
+import { NumberInput } from "components/form/NumberInput"
+import { useStore } from "store"
+import * as S from "./UI"
 
 export const TokenTab = () => {
-  const { tokens, addToken, removeToken, setTokenColor, setTokenSpeed, setTokenShape } = useStore(
+  const { tokens, addToken, removeToken, updateToken } = useStore(
     useShallow((s) => ({
       tokens: s.tokens,
       addToken: s.addToken,
       removeToken: s.removeToken,
-      setTokenColor: s.setTokenColor,
-      setTokenSpeed: s.setTokenSpeed,
-      setTokenShape: s.setTokenShape,
-    })),
-  );
+      updateToken: s.updateToken,
+    }))
+  )
 
   return (
-    <S.Wrapper>
-      <Button color="#1e293b" onClick={addToken}>
-        Add Token
-      </Button>
+    <S.Container>
+      <S.AddButton onClick={() => addToken(new Token(TOKEN_COLORS[0], 1))}>
+        + Add Token
+      </S.AddButton>
+
       <S.TokenList>
-        {tokens.length === 0 && <S.Empty>No tokens</S.Empty>}
-        {tokens.map((token, index) => (
-          <ItemRow key={token.id} onDelete={() => removeToken(index)}>
-            <S.TokenContent>
-              <S.TokenHeader>
-                <S.TokenPreview $color={token.color} $shape={token.shape} />
+        {Object.values(tokens).map((token) => (
+          <S.TokenCard key={token.id}>
+            <S.TokenHeader>
+              <S.TokenIdRow>
+                <S.TokenShape $color={token.color} $round={token.type === "round"} />
                 <S.TokenId>{token.id}</S.TokenId>
-              </S.TokenHeader>
-              <S.Hr />
-              <ColorPicker
-                palette={PALETTE}
-                value={token.color}
-                onChange={(color) => setTokenColor(index, color)}
-              />
+              </S.TokenIdRow>
+              <S.DeleteButton onClick={() => removeToken(token.id)}>✕</S.DeleteButton>
+            </S.TokenHeader>
+            <S.Divider />
+            <S.Fields>
+              <S.FieldRow>
+                <S.FieldLabel>Type</S.FieldLabel>
+                <S.TypeToggle>
+                  {(["round", "square"] as TokenType[]).map((t) => (
+                    <S.TypeButton key={t} $active={token.type === t} onClick={() => updateToken(token.id, { type: t })}>
+                      {t}
+                    </S.TypeButton>
+                  ))}
+                </S.TypeToggle>
+              </S.FieldRow>
+              <S.FieldRow>
+                <S.FieldLabel>Color</S.FieldLabel>
+                <ColorPicker
+                  palette={TOKEN_COLORS}
+                  value={token.color}
+                  onChange={(color) => updateToken(token.id, { color: color as TokenColor })}
+                />
+              </S.FieldRow>
               <NumberInput
-                label="speed"
+                label="Speed"
                 value={token.speed}
-                min={1}
-                step={1}
-                onChange={(v) => setTokenSpeed(index, v)}
+                onChange={(v) => updateToken(token.id, { speed: v })}
               />
-              <Field label="shape">
-                <S.ShapeRow>
-                  <S.ShapeTag $active={token.shape === "circle"} onClick={() => setTokenShape(index, "circle")}>circle</S.ShapeTag>
-                  <S.ShapeTag $active={token.shape === "square"} onClick={() => setTokenShape(index, "square")}>square</S.ShapeTag>
-                  <S.ShapeTag $active={token.shape === "triangle"} onClick={() => setTokenShape(index, "triangle")}>triangle</S.ShapeTag>
-                </S.ShapeRow>
-              </Field>
-            </S.TokenContent>
-          </ItemRow>
+            </S.Fields>
+          </S.TokenCard>
         ))}
       </S.TokenList>
-    </S.Wrapper>
-  );
-};
+    </S.Container>
+  )
+}

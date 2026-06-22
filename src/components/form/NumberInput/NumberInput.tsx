@@ -1,30 +1,33 @@
-import { Field } from "components/form/Field";
-import type { Props } from "./types";
-import * as S from "./UI";
+import * as S from "./UI"
 
-const InputRow = ({ value, onChange, unit, min, max, step = 1 }: Omit<Props, "label">) => (
-  <S.Row>
+interface Props {
+  value: number
+  onChange: (v: number) => void
+  label?: string
+  min?: number
+  step?: number
+}
+
+export const NumberInput = ({ value, onChange, label, min = 0, step = 1 }: Props) => {
+  const input = (
     <S.Input
       type="number"
-      value={value}
       min={min}
-      max={max}
       step={step}
+      value={value}
       onChange={(e) => {
-        const parsed = parseFloat(e.target.value);
-        const clamped = min !== undefined ? Math.max(min, parsed || 0) : parsed || 0;
-        onChange(max !== undefined ? Math.min(max, clamped) : clamped);
+        const v = parseInt(e.target.value)
+        onChange(isNaN(v) || v < (min ?? 0) ? (min ?? 0) : v)
       }}
     />
-    {unit && <S.Unit>{unit}</S.Unit>}
-  </S.Row>
-);
+  )
 
-export const NumberInput = ({ label, ...rest }: Props) =>
-  label ? (
-    <Field label={label}>
-      <InputRow {...rest} />
-    </Field>
-  ) : (
-    <InputRow {...rest} />
-  );
+  if (!label) return input
+
+  return (
+    <S.Row>
+      <S.Label>{label}</S.Label>
+      {input}
+    </S.Row>
+  )
+}

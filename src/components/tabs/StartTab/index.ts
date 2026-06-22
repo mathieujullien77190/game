@@ -1,1 +1,1 @@
-export { StartTab as default } from "./StartTab";
+export { StartTab as default } from "./StartTab"

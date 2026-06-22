@@ -1,135 +1,61 @@
-import { useShallow } from "zustand/react/shallow";
-import { useStore } from "store/useStore";
-import { computeLinks } from "engine/Link";
-import { EDITOR_COLORS } from "engine/colors";
-import { PALETTE } from "engine/colors";
-import ItemRow from "components/ItemRow";
-import { Tag } from "components/ui/Tag";
-import { TagLine } from "components/ui/TagLine";
-import Button from "components/ui/Button";
-import { ColorPicker } from "components/form/ColorPicker";
-import { buildAnchorMap } from "./helpers";
-import * as S from "./UI";
+import { useShallow } from "zustand/react/shallow"
+import { useStore } from "store"
+import * as S from "./UI"
 
 export const LineTab = () => {
-  const {
-    lines,
-    mode,
-    linkActive,
-    setMode,
-    setPendingStart,
-    setPendingEnd,
-    removeLine,
-    setLineColor,
-    toggleLinkActive,
-  } = useStore(
+  const { editorManager, revision, mode, setMode, removeLine, toggleLinkActivated } = useStore(
     useShallow((s) => ({
-      lines: s.lines,
+      editorManager: s.editorManager,
+      revision: s.revision,
       mode: s.mode,
-      linkActive: s.linkActive,
       setMode: s.setMode,
-      setPendingStart: s.setPendingStart,
-      setPendingEnd: s.setPendingEnd,
       removeLine: s.removeLine,
-      setLineColor: s.setLineColor,
-      toggleLinkActive: s.toggleLinkActive,
-    })),
-  );
+      toggleLinkActivated: s.toggleLinkActivated,
+    }))
+  )
 
-  const isEditing = mode === "addLine" || mode === "addCurve";
-  const links = computeLinks(lines, linkActive);
-  const anchorMap = buildAnchorMap(links);
-
-  const cancel = () => {
-    setMode("idle");
-    setPendingStart(null);
-    setPendingEnd(null);
-  };
+  const allLinks = Object.values(editorManager.data.links)
 
   return (
-    <S.Wrapper>
-      {isEditing ? (
-        <Button color="#ef4444" onClick={cancel}>
-          Cancel
-        </Button>
-      ) : (
-        <S.ButtonRow>
-          <Button color={EDITOR_COLORS.anchorStart} onClick={() => setMode("addLine")}>
-            Add Line
-          </Button>
-          <Button color={EDITOR_COLORS.pointCurve} onClick={() => setMode("addCurve")}>
-            Add Curve
-          </Button>
-        </S.ButtonRow>
-      )}
-      {lines.length > 0 && (
-        <S.LineList>
-          {lines.map((line, index) => {
-            const connections = anchorMap[line.id] ?? { start: [], end: [] };
-            return (
-              <ItemRow
-                key={line.id}
-                onDelete={() => removeLine(index)}
-              >
+    <S.Container>
+      <S.AddButton
+        $active={mode === "addLine"}
+        onClick={() => setMode(mode === "addLine" ? "select" : "addLine")}
+      >
+        {mode === "addLine" ? "Cancel" : "+ Add Line"}
+      </S.AddButton>
+      <S.LineList>
+        {Object.values(editorManager.data.lines).map((line) => {
+          const lineLinks = allLinks.filter(
+            (lk) => lk.line1.lineId === line.id || lk.line2.lineId === line.id
+          )
+          return (
+            <S.LineBlock key={`${line.id}-${revision}`}>
+              <S.LineItem>
                 <S.LineLabel>
-                  <S.LineId>
-                    <TagLine lineId={line.id} large />
-                    <Tag color="#374151" bg="#f3f4f6" large>
-                      {line.type}
-                    </Tag>
-                    <Tag color="#6366f1" bg="#eef2ff" large>{line.screenId ?? "mainScreen"}</Tag>
-                  </S.LineId>
-                  <S.Hr />
-                  <S.Anchors>
-                    <S.AnchorGroup>
-                      <Tag color={EDITOR_COLORS.anchorStart} bg={EDITOR_COLORS.anchorStartBg}>
-                        start
-                      </Tag>
-                      {connections.start.length > 0 ? (
-                        connections.start.map(({ lineId, linkId, active }) => (
-                          <TagLine
-                            key={linkId}
-                            lineId={lineId}
-                            active={active}
-                            muted
-                            onClick={() => toggleLinkActive(linkId)}
-                          />
-                        ))
-                      ) : (
-                        <S.Empty>—</S.Empty>
-                      )}
-                    </S.AnchorGroup>
-                    <S.AnchorGroup>
-                      <Tag color={EDITOR_COLORS.anchorEnd} bg={EDITOR_COLORS.anchorEndBg}>
-                        end
-                      </Tag>
-                      {connections.end.length > 0 ? (
-                        connections.end.map(({ lineId, linkId, active }) => (
-                          <TagLine
-                            key={linkId}
-                            lineId={lineId}
-                            active={active}
-                            muted
-                            onClick={() => toggleLinkActive(linkId)}
-                          />
-                        ))
-                      ) : (
-                        <S.Empty>—</S.Empty>
-                      )}
-                    </S.AnchorGroup>
-                  </S.Anchors>
-                  <ColorPicker
-                    label="color"
-                    palette={PALETTE}
-                    value={line.color}
-                    onChange={(color) => setLineColor(index, color)}
-                  />
+                  <S.LineId>{line.id}</S.LineId>
+                  ({line.start.x}, {line.start.y}) → ({line.end.x}, {line.end.y})
                 </S.LineLabel>
-              </ItemRow>
-            );
-          })}
-        </S.LineList>
-      )}
-    </S.Wrapper>
-  );
-};
+                <S.DeleteButton onClick={() => removeLine(line.id)}>✕</S.DeleteButton>
+              </S.LineItem>
+              {lineLinks.map((lk) => {
+                const other = lk.line1.lineId === line.id ? lk.line2 : lk.line1
+                return (
+                  <S.LinkItem key={lk.id}>
+                    <S.LinkId>{lk.id}</S.LinkId>
+                    <S.LinkDetail>
+                      {other.lineId}[{other.endpoint}]
+                    </S.LinkDetail>
+                    <S.LinkActivated $on={lk.activated} onClick={() => toggleLinkActivated(lk.id)}>
+                      {lk.activated ? "on" : "off"}
+                    </S.LinkActivated>
+                  </S.LinkItem>
+                )
+              })}
+            </S.LineBlock>
+          )
+        })}
+      </S.LineList>
+    </S.Container>
+  )
+}

@@ -1,1 +1,1 @@
-export { TokenTab as default } from "./TokenTab";
+export { TokenTab as default } from "./TokenTab"

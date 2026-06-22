@@ -1,1 +1,1 @@
-export { LineTab as default } from "./LineTab";
+export { LineTab as default } from "./LineTab"

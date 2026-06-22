@@ -1,77 +1,131 @@
-import styled from "styled-components";
+import styled from "styled-components"
 
-export const Wrapper = styled.div`
+export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  overflow-y: auto;
-`;
+  gap: 8px;
+`
+
+export const AddButton = styled.button`
+  width: 100%;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    background: #e8e8e8;
+  }
+`
 
 export const TokenList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-`;
+  gap: 6px;
+`
 
-export const TokenContent = styled.div`
+export const TokenCard = styled.div`
+  padding: 8px 10px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-`;
+  gap: 6px;
+`
 
 export const TokenHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-`;
+  justify-content: space-between;
+`
 
-export const TokenPreview = styled.div<{ $color: string; $shape: "circle" | "square" | "triangle" }>`
-  width: 20px;
-  height: 20px;
+export const TokenIdRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`
+
+export const TokenShape = styled.div<{ $color: string; $round: boolean }>`
+  width: 14px;
+  height: 14px;
+  background: ${(p) => p.$color};
+  border-radius: ${(p) => (p.$round ? "50%" : "2px")};
   flex-shrink: 0;
-  background: ${({ $color }) => $color};
-  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.2);
-  border-radius: ${({ $shape }) => ($shape === "circle" ? "50%" : $shape === "square" ? "3px" : "0")};
-  clip-path: ${({ $shape }) =>
-    $shape === "triangle"
-      ? "polygon(50% 0%, 0% 100%, 100% 100%)"
-      : "none"};
-`;
+`
 
 export const TokenId = styled.span`
-  font-size: 13px;
   font-family: monospace;
-  color: #374151;
-`;
-
-export const Hr = styled.hr`
-  border: none;
-  border-top: 1px solid #e5e7eb;
-  margin: 0;
-`;
-
-export const Empty = styled.span`
-  font-size: 11px;
-  color: #d1d5db;
-  font-family: monospace;
-`;
-
-export const ShapeRow = styled.div`
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-`;
-
-export const ShapeTag = styled.button<{ $active: boolean }>`
   font-size: 10px;
+  font-weight: bold;
+  color: #555;
+`
+
+export const TypeToggle = styled.div`
+  display: flex;
+  gap: 3px;
+`
+
+export const TypeButton = styled.button<{ $active: boolean }>`
+  padding: 2px 6px;
   font-family: monospace;
-  padding: 2px 7px;
-  border-radius: 3px;
-  border: 1px solid ${({ $active }) => ($active ? "#1e293b" : "#e5e7eb")};
-  background: ${({ $active }) => ($active ? "#1e293b" : "transparent")};
-  color: ${({ $active }) => ($active ? "#fff" : "#9ca3af")};
+  font-size: 10px;
   cursor: pointer;
-  user-select: none;
-  &:hover { border-color: #9ca3af; }
-`;
+  border-radius: 3px;
+  border: 1px solid ${(p) => (p.$active ? "#333" : "#ddd")};
+  background: ${(p) => (p.$active ? "#333" : "#f5f5f5")};
+  color: ${(p) => (p.$active ? "#fff" : "#999")};
+
+  &:hover {
+    border-color: #333;
+    color: ${(p) => (p.$active ? "#fff" : "#333")};
+  }
+`
+
+export const Divider = styled.hr`
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 0;
+`
+
+export const Fields = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`
+
+export const FieldRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+
+export const FieldLabel = styled.span`
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+  min-width: 40px;
+  flex-shrink: 0;
+`
+
+export const DeleteButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+
+  &:hover {
+    color: #e53935;
+  }
+`

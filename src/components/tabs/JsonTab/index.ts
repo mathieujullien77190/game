@@ -1,1 +1,1 @@
-export { JsonTab as default } from "./JsonTab";
+export { JsonTab as default } from "./JsonTab"
