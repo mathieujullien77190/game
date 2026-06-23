@@ -58,6 +58,27 @@ export const CanvasOuter = styled.div`
   position: relative;
 `
 
+export const RestartButton = styled.button`
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.85);
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  z-index: 10;
+
+  &:hover {
+    background: #e0e0e0;
+  }
+`
+
 export const IdsButton = styled.button<{ $active: boolean }>`
   position: absolute;
   bottom: 8px;
@@ -89,11 +110,13 @@ export const CanvasWrapper = styled.div<{ $w: number; $h: number }>`
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
 `
 
-export const StyledCanvas = styled.canvas<{ $scale: number; $cursor: string; $visible: boolean }>`
+export const StyledCanvas = styled.canvas<{ $scale: number; $cursor: string; $visible: boolean; $w: number; $h: number }>`
   display: ${({ $visible }) => ($visible ? "block" : "none")};
   position: absolute;
   top: 0;
   left: 0;
+  width: ${({ $w }) => $w}px;
+  height: ${({ $h }) => $h}px;
   transform: scale(${({ $scale }) => $scale});
   transform-origin: top left;
   background: #fff;

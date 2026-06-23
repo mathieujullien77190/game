@@ -1,8 +1,8 @@
 import type { Point } from "../types"
-import { GRID_SIZE } from "../constants"
+import { CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR } from "../constants"
 import { LineEditor } from "../Line/LineEditor"
 import { Link } from "../Link/Link"
-import type { Start } from "../Start/Start"
+import { StartEditor } from "../Start/StartEditor"
 import { Manager } from "./Manager"
 
 const pointsEqual = (a: Point, b: Point) => a.x === b.x && a.y === b.y
@@ -68,21 +68,24 @@ export class EditorManager extends Manager<LineEditor> {
   }
 
   drawGrid = (ctx: CanvasRenderingContext2D) => {
-    const { width, height } = ctx.canvas
-    ctx.strokeStyle = "#e8e8e8"
-    ctx.lineWidth = 1
     ctx.setLineDash([])
-    for (let x = 0; x <= width; x += GRID_SIZE) {
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, height)
-      ctx.stroke()
+
+    ctx.strokeStyle = "#f0f0f0"
+    ctx.lineWidth = 0.5
+    for (let x = 0; x <= CANVAS_W; x += GRID_MINOR) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke()
     }
-    for (let y = 0; y <= height; y += GRID_SIZE) {
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(width, y)
-      ctx.stroke()
+    for (let y = 0; y <= CANVAS_H; y += GRID_MINOR) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke()
+    }
+
+    ctx.strokeStyle = "#e0e0e0"
+    ctx.lineWidth = 1
+    for (let x = 0; x <= CANVAS_W; x += GRID_MAJOR) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke()
+    }
+    for (let y = 0; y <= CANVAS_H; y += GRID_MAJOR) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke()
     }
   }
 
@@ -92,11 +95,13 @@ export class EditorManager extends Manager<LineEditor> {
     snapPoint: Point | null = null,
     pendingPoint: Point | null = null,
     showIds = false,
-    start: Start | null = null,
+    starts: StartEditor[] = [],
     previewStartPt: Point | null = null
   ) => {
-    const { width, height } = ctx.canvas
-    ctx.clearRect(0, 0, width, height)
+    ctx.save()
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    ctx.restore()
 
     this.drawGrid(ctx)
 
@@ -104,12 +109,11 @@ export class EditorManager extends Manager<LineEditor> {
       line.draw(ctx, line.id === hoveredLineId, showIds)
     }
 
-    if (start) {
+    for (const start of starts) {
       const line = this.data.lines[start.lineId]
-      if (line) {
-        const pt = start.endpoint === "start" ? line.start : line.end
-        start.drawEditor(ctx, pt)
-      }
+      if (!line) continue
+      const pt = start.endpoint === "end" ? line.end : line.start
+      start.draw(ctx, pt)
     }
 
     if (previewStartPt) {

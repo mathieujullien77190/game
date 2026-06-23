@@ -6,12 +6,12 @@ export const Container = styled.div`
   gap: 8px;
 `
 
-export const AddButton = styled.button<{ $active: boolean }>`
+export const AddButton = styled.button<{ $active?: boolean }>`
   width: 100%;
   padding: 8px 12px;
-  background: ${({ $active }) => ($active ? "#1a73e8" : "#f0f0f0")};
-  color: ${({ $active }) => ($active ? "#fff" : "#333")};
-  border: 1px solid ${({ $active }) => ($active ? "#1a73e8" : "#ddd")};
+  background: ${(p) => (p.$active ? "#333" : "#f0f0f0")};
+  color: ${(p) => (p.$active ? "#fff" : "#333")};
+  border: 1px solid ${(p) => (p.$active ? "#333" : "#ddd")};
   border-radius: 6px;
   cursor: pointer;
   font-family: monospace;
@@ -20,18 +20,24 @@ export const AddButton = styled.button<{ $active: boolean }>`
   letter-spacing: 0.5px;
 
   &:hover {
-    background: ${({ $active }) => ($active ? "#1557b0" : "#e8e8e8")};
+    background: ${(p) => (p.$active ? "#555" : "#e8e8e8")};
   }
 `
 
-export const StartCard = styled.div`
+export const StartList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px;
+`
+
+export const StartCard = styled.div`
+  padding: 8px 10px;
   background: #f5f5f5;
-  border: 1px solid #333;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 `
 
 export const StartHeader = styled.div`
@@ -44,10 +50,16 @@ export const StartInfo = styled.span`
   font-family: monospace;
   font-size: 10px;
   font-weight: bold;
-  color: #333;
+  color: #555;
 `
 
-export const RemoveButton = styled.button`
+export const Divider = styled.hr`
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 0;
+`
+
+export const DeleteButton = styled.button`
   background: transparent;
   border: none;
   color: #aaa;
@@ -60,10 +72,3 @@ export const RemoveButton = styled.button`
     color: #e53935;
   }
 `
-
-export const Divider = styled.hr`
-  border: none;
-  border-top: 1px solid #e0e0e0;
-  margin: 0;
-`
-

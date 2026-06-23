@@ -1,6 +1,6 @@
 import { RefObject, useEffect } from "react"
 import { EditorManager } from "engine/Manager/EditorManager"
-import type { Start } from "engine/Start/Start"
+import { StartEditor } from "engine/Start/StartEditor"
 import type { Point } from "engine/types"
 
 export const useCanvasDraw = (
@@ -11,12 +11,14 @@ export const useCanvasDraw = (
   snapPoint: Point | null,
   pendingPoint: Point | null,
   showIds: boolean,
-  start: Start | null,
-  previewStartPt: Point | null
+  starts: StartEditor[],
+  previewStartPt: Point | null,
+  dpr: number
 ) => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d")
     if (!ctx) return
-    manager.drawAll(ctx, hoveredLineId, snapPoint, pendingPoint, showIds, start, previewStartPt)
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, start, previewStartPt])
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    manager.drawAll(ctx, hoveredLineId, snapPoint, pendingPoint, showIds, starts, previewStartPt)
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, previewStartPt, dpr])
 }

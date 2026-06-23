@@ -3,7 +3,7 @@ import { EditorManager } from "engine/Manager/EditorManager"
 import { PreviewManager } from "engine/Manager/PreviewManager"
 import { LineEditor } from "engine/Line/LineEditor"
 import { Token } from "engine/Token/Token"
-import { Start } from "engine/Start/Start"
+import { StartEditor } from "engine/Start/StartEditor"
 import type { Point } from "engine/types"
 
 export type Mode = "select" | "addLine" | "addStart"
@@ -13,7 +13,7 @@ export interface StoreState {
   editorManager: EditorManager
   previewManager: PreviewManager
   tokens: Record<string, Token>
-  start: Start | null
+  starts: Record<string, StartEditor>
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -28,8 +28,9 @@ export interface StoreActions {
   addToken: (token: Token) => void
   removeToken: (id: string) => void
   updateToken: (id: string, patch: { color?: string; speed?: number; type?: string }) => void
-  setStart: (start: Start | null) => void
-  updateStartDelay: (delay: number) => void
+  addStart: (start: StartEditor) => void
+  removeStart: (id: string) => void
+  updateStartDelay: (id: string, delay: number) => void
   setMode: (mode: Mode) => void
   setViewMode: (viewMode: ViewMode) => void
   setPendingPoint: (point: Point | null) => void

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { LineEditor } from "engine/Line/LineEditor"
-import { Start } from "engine/Start/Start"
-import { GRID_SIZE } from "engine/constants"
+import { StartEditor } from "engine/Start/StartEditor"
+import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
 import { useCanvasDraw } from "hooks/useCanvasDraw"
@@ -10,8 +10,6 @@ import { useCanvasDrawPreview } from "hooks/useCanvasDrawPreview"
 import * as S from "./UI"
 import ToolsPanel from "components/ToolsPanel"
 
-const CANVAS_W = 405
-const CANVAS_H = 720
 const PADDING = 24
 const HIT_RADIUS = 10
 
@@ -35,6 +33,7 @@ const findEndpointAt = (lines: LineEditor[], point: Point) => {
 }
 
 export const LevelEditor = () => {
+  const dpr = window.devicePixelRatio || 1
   const [leftWidth, setLeftWidth] = useState(() => Math.round(window.innerWidth * 0.3))
   const [scale, setScale] = useState(1)
   const [snapPoint, setSnapPoint] = useState<Point | null>(null)
@@ -52,8 +51,8 @@ export const LevelEditor = () => {
 
   const {
     editorManager, previewManager, revision,
-    mode, viewMode, pendingPoint, start,
-    addLine, setPendingPoint, setMode, setViewMode, updateLineEndpoint, setStart,
+    mode, viewMode, pendingPoint, starts,
+    addLine, addStart, setPendingPoint, setMode, setViewMode, updateLineEndpoint,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -62,15 +61,17 @@ export const LevelEditor = () => {
       mode: s.mode,
       viewMode: s.viewMode,
       pendingPoint: s.pendingPoint,
-      start: s.start,
+      starts: s.starts,
       addLine: s.addLine,
+      addStart: s.addStart,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
       setViewMode: s.setViewMode,
       updateLineEndpoint: s.updateLineEndpoint,
-      setStart: s.setStart,
     }))
   )
+
+  const startsArray = Object.values(starts)
 
   useCanvasDraw(
     editorCanvasRef, editorManager, revision,
@@ -78,10 +79,11 @@ export const LevelEditor = () => {
     mode === "addLine" ? snapPoint : null,
     pendingPoint,
     showIds,
-    start,
-    mode === "addStart" ? (addStartSnap?.pt ?? null) : null
+    startsArray,
+    mode === "addStart" ? (addStartSnap?.pt ?? null) : null,
+    dpr
   )
-  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null)
+  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr)
 
   useEffect(() => {
     const el = canvasAreaRef.current
@@ -124,7 +126,7 @@ export const LevelEditor = () => {
   const onCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (mode !== "select") return
     const point = getCanvasPoint(e)
-    const hit = findEndpointAt(Object.values(editorManager.data.lines),point)
+    const hit = findEndpointAt(Object.values(editorManager.data.lines), point)
     if (hit) {
       draggingEndpoint.current = hit
       setIsDragging(true)
@@ -171,7 +173,7 @@ export const LevelEditor = () => {
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       if (mode === "addStart") {
         if (addStartSnap) {
-          setStart(new Start(addStartSnap.lineId, addStartSnap.endpoint, start?.delay ?? 0))
+          addStart(new StartEditor(addStartSnap.lineId, addStartSnap.endpoint))
           setAddStartSnap(null)
           setMode("select")
         }
@@ -187,7 +189,7 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, addStartSnap, start, addLine, setPendingPoint, setMode, setStart]
+    [mode, pendingPoint, addStartSnap, addLine, addStart, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"
@@ -216,8 +218,10 @@ export const LevelEditor = () => {
             <S.CanvasWrapper $w={CANVAS_W * scale} $h={CANVAS_H * scale}>
               <S.StyledCanvas
                 ref={editorCanvasRef}
-                width={CANVAS_W}
-                height={CANVAS_H}
+                width={CANVAS_W * dpr}
+                height={CANVAS_H * dpr}
+                $w={CANVAS_W}
+                $h={CANVAS_H}
                 $scale={scale}
                 $cursor={canvasCursor}
                 $visible={viewMode === "editor"}
@@ -229,8 +233,10 @@ export const LevelEditor = () => {
               />
               <S.StyledCanvas
                 ref={previewCanvasRef}
-                width={CANVAS_W}
-                height={CANVAS_H}
+                width={CANVAS_W * dpr}
+                height={CANVAS_H * dpr}
+                $w={CANVAS_W}
+                $h={CANVAS_H}
                 $scale={scale}
                 $cursor="default"
                 $visible={viewMode === "preview"}
@@ -240,6 +246,11 @@ export const LevelEditor = () => {
               <S.IdsButton $active={showIds} onClick={() => setShowIds((v) => !v)}>
                 IDs
               </S.IdsButton>
+            )}
+            {viewMode === "preview" && (
+              <S.RestartButton onClick={() => setViewMode("preview")}>
+                ↺ Restart
+              </S.RestartButton>
             )}
           </S.CanvasOuter>
         </S.CanvasArea>

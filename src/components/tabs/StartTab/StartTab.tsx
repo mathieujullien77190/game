@@ -4,44 +4,44 @@ import { useStore } from "store"
 import * as S from "./UI"
 
 export const StartTab = () => {
-  const { revision, start, mode, setMode, setStart, updateStartDelay } = useStore(
+  const { starts, mode, setMode, removeStart, updateStartDelay } = useStore(
     useShallow((s) => ({
-      revision: s.revision,
-      start: s.start,
+      starts: s.starts,
       mode: s.mode,
       setMode: s.setMode,
-      setStart: s.setStart,
+      removeStart: s.removeStart,
       updateStartDelay: s.updateStartDelay,
     }))
   )
 
   const isPlacing = mode === "addStart"
+  const hasStart = Object.keys(starts).length > 0
 
   return (
     <S.Container>
-      {!start && (
-        <S.AddButton
-          $active={isPlacing}
-          onClick={() => setMode(isPlacing ? "select" : "addStart")}
-        >
+      {!hasStart && (
+        <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addStart")}>
           {isPlacing ? "Cancel" : "+ Add Start"}
         </S.AddButton>
       )}
 
-      {start && (
-        <S.StartCard key={revision}>
-          <S.StartHeader>
-            <S.StartInfo>{start.lineId} [{start.endpoint}]</S.StartInfo>
-            <S.RemoveButton onClick={() => { setStart(null); if (isPlacing) setMode("select") }}>✕</S.RemoveButton>
-          </S.StartHeader>
-          <S.Divider />
-          <NumberInput
-            label="Delay (s)"
-            value={start.delay}
-            onChange={updateStartDelay}
-          />
-        </S.StartCard>
-      )}
+      <S.StartList>
+        {Object.values(starts).map((start) => (
+          <S.StartCard key={start.id}>
+            <S.StartHeader>
+              <S.StartInfo>{start.lineId} [{start.endpoint}]</S.StartInfo>
+              <S.DeleteButton onClick={() => removeStart(start.id)}>✕</S.DeleteButton>
+            </S.StartHeader>
+            <S.Divider />
+            <NumberInput
+              label="Delay (s)"
+              value={start.delay}
+              min={1}
+              onChange={(v) => updateStartDelay(start.id, v)}
+            />
+          </S.StartCard>
+        ))}
+      </S.StartList>
     </S.Container>
   )
 }

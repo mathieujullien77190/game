@@ -3,8 +3,8 @@ import { useStore } from "store"
 import * as S from "./UI"
 
 export const JsonTab = () => {
-  const { editorManager, tokens, start, revision } = useStore(
-    useShallow((s) => ({ editorManager: s.editorManager, tokens: s.tokens, start: s.start, revision: s.revision }))
+  const { editorManager, tokens, starts, revision } = useStore(
+    useShallow((s) => ({ editorManager: s.editorManager, tokens: s.tokens, starts: s.starts, revision: s.revision }))
   )
 
   const json = JSON.stringify(
@@ -16,13 +16,8 @@ export const JsonTab = () => {
         line2: lk.line2,
         activated: lk.activated,
       })),
-      tokens: Object.values(tokens).map((t) => ({
-        id: t.id,
-        color: t.color,
-        type: t.type,
-        speed: t.speed,
-      })),
-      start: start ? { lineId: start.lineId, endpoint: start.endpoint, delay: start.delay } : null,
+      tokens: Object.values(tokens).map((t) => ({ id: t.id, color: t.color, type: t.type, speed: t.speed })),
+      starts: Object.values(starts).map((s) => ({ id: s.id, lineId: s.lineId, endpoint: s.endpoint, delay: s.delay })),
     },
     null,
     2

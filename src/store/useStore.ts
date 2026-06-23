@@ -4,7 +4,8 @@ import { EditorManager } from "engine/Manager/EditorManager"
 import { PreviewManager } from "engine/Manager/PreviewManager"
 import { LineEditor } from "engine/Line/LineEditor"
 import { Token, syncTokenCounter, type TokenColor, type TokenType } from "engine/Token/Token"
-import { Start } from "engine/Start/Start"
+import { StartEditor } from "engine/Start/StartEditor"
+import { syncStartCounter } from "engine/Start/Start"
 import type { Store } from "./types"
 import type { Point } from "engine/types"
 import { createLineActions } from "./actions/lineActions"
@@ -17,7 +18,7 @@ type PersistedState = {
   lines: { id: string; start: Point; end: Point }[]
   links: { id: string; activated: boolean }[]
   tokens: { id: string; color: TokenColor; speed: number; type?: TokenType }[]
-  start: { lineId: string; endpoint: "start" | "end"; delay: number } | null
+  starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number }[]
 }
 
 const editorManager = new EditorManager()
@@ -30,7 +31,7 @@ export const useStore = create<Store>()(
       editorManager,
       previewManager,
       tokens: {},
-      start: null,
+      starts: {},
       revision: 0,
       mode: "select",
       viewMode: "editor",
@@ -59,9 +60,12 @@ export const useStore = create<Store>()(
           speed: t.speed,
           type: t.type,
         })),
-        start: state.start
-          ? { lineId: state.start.lineId, endpoint: state.start.endpoint, delay: state.start.delay }
-          : null,
+        starts: Object.values(state.starts).map((s) => ({
+          id: s.id,
+          lineId: s.lineId,
+          endpoint: s.endpoint,
+          delay: s.delay,
+        })),
       }),
       merge: (persisted, current) => {
         const p = persisted as PersistedState
@@ -88,11 +92,16 @@ export const useStore = create<Store>()(
           syncTokenCounter(Object.keys(tokens))
         }
 
-        const start = p.start
-          ? new Start(p.start.lineId, p.start.endpoint, p.start.delay)
-          : null
+        const starts: Record<string, StartEditor> = {}
+        if (p.starts?.length) {
+          p.starts.forEach(({ id, lineId, endpoint, delay }) => {
+            const s = new StartEditor(lineId, endpoint, delay, id)
+            starts[s.id] = s
+          })
+          syncStartCounter(Object.keys(starts))
+        }
 
-        return { ...current, tokens, start, revision: 1 }
+        return { ...current, tokens, starts, revision: 1 }
       },
     }
   )
