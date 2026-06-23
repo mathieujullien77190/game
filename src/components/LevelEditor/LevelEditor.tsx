@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { LineEditor } from "engine/Line/LineEditor"
 import { StartEditor } from "engine/Start/StartEditor"
+import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
@@ -50,8 +51,9 @@ export const LevelEditor = () => {
   const [snapPoint, setSnapPoint] = useState<Point | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [hoverNearEndpoint, setHoverNearEndpoint] = useState(false)
-  const [showIds, setShowIds] = useState(false)
+  const [showIds, setShowIds] = useState(true)
   const [addStartSnap, setAddStartSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
+  const [addSwitchSnap, setAddSwitchSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
 
   const leftRef = useRef<HTMLDivElement>(null)
   const canvasAreaRef = useRef<HTMLDivElement>(null)
@@ -63,8 +65,8 @@ export const LevelEditor = () => {
 
   const {
     editorManager, previewManager, revision,
-    mode, viewMode, pendingPoint, starts, lineType,
-    addLine, addStart, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint,
+    mode, viewMode, pendingPoint, starts, switches, hoveredLineId, hoveredSwitchId, lineType,
+    addLine, addStart, addSwitch, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -74,28 +76,37 @@ export const LevelEditor = () => {
       viewMode: s.viewMode,
       pendingPoint: s.pendingPoint,
       starts: s.starts,
+      switches: s.switches,
+      hoveredLineId: s.hoveredLineId,
+      hoveredSwitchId: s.hoveredSwitchId,
       lineType: s.lineType,
       addLine: s.addLine,
       addStart: s.addStart,
+      addSwitch: s.addSwitch,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
       setViewMode: s.setViewMode,
       updateLineEndpoint: s.updateLineEndpoint,
       updateLineControlPoint: s.updateLineControlPoint,
+      setHoveredLineId: s.setHoveredLineId,
     }))
   )
 
   const startsArray = Object.values(starts)
+  const switchesArray = Object.values(switches)
 
   useCanvasDraw(
     editorCanvasRef, editorManager, revision,
-    null,
+    hoveredLineId,
     mode === "addLine" ? snapPoint : null,
     pendingPoint,
     showIds,
     startsArray,
+    switchesArray,
     mode === "addStart" ? (addStartSnap?.pt ?? null) : null,
-    dpr
+    mode === "addSwitch" ? (addSwitchSnap?.pt ?? null) : null,
+    dpr,
+    hoveredSwitchId
   )
   useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr)
 
@@ -173,13 +184,31 @@ export const LevelEditor = () => {
         setAddStartSnap(null)
         setHoverNearEndpoint(false)
       }
+    } else if (mode === "addSwitch") {
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddSwitchSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddSwitchSnap(null)
+        setHoverNearEndpoint(false)
+      }
     } else {
       setSnapPoint(point)
       if (mode === "select") {
         setHoverNearEndpoint(findEndpointAt(Object.values(editorManager.data.lines), raw) !== null)
+        const HIT_R = 8
+        const found = Object.values(editorManager.data.lines).find((line) =>
+          line.points.some((pt) => {
+            const dx = pt.x - raw.x; const dy = pt.y - raw.y
+            return dx * dx + dy * dy <= HIT_R * HIT_R
+          })
+        )
+        setHoveredLineId(found?.id ?? null)
       }
     }
-  }, [mode, editorManager, updateLineEndpoint])
+  }, [mode, editorManager, updateLineEndpoint, setHoveredLineId])
 
   const onCanvasMouseUp = useCallback(() => {
     draggingEndpoint.current = null
@@ -190,11 +219,13 @@ export const LevelEditor = () => {
   const onMouseLeave = useCallback(() => {
     setSnapPoint(null)
     setAddStartSnap(null)
+    setAddSwitchSnap(null)
     setHoverNearEndpoint(false)
+    setHoveredLineId(null)
     draggingEndpoint.current = null
     draggingCP.current = null
     setIsDragging(false)
-  }, [])
+  }, [setHoveredLineId])
 
   const onCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -202,6 +233,20 @@ export const LevelEditor = () => {
         if (addStartSnap) {
           addStart(new StartEditor(addStartSnap.lineId, addStartSnap.endpoint))
           setAddStartSnap(null)
+          setMode("select")
+        }
+        return
+      }
+      if (mode === "addSwitch") {
+        if (addSwitchSnap) {
+          const linkIds = Object.values(editorManager.data.links)
+            .filter((lk) =>
+              (lk.line1.lineId === addSwitchSnap.lineId && lk.line1.endpoint === addSwitchSnap.endpoint) ||
+              (lk.line2.lineId === addSwitchSnap.lineId && lk.line2.endpoint === addSwitchSnap.endpoint)
+            )
+            .map((lk) => lk.id)
+          addSwitch(new SwitchEditor(undefined, linkIds, linkIds[0] ?? null))
+          setAddSwitchSnap(null)
           setMode("select")
         }
         return
@@ -216,12 +261,12 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, addStartSnap, lineType, addLine, addStart, setPendingPoint, setMode]
+    [mode, pendingPoint, addStartSnap, addSwitchSnap, lineType, addLine, addStart, addSwitch, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
-    : mode === "addStart"
+    : (mode === "addStart" || mode === "addSwitch")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging
         ? "grabbing"
@@ -265,8 +310,14 @@ export const LevelEditor = () => {
                 $w={CANVAS_W}
                 $h={CANVAS_H}
                 $scale={scale}
-                $cursor="default"
+                $cursor={viewMode === "preview" && Object.keys(previewManager.data.switches).length > 0 ? "pointer" : "default"}
                 $visible={viewMode === "preview"}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const x = (e.clientX - rect.left) * (CANVAS_W / rect.width)
+                  const y = (e.clientY - rect.top) * (CANVAS_H / rect.height)
+                  previewManager.cycleSwitchAt(x, y)
+                }}
               />
             </S.CanvasWrapper>
             {viewMode === "editor" && (

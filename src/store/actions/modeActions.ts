@@ -12,7 +12,7 @@ export const createModeActions = (set: Set) => ({
         Object.values(state.editorManager.data.lines).forEach((l) =>
           state.previewManager.addLine(new LinePreview(l.start, l.end, l.type, l.id, l.cp1, l.cp2))
         )
-        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts)
+        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks)
       }
       return { viewMode }
     }),

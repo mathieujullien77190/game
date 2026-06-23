@@ -40,10 +40,32 @@ export const LineItem = styled.div`
   border-radius: 4px;
 `
 
-export const LineLabel = styled.span`
+export const LineLabel = styled.span<{ $clickable?: boolean }>`
   font-size: 10px;
   color: #555;
   font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
+  user-select: none;
+`
+
+export const Chevron = styled.span<{ $open: boolean }>`
+  font-size: 8px;
+  color: #aaa;
+  transform: ${({ $open }) => ($open ? "rotate(90deg)" : "rotate(0deg)")};
+  transition: transform 0.15s ease;
+  display: inline-block;
+`
+
+export const LinkCount = styled.span`
+  padding: 0px 5px;
+  border-radius: 8px;
+  background: #e0e0e0;
+  color: #888;
+  font-family: monospace;
+  font-size: 9px;
 `
 
 export const DeleteButton = styled.button`

@@ -19,7 +19,7 @@ export class LineEditor extends Line {
 
   draw = (ctx: CanvasRenderingContext2D, hovered = false, showId = false) => {
     ctx.lineCap = "round"
-    ctx.strokeStyle = hovered ? "#555" : "#999"
+    ctx.strokeStyle = hovered ? "#000" : "#999"
     ctx.lineWidth = hovered ? 3 : 2
     ctx.setLineDash([6, 5])
     ctx.beginPath()

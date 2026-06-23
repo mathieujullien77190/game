@@ -3,9 +3,10 @@ import * as S from "./UI"
 import LineTab from "components/tabs/LineTab"
 import TokenTab from "components/tabs/TokenTab"
 import StartTab from "components/tabs/StartTab"
+import SwitchTab from "components/tabs/SwitchTab"
 import JsonTab from "components/tabs/JsonTab"
 
-const TABS = ["line", "token", "start", "json"] as const
+const TABS = ["line", "token", "start", "switch", "json"] as const
 type Tab = (typeof TABS)[number]
 
 export const ToolsPanel = () => {
@@ -28,6 +29,7 @@ export const ToolsPanel = () => {
         {activeTab === "line" && <LineTab />}
         {activeTab === "token" && <TokenTab />}
         {activeTab === "start" && <StartTab />}
+        {activeTab === "switch" && <SwitchTab />}
         {activeTab === "json" && <JsonTab />}
       </S.TabContent>
     </S.Container>

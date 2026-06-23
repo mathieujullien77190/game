@@ -3,6 +3,9 @@ import { CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR } from "../constants"
 import { LineEditor } from "../Line/LineEditor"
 import { Link } from "../Link/Link"
 import { StartEditor } from "../Start/StartEditor"
+import { SwitchEditor } from "../Switch/SwitchEditor"
+import { getSwitchEnterPoint } from "../Switch/switchUtils"
+import { drawStats } from "../stats"
 import { Manager } from "./Manager"
 
 const pointsEqual = (a: Point, b: Point) => a.x === b.x && a.y === b.y
@@ -96,7 +99,12 @@ export class EditorManager extends Manager<LineEditor> {
     pendingPoint: Point | null = null,
     showIds = false,
     starts: StartEditor[] = [],
-    previewStartPt: Point | null = null
+    switches: SwitchEditor[] = [],
+    previewStartPt: Point | null = null,
+    previewSwitchPt: Point | null = null,
+    fps = 0,
+    frameMs = 0,
+    hoveredSwitchId: string | null = null
   ) => {
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -104,6 +112,26 @@ export class EditorManager extends Manager<LineEditor> {
     ctx.restore()
 
     this.drawGrid(ctx)
+
+    for (const sw of switches) {
+      const ep = getSwitchEnterPoint(sw.linkIds, this.data.links)
+      if (!ep) continue
+      const line = this.data.lines[ep.lineId]
+      if (!line) continue
+      const pt = ep.endpoint === "end" ? line.end : line.start
+      ctx.globalAlpha = hoveredSwitchId === sw.id ? 1 : 0.4
+      sw.draw(ctx, pt)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewSwitchPt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#7c3aed"
+      ctx.beginPath()
+      ctx.arc(previewSwitchPt.x, previewSwitchPt.y, 18, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+    }
 
     for (const line of Object.values(this.data.lines)) {
       line.draw(ctx, line.id === hoveredLineId, showIds)
@@ -158,5 +186,7 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.arc(snapPoint.x, snapPoint.y, isSecond ? 7 : 5, 0, Math.PI * 2)
       ctx.fill()
     }
+
+    drawStats(ctx, fps, frameMs)
   }
 }

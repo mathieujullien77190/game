@@ -5,9 +5,10 @@ import { LineEditor } from "engine/Line/LineEditor"
 import type { LineType } from "engine/Line/Line"
 import { Token } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
+import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import type { Point } from "engine/types"
 
-export type Mode = "select" | "addLine" | "addStart"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -15,6 +16,10 @@ export interface StoreState {
   previewManager: PreviewManager
   tokens: Record<string, Token>
   starts: Record<string, StartEditor>
+  switches: Record<string, SwitchEditor>
+  switchLinks: Record<string, string[]>
+  hoveredLineId: string | null
+  hoveredSwitchId: string | null
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -34,6 +39,13 @@ export interface StoreActions {
   addStart: (start: StartEditor) => void
   removeStart: (id: string) => void
   updateStartDelay: (id: string, delay: number) => void
+  addSwitch: (sw: SwitchEditor) => void
+  removeSwitch: (id: string) => void
+  updateSwitchActiveLink: (id: string, activeLinkId: string) => void
+  updateSwitchLinks: (id: string, linkIds: string[], activeLinkId: string | null) => void
+  toggleSwitchLink: (id1: string, id2: string) => void
+  setHoveredSwitchId: (id: string | null) => void
+  setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void
   setViewMode: (viewMode: ViewMode) => void
   setPendingPoint: (point: Point | null) => void
