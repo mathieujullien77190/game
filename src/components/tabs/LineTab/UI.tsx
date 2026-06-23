@@ -94,6 +94,41 @@ export const LinkDetail = styled.span`
   flex: 1;
 `
 
+export const TypeRow = styled.div`
+  display: flex;
+  gap: 6px;
+`
+
+export const TypeButton = styled.button<{ $active: boolean }>`
+  flex: 1;
+  padding: 5px 8px;
+  background: ${({ $active }) => ($active ? "#333" : "#f0f0f0")};
+  color: ${({ $active }) => ($active ? "#fff" : "#666")};
+  border: 1px solid ${({ $active }) => ($active ? "#333" : "#ddd")};
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? "#444" : "#e0e0e0")};
+  }
+`
+
+export const TypeBadge = styled.span<{ $curve: boolean }>`
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: ${({ $curve }) => ($curve ? "#ede7f6" : "#e8f0fe")};
+  color: ${({ $curve }) => ($curve ? "#7b1fa2" : "#1565c0")};
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+`
+
 export const LinkActivated = styled.button<{ $on: boolean }>`
   padding: 1px 6px;
   border-radius: 3px;

@@ -3,12 +3,14 @@ import { useStore } from "store"
 import * as S from "./UI"
 
 export const LineTab = () => {
-  const { editorManager, revision, mode, setMode, removeLine, toggleLinkActivated } = useStore(
+  const { editorManager, revision, mode, lineType, setMode, setLineType, removeLine, toggleLinkActivated } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       revision: s.revision,
       mode: s.mode,
+      lineType: s.lineType,
       setMode: s.setMode,
+      setLineType: s.setLineType,
       removeLine: s.removeLine,
       toggleLinkActivated: s.toggleLinkActivated,
     }))
@@ -18,12 +20,25 @@ export const LineTab = () => {
 
   return (
     <S.Container>
-      <S.AddButton
-        $active={mode === "addLine"}
-        onClick={() => setMode(mode === "addLine" ? "select" : "addLine")}
-      >
-        {mode === "addLine" ? "Cancel" : "+ Add Line"}
-      </S.AddButton>
+      {mode === "addLine" ? (
+        <S.AddButton $active onClick={() => setMode("select")}>Cancel</S.AddButton>
+      ) : (
+        <S.TypeRow>
+          <S.TypeButton
+            $active={false}
+            onClick={() => { setLineType("straight"); setMode("addLine") }}
+          >
+            + Straight
+          </S.TypeButton>
+          <S.TypeButton
+            $active={false}
+            onClick={() => { setLineType("curve"); setMode("addLine") }}
+          >
+            + Curve
+          </S.TypeButton>
+        </S.TypeRow>
+      )}
+
       <S.LineList>
         {Object.values(editorManager.data.lines).map((line) => {
           const lineLinks = allLinks.filter(
@@ -34,7 +49,7 @@ export const LineTab = () => {
               <S.LineItem>
                 <S.LineLabel>
                   <S.LineId>{line.id}</S.LineId>
-                  ({line.start.x}, {line.start.y}) → ({line.end.x}, {line.end.y})
+                  <S.TypeBadge $curve={line.type === "curve"}>{line.type}</S.TypeBadge>
                 </S.LineLabel>
                 <S.DeleteButton onClick={() => removeLine(line.id)}>✕</S.DeleteButton>
               </S.LineItem>

@@ -2,8 +2,14 @@ import { Line } from "./Line"
 
 export class LineEditor extends Line {
   drawId = (ctx: CanvasRenderingContext2D) => {
-    const mx = (this.start.x + this.end.x) / 2
-    const my = (this.start.y + this.end.y) / 2
+    let mx: number, my: number
+    if (this.type === "curve") {
+      mx = 0.125*this.start.x + 0.375*this.cp1.x + 0.375*this.cp2.x + 0.125*this.end.x
+      my = 0.125*this.start.y + 0.375*this.cp1.y + 0.375*this.cp2.y + 0.125*this.end.y
+    } else {
+      mx = (this.start.x + this.end.x) / 2
+      my = (this.start.y + this.end.y) / 2
+    }
     ctx.font = "bold 10px monospace"
     ctx.fillStyle = "#333"
     ctx.textAlign = "center"
@@ -13,15 +19,43 @@ export class LineEditor extends Line {
 
   draw = (ctx: CanvasRenderingContext2D, hovered = false, showId = false) => {
     ctx.lineCap = "round"
-
     ctx.strokeStyle = hovered ? "#555" : "#999"
     ctx.lineWidth = hovered ? 3 : 2
     ctx.setLineDash([6, 5])
     ctx.beginPath()
     ctx.moveTo(this.start.x, this.start.y)
-    ctx.lineTo(this.end.x, this.end.y)
+    if (this.type === "curve") {
+      ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
+    } else {
+      ctx.lineTo(this.end.x, this.end.y)
+    }
     ctx.stroke()
     ctx.setLineDash([])
+
+    if (this.type === "curve") {
+      ctx.strokeStyle = "#ccc"
+      ctx.lineWidth = 1
+      ctx.setLineDash([3, 3])
+      ctx.beginPath()
+      ctx.moveTo(this.start.x, this.start.y)
+      ctx.lineTo(this.cp1.x, this.cp1.y)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(this.end.x, this.end.y)
+      ctx.lineTo(this.cp2.x, this.cp2.y)
+      ctx.stroke()
+      ctx.setLineDash([])
+
+      ctx.fillStyle = "#4caf50"
+      ctx.beginPath()
+      ctx.arc(this.cp1.x, this.cp1.y, 5, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.fillStyle = "#9c27b0"
+      ctx.beginPath()
+      ctx.arc(this.cp2.x, this.cp2.y, 5, 0, Math.PI * 2)
+      ctx.fill()
+    }
 
     ctx.fillStyle = "#f9ab00"
     ctx.beginPath()

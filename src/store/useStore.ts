@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware"
 import { EditorManager } from "engine/Manager/EditorManager"
 import { PreviewManager } from "engine/Manager/PreviewManager"
 import { LineEditor } from "engine/Line/LineEditor"
+import { syncLineCounter, type LineType } from "engine/Line/Line"
 import { Token, syncTokenCounter, type TokenColor, type TokenType } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
 import { syncStartCounter } from "engine/Start/Start"
@@ -15,7 +16,7 @@ import { createModeActions } from "./actions/modeActions"
 import { createStartActions } from "./actions/startActions"
 
 type PersistedState = {
-  lines: { id: string; start: Point; end: Point }[]
+  lines: { id: string; start: Point; end: Point; type?: LineType; cp1?: Point; cp2?: Point }[]
   links: { id: string; activated: boolean }[]
   tokens: { id: string; color: TokenColor; speed: number; type?: TokenType }[]
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number }[]
@@ -36,6 +37,7 @@ export const useStore = create<Store>()(
       mode: "select",
       viewMode: "editor",
       pendingPoint: null,
+      lineType: "straight" as LineType,
       ...createLineActions(set),
       ...createLinkActions(set),
       ...createTokenActions(set),
@@ -49,6 +51,9 @@ export const useStore = create<Store>()(
           id: l.id,
           start: l.start,
           end: l.end,
+          type: l.type,
+          cp1: l.cp1,
+          cp2: l.cp2,
         })),
         links: Object.values(state.editorManager.data.links).map((lk) => ({
           id: lk.id,
@@ -71,9 +76,10 @@ export const useStore = create<Store>()(
         const p = persisted as PersistedState
 
         if (p.lines?.length) {
-          p.lines.forEach(({ id, start, end }) => {
-            current.editorManager.addLine(new LineEditor(start, end, id))
+          p.lines.forEach(({ id, start, end, type, cp1, cp2 }) => {
+            current.editorManager.addLine(new LineEditor(start, end, type ?? "straight", id, cp1, cp2))
           })
+          syncLineCounter(p.lines.map((l) => l.id))
         }
 
         if (p.links?.length) {

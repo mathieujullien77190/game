@@ -17,7 +17,7 @@ export const TokenTab = () => {
 
   return (
     <S.Container>
-      <S.AddButton onClick={() => addToken(new Token(TOKEN_COLORS[0], 1))}>
+      <S.AddButton onClick={() => addToken(new Token(TOKEN_COLORS[0], 40))}>
         + Add Token
       </S.AddButton>
 

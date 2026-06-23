@@ -10,7 +10,7 @@ export const createModeActions = (set: Set) => ({
       if (viewMode === "preview") {
         state.previewManager.data.lines = {}
         Object.values(state.editorManager.data.lines).forEach((l) =>
-          state.previewManager.addLine(new LinePreview(l.start, l.end, l.id))
+          state.previewManager.addLine(new LinePreview(l.start, l.end, l.type, l.id, l.cp1, l.cp2))
         )
         state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts)
       }

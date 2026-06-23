@@ -18,6 +18,17 @@ const snapToGrid = (p: Point): Point => ({
   y: Math.round(p.y / GRID_SIZE) * GRID_SIZE,
 })
 
+const findControlPointAt = (lines: LineEditor[], point: Point) => {
+  for (const line of lines) {
+    if (line.type !== "curve") continue
+    const d1x = point.x - line.cp1.x; const d1y = point.y - line.cp1.y
+    if (Math.sqrt(d1x * d1x + d1y * d1y) <= HIT_RADIUS) return { lineId: line.id, cp: "cp1" as const }
+    const d2x = point.x - line.cp2.x; const d2y = point.y - line.cp2.y
+    if (Math.sqrt(d2x * d2x + d2y * d2y) <= HIT_RADIUS) return { lineId: line.id, cp: "cp2" as const }
+  }
+  return null
+}
+
 const findEndpointAt = (lines: LineEditor[], point: Point) => {
   for (const line of lines) {
     const dsx = point.x - line.start.x
@@ -48,11 +59,12 @@ export const LevelEditor = () => {
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
   const dragging = useRef(false)
   const draggingEndpoint = useRef<{ lineId: string; endpoint: "start" | "end" } | null>(null)
+  const draggingCP = useRef<{ lineId: string; cp: "cp1" | "cp2" } | null>(null)
 
   const {
     editorManager, previewManager, revision,
-    mode, viewMode, pendingPoint, starts,
-    addLine, addStart, setPendingPoint, setMode, setViewMode, updateLineEndpoint,
+    mode, viewMode, pendingPoint, starts, lineType,
+    addLine, addStart, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -62,12 +74,14 @@ export const LevelEditor = () => {
       viewMode: s.viewMode,
       pendingPoint: s.pendingPoint,
       starts: s.starts,
+      lineType: s.lineType,
       addLine: s.addLine,
       addStart: s.addStart,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
       setViewMode: s.setViewMode,
       updateLineEndpoint: s.updateLineEndpoint,
+      updateLineControlPoint: s.updateLineControlPoint,
     }))
   )
 
@@ -126,7 +140,14 @@ export const LevelEditor = () => {
   const onCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (mode !== "select") return
     const point = getCanvasPoint(e)
-    const hit = findEndpointAt(Object.values(editorManager.data.lines), point)
+    const lines = Object.values(editorManager.data.lines)
+    const cpHit = findControlPointAt(lines, point)
+    if (cpHit) {
+      draggingCP.current = cpHit
+      setIsDragging(true)
+      return
+    }
+    const hit = findEndpointAt(lines, point)
     if (hit) {
       draggingEndpoint.current = hit
       setIsDragging(true)
@@ -136,6 +157,10 @@ export const LevelEditor = () => {
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const raw = getCanvasPoint(e)
     const point = snapToGrid(raw)
+    if (draggingCP.current) {
+      updateLineControlPoint(draggingCP.current.lineId, draggingCP.current.cp, raw)
+      return
+    }
     if (draggingEndpoint.current) {
       updateLineEndpoint(draggingEndpoint.current.lineId, draggingEndpoint.current.endpoint, point)
     } else if (mode === "addStart") {
@@ -158,6 +183,7 @@ export const LevelEditor = () => {
 
   const onCanvasMouseUp = useCallback(() => {
     draggingEndpoint.current = null
+    draggingCP.current = null
     setIsDragging(false)
   }, [])
 
@@ -166,6 +192,7 @@ export const LevelEditor = () => {
     setAddStartSnap(null)
     setHoverNearEndpoint(false)
     draggingEndpoint.current = null
+    draggingCP.current = null
     setIsDragging(false)
   }, [])
 
@@ -184,12 +211,12 @@ export const LevelEditor = () => {
       if (!pendingPoint) {
         setPendingPoint(point)
       } else {
-        addLine(new LineEditor(pendingPoint, point))
+        addLine(new LineEditor(pendingPoint, point, lineType))
         setPendingPoint(null)
         setMode("select")
       }
     },
-    [mode, pendingPoint, addStartSnap, addLine, addStart, setPendingPoint, setMode]
+    [mode, pendingPoint, addStartSnap, lineType, addLine, addStart, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"

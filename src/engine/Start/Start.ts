@@ -14,7 +14,7 @@ export class Start {
   endpoint: "start" | "end"
   delay: number
 
-  constructor(lineId: string, endpoint: "start" | "end", delay: number = 2, id?: string) {
+  constructor(lineId: string, endpoint: "start" | "end", delay: number = 6, id?: string) {
     this.id = id ?? `start${startCounter++}`
     this.lineId = lineId
     this.endpoint = endpoint

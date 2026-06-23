@@ -2,6 +2,7 @@ import type { StoreApi } from "zustand"
 import { EditorManager } from "engine/Manager/EditorManager"
 import { PreviewManager } from "engine/Manager/PreviewManager"
 import { LineEditor } from "engine/Line/LineEditor"
+import type { LineType } from "engine/Line/Line"
 import { Token } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
 import type { Point } from "engine/types"
@@ -18,12 +19,14 @@ export interface StoreState {
   mode: Mode
   viewMode: ViewMode
   pendingPoint: Point | null
+  lineType: LineType
 }
 
 export interface StoreActions {
   addLine: (line: LineEditor) => void
   removeLine: (id: string) => void
   updateLineEndpoint: (id: string, endpoint: "start" | "end", point: Point) => void
+  updateLineControlPoint: (id: string, cp: "cp1" | "cp2", point: Point) => void
   toggleLinkActivated: (linkId: string) => void
   addToken: (token: Token) => void
   removeToken: (id: string) => void
@@ -34,6 +37,7 @@ export interface StoreActions {
   setMode: (mode: Mode) => void
   setViewMode: (viewMode: ViewMode) => void
   setPendingPoint: (point: Point | null) => void
+  setLineType: (lineType: LineType) => void
 }
 
 export type Store = StoreState & StoreActions

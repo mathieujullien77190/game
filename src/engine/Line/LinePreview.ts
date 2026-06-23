@@ -8,7 +8,11 @@ export class LinePreview extends Line {
     ctx.setLineDash([])
     ctx.beginPath()
     ctx.moveTo(this.start.x, this.start.y)
-    ctx.lineTo(this.end.x, this.end.y)
+    if (this.type === "curve") {
+      ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
+    } else {
+      ctx.lineTo(this.end.x, this.end.y)
+    }
     ctx.stroke()
   }
 }
