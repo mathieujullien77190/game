@@ -82,6 +82,24 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
+  updateLineBoost: (id: string, boost: number) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.boost = boost
+      return { revision: state.revision + 1 }
+    }),
+
+  updateLineSine: (id: string, frequency: number, amplitude: number) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.frequency = frequency
+      line.amplitude = amplitude
+      line.computePoints()
+      return { revision: state.revision + 1 }
+    }),
+
   setHoveredLineId: (id: string | null) => set(() => ({ hoveredLineId: id })),
 
   setLineType: (lineType: LineType) => set(() => ({ lineType })),

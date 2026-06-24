@@ -115,10 +115,8 @@ export const StyledCanvas = styled.canvas<{ $scale: number; $cursor: string; $vi
   position: absolute;
   top: 0;
   left: 0;
-  width: ${({ $w }) => $w}px;
-  height: ${({ $h }) => $h}px;
-  transform: scale(${({ $scale }) => $scale});
-  transform-origin: top left;
+  width: ${({ $w, $scale }) => $w * $scale}px;
+  height: ${({ $h, $scale }) => $h * $scale}px;
   background: #fff;
   cursor: ${({ $cursor }) => $cursor};
 `

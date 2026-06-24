@@ -139,16 +139,36 @@ export const TypeButton = styled.button<{ $active: boolean }>`
   }
 `
 
-export const TypeBadge = styled.span<{ $curve: boolean }>`
+export const TypeBadge = styled.span<{ $type: string }>`
   padding: 1px 5px;
   border-radius: 3px;
-  background: ${({ $curve }) => ($curve ? "#ede7f6" : "#e8f0fe")};
-  color: ${({ $curve }) => ($curve ? "#7b1fa2" : "#1565c0")};
+  background: ${({ $type }) => $type === "curve" ? "#ede7f6" : $type === "sine" ? "#e8f5e9" : "#e8f0fe"};
+  color: ${({ $type }) => $type === "curve" ? "#7b1fa2" : $type === "sine" ? "#2e7d32" : "#1565c0"};
   font-family: monospace;
   font-size: 9px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+`
+
+export const BoostRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+`
+
+export const BoostLabel = styled.span`
+  font-family: monospace;
+  font-size: 9px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
 `
 
 export const LinkActivated = styled.button<{ $on: boolean }>`

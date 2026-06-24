@@ -3,6 +3,7 @@ import { useShallow } from "zustand/react/shallow"
 import { LineEditor } from "engine/Line/LineEditor"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
+import { RotatorEditor } from "engine/Rotator/RotatorEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
@@ -54,6 +55,7 @@ export const LevelEditor = () => {
   const [showIds, setShowIds] = useState(true)
   const [addStartSnap, setAddStartSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addSwitchSnap, setAddSwitchSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
+  const [addRotatorSnap, setAddRotatorSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
 
   const leftRef = useRef<HTMLDivElement>(null)
   const canvasAreaRef = useRef<HTMLDivElement>(null)
@@ -65,8 +67,8 @@ export const LevelEditor = () => {
 
   const {
     editorManager, previewManager, revision,
-    mode, viewMode, pendingPoint, starts, switches, hoveredLineId, hoveredSwitchId, lineType,
-    addLine, addStart, addSwitch, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
+    mode, viewMode, pendingPoint, starts, switches, rotators, hoveredLineId, hoveredSwitchId, hoveredRotatorId, lineType,
+    addLine, addStart, addSwitch, addRotator, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -77,12 +79,15 @@ export const LevelEditor = () => {
       pendingPoint: s.pendingPoint,
       starts: s.starts,
       switches: s.switches,
+      rotators: s.rotators,
       hoveredLineId: s.hoveredLineId,
       hoveredSwitchId: s.hoveredSwitchId,
+      hoveredRotatorId: s.hoveredRotatorId,
       lineType: s.lineType,
       addLine: s.addLine,
       addStart: s.addStart,
       addSwitch: s.addSwitch,
+      addRotator: s.addRotator,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
       setViewMode: s.setViewMode,
@@ -94,6 +99,7 @@ export const LevelEditor = () => {
 
   const startsArray = Object.values(starts)
   const switchesArray = Object.values(switches)
+  const rotatorsArray = Object.values(rotators).map((r) => new RotatorEditor(r.linkId, r.id))
 
   useCanvasDraw(
     editorCanvasRef, editorManager, revision,
@@ -105,10 +111,13 @@ export const LevelEditor = () => {
     switchesArray,
     mode === "addStart" ? (addStartSnap?.pt ?? null) : null,
     mode === "addSwitch" ? (addSwitchSnap?.pt ?? null) : null,
-    dpr,
-    hoveredSwitchId
+    dpr * scale,
+    hoveredSwitchId,
+    rotatorsArray,
+    hoveredRotatorId,
+    mode === "addRotator" ? (addRotatorSnap?.pt ?? null) : null
   )
-  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr)
+  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale)
 
   useEffect(() => {
     const el = canvasAreaRef.current
@@ -194,6 +203,16 @@ export const LevelEditor = () => {
         setAddSwitchSnap(null)
         setHoverNearEndpoint(false)
       }
+    } else if (mode === "addRotator") {
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddRotatorSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddRotatorSnap(null)
+        setHoverNearEndpoint(false)
+      }
     } else {
       setSnapPoint(point)
       if (mode === "select") {
@@ -220,6 +239,7 @@ export const LevelEditor = () => {
     setSnapPoint(null)
     setAddStartSnap(null)
     setAddSwitchSnap(null)
+    setAddRotatorSnap(null)
     setHoverNearEndpoint(false)
     setHoveredLineId(null)
     draggingEndpoint.current = null
@@ -251,6 +271,20 @@ export const LevelEditor = () => {
         }
         return
       }
+      if (mode === "addRotator") {
+        if (addRotatorSnap) {
+          const linkId = Object.values(editorManager.data.links).find((lk) =>
+            (lk.line1.lineId === addRotatorSnap.lineId && lk.line1.endpoint === addRotatorSnap.endpoint) ||
+            (lk.line2.lineId === addRotatorSnap.lineId && lk.line2.endpoint === addRotatorSnap.endpoint)
+          )?.id
+          if (linkId) {
+            addRotator(linkId)
+            setAddRotatorSnap(null)
+            setMode("select")
+          }
+        }
+        return
+      }
       if (mode !== "addLine") return
       const point = snapToGrid(getCanvasPoint(e))
       if (!pendingPoint) {
@@ -261,12 +295,12 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, addStartSnap, addSwitchSnap, lineType, addLine, addStart, addSwitch, setPendingPoint, setMode]
+    [mode, pendingPoint, addStartSnap, addSwitchSnap, addRotatorSnap, lineType, addLine, addStart, addSwitch, addRotator, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
-    : (mode === "addStart" || mode === "addSwitch")
+    : (mode === "addStart" || mode === "addSwitch" || mode === "addRotator")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging
         ? "grabbing"
@@ -290,8 +324,8 @@ export const LevelEditor = () => {
             <S.CanvasWrapper $w={CANVAS_W * scale} $h={CANVAS_H * scale}>
               <S.StyledCanvas
                 ref={editorCanvasRef}
-                width={CANVAS_W * dpr}
-                height={CANVAS_H * dpr}
+                width={CANVAS_W * dpr * scale}
+                height={CANVAS_H * dpr * scale}
                 $w={CANVAS_W}
                 $h={CANVAS_H}
                 $scale={scale}
@@ -305,8 +339,8 @@ export const LevelEditor = () => {
               />
               <S.StyledCanvas
                 ref={previewCanvasRef}
-                width={CANVAS_W * dpr}
-                height={CANVAS_H * dpr}
+                width={CANVAS_W * dpr * scale}
+                height={CANVAS_H * dpr * scale}
                 $w={CANVAS_W}
                 $h={CANVAS_H}
                 $scale={scale}

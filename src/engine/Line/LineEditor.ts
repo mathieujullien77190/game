@@ -6,6 +6,10 @@ export class LineEditor extends Line {
     if (this.type === "curve") {
       mx = 0.125*this.start.x + 0.375*this.cp1.x + 0.375*this.cp2.x + 0.125*this.end.x
       my = 0.125*this.start.y + 0.375*this.cp1.y + 0.375*this.cp2.y + 0.125*this.end.y
+    } else if (this.type === "sine" && this.points.length > 0) {
+      const mid = this.points[Math.floor(this.points.length / 2)]
+      mx = mid.x
+      my = mid.y
     } else {
       mx = (this.start.x + this.end.x) / 2
       my = (this.start.y + this.end.y) / 2
@@ -26,6 +30,8 @@ export class LineEditor extends Line {
     ctx.moveTo(this.start.x, this.start.y)
     if (this.type === "curve") {
       ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
+    } else if (this.type === "sine") {
+      for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y)
     } else {
       ctx.lineTo(this.end.x, this.end.y)
     }

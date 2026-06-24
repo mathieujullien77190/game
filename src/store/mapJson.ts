@@ -5,17 +5,19 @@ import { StartEditor } from "engine/Start/StartEditor"
 import { syncStartCounter } from "engine/Start/Start"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
+import { Rotator, syncRotatorCounter } from "engine/Rotator/Rotator"
 import type { EditorManager } from "engine/Manager/EditorManager"
 import type { Point } from "engine/types"
 import type { StartEditor as StartEditorType } from "engine/Start/StartEditor"
 import type { SwitchEditor as SwitchEditorType } from "engine/Switch/SwitchEditor"
 
 export type MapJson = {
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point }[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; frequency?: number; amplitude?: number }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number }[]
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[] }>
+  rotators?: { id: string; linkId: string }[]
 }
 
 export const serializeMap = (
@@ -23,7 +25,8 @@ export const serializeMap = (
   tokens: Record<string, Token>,
   starts: Record<string, StartEditorType>,
   switches: Record<string, SwitchEditorType>,
-  switchLinks: Record<string, string[]>
+  switchLinks: Record<string, string[]>,
+  rotators: Record<string, Rotator> = {}
 ): MapJson => ({
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
@@ -32,6 +35,8 @@ export const serializeMap = (
     type: l.type,
     ...(l.cp1 ? { cp1: l.cp1 } : {}),
     ...(l.cp2 ? { cp2: l.cp2 } : {}),
+    ...(l.boost !== 0 ? { boost: l.boost } : {}),
+    ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
   })),
   links: Object.values(editorManager.data.links).map((lk) => ({
     id: lk.id,
@@ -57,14 +62,22 @@ export const serializeMap = (
       { linkIds: sw.linkIds, activeLinkId: sw.activeLinkId, linkedSwitchIds: switchLinks[sw.id] ?? [] },
     ])
   ),
+  rotators: Object.values(rotators).map((r) => ({ id: r.id, linkId: r.linkId })),
 })
 
 export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2 }) => {
-    editorManager.addLine(new LineEditor(start, end, type ?? "straight", id, cp1, cp2))
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, frequency, amplitude }) => {
+    const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2)
+    if (boost) line.boost = boost
+    if (type === "sine") {
+      if (frequency !== undefined) line.frequency = frequency
+      if (amplitude !== undefined) line.amplitude = amplitude
+      line.computePoints()
+    }
+    editorManager.addLine(line)
   })
   syncLineCounter(json.lines?.map((l) => l.id) ?? [])
 
@@ -96,5 +109,11 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncSwitchCounter(Object.keys(switches))
 
-  return { tokens, starts, switches, switchLinks }
+  const rotators: Record<string, Rotator> = {}
+  json.rotators?.forEach(({ id, linkId }) => {
+    rotators[id] = new Rotator(linkId, id)
+  })
+  syncRotatorCounter(Object.keys(rotators))
+
+  return { tokens, starts, switches, switchLinks, rotators }
 }

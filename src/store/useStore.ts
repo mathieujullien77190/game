@@ -10,6 +10,7 @@ import { createTokenActions } from "./actions/tokenActions"
 import { createModeActions } from "./actions/modeActions"
 import { createStartActions } from "./actions/startActions"
 import { createSwitchActions } from "./actions/switchActions"
+import { createRotatorActions } from "./actions/rotatorActions"
 import { serializeMap, deserializeMap, type MapJson } from "./mapJson"
 
 const editorManager = new EditorManager()
@@ -43,8 +44,10 @@ export const useStore = create<Store>()(
       starts: {},
       switches: {},
       switchLinks: {},
+      rotators: {},
       hoveredLineId: null,
       hoveredSwitchId: null,
+      hoveredRotatorId: null,
       revision: 0,
       mode: "select",
       viewMode: "editor",
@@ -56,16 +59,17 @@ export const useStore = create<Store>()(
       ...createModeActions(set),
       ...createStartActions(set),
       ...createSwitchActions(set),
+      ...createRotatorActions(set),
     }),
     {
       name: "game2-map",
       storage: mapStorage as any,
       partialize: (state) =>
-        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks) as any,
+        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.rotators) as any,
       merge: (persisted, current) => {
         const json = persisted as MapJson
-        const { tokens, starts, switches, switchLinks } = deserializeMap(json, current.editorManager)
-        return { ...current, tokens, starts, switches, switchLinks, revision: 1 }
+        const { tokens, starts, switches, switchLinks, rotators } = deserializeMap(json, current.editorManager)
+        return { ...current, tokens, starts, switches, switchLinks, rotators, revision: 1 }
       },
     }
   )

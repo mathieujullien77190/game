@@ -9,10 +9,17 @@ export const createModeActions = (set: Set) => ({
     set((state) => {
       if (viewMode === "preview") {
         state.previewManager.data.lines = {}
-        Object.values(state.editorManager.data.lines).forEach((l) =>
-          state.previewManager.addLine(new LinePreview(l.start, l.end, l.type, l.id, l.cp1, l.cp2))
-        )
-        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks)
+        Object.values(state.editorManager.data.lines).forEach((l) => {
+          const lp = new LinePreview(l.start, l.end, l.type, l.id, l.cp1, l.cp2)
+          lp.boost = l.boost
+          if (l.type === "sine") {
+            lp.frequency = l.frequency
+            lp.amplitude = l.amplitude
+            lp.computePoints()
+          }
+          state.previewManager.addLine(lp)
+        })
+        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.rotators)
       }
       return { viewMode }
     }),

@@ -6,9 +6,10 @@ import type { LineType } from "engine/Line/Line"
 import { Token } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
+import type { Rotator } from "engine/Rotator/Rotator"
 import type { Point } from "engine/types"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -18,8 +19,10 @@ export interface StoreState {
   starts: Record<string, StartEditor>
   switches: Record<string, SwitchEditor>
   switchLinks: Record<string, string[]>
+  rotators: Record<string, Rotator>
   hoveredLineId: string | null
   hoveredSwitchId: string | null
+  hoveredRotatorId: string | null
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -32,6 +35,8 @@ export interface StoreActions {
   removeLine: (id: string) => void
   updateLineEndpoint: (id: string, endpoint: "start" | "end", point: Point) => void
   updateLineControlPoint: (id: string, cp: "cp1" | "cp2", point: Point) => void
+  updateLineBoost: (id: string, boost: number) => void
+  updateLineSine: (id: string, frequency: number, amplitude: number) => void
   toggleLinkActivated: (linkId: string) => void
   addToken: (token: Token) => void
   removeToken: (id: string) => void
@@ -44,6 +49,9 @@ export interface StoreActions {
   updateSwitchActiveLink: (id: string, activeLinkId: string) => void
   updateSwitchLinks: (id: string, linkIds: string[], activeLinkId: string | null) => void
   toggleSwitchLink: (id1: string, id2: string) => void
+  addRotator: (linkId: string) => void
+  removeRotator: (id: string) => void
+  setHoveredRotatorId: (id: string | null) => void
   setHoveredSwitchId: (id: string | null) => void
   setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void

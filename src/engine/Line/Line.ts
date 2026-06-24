@@ -1,7 +1,7 @@
 import { POINT_SPACING } from "../constants"
 import type { Point, LinePoint } from "../types"
 
-export type LineType = "straight" | "curve"
+export type LineType = "straight" | "curve" | "sine"
 
 let lineCounter = 0
 
@@ -30,6 +30,9 @@ export class Line {
   cp1: Point
   cp2: Point
   points: LinePoint[] = []
+  boost: number = 0
+  frequency: number = 1
+  amplitude: number = 20
 
   constructor(start: Point, end: Point, type: LineType = "straight", id?: string, cp1?: Point, cp2?: Point) {
     this.id = id ?? generateLineId()
@@ -44,6 +47,29 @@ export class Line {
   }
 
   computePoints = () => {
+    if (this.type === "sine") {
+      const dx = this.end.x - this.start.x
+      const dy = this.end.y - this.start.y
+      const length = Math.sqrt(dx * dx + dy * dy)
+      if (length === 0) { this.points = [{ x: this.start.x, y: this.start.y, angle: 0 }]; return }
+      const ux = dx / length
+      const uy = dy / length
+      const px = -uy
+      const py = ux
+      const angularFreq = Math.PI * 2 * this.frequency
+      const count = Math.max(1, Math.floor(length / POINT_SPACING))
+      this.points = Array.from({ length: count + 1 }, (_, i) => {
+        const t = i / count
+        const sine = Math.sin(t * angularFreq)
+        const cosine = Math.cos(t * angularFreq)
+        const x = this.start.x + t * dx + this.amplitude * sine * px
+        const y = this.start.y + t * dy + this.amplitude * sine * py
+        const tanX = ux + (this.amplitude * angularFreq / length) * cosine * px
+        const tanY = uy + (this.amplitude * angularFreq / length) * cosine * py
+        return { x, y, angle: Math.atan2(tanY, tanX) }
+      })
+      return
+    }
     if (this.type === "straight") {
       const dx = this.end.x - this.start.x
       const dy = this.end.y - this.start.y

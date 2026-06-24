@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
+import { NumberInput } from "components/form/NumberInput"
+import { MAX_BOOST } from "engine/constants"
 import * as S from "./UI"
 
 export const LineTab = () => {
@@ -13,7 +15,7 @@ export const LineTab = () => {
       return next
     })
 
-  const { editorManager, revision, mode, lineType, setMode, setLineType, removeLine, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, revision, mode, lineType, setMode, setLineType, removeLine, updateLineBoost, updateLineSine, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       revision: s.revision,
@@ -22,6 +24,8 @@ export const LineTab = () => {
       setMode: s.setMode,
       setLineType: s.setLineType,
       removeLine: s.removeLine,
+      updateLineBoost: s.updateLineBoost,
+      updateLineSine: s.updateLineSine,
       toggleLinkActivated: s.toggleLinkActivated,
       setHoveredLineId: s.setHoveredLineId,
     }))
@@ -47,6 +51,12 @@ export const LineTab = () => {
           >
             + Curve
           </S.TypeButton>
+          <S.TypeButton
+            $active={false}
+            onClick={() => { setLineType("sine"); setMode("addLine") }}
+          >
+            + Sine
+          </S.TypeButton>
         </S.TypeRow>
       )}
 
@@ -56,20 +66,51 @@ export const LineTab = () => {
             (lk) => lk.line1.lineId === line.id || lk.line2.lineId === line.id
           )
           return (
-            <S.LineBlock key={`${line.id}-${revision}`} onMouseEnter={() => setHoveredLineId(line.id)} onMouseLeave={() => setHoveredLineId(null)}>
+            <S.LineBlock key={line.id} onMouseEnter={() => setHoveredLineId(line.id)} onMouseLeave={() => setHoveredLineId(null)}>
               <S.LineItem>
                 <S.LineLabel onClick={() => lineLinks.length > 0 && toggleExpand(line.id)} $clickable={lineLinks.length > 0}>
                   {lineLinks.length > 0 && (
                     <S.Chevron $open={expandedLines.has(line.id)}>▶</S.Chevron>
                   )}
                   <S.LineId>{line.id}</S.LineId>
-                  <S.TypeBadge $curve={line.type === "curve"}>{line.type}</S.TypeBadge>
+                  <S.TypeBadge $type={line.type}>{line.type}</S.TypeBadge>
                   {lineLinks.length > 0 && !expandedLines.has(line.id) && (
                     <S.LinkCount>{lineLinks.length}</S.LinkCount>
                   )}
                 </S.LineLabel>
                 <S.DeleteButton onClick={() => removeLine(line.id)}>✕</S.DeleteButton>
               </S.LineItem>
+              <S.BoostRow>
+                <S.BoostLabel>boost</S.BoostLabel>
+                <NumberInput
+                  value={line.boost}
+                  onChange={(v) => updateLineBoost(line.id, v)}
+                  min={-MAX_BOOST}
+                  step={10}
+                />
+              </S.BoostRow>
+              {line.type === "sine" && (
+                <>
+                  <S.BoostRow>
+                    <S.BoostLabel>freq</S.BoostLabel>
+                    <NumberInput
+                      value={line.frequency}
+                      onChange={(v) => updateLineSine(line.id, v, line.amplitude)}
+                      min={1}
+                      step={1}
+                    />
+                  </S.BoostRow>
+                  <S.BoostRow>
+                    <S.BoostLabel>amp</S.BoostLabel>
+                    <NumberInput
+                      value={line.amplitude}
+                      onChange={(v) => updateLineSine(line.id, line.frequency, v)}
+                      min={1}
+                      step={5}
+                    />
+                  </S.BoostRow>
+                </>
+              )}
               {expandedLines.has(line.id) && lineLinks.map((lk) => {
                 const other = lk.line1.lineId === line.id ? lk.line2 : lk.line1
                 return (

@@ -1,4 +1,4 @@
-import { CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR } from "../constants";
+import { ACCEL_TIME, CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR, ROTATION_SPEED } from "../constants";
 import { LinePreview } from "../Line/LinePreview";
 import type { Link, LinkEndpoint } from "../Link/Link";
 import type { Start } from "../Start/Start";
@@ -8,6 +8,8 @@ import { SwitchPreview } from "../Switch/SwitchPreview";
 import { drawStats, smoothFps } from "../stats";
 import type { Token } from "../Token/Token";
 import { TokenPreview } from "../Token/TokenPreview";
+import type { Rotator } from "../Rotator/Rotator";
+import { RotatorPreview } from "../Rotator/RotatorPreview";
 import { Manager } from "./Manager";
 
 type LinkMap = Record<string, LinkEndpoint>;
@@ -21,6 +23,9 @@ export class PreviewManager extends Manager<LinePreview> {
     switchLinks: {} as Record<string, string[]>,
     links: {} as Record<string, Link>,
     linkMap: {} as LinkMap,
+    rotators: {} as Record<string, RotatorPreview>,
+    rotatorLinkIds: new Set<string>(),
+    linkByEndpointKey: {} as Record<string, string>,
     elapsedSeconds: 0,
     lastTimestamp: null as number | null,
     fps: 0,
@@ -33,6 +38,7 @@ export class PreviewManager extends Manager<LinePreview> {
     starts: Record<string, Start>,
     switches: Record<string, Switch> = {},
     switchLinks: Record<string, string[]> = {},
+    rotators: Record<string, Rotator> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -40,12 +46,22 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.elapsedSeconds = 0;
     this.data.lastTimestamp = null;
 
+    this.data.linkByEndpointKey = {};
     for (const lk of Object.values(links)) {
-      if (!lk.activated) continue;
       const k1 = `${lk.line1.lineId}::${lk.line1.endpoint}`;
       const k2 = `${lk.line2.lineId}::${lk.line2.endpoint}`;
+      this.data.linkByEndpointKey[k1] = lk.id;
+      this.data.linkByEndpointKey[k2] = lk.id;
+      if (!lk.activated) continue;
       this.data.linkMap[k1] = lk.line2;
       this.data.linkMap[k2] = lk.line1;
+    }
+
+    this.data.rotators = {};
+    this.data.rotatorLinkIds = new Set();
+    for (const r of Object.values(rotators)) {
+      this.data.rotators[r.id] = new RotatorPreview(r.linkId, r.id);
+      this.data.rotatorLinkIds.add(r.linkId);
     }
 
     this.data.switches = {};
@@ -77,6 +93,7 @@ export class PreviewManager extends Manager<LinePreview> {
           token.remainder = 0;
           token.direction = direction;
           token.startAt = (i + 1) * start.delay;
+          token.currentSpeed = 0;
           return token;
         });
       }
@@ -88,7 +105,7 @@ export class PreviewManager extends Manager<LinePreview> {
       this.data.lastTimestamp = timestamp;
       return;
     }
-    const deltaMs = Math.min(timestamp - this.data.lastTimestamp, 100);
+    const deltaMs = Math.max(1, Math.min(timestamp - this.data.lastTimestamp, 100));
     this.data.lastTimestamp = timestamp;
     this.data.fps = smoothFps(this.data.fps, deltaMs);
 
@@ -102,12 +119,25 @@ export class PreviewManager extends Manager<LinePreview> {
       if (token.direction === 0 || token.speed === 0) continue;
       const line = this.data.lines[token.lineId];
       if (!line) continue;
+      const targetSpeed = Math.max(1, token.speed + line.boost);
+      const k = ACCEL_TIME > 0 ? 1 - Math.exp(-deltaSeconds / ACCEL_TIME) : 1;
+      token.currentSpeed += (targetSpeed - token.currentSpeed) * k;
       const result = token.advance(deltaSeconds, line.points.length);
       if (result) this.transitionToken(token, result.hit, result.excess);
+
+      if (token.rotationOffset !== token.targetRotationOffset) {
+        const diff = token.targetRotationOffset - token.rotationOffset;
+        const step = ROTATION_SPEED * deltaSeconds;
+        token.rotationOffset = Math.abs(diff) <= step ? token.targetRotationOffset : token.rotationOffset + Math.sign(diff) * step;
+      }
     }
   };
 
   private transitionToken = (token: TokenPreview, arrivedAt: "start" | "end", excess: number) => {
+    const linkId = this.data.linkByEndpointKey[`${token.lineId}::${arrivedAt}`];
+    if (linkId && this.data.rotatorLinkIds.has(linkId)) {
+      token.targetRotationOffset += Math.PI * 2.25;
+    }
     const other = this.data.linkMap[`${token.lineId}::${arrivedAt}`];
     if (other) {
       token.lineId = other.lineId;
@@ -151,11 +181,21 @@ export class PreviewManager extends Manager<LinePreview> {
     this.drawGrid(ctx);
 
     this.drawSwitchLinks(ctx);
+    for (const line of Object.values(this.data.lines)) line.drawGlow(ctx);
     for (const line of Object.values(this.data.lines)) line.draw(ctx);
 
     for (const sw of Object.values(this.data.switches)) {
       sw.prepareFrame(this.data.lines, this.data.links, this.data.linkMap);
       sw.draw(ctx);
+    }
+
+    for (const rot of Object.values(this.data.rotators)) {
+      const link = this.data.links[rot.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line) continue;
+      const pt = link.line1.endpoint === "end" ? line.end : line.start;
+      rot.draw(ctx, pt, this.data.elapsedSeconds);
     }
 
     if (this.data.start) {
@@ -178,7 +218,7 @@ export class PreviewManager extends Manager<LinePreview> {
       const line = this.data.lines[token.lineId];
       if (!line || line.points.length === 0) continue;
       const pt = line.points[token.pointIndex];
-      if (pt) token.draw(ctx, pt);
+      if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points);
     }
 
     drawStats(ctx, this.data.fps, this.data.frameMs);
