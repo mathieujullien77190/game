@@ -12,6 +12,16 @@ export class TokenPreview extends Token {
   currentSpeed: number = 0
   rotationOffset: number = 0
   targetRotationOffset: number = 0
+  colorTransitionFrom: string = ""
+  displayColor: string = ""
+  colorProgress: number = 1
+  isPainting: boolean = false
+  paintProgress: number = 0
+  paintingLinkId: string = ""
+  pendingLineId: string = ""
+  pendingPointIndex: number = 0
+  pendingDirection: 1 | -1 = 1
+  pendingRemainder: number = 0
 
   advance = (deltaSeconds: number, pointCount: number): { hit: "start" | "end"; excess: number } | null => {
     let budget = Math.max(1, this.currentSpeed) * deltaSeconds + this.remainder
@@ -37,7 +47,7 @@ export class TokenPreview extends Token {
       const tpt = points[idx]
       const frac = 1 - i / (trailLen + 1)
       ctx.globalAlpha = frac * 0.55
-      ctx.fillStyle = this.color
+      ctx.fillStyle = this.displayColor || (this.color as string)
       ctx.beginPath()
       ctx.arc(tpt.x, tpt.y, 8 * frac * 0.75, 0, Math.PI * 2)
       ctx.fill()
@@ -47,7 +57,7 @@ export class TokenPreview extends Token {
 
   draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[]) => {
     if (points) this.drawBoostTrail(ctx, speedDelta, points)
-    ctx.fillStyle = this.color
+    ctx.fillStyle = this.displayColor || (this.color as string)
     ctx.strokeStyle = "#000"
     ctx.lineWidth = 2
     if (this.type === "square") {
@@ -66,5 +76,6 @@ export class TokenPreview extends Token {
       ctx.fill()
       ctx.stroke()
     }
+
   }
 }

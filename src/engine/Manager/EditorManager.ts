@@ -6,6 +6,7 @@ import { StartEditor } from "../Start/StartEditor"
 import { SwitchEditor } from "../Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "../Switch/switchUtils"
 import { RotatorEditor } from "../Rotator/RotatorEditor"
+import { PainterEditor } from "../Painter/PainterEditor"
 import { drawStats } from "../stats"
 import { Manager } from "./Manager"
 
@@ -108,7 +109,10 @@ export class EditorManager extends Manager<LineEditor> {
     hoveredSwitchId: string | null = null,
     rotators: RotatorEditor[] = [],
     hoveredRotatorId: string | null = null,
-    previewRotatorPt: Point | null = null
+    previewRotatorPt: Point | null = null,
+    painters: PainterEditor[] = [],
+    hoveredPainterId: string | null = null,
+    previewPainterPt: Point | null = null
   ) => {
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -153,6 +157,27 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.fillStyle = "#00BCD4"
       ctx.beginPath()
       ctx.arc(previewRotatorPt.x, previewRotatorPt.y, 18, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+    }
+
+    for (const p of painters) {
+      const link = this.data.links[p.linkId]
+      if (!link) continue
+      const line = this.data.lines[link.line1.lineId]
+      if (!line) continue
+      const pt = link.line1.endpoint === "end" ? line.end : line.start
+      const painterHovered = hoveredPainterId === p.id
+      ctx.globalAlpha = painterHovered ? 1 : 0.4
+      p.draw(ctx, pt, painterHovered)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewPainterPt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#e91e63"
+      ctx.beginPath()
+      ctx.arc(previewPainterPt.x, previewPainterPt.y, 18, 0, Math.PI * 2)
       ctx.fill()
       ctx.globalAlpha = 1
     }

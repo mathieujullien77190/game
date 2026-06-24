@@ -7,9 +7,10 @@ import { Token } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import type { Rotator } from "engine/Rotator/Rotator"
+import type { Painter } from "engine/Painter/Painter"
 import type { Point } from "engine/types"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator" | "addPainter"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -20,9 +21,11 @@ export interface StoreState {
   switches: Record<string, SwitchEditor>
   switchLinks: Record<string, string[]>
   rotators: Record<string, Rotator>
+  painters: Record<string, Painter>
   hoveredLineId: string | null
   hoveredSwitchId: string | null
   hoveredRotatorId: string | null
+  hoveredPainterId: string | null
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -52,6 +55,10 @@ export interface StoreActions {
   addRotator: (linkId: string) => void
   removeRotator: (id: string) => void
   setHoveredRotatorId: (id: string | null) => void
+  addPainter: (linkId: string) => void
+  removePainter: (id: string) => void
+  setPainterColor: (id: string, color: string) => void
+  setHoveredPainterId: (id: string | null) => void
   setHoveredSwitchId: (id: string | null) => void
   setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void

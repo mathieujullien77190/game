@@ -19,7 +19,7 @@ export const createModeActions = (set: Set) => ({
           }
           state.previewManager.addLine(lp)
         })
-        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.rotators)
+        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.rotators, state.painters)
       }
       return { viewMode }
     }),

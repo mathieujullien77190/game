@@ -7,3 +7,5 @@ export const GRID_MAJOR = 100;
 export const MAX_BOOST = 300;
 export const ACCEL_TIME = 0.5;
 export const ROTATION_SPEED = Math.PI * 4;
+export const COLOR_LERP_TIME = 0.4;
+export const PAINT_DURATION = 1.5;

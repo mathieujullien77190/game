@@ -4,6 +4,7 @@ import { LineEditor } from "engine/Line/LineEditor"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { RotatorEditor } from "engine/Rotator/RotatorEditor"
+import { PainterEditor } from "engine/Painter/PainterEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
@@ -56,6 +57,7 @@ export const LevelEditor = () => {
   const [addStartSnap, setAddStartSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addSwitchSnap, setAddSwitchSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addRotatorSnap, setAddRotatorSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
+  const [addPainterSnap, setAddPainterSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
 
   const leftRef = useRef<HTMLDivElement>(null)
   const canvasAreaRef = useRef<HTMLDivElement>(null)
@@ -67,8 +69,8 @@ export const LevelEditor = () => {
 
   const {
     editorManager, previewManager, revision,
-    mode, viewMode, pendingPoint, starts, switches, rotators, hoveredLineId, hoveredSwitchId, hoveredRotatorId, lineType,
-    addLine, addStart, addSwitch, addRotator, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
+    mode, viewMode, pendingPoint, starts, switches, rotators, painters, hoveredLineId, hoveredSwitchId, hoveredRotatorId, hoveredPainterId, lineType,
+    addLine, addStart, addSwitch, addRotator, addPainter, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -80,14 +82,17 @@ export const LevelEditor = () => {
       starts: s.starts,
       switches: s.switches,
       rotators: s.rotators,
+      painters: s.painters,
       hoveredLineId: s.hoveredLineId,
       hoveredSwitchId: s.hoveredSwitchId,
       hoveredRotatorId: s.hoveredRotatorId,
+      hoveredPainterId: s.hoveredPainterId,
       lineType: s.lineType,
       addLine: s.addLine,
       addStart: s.addStart,
       addSwitch: s.addSwitch,
       addRotator: s.addRotator,
+      addPainter: s.addPainter,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
       setViewMode: s.setViewMode,
@@ -100,6 +105,7 @@ export const LevelEditor = () => {
   const startsArray = Object.values(starts)
   const switchesArray = Object.values(switches)
   const rotatorsArray = Object.values(rotators).map((r) => new RotatorEditor(r.linkId, r.id))
+  const paintersArray = Object.values(painters).map((p) => new PainterEditor(p.linkId, p.color, p.id))
 
   useCanvasDraw(
     editorCanvasRef, editorManager, revision,
@@ -115,7 +121,10 @@ export const LevelEditor = () => {
     hoveredSwitchId,
     rotatorsArray,
     hoveredRotatorId,
-    mode === "addRotator" ? (addRotatorSnap?.pt ?? null) : null
+    mode === "addRotator" ? (addRotatorSnap?.pt ?? null) : null,
+    paintersArray,
+    hoveredPainterId,
+    mode === "addPainter" ? (addPainterSnap?.pt ?? null) : null
   )
   useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale)
 
@@ -213,6 +222,16 @@ export const LevelEditor = () => {
         setAddRotatorSnap(null)
         setHoverNearEndpoint(false)
       }
+    } else if (mode === "addPainter") {
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddPainterSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddPainterSnap(null)
+        setHoverNearEndpoint(false)
+      }
     } else {
       setSnapPoint(point)
       if (mode === "select") {
@@ -240,6 +259,7 @@ export const LevelEditor = () => {
     setAddStartSnap(null)
     setAddSwitchSnap(null)
     setAddRotatorSnap(null)
+    setAddPainterSnap(null)
     setHoverNearEndpoint(false)
     setHoveredLineId(null)
     draggingEndpoint.current = null
@@ -285,6 +305,20 @@ export const LevelEditor = () => {
         }
         return
       }
+      if (mode === "addPainter") {
+        if (addPainterSnap) {
+          const linkId = Object.values(editorManager.data.links).find((lk) =>
+            (lk.line1.lineId === addPainterSnap.lineId && lk.line1.endpoint === addPainterSnap.endpoint) ||
+            (lk.line2.lineId === addPainterSnap.lineId && lk.line2.endpoint === addPainterSnap.endpoint)
+          )?.id
+          if (linkId) {
+            addPainter(linkId)
+            setAddPainterSnap(null)
+            setMode("select")
+          }
+        }
+        return
+      }
       if (mode !== "addLine") return
       const point = snapToGrid(getCanvasPoint(e))
       if (!pendingPoint) {
@@ -295,12 +329,12 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, addStartSnap, addSwitchSnap, addRotatorSnap, lineType, addLine, addStart, addSwitch, addRotator, setPendingPoint, setMode]
+    [mode, pendingPoint, addStartSnap, addSwitchSnap, addRotatorSnap, addPainterSnap, lineType, addLine, addStart, addSwitch, addRotator, addPainter, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
-    : (mode === "addStart" || mode === "addSwitch" || mode === "addRotator")
+    : (mode === "addStart" || mode === "addSwitch" || mode === "addRotator" || mode === "addPainter")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging
         ? "grabbing"

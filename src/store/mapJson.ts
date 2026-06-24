@@ -6,6 +6,7 @@ import { syncStartCounter } from "engine/Start/Start"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
 import { Rotator, syncRotatorCounter } from "engine/Rotator/Rotator"
+import { Painter, syncPainterCounter } from "engine/Painter/Painter"
 import type { EditorManager } from "engine/Manager/EditorManager"
 import type { Point } from "engine/types"
 import type { StartEditor as StartEditorType } from "engine/Start/StartEditor"
@@ -18,6 +19,7 @@ export type MapJson = {
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number }[]
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[] }>
   rotators?: { id: string; linkId: string }[]
+  painters?: { id: string; linkId: string; color: string }[]
 }
 
 export const serializeMap = (
@@ -26,7 +28,8 @@ export const serializeMap = (
   starts: Record<string, StartEditorType>,
   switches: Record<string, SwitchEditorType>,
   switchLinks: Record<string, string[]>,
-  rotators: Record<string, Rotator> = {}
+  rotators: Record<string, Rotator> = {},
+  painters: Record<string, Painter> = {}
 ): MapJson => ({
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
@@ -63,6 +66,7 @@ export const serializeMap = (
     ])
   ),
   rotators: Object.values(rotators).map((r) => ({ id: r.id, linkId: r.linkId })),
+  painters: Object.values(painters).map((p) => ({ id: p.id, linkId: p.linkId, color: p.color })),
 })
 
 export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
@@ -115,5 +119,11 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncRotatorCounter(Object.keys(rotators))
 
-  return { tokens, starts, switches, switchLinks, rotators }
+  const painters: Record<string, Painter> = {}
+  json.painters?.forEach(({ id, linkId, color }) => {
+    painters[id] = new Painter(linkId, color, id)
+  })
+  syncPainterCounter(Object.keys(painters))
+
+  return { tokens, starts, switches, switchLinks, rotators, painters }
 }

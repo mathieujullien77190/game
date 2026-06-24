@@ -1,4 +1,4 @@
-import { ACCEL_TIME, CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR, ROTATION_SPEED } from "../constants";
+import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED } from "../constants";
 import { LinePreview } from "../Line/LinePreview";
 import type { Link, LinkEndpoint } from "../Link/Link";
 import type { Start } from "../Start/Start";
@@ -10,7 +10,16 @@ import type { Token } from "../Token/Token";
 import { TokenPreview } from "../Token/TokenPreview";
 import type { Rotator } from "../Rotator/Rotator";
 import { RotatorPreview } from "../Rotator/RotatorPreview";
+import type { Painter } from "../Painter/Painter";
+import { PainterPreview } from "../Painter/PainterPreview";
 import { Manager } from "./Manager";
+
+const lerpHex = (a: string, b: string, t: number): string => {
+  const ar = parseInt(a.slice(1, 3), 16), ag = parseInt(a.slice(3, 5), 16), ab2 = parseInt(a.slice(5, 7), 16)
+  const br = parseInt(b.slice(1, 3), 16), bg = parseInt(b.slice(3, 5), 16), bb2 = parseInt(b.slice(5, 7), 16)
+  const r = Math.round(ar + (br - ar) * t), g = Math.round(ag + (bg - ag) * t), b3 = Math.round(ab2 + (bb2 - ab2) * t)
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b3.toString(16).padStart(2, "0")}`
+}
 
 type LinkMap = Record<string, LinkEndpoint>;
 
@@ -26,6 +35,8 @@ export class PreviewManager extends Manager<LinePreview> {
     rotators: {} as Record<string, RotatorPreview>,
     rotatorLinkIds: new Set<string>(),
     linkByEndpointKey: {} as Record<string, string>,
+    painters: {} as Record<string, PainterPreview>,
+    painterByLinkId: {} as Record<string, PainterPreview>,
     elapsedSeconds: 0,
     lastTimestamp: null as number | null,
     fps: 0,
@@ -39,6 +50,7 @@ export class PreviewManager extends Manager<LinePreview> {
     switches: Record<string, Switch> = {},
     switchLinks: Record<string, string[]> = {},
     rotators: Record<string, Rotator> = {},
+    painters: Record<string, Painter> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -62,6 +74,14 @@ export class PreviewManager extends Manager<LinePreview> {
     for (const r of Object.values(rotators)) {
       this.data.rotators[r.id] = new RotatorPreview(r.linkId, r.id);
       this.data.rotatorLinkIds.add(r.linkId);
+    }
+
+    this.data.painters = {};
+    this.data.painterByLinkId = {};
+    for (const p of Object.values(painters)) {
+      const pp = new PainterPreview(p.linkId, p.color, p.id);
+      this.data.painters[p.id] = pp;
+      this.data.painterByLinkId[p.linkId] = pp;
     }
 
     this.data.switches = {};
@@ -116,19 +136,45 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
-      if (token.direction === 0 || token.speed === 0) continue;
-      const line = this.data.lines[token.lineId];
-      if (!line) continue;
-      const targetSpeed = Math.max(1, token.speed + line.boost);
-      const k = ACCEL_TIME > 0 ? 1 - Math.exp(-deltaSeconds / ACCEL_TIME) : 1;
-      token.currentSpeed += (targetSpeed - token.currentSpeed) * k;
-      const result = token.advance(deltaSeconds, line.points.length);
-      if (result) this.transitionToken(token, result.hit, result.excess);
 
-      if (token.rotationOffset !== token.targetRotationOffset) {
-        const diff = token.targetRotationOffset - token.rotationOffset;
-        const step = ROTATION_SPEED * deltaSeconds;
-        token.rotationOffset = Math.abs(diff) <= step ? token.targetRotationOffset : token.rotationOffset + Math.sign(diff) * step;
+      if (token.isPainting) {
+        token.paintProgress = Math.min(1, token.paintProgress + deltaSeconds / PAINT_DURATION);
+        const activePainter = this.data.painterByLinkId[token.paintingLinkId];
+        if (activePainter) {
+          activePainter.paintProgress = token.paintProgress;
+          activePainter.currentTokenColor = token.displayColor || (token.color as string);
+        }
+        if (token.paintProgress >= 1) {
+          token.isPainting = false;
+          if (activePainter) { activePainter.paintProgress = -1; activePainter.currentTokenColor = ""; }
+          if (token.pendingLineId) {
+            token.lineId = token.pendingLineId;
+            token.pointIndex = token.pendingPointIndex;
+            token.direction = token.pendingDirection;
+            token.remainder = token.pendingRemainder;
+            token.pendingLineId = "";
+          }
+        }
+      } else {
+        if (token.direction === 0 || token.speed === 0) continue;
+        const line = this.data.lines[token.lineId];
+        if (!line) continue;
+        const targetSpeed = Math.max(1, token.speed + line.boost);
+        const k = ACCEL_TIME > 0 ? 1 - Math.exp(-deltaSeconds / ACCEL_TIME) : 1;
+        token.currentSpeed += (targetSpeed - token.currentSpeed) * k;
+        const result = token.advance(deltaSeconds, line.points.length);
+        if (result) this.transitionToken(token, result.hit, result.excess);
+
+        if (token.rotationOffset !== token.targetRotationOffset) {
+          const diff = token.targetRotationOffset - token.rotationOffset;
+          const step = ROTATION_SPEED * deltaSeconds;
+          token.rotationOffset = Math.abs(diff) <= step ? token.targetRotationOffset : token.rotationOffset + Math.sign(diff) * step;
+        }
+      }
+
+      if (token.colorProgress < 1) {
+        token.colorProgress = Math.min(1, token.colorProgress + deltaSeconds / PAINT_DURATION);
+        token.displayColor = token.colorProgress >= 1 ? "" : lerpHex(token.colorTransitionFrom, token.color as string, token.colorProgress);
       }
     }
   };
@@ -137,6 +183,31 @@ export class PreviewManager extends Manager<LinePreview> {
     const linkId = this.data.linkByEndpointKey[`${token.lineId}::${arrivedAt}`];
     if (linkId && this.data.rotatorLinkIds.has(linkId)) {
       token.targetRotationOffset += Math.PI * 2.25;
+    }
+    const painter = linkId ? this.data.painterByLinkId[linkId] : undefined;
+    if (painter) {
+      token.colorTransitionFrom = token.displayColor || (token.color as string);
+      token.color = painter.color as any;
+      token.colorProgress = 0;
+      token.isPainting = true;
+      token.paintProgress = 0;
+      token.paintingLinkId = linkId;
+      token.direction = 0;
+      painter.paintProgress = 0;
+      const other = this.data.linkMap[`${token.lineId}::${arrivedAt}`];
+      if (other) {
+        const newLine = this.data.lines[other.lineId];
+        token.pendingLineId = other.lineId;
+        token.pendingPointIndex = other.endpoint === "start" ? 0 : (newLine?.points.length ?? 1) - 1;
+        token.pendingDirection = other.endpoint === "start" ? 1 : -1;
+        token.pendingRemainder = excess;
+      } else {
+        const line = this.data.lines[token.lineId];
+        token.pointIndex = arrivedAt === "end" ? (line?.points.length ?? 1) - 1 : 0;
+        token.remainder = 0;
+        token.pendingLineId = "";
+      }
+      return;
     }
     const other = this.data.linkMap[`${token.lineId}::${arrivedAt}`];
     if (other) {
@@ -153,33 +224,11 @@ export class PreviewManager extends Manager<LinePreview> {
     }
   };
 
-  drawGrid = (ctx: CanvasRenderingContext2D) => {
-    ctx.setLineDash([]);
-    ctx.strokeStyle = "#f0f0f0";
-    ctx.lineWidth = 0.5;
-    for (let x = 0; x <= CANVAS_W; x += GRID_MINOR) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke();
-    }
-    for (let y = 0; y <= CANVAS_H; y += GRID_MINOR) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke();
-    }
-    ctx.strokeStyle = "#e0e0e0";
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= CANVAS_W; x += GRID_MAJOR) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke();
-    }
-    for (let y = 0; y <= CANVAS_H; y += GRID_MAJOR) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke();
-    }
-  };
-
   drawAllPreview = (ctx: CanvasRenderingContext2D) => {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
-    this.drawGrid(ctx);
-
     this.drawSwitchLinks(ctx);
     for (const line of Object.values(this.data.lines)) line.drawGlow(ctx);
     for (const line of Object.values(this.data.lines)) line.draw(ctx);
@@ -196,6 +245,15 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!line) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
       rot.draw(ctx, pt, this.data.elapsedSeconds);
+    }
+
+    for (const p of Object.values(this.data.painters)) {
+      const link = this.data.links[p.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line) continue;
+      const pt = link.line1.endpoint === "end" ? line.end : line.start;
+      p.draw(ctx, pt, this.data.elapsedSeconds);
     }
 
     if (this.data.start) {
