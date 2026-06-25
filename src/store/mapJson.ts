@@ -7,6 +7,8 @@ import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
 import { Rotator, syncRotatorCounter } from "engine/Rotator/Rotator"
 import { Painter, syncPainterCounter } from "engine/Painter/Painter"
+import { Fader, syncFaderCounter } from "engine/Fader/Fader"
+import { Inverter, syncInverterCounter } from "engine/Inverter/Inverter"
 import { ArrivalEditor, } from "engine/Arrival/ArrivalEditor"
 import { syncArrivalCounter } from "engine/Arrival/Arrival"
 import type { EditorManager } from "engine/Manager/EditorManager"
@@ -22,6 +24,8 @@ export type MapJson = {
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[] }>
   rotators?: { id: string; linkId: string }[]
   painters?: { id: string; linkId: string; color: string }[]
+  faders?: { id: string; linkId: string; amount: number }[]
+  inverters?: { id: string; linkId: string }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[] } | null
 }
 
@@ -33,7 +37,9 @@ export const serializeMap = (
   switchLinks: Record<string, string[]>,
   rotators: Record<string, Rotator> = {},
   painters: Record<string, Painter> = {},
-  arrival: ArrivalEditor | null = null
+  arrival: ArrivalEditor | null = null,
+  faders: Record<string, Fader> = {},
+  inverters: Record<string, Inverter> = {}
 ): MapJson => ({
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
@@ -71,6 +77,8 @@ export const serializeMap = (
   ),
   rotators: Object.values(rotators).map((r) => ({ id: r.id, linkId: r.linkId })),
   painters: Object.values(painters).map((p) => ({ id: p.id, linkId: p.linkId, color: p.color })),
+  faders: Object.values(faders).map((f) => ({ id: f.id, linkId: f.linkId, amount: f.amount })),
+  inverters: Object.values(inverters).map((inv) => ({ id: inv.id, linkId: inv.linkId })),
   arrival: arrival ? { id: arrival.id, lineId: arrival.lineId, endpoint: arrival.endpoint, demands: arrival.demands } : null,
 })
 
@@ -130,11 +138,23 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncPainterCounter(Object.keys(painters))
 
+  const faders: Record<string, Fader> = {}
+  json.faders?.forEach(({ id, linkId, amount }) => {
+    faders[id] = new Fader(linkId, id, amount ?? 0.5)
+  })
+  syncFaderCounter(Object.keys(faders))
+
+  const inverters: Record<string, Inverter> = {}
+  json.inverters?.forEach(({ id, linkId }) => {
+    inverters[id] = new Inverter(linkId, id)
+  })
+  syncInverterCounter(Object.keys(inverters))
+
   let arrival: ArrivalEditor | null = null
   if (json.arrival) {
     arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any)
     syncArrivalCounter([json.arrival.id])
   }
 
-  return { tokens, starts, switches, switchLinks, rotators, painters, arrival }
+  return { tokens, starts, switches, switchLinks, rotators, painters, faders, inverters, arrival }
 }

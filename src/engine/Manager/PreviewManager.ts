@@ -12,6 +12,10 @@ import type { Rotator } from "../Rotator/Rotator";
 import { RotatorPreview } from "../Rotator/RotatorPreview";
 import type { Painter } from "../Painter/Painter";
 import { PainterPreview } from "../Painter/PainterPreview";
+import type { Fader } from "../Fader/Fader";
+import { FaderPreview } from "../Fader/FaderPreview";
+import type { Inverter } from "../Inverter/Inverter";
+import { InverterPreview } from "../Inverter/InverterPreview";
 import type { Arrival } from "../Arrival/Arrival";
 import { ArrivalPreview } from "../Arrival/ArrivalPreview";
 import { Manager } from "./Manager";
@@ -39,6 +43,11 @@ export class PreviewManager extends Manager<LinePreview> {
     linkByEndpointKey: {} as Record<string, string>,
     painters: {} as Record<string, PainterPreview>,
     painterByLinkId: {} as Record<string, PainterPreview>,
+    faders: {} as Record<string, FaderPreview>,
+    faderLinkIds: new Set<string>(),
+    inverters: {} as Record<string, InverterPreview>,
+    inverterLinkIds: new Set<string>(),
+    isInverted: false,
     arrival: null as ArrivalPreview | null,
     arrivalKey: "" as string,
     elapsedSeconds: 0,
@@ -56,6 +65,8 @@ export class PreviewManager extends Manager<LinePreview> {
     rotators: Record<string, Rotator> = {},
     painters: Record<string, Painter> = {},
     arrival: Arrival | null = null,
+    faders: Record<string, Fader> = {},
+    inverters: Record<string, Inverter> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -98,6 +109,21 @@ export class PreviewManager extends Manager<LinePreview> {
       }
       sw.applyToLinkMap(links, this.data.linkMap);
       this.data.switches[s.id] = sw;
+    }
+
+    this.data.faders = {};
+    this.data.faderLinkIds = new Set();
+    for (const f of Object.values(faders)) {
+      this.data.faders[f.id] = new FaderPreview(f.linkId, f.id, f.amount);
+      this.data.faderLinkIds.add(f.linkId);
+    }
+
+    this.data.inverters = {};
+    this.data.inverterLinkIds = new Set();
+    this.data.isInverted = false;
+    for (const inv of Object.values(inverters)) {
+      this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
+      this.data.inverterLinkIds.add(inv.linkId);
     }
 
     this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
@@ -187,6 +213,7 @@ export class PreviewManager extends Manager<LinePreview> {
           const step = ROTATION_SPEED * deltaSeconds;
           token.rotationOffset = Math.abs(diff) <= step ? token.targetRotationOffset : token.rotationOffset + Math.sign(diff) * step;
         }
+
       }
 
       if (token.colorProgress < 1) {
@@ -212,6 +239,13 @@ export class PreviewManager extends Manager<LinePreview> {
     const linkId = this.data.linkByEndpointKey[`${token.lineId}::${arrivedAt}`];
     if (linkId && this.data.rotatorLinkIds.has(linkId)) {
       token.targetRotationOffset += Math.PI * 2.25;
+    }
+    if (linkId && this.data.faderLinkIds.has(linkId)) {
+      const fader = Object.values(this.data.faders).find((f) => f.linkId === linkId);
+      if (fader) token.opacity = fader.amount;
+    }
+    if (linkId && this.data.inverterLinkIds.has(linkId)) {
+      this.data.isInverted = !this.data.isInverted;
     }
     const painter = linkId ? this.data.painterByLinkId[linkId] : undefined;
     if (painter) {
@@ -257,6 +291,8 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
     this.drawSwitchLinks(ctx);
     for (const line of Object.values(this.data.lines)) line.drawGlow(ctx);
@@ -315,6 +351,35 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!line || line.points.length === 0) continue;
       const pt = line.points[token.pointIndex];
       if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points);
+    }
+
+    for (const f of Object.values(this.data.faders)) {
+      const link = this.data.links[f.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line) continue;
+      const pt = link.line1.endpoint === "end" ? line.end : line.start;
+      f.draw(ctx, pt);
+    }
+
+    for (const inv of Object.values(this.data.inverters)) {
+      const link = this.data.links[inv.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line || line.points.length === 0) continue;
+      const isEnd = link.line1.endpoint === "end";
+      const pt = isEnd ? line.end : line.start;
+      const ptAngle = isEnd ? line.points[line.points.length - 1] : line.points[0];
+      inv.draw(ctx, pt, ptAngle?.angle ?? 0);
+    }
+
+    if (this.data.isInverted) {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalCompositeOperation = "difference";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.restore();
     }
 
     drawStats(ctx, this.data.fps, this.data.frameMs);

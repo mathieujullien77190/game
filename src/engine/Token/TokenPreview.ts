@@ -15,6 +15,7 @@ export class TokenPreview extends Token {
   colorTransitionFrom: string = ""
   displayColor: string = ""
   colorProgress: number = 1
+  opacity: number = 1
   arrived: boolean = false
   isPainting: boolean = false
   paintProgress: number = 0
@@ -47,7 +48,7 @@ export class TokenPreview extends Token {
       if (idx < 0 || idx >= points.length) break
       const tpt = points[idx]
       const frac = 1 - i / (trailLen + 1)
-      ctx.globalAlpha = frac * 0.55
+      ctx.globalAlpha = frac * 0.55 * this.opacity
       ctx.fillStyle = this.displayColor || (this.color as string)
       ctx.beginPath()
       ctx.arc(tpt.x, tpt.y, 8 * frac * 0.75, 0, Math.PI * 2)
@@ -58,6 +59,7 @@ export class TokenPreview extends Token {
 
   draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[]) => {
     if (points) this.drawBoostTrail(ctx, speedDelta, points)
+    ctx.globalAlpha = this.opacity
     ctx.fillStyle = this.displayColor || (this.color as string)
     ctx.strokeStyle = "#000"
     ctx.lineWidth = 2
@@ -77,6 +79,6 @@ export class TokenPreview extends Token {
       ctx.fill()
       ctx.stroke()
     }
-
+    ctx.globalAlpha = 1
   }
 }

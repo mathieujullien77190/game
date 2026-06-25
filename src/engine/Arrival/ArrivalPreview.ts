@@ -32,7 +32,7 @@ export class ArrivalPreview extends Arrival {
     ctx.translate(pt.x, pt.y)
 
     ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2
+    ctx.lineWidth = 3
     ctx.setLineDash([])
     ctx.beginPath()
     ctx.arc(0, 0, 14, 0, Math.PI * 2)

@@ -7,9 +7,11 @@ import SwitchTab from "components/tabs/SwitchTab"
 import RotatorTab from "components/tabs/RotatorTab"
 import PainterTab from "components/tabs/PainterTab"
 import ArrivalTab from "components/tabs/ArrivalTab"
+import FaderTab from "components/tabs/FaderTab"
+import InverterTab from "components/tabs/InverterTab"
 import JsonTab from "components/tabs/JsonTab"
 
-const TABS = ["line", "token", "start", "switch", "rotator", "painter", "arrival", "json"] as const
+const TABS = ["line", "token", "start", "switch", "rotator", "painter", "fader", "inverter", "arrival", "json"] as const
 type Tab = (typeof TABS)[number]
 
 export const ToolsPanel = () => {
@@ -35,6 +37,8 @@ export const ToolsPanel = () => {
         {activeTab === "switch" && <SwitchTab />}
         {activeTab === "rotator" && <RotatorTab />}
         {activeTab === "painter" && <PainterTab />}
+        {activeTab === "fader" && <FaderTab />}
+        {activeTab === "inverter" && <InverterTab />}
         {activeTab === "arrival" && <ArrivalTab />}
         {activeTab === "json" && <JsonTab />}
       </S.TabContent>

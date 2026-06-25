@@ -4,6 +4,8 @@ import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { RotatorEditor } from "engine/Rotator/RotatorEditor"
 import { PainterEditor } from "engine/Painter/PainterEditor"
+import { FaderEditor } from "engine/Fader/FaderEditor"
+import { InverterEditor } from "engine/Inverter/InverterEditor"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { smoothFps } from "engine/stats"
 import type { Point } from "engine/types"
@@ -28,6 +30,12 @@ export const useCanvasDraw = (
   painters: PainterEditor[] = [],
   hoveredPainterId: string | null = null,
   previewPainterPt: Point | null = null,
+  faders: FaderEditor[] = [],
+  hoveredFaderId: string | null = null,
+  previewFaderPt: Point | null = null,
+  inverters: InverterEditor[] = [],
+  hoveredInverterId: string | null = null,
+  previewInverterPt: Point | null = null,
   arrival: ArrivalEditor | null = null,
   previewArrivalPt: Point | null = null
 ) => {
@@ -50,8 +58,10 @@ export const useCanvasDraw = (
       starts, switches, previewStartPt, previewSwitchPt,
       fpsRef.current, frameMsRef.current, hoveredSwitchId, rotators,
       hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt,
+      faders, hoveredFaderId, previewFaderPt,
+      inverters, hoveredInverterId, previewInverterPt,
       arrival, previewArrivalPt
     )
     frameMsRef.current = performance.now() - t0
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, rotators, hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt, arrival, previewArrivalPt])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, rotators, hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt, faders, hoveredFaderId, previewFaderPt, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt])
 }

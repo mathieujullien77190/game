@@ -7,6 +7,8 @@ import { SwitchEditor } from "../Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "../Switch/switchUtils"
 import { RotatorEditor } from "../Rotator/RotatorEditor"
 import { PainterEditor } from "../Painter/PainterEditor"
+import { FaderEditor } from "../Fader/FaderEditor"
+import { InverterEditor } from "../Inverter/InverterEditor"
 import { ArrivalEditor } from "../Arrival/ArrivalEditor"
 import { drawStats } from "../stats"
 import { Manager } from "./Manager"
@@ -114,6 +116,12 @@ export class EditorManager extends Manager<LineEditor> {
     painters: PainterEditor[] = [],
     hoveredPainterId: string | null = null,
     previewPainterPt: Point | null = null,
+    faders: FaderEditor[] = [],
+    hoveredFaderId: string | null = null,
+    previewFaderPt: Point | null = null,
+    inverters: InverterEditor[] = [],
+    hoveredInverterId: string | null = null,
+    previewInverterPt: Point | null = null,
     arrival: ArrivalEditor | null = null,
     previewArrivalPt: Point | null = null
   ) => {
@@ -182,6 +190,51 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.beginPath()
       ctx.arc(previewPainterPt.x, previewPainterPt.y, 18, 0, Math.PI * 2)
       ctx.fill()
+      ctx.globalAlpha = 1
+    }
+
+    for (const f of faders) {
+      const link = this.data.links[f.linkId]
+      if (!link) continue
+      const line = this.data.lines[link.line1.lineId]
+      if (!line) continue
+      const pt = link.line1.endpoint === "end" ? line.end : line.start
+      ctx.globalAlpha = hoveredFaderId === f.id ? 1 : 0.4
+      f.draw(ctx, pt)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewFaderPt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#000"
+      ctx.beginPath()
+      ctx.arc(previewFaderPt.x, previewFaderPt.y, 14, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+    }
+
+    for (const inv of inverters) {
+      const link = this.data.links[inv.linkId]
+      if (!link) continue
+      const line = this.data.lines[link.line1.lineId]
+      if (!line) continue
+      const isEnd = link.line1.endpoint === "end"
+      const pt = isEnd ? line.end : line.start
+      const angle = Math.atan2(line.end.y - line.start.y, line.end.x - line.start.x)
+      ctx.globalAlpha = hoveredInverterId === inv.id ? 1 : 0.4
+      inv.draw(ctx, pt, angle)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewInverterPt) {
+      ctx.globalAlpha = 0.45
+      ctx.strokeStyle = "#7b1fa2"
+      ctx.lineWidth = 3
+      ctx.lineCap = "round"
+      ctx.beginPath()
+      ctx.moveTo(previewInverterPt.x - 14, previewInverterPt.y)
+      ctx.lineTo(previewInverterPt.x + 14, previewInverterPt.y)
+      ctx.stroke()
       ctx.globalAlpha = 1
     }
 
