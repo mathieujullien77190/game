@@ -10,11 +10,9 @@ import { createTokenActions } from "./actions/tokenActions"
 import { createModeActions } from "./actions/modeActions"
 import { createStartActions } from "./actions/startActions"
 import { createSwitchActions } from "./actions/switchActions"
-import { createRotatorActions } from "./actions/rotatorActions"
-import { createArrivalActions } from "./actions/arrivalActions"
-import { createFaderActions } from "./actions/faderActions"
-import { createInverterActions } from "./actions/inverterActions"
 import { createTransformerActions } from "./actions/transformerActions"
+import { createArrivalActions } from "./actions/arrivalActions"
+import { createInverterActions } from "./actions/inverterActions"
 import { serializeMap, deserializeMap, type MapJson } from "./mapJson"
 
 const editorManager = new EditorManager()
@@ -48,21 +46,18 @@ export const useStore = create<Store>()(
       starts: {},
       switches: {},
       switchLinks: {},
-      rotators: {},
-      faders: {},
-      inverters: {},
       transformers: {},
+      inverters: {},
       arrival: null,
       hoveredLineId: null,
       hoveredSwitchId: null,
-      hoveredRotatorId: null,
-      hoveredFaderId: null,
-      hoveredInverterId: null,
       hoveredTransformerId: null,
+      hoveredInverterId: null,
       revision: 0,
       mode: "select",
       viewMode: "editor",
       pendingPoint: null,
+      pendingTransformerType: "color" as const,
       lineType: "straight" as LineType,
       ...createLineActions(set),
       ...createLinkActions(set),
@@ -70,21 +65,19 @@ export const useStore = create<Store>()(
       ...createModeActions(set),
       ...createStartActions(set),
       ...createSwitchActions(set),
-      ...createRotatorActions(set),
-      ...createArrivalActions(set),
-      ...createFaderActions(set),
-      ...createInverterActions(set),
       ...createTransformerActions(set),
+      ...createArrivalActions(set),
+      ...createInverterActions(set),
     }),
     {
       name: "game2-map",
       storage: mapStorage as any,
       partialize: (state) =>
-        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.rotators, state.arrival, state.faders, state.inverters, state.transformers) as any,
+        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters) as any,
       merge: (persisted, current) => {
         const json = persisted as MapJson
-        const { tokens, starts, switches, switchLinks, rotators, faders, inverters, transformers, arrival } = deserializeMap(json, current.editorManager)
-        return { ...current, tokens, starts, switches, switchLinks, rotators, faders, inverters, transformers, arrival, revision: 1 }
+        const { tokens, starts, switches, switchLinks, transformers, inverters, arrival } = deserializeMap(json, current.editorManager)
+        return { ...current, tokens, starts, switches, switchLinks, transformers, inverters, arrival, revision: 1 }
       },
     }
   )

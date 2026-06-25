@@ -3,19 +3,30 @@ import { useStore } from "store"
 import { TOKEN_COLORS } from "engine/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import * as S from "./UI"
+import type { TransformerType } from "engine/Transformer/Transformer"
+
+const ALL_TYPES: TransformerType[] = ["fade", "rotate", "color", "shape"]
 
 export const TransformerTab = () => {
-  const { transformers, revision: _revision, mode, setMode, removeTransformer, setHoveredTransformerId, updateTransformerTargetType, updateTransformerColor, updateTransformerMode } = useStore(
+  const {
+    transformers, revision: _revision, mode, pendingTransformerType,
+    setMode, removeTransformer, setHoveredTransformerId,
+    updateTransformerAmount, updateTransformerColor, updateTransformerTargetType, updateTransformerType,
+    setPendingTransformerType,
+  } = useStore(
     useShallow((s) => ({
       transformers: s.transformers,
       revision: s.revision,
       mode: s.mode,
+      pendingTransformerType: s.pendingTransformerType,
       setMode: s.setMode,
       removeTransformer: s.removeTransformer,
       setHoveredTransformerId: s.setHoveredTransformerId,
-      updateTransformerTargetType: s.updateTransformerTargetType,
+      updateTransformerAmount: s.updateTransformerAmount,
       updateTransformerColor: s.updateTransformerColor,
-      updateTransformerMode: s.updateTransformerMode,
+      updateTransformerTargetType: s.updateTransformerTargetType,
+      updateTransformerType: s.updateTransformerType,
+      setPendingTransformerType: s.setPendingTransformerType,
     }))
   )
 
@@ -23,8 +34,15 @@ export const TransformerTab = () => {
 
   return (
     <S.Container>
+      <S.TypeRow>
+        {ALL_TYPES.map((t) => (
+          <S.TypeButton key={t} $active={pendingTransformerType === t} onClick={() => setPendingTransformerType(t)}>
+            {t}
+          </S.TypeButton>
+        ))}
+      </S.TypeRow>
       <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addTransformer")}>
-        {isPlacing ? "Cancel" : "+ Add Transformer"}
+        {isPlacing ? "Cancel" : `+ Add ${pendingTransformerType}`}
       </S.AddButton>
       <S.TransformerList>
         {Object.values(transformers).map((tr) => (
@@ -38,20 +56,35 @@ export const TransformerTab = () => {
               <S.DeleteButton onClick={() => removeTransformer(tr.id)}>✕</S.DeleteButton>
             </S.Row>
             <S.Row>
-              <S.Label>mode</S.Label>
+              <S.Label>type</S.Label>
               <S.TypeButtons>
-                <S.TypeBtn $active={tr.mode === "color"} onClick={() => updateTransformerMode(tr.id, "color")}>
-                  color
-                </S.TypeBtn>
-                <S.TypeBtn $active={tr.mode === "shape"} onClick={() => updateTransformerMode(tr.id, "shape")}>
-                  shape
-                </S.TypeBtn>
+                {ALL_TYPES.map((t) => (
+                  <S.TypeBtn key={t} $active={tr.type === t} onClick={() => updateTransformerType(tr.id, t)}>
+                    {t}
+                  </S.TypeBtn>
+                ))}
               </S.TypeButtons>
             </S.Row>
-            {tr.mode === "color" && (
+            {tr.type === "fade" && (
+              <S.Row>
+                <S.Label>opacity</S.Label>
+                <S.AmountInput
+                  type="number"
+                  min={0.05}
+                  max={1}
+                  step={0.05}
+                  value={tr.amount}
+                  onChange={(ev) => {
+                    const v = parseFloat(ev.target.value)
+                    if (!isNaN(v)) updateTransformerAmount(tr.id, Math.min(1, Math.max(0.05, v)))
+                  }}
+                />
+              </S.Row>
+            )}
+            {tr.type === "color" && (
               <ColorPicker palette={TOKEN_COLORS} value={tr.color} onChange={(c) => updateTransformerColor(tr.id, c)} />
             )}
-            {tr.mode === "shape" && (
+            {tr.type === "shape" && (
               <S.Row>
                 <S.Label>target</S.Label>
                 <S.TypeButtons>

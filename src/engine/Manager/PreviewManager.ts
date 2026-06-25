@@ -8,10 +8,6 @@ import { SwitchPreview } from "../Switch/SwitchPreview";
 import { drawStats, smoothFps } from "../stats";
 import type { Token } from "../Token/Token";
 import { TokenPreview } from "../Token/TokenPreview";
-import type { Rotator } from "../Rotator/Rotator";
-import { RotatorPreview } from "../Rotator/RotatorPreview";
-import type { Fader } from "../Fader/Fader";
-import { FaderPreview } from "../Fader/FaderPreview";
 import type { Inverter } from "../Inverter/Inverter";
 import { InverterPreview } from "../Inverter/InverterPreview";
 import type { Transformer } from "../Transformer/Transformer";
@@ -38,16 +34,12 @@ export class PreviewManager extends Manager<LinePreview> {
     switchLinks: {} as Record<string, string[]>,
     links: {} as Record<string, Link>,
     linkMap: {} as LinkMap,
-    rotators: {} as Record<string, RotatorPreview>,
-    rotatorLinkIds: new Set<string>(),
+    transformers: {} as Record<string, TransformerPreview>,
+    transformerByLinkId: {} as Record<string, string>,
     linkByEndpointKey: {} as Record<string, string>,
-    faders: {} as Record<string, FaderPreview>,
-    faderLinkIds: new Set<string>(),
     inverters: {} as Record<string, InverterPreview>,
     inverterLinkIds: new Set<string>(),
     isInverted: false,
-    transformers: {} as Record<string, TransformerPreview>,
-    transformerByLinkId: {} as Record<string, TransformerPreview>,
     arrival: null as ArrivalPreview | null,
     arrivalKey: "" as string,
     elapsedSeconds: 0,
@@ -62,11 +54,9 @@ export class PreviewManager extends Manager<LinePreview> {
     starts: Record<string, Start>,
     switches: Record<string, Switch> = {},
     switchLinks: Record<string, string[]> = {},
-    rotators: Record<string, Rotator> = {},
-    arrival: Arrival | null = null,
-    faders: Record<string, Fader> = {},
-    inverters: Record<string, Inverter> = {},
     transformers: Record<string, Transformer> = {},
+    arrival: Arrival | null = null,
+    inverters: Record<string, Inverter> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -85,11 +75,12 @@ export class PreviewManager extends Manager<LinePreview> {
       this.data.linkMap[k2] = lk.line1;
     }
 
-    this.data.rotators = {};
-    this.data.rotatorLinkIds = new Set();
-    for (const r of Object.values(rotators)) {
-      this.data.rotators[r.id] = new RotatorPreview(r.linkId, r.id);
-      this.data.rotatorLinkIds.add(r.linkId);
+    this.data.transformers = {};
+    this.data.transformerByLinkId = {};
+    for (const tr of Object.values(transformers)) {
+      const tp = new TransformerPreview(tr.linkId, tr.type, tr.id, tr.amount, tr.color, tr.targetType);
+      this.data.transformers[tp.id] = tp;
+      this.data.transformerByLinkId[tr.linkId] = tp.id;
     }
 
     this.data.switches = {};
@@ -103,27 +94,12 @@ export class PreviewManager extends Manager<LinePreview> {
       this.data.switches[s.id] = sw;
     }
 
-    this.data.faders = {};
-    this.data.faderLinkIds = new Set();
-    for (const f of Object.values(faders)) {
-      this.data.faders[f.id] = new FaderPreview(f.linkId, f.id, f.amount);
-      this.data.faderLinkIds.add(f.linkId);
-    }
-
     this.data.inverters = {};
     this.data.inverterLinkIds = new Set();
     this.data.isInverted = false;
     for (const inv of Object.values(inverters)) {
       this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
       this.data.inverterLinkIds.add(inv.linkId);
-    }
-
-    this.data.transformers = {};
-    this.data.transformerByLinkId = {};
-    for (const tr of Object.values(transformers)) {
-      const tp = new TransformerPreview(tr.linkId, tr.mode, tr.color, tr.targetType, tr.id);
-      this.data.transformers[tp.id] = tp;
-      this.data.transformerByLinkId[tr.linkId] = tp;
     }
 
     this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
@@ -182,7 +158,7 @@ export class PreviewManager extends Manager<LinePreview> {
 
       if (token.isTransforming) {
         token.transformProgress = Math.min(1, token.transformProgress + deltaSeconds / PAINT_DURATION);
-        const activeTransformer = this.data.transformerByLinkId[token.transformingLinkId];
+        const activeTransformer = this.data.transformers[this.data.transformerByLinkId[token.transformingLinkId]];
         if (activeTransformer) {
           activeTransformer.transformProgress = token.transformProgress;
           if (token.transformMode === "color") {
@@ -247,15 +223,6 @@ export class PreviewManager extends Manager<LinePreview> {
       sw.draw(ctx);
     }
 
-    for (const rot of Object.values(this.data.rotators)) {
-      const link = this.data.links[rot.linkId];
-      if (!link) continue;
-      const line = this.data.lines[link.line1.lineId];
-      if (!line) continue;
-      const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      rot.draw(ctx, pt, this.data.elapsedSeconds);
-    }
-
     for (const tr of Object.values(this.data.transformers)) {
       const link = this.data.links[tr.linkId];
       if (!link) continue;
@@ -295,15 +262,6 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!line || line.points.length === 0) continue;
       const pt = line.points[token.pointIndex];
       if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points);
-    }
-
-    for (const f of Object.values(this.data.faders)) {
-      const link = this.data.links[f.linkId];
-      if (!link) continue;
-      const line = this.data.lines[link.line1.lineId];
-      if (!line) continue;
-      const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      f.draw(ctx, pt);
     }
 
     for (const inv of Object.values(this.data.inverters)) {

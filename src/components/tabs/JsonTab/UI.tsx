@@ -1,5 +1,23 @@
 import styled from "styled-components"
 
+export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`
+
+export const ClearButton = styled.button`
+  padding: 6px 10px;
+  font-size: 11px;
+  font-family: monospace;
+  background: #fff0f0;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover { background: #c62828; color: #fff; }
+`
+
 export const Pre = styled.pre`
   margin: 0;
   font-family: monospace;

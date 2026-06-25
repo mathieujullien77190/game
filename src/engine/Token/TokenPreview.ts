@@ -3,7 +3,6 @@ import type { LinePoint } from "../types"
 import type { LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
-import type { FaderPreview } from "../Fader/FaderPreview"
 import type { TransformerPreview } from "../Transformer/TransformerPreview"
 import { Token } from "./Token"
 
@@ -13,12 +12,10 @@ export type TransitionCtx = {
   linkByEndpointKey: Record<string, string>
   linkMap: Record<string, LinkEndpoint>
   lines: Record<string, LinePreview>
-  rotatorLinkIds: Set<string>
-  faderLinkIds: Set<string>
-  faders: Record<string, FaderPreview>
+  transformers: Record<string, TransformerPreview>
+  transformerByLinkId: Record<string, string>
   inverterLinkIds: Set<string>
   isInverted: boolean
-  transformerByLinkId: Record<string, TransformerPreview>
 }
 
 export class TokenPreview extends Token {
@@ -74,27 +71,22 @@ export class TokenPreview extends Token {
     }
 
     const linkId = ctx.linkByEndpointKey[`${this.lineId}::${arrivedAt}`]
-    if (linkId && ctx.rotatorLinkIds.has(linkId)) {
-      this.targetRotationOffset += Math.PI * 2.25
-    }
-    if (linkId && ctx.faderLinkIds.has(linkId)) {
-      const fader = Object.values(ctx.faders).find((f) => f.linkId === linkId)
-      if (fader) this.opacity = fader.amount
-    }
+    const transformer = linkId ? ctx.transformers[ctx.transformerByLinkId[linkId]] : undefined
+    if (transformer?.type === "rotate") this.targetRotationOffset += Math.PI * 2.25
+    if (transformer?.type === "fade") this.opacity = transformer.amount
     if (linkId && ctx.inverterLinkIds.has(linkId)) {
       isInverted = !isInverted
     }
 
-    const transformer = linkId ? ctx.transformerByLinkId[linkId] : undefined
-    if (transformer) {
+    if (transformer?.type === "color" || transformer?.type === "shape") {
       const currentColor = this.displayColor || (this.color as string)
-      const needsColor = transformer.mode === "color" && currentColor !== transformer.color
-      const needsShape = transformer.mode === "shape" && (this.type as string) !== transformer.targetType
+      const needsColor = transformer.type === "color" && currentColor !== transformer.color
+      const needsShape = transformer.type === "shape" && (this.type as string) !== transformer.targetType
       if (needsColor || needsShape) {
         this.isTransforming = true
         this.transformProgress = 0
         this.transformingLinkId = linkId
-        this.transformMode = transformer.mode
+        this.transformMode = transformer.type
         this.direction = 0
         this.currentSpeed = this.speed
         transformer.transformProgress = 0

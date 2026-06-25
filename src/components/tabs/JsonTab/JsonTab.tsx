@@ -15,7 +15,21 @@ export const JsonTab = () => {
     }))
   )
 
-  const json = JSON.stringify(serializeMap(editorManager, tokens, starts, switches, switchLinks), null, 2)
+  const { transformers, inverters, arrival } = useStore(
+    useShallow((s) => ({ transformers: s.transformers, inverters: s.inverters, arrival: s.arrival }))
+  )
 
-  return <S.Pre key={revision}>{json}</S.Pre>
+  const json = JSON.stringify(serializeMap(editorManager, tokens, starts, switches, switchLinks, transformers, arrival, inverters), null, 2)
+
+  const handleClear = () => {
+    localStorage.removeItem("game2-map")
+    window.location.reload()
+  }
+
+  return (
+    <S.Container>
+      <S.ClearButton onClick={handleClear}>Clear map</S.ClearButton>
+      <S.Pre key={revision}>{json}</S.Pre>
+    </S.Container>
+  )
 }

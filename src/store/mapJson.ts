@@ -5,10 +5,8 @@ import { StartEditor } from "engine/Start/StartEditor"
 import { syncStartCounter } from "engine/Start/Start"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
-import { Rotator, syncRotatorCounter } from "engine/Rotator/Rotator"
-import { Fader, syncFaderCounter } from "engine/Fader/Fader"
+import { Transformer, syncTransformerCounter, type TransformerType } from "engine/Transformer/Transformer"
 import { Inverter, syncInverterCounter } from "engine/Inverter/Inverter"
-import { Transformer, syncTransformerCounter, type TransformerMode } from "engine/Transformer/Transformer"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { syncArrivalCounter } from "engine/Arrival/Arrival"
 import type { EditorManager } from "engine/Manager/EditorManager"
@@ -22,12 +20,14 @@ export type MapJson = {
   tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number }[]
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[] }>
-  rotators?: { id: string; linkId: string }[]
-  painters?: { id: string; linkId: string; color: string }[]
-  faders?: { id: string; linkId: string; amount: number }[]
+  transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string }[]
   inverters?: { id: string; linkId: string }[]
-  transformers?: { id: string; linkId: string; targetType: string; mode?: TransformerMode; color?: string }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[] } | null
+  // legacy fields for backward compat
+  tokenEffects?: { id: string; linkId: string; type: "fade" | "rotate"; amount: number }[]
+  rotators?: { id: string; linkId: string }[]
+  faders?: { id: string; linkId: string; amount: number }[]
+  painters?: { id: string; linkId: string; color: string }[]
 }
 
 export const serializeMap = (
@@ -36,11 +36,9 @@ export const serializeMap = (
   starts: Record<string, StartEditorType>,
   switches: Record<string, SwitchEditorType>,
   switchLinks: Record<string, string[]>,
-  rotators: Record<string, Rotator> = {},
-  arrival: ArrivalEditor | null = null,
-  faders: Record<string, Fader> = {},
-  inverters: Record<string, Inverter> = {},
   transformers: Record<string, Transformer> = {},
+  arrival: ArrivalEditor | null = null,
+  inverters: Record<string, Inverter> = {},
 ): MapJson => ({
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
@@ -76,16 +74,15 @@ export const serializeMap = (
       { linkIds: sw.linkIds, activeLinkId: sw.activeLinkId, linkedSwitchIds: switchLinks[sw.id] ?? [] },
     ])
   ),
-  rotators: Object.values(rotators).map((r) => ({ id: r.id, linkId: r.linkId })),
-  faders: Object.values(faders).map((f) => ({ id: f.id, linkId: f.linkId, amount: f.amount })),
-  inverters: Object.values(inverters).map((inv) => ({ id: inv.id, linkId: inv.linkId })),
   transformers: Object.values(transformers).map((tr) => ({
     id: tr.id,
     linkId: tr.linkId,
-    targetType: tr.targetType,
-    mode: tr.mode,
+    type: tr.type,
+    amount: tr.amount,
     color: tr.color,
+    targetType: tr.targetType,
   })),
+  inverters: Object.values(inverters).map((inv) => ({ id: inv.id, linkId: inv.linkId })),
   arrival: arrival ? { id: arrival.id, lineId: arrival.lineId, endpoint: arrival.endpoint, demands: arrival.demands } : null,
 })
 
@@ -133,17 +130,32 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncSwitchCounter(Object.keys(switches))
 
-  const rotators: Record<string, Rotator> = {}
+  const transformers: Record<string, Transformer> = {}
+  // Current format
+  json.transformers?.forEach(({ id, linkId, type, amount, color, targetType }) => {
+    transformers[id] = new Transformer(linkId, type, id, amount ?? 0.5, color ?? "#e53935", targetType ?? "square")
+  })
+  // Migration: tokenEffects (previous merge)
+  json.tokenEffects?.forEach(({ id, linkId, type, amount }) => {
+    const migId = `transform_te_${id}`
+    transformers[migId] = new Transformer(linkId, type, migId, amount ?? 0.5)
+  })
+  // Migration: old rotators
   json.rotators?.forEach(({ id, linkId }) => {
-    rotators[id] = new Rotator(linkId, id)
+    const migId = `transform_rot_${id}`
+    transformers[migId] = new Transformer(linkId, "rotate", migId)
   })
-  syncRotatorCounter(Object.keys(rotators))
-
-  const faders: Record<string, Fader> = {}
+  // Migration: old faders
   json.faders?.forEach(({ id, linkId, amount }) => {
-    faders[id] = new Fader(linkId, id, amount ?? 0.5)
+    const migId = `transform_fad_${id}`
+    transformers[migId] = new Transformer(linkId, "fade", migId, amount ?? 0.5)
   })
-  syncFaderCounter(Object.keys(faders))
+  // Migration: old painters → color transformer
+  json.painters?.forEach(({ id, linkId, color }) => {
+    const migId = `transform_pt_${id}`
+    transformers[migId] = new Transformer(linkId, "color", migId, 0.5, color)
+  })
+  syncTransformerCounter(Object.keys(transformers))
 
   const inverters: Record<string, Inverter> = {}
   json.inverters?.forEach(({ id, linkId }) => {
@@ -151,22 +163,11 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncInverterCounter(Object.keys(inverters))
 
-  const transformers: Record<string, Transformer> = {}
-  json.transformers?.forEach(({ id, linkId, targetType, mode, color }) => {
-    transformers[id] = new Transformer(linkId, mode ?? "shape", color ?? "#e53935", targetType ?? "square", id)
-  })
-  // Migration: old painters → transformers with mode "color"
-  json.painters?.forEach(({ id, linkId, color }) => {
-    const migId = `migrated_${id}`
-    transformers[migId] = new Transformer(linkId, "color", color, "square", migId)
-  })
-  syncTransformerCounter(Object.keys(transformers))
-
   let arrival: ArrivalEditor | null = null
   if (json.arrival) {
     arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any)
     syncArrivalCounter([json.arrival.id])
   }
 
-  return { tokens, starts, switches, switchLinks, rotators, faders, inverters, transformers, arrival }
+  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival }
 }

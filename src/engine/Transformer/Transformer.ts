@@ -11,18 +11,20 @@ export const syncTransformerCounter = (ids: string[]) => {
 
 const generateTransformerId = () => `transform${++transformerCounter}`
 
-export type TransformerMode = "color" | "shape"
+export type TransformerType = "fade" | "rotate" | "color" | "shape"
 
 export class Transformer {
   id: string
   linkId: string
-  mode: TransformerMode
+  type: TransformerType
+  amount: number
   color: string
   targetType: string
-  constructor(linkId: string, mode: TransformerMode = "shape", color: string = "#e53935", targetType: string = "square", id?: string) {
+  constructor(linkId: string, type: TransformerType = "color", id?: string, amount = 0.5, color = "#e53935", targetType = "square") {
     this.id = id ?? generateTransformerId()
     this.linkId = linkId
-    this.mode = mode
+    this.type = type
+    this.amount = amount
     this.color = color
     this.targetType = targetType
   }
