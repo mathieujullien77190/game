@@ -15,6 +15,7 @@ export class TokenPreview extends Token {
   colorTransitionFrom: string = ""
   displayColor: string = ""
   colorProgress: number = 1
+  arrived: boolean = false
   isPainting: boolean = false
   paintProgress: number = 0
   paintingLinkId: string = ""

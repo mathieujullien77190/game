@@ -7,6 +7,7 @@ import { SwitchEditor } from "../Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "../Switch/switchUtils"
 import { RotatorEditor } from "../Rotator/RotatorEditor"
 import { PainterEditor } from "../Painter/PainterEditor"
+import { ArrivalEditor } from "../Arrival/ArrivalEditor"
 import { drawStats } from "../stats"
 import { Manager } from "./Manager"
 
@@ -112,7 +113,9 @@ export class EditorManager extends Manager<LineEditor> {
     previewRotatorPt: Point | null = null,
     painters: PainterEditor[] = [],
     hoveredPainterId: string | null = null,
-    previewPainterPt: Point | null = null
+    previewPainterPt: Point | null = null,
+    arrival: ArrivalEditor | null = null,
+    previewArrivalPt: Point | null = null
   ) => {
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -191,6 +194,25 @@ export class EditorManager extends Manager<LineEditor> {
       if (!line) continue
       const pt = start.endpoint === "end" ? line.end : line.start
       start.draw(ctx, pt)
+    }
+
+    if (arrival) {
+      const line = this.data.lines[arrival.lineId]
+      if (line) {
+        const pt = arrival.endpoint === "end" ? line.end : line.start
+        arrival.draw(ctx, pt)
+      }
+    }
+
+    if (previewArrivalPt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#000"
+      ctx.beginPath()
+      ctx.arc(previewArrivalPt.x, previewArrivalPt.y, 14, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = "#fff"
+      ctx.fillRect(previewArrivalPt.x - 5, previewArrivalPt.y - 5, 10, 10)
+      ctx.globalAlpha = 1
     }
 
     if (previewStartPt) {

@@ -7,6 +7,8 @@ import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
 import { Rotator, syncRotatorCounter } from "engine/Rotator/Rotator"
 import { Painter, syncPainterCounter } from "engine/Painter/Painter"
+import { ArrivalEditor, } from "engine/Arrival/ArrivalEditor"
+import { syncArrivalCounter } from "engine/Arrival/Arrival"
 import type { EditorManager } from "engine/Manager/EditorManager"
 import type { Point } from "engine/types"
 import type { StartEditor as StartEditorType } from "engine/Start/StartEditor"
@@ -20,6 +22,7 @@ export type MapJson = {
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[] }>
   rotators?: { id: string; linkId: string }[]
   painters?: { id: string; linkId: string; color: string }[]
+  arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[] } | null
 }
 
 export const serializeMap = (
@@ -29,7 +32,8 @@ export const serializeMap = (
   switches: Record<string, SwitchEditorType>,
   switchLinks: Record<string, string[]>,
   rotators: Record<string, Rotator> = {},
-  painters: Record<string, Painter> = {}
+  painters: Record<string, Painter> = {},
+  arrival: ArrivalEditor | null = null
 ): MapJson => ({
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
@@ -67,6 +71,7 @@ export const serializeMap = (
   ),
   rotators: Object.values(rotators).map((r) => ({ id: r.id, linkId: r.linkId })),
   painters: Object.values(painters).map((p) => ({ id: p.id, linkId: p.linkId, color: p.color })),
+  arrival: arrival ? { id: arrival.id, lineId: arrival.lineId, endpoint: arrival.endpoint, demands: arrival.demands } : null,
 })
 
 export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
@@ -125,5 +130,11 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncPainterCounter(Object.keys(painters))
 
-  return { tokens, starts, switches, switchLinks, rotators, painters }
+  let arrival: ArrivalEditor | null = null
+  if (json.arrival) {
+    arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any)
+    syncArrivalCounter([json.arrival.id])
+  }
+
+  return { tokens, starts, switches, switchLinks, rotators, painters, arrival }
 }

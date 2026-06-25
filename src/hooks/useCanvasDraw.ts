@@ -4,6 +4,7 @@ import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { RotatorEditor } from "engine/Rotator/RotatorEditor"
 import { PainterEditor } from "engine/Painter/PainterEditor"
+import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { smoothFps } from "engine/stats"
 import type { Point } from "engine/types"
 
@@ -26,7 +27,9 @@ export const useCanvasDraw = (
   previewRotatorPt: Point | null = null,
   painters: PainterEditor[] = [],
   hoveredPainterId: string | null = null,
-  previewPainterPt: Point | null = null
+  previewPainterPt: Point | null = null,
+  arrival: ArrivalEditor | null = null,
+  previewArrivalPt: Point | null = null
 ) => {
   const lastTimestampRef = useRef<number | null>(null)
   const fpsRef = useRef(0)
@@ -46,8 +49,9 @@ export const useCanvasDraw = (
       ctx, hoveredLineId, snapPoint, pendingPoint, showIds,
       starts, switches, previewStartPt, previewSwitchPt,
       fpsRef.current, frameMsRef.current, hoveredSwitchId, rotators,
-      hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt
+      hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt,
+      arrival, previewArrivalPt
     )
     frameMsRef.current = performance.now() - t0
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, rotators, hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, rotators, hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt, arrival, previewArrivalPt])
 }

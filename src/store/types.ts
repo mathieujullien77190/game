@@ -8,9 +8,10 @@ import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import type { Rotator } from "engine/Rotator/Rotator"
 import type { Painter } from "engine/Painter/Painter"
+import type { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import type { Point } from "engine/types"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator" | "addPainter"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator" | "addPainter" | "addArrival"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -22,6 +23,7 @@ export interface StoreState {
   switchLinks: Record<string, string[]>
   rotators: Record<string, Rotator>
   painters: Record<string, Painter>
+  arrival: ArrivalEditor | null
   hoveredLineId: string | null
   hoveredSwitchId: string | null
   hoveredRotatorId: string | null
@@ -59,6 +61,11 @@ export interface StoreActions {
   removePainter: (id: string) => void
   setPainterColor: (id: string, color: string) => void
   setHoveredPainterId: (id: string | null) => void
+  setArrival: (lineId: string, endpoint: "start" | "end") => void
+  removeArrival: () => void
+  addArrivalDemand: () => void
+  removeArrivalDemand: (id: string) => void
+  updateArrivalDemand: (id: string, patch: { color?: string; type?: string; angled?: boolean }) => void
   setHoveredSwitchId: (id: string | null) => void
   setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void

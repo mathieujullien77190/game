@@ -12,6 +12,8 @@ import type { Rotator } from "../Rotator/Rotator";
 import { RotatorPreview } from "../Rotator/RotatorPreview";
 import type { Painter } from "../Painter/Painter";
 import { PainterPreview } from "../Painter/PainterPreview";
+import type { Arrival } from "../Arrival/Arrival";
+import { ArrivalPreview } from "../Arrival/ArrivalPreview";
 import { Manager } from "./Manager";
 
 const lerpHex = (a: string, b: string, t: number): string => {
@@ -37,6 +39,8 @@ export class PreviewManager extends Manager<LinePreview> {
     linkByEndpointKey: {} as Record<string, string>,
     painters: {} as Record<string, PainterPreview>,
     painterByLinkId: {} as Record<string, PainterPreview>,
+    arrival: null as ArrivalPreview | null,
+    arrivalKey: "" as string,
     elapsedSeconds: 0,
     lastTimestamp: null as number | null,
     fps: 0,
@@ -51,6 +55,7 @@ export class PreviewManager extends Manager<LinePreview> {
     switchLinks: Record<string, string[]> = {},
     rotators: Record<string, Rotator> = {},
     painters: Record<string, Painter> = {},
+    arrival: Arrival | null = null,
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -95,6 +100,9 @@ export class PreviewManager extends Manager<LinePreview> {
       this.data.switches[s.id] = sw;
     }
 
+    this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
+    this.data.arrivalKey = arrival ? `${arrival.lineId}::${arrival.endpoint}` : "";
+
     const s = Object.values(starts)[0];
     this.data.start = s ? new StartPreview(s.lineId, s.endpoint, s.delay, s.id) : null;
 
@@ -133,6 +141,15 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.elapsedSeconds += deltaSeconds;
 
     for (const sw of Object.values(this.data.switches)) sw.tick(deltaSeconds);
+
+    if (this.data.arrival?.isFading) {
+      this.data.arrival.fadeAlpha = Math.max(0, this.data.arrival.fadeAlpha - deltaSeconds / 2);
+      if (this.data.arrival.fadeAlpha <= 0) {
+        this.data.arrival.isFading = false;
+        this.data.arrival.fadeAlpha = 1;
+        this.data.arrival.currentDemandIndex++;
+      }
+    }
 
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
@@ -177,9 +194,21 @@ export class PreviewManager extends Manager<LinePreview> {
         token.displayColor = token.colorProgress >= 1 ? "" : lerpHex(token.colorTransitionFrom, token.color as string, token.colorProgress);
       }
     }
+    if (this.data.tokens.some(t => t.arrived)) {
+      this.data.tokens = this.data.tokens.filter(t => !t.arrived);
+    }
   };
 
   private transitionToken = (token: TokenPreview, arrivedAt: "start" | "end", excess: number) => {
+    if (this.data.arrivalKey && this.data.arrivalKey === `${token.lineId}::${arrivedAt}`) {
+      if (this.data.arrival) {
+        this.data.arrival.isFading = true;
+        this.data.arrival.fadeAlpha = 1;
+      }
+      token.arrived = true;
+      token.direction = 0;
+      return;
+    }
     const linkId = this.data.linkByEndpointKey[`${token.lineId}::${arrivedAt}`];
     if (linkId && this.data.rotatorLinkIds.has(linkId)) {
       token.targetRotationOffset += Math.PI * 2.25;
@@ -254,6 +283,15 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!line) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
       p.draw(ctx, pt, this.data.elapsedSeconds);
+    }
+
+    if (this.data.arrival) {
+      const arrival = this.data.arrival;
+      const line = this.data.lines[arrival.lineId];
+      if (line) {
+        const pt = arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
+        if (pt) arrival.draw(ctx, pt);
+      }
     }
 
     if (this.data.start) {
