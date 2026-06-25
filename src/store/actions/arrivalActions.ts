@@ -6,7 +6,7 @@ import type { Set } from "store/types"
 export const createArrivalActions = (set: Set) => ({
   setArrival: (lineId: string, endpoint: "start" | "end") =>
     set((state) => ({
-      arrival: new ArrivalEditor(lineId, endpoint),
+      arrival: new ArrivalEditor(lineId, endpoint, undefined, [], state.currentScreenId),
       revision: state.revision + 1,
     })),
 

@@ -12,6 +12,8 @@ import type { Inverter } from "../Inverter/Inverter";
 import { InverterPreview } from "../Inverter/InverterPreview";
 import type { Transformer } from "../Transformer/Transformer";
 import { TransformerPreview } from "../Transformer/TransformerPreview";
+import type { ScreenGate } from "../ScreenGate/ScreenGate";
+import { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview";
 import type { Arrival } from "../Arrival/Arrival";
 import { ArrivalPreview } from "../Arrival/ArrivalPreview";
 import { Manager } from "./Manager";
@@ -40,6 +42,11 @@ export class PreviewManager extends Manager<LinePreview> {
     inverters: {} as Record<string, InverterPreview>,
     inverterLinkIds: new Set<string>(),
     isInverted: false,
+    screenGates: {} as Record<string, ScreenGatePreview>,
+    screenGateByLinkId: {} as Record<string, ScreenGatePreview>,
+    screenGateByExitKey: {} as Record<string, ScreenGatePreview>,
+    previewScreenId: "main" as string,
+    previewScreenHistory: [] as string[],
     arrival: null as ArrivalPreview | null,
     arrivalKey: "" as string,
     elapsedSeconds: 0,
@@ -57,6 +64,7 @@ export class PreviewManager extends Manager<LinePreview> {
     transformers: Record<string, Transformer> = {},
     arrival: Arrival | null = null,
     inverters: Record<string, Inverter> = {},
+    screenGates: Record<string, ScreenGate> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -100,6 +108,18 @@ export class PreviewManager extends Manager<LinePreview> {
     for (const inv of Object.values(inverters)) {
       this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
       this.data.inverterLinkIds.add(inv.linkId);
+    }
+
+    this.data.screenGates = {};
+    this.data.screenGateByLinkId = {};
+    this.data.screenGateByExitKey = {};
+    this.data.previewScreenId = "main";
+    this.data.previewScreenHistory = [];
+    for (const sg of Object.values(screenGates)) {
+      const sgp = new ScreenGatePreview(sg.linkId, sg.targetScreenId, sg.entryKey, sg.exitKey, sg.id, sg.screenId);
+      this.data.screenGates[sgp.id] = sgp;
+      this.data.screenGateByLinkId[sg.linkId] = sgp;
+      if (sg.exitKey) this.data.screenGateByExitKey[sg.exitKey] = sgp;
     }
 
     this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
@@ -214,12 +234,51 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
+
+    const sid = this.data.previewScreenId;
+    const visibleLines = Object.values(this.data.lines).filter((l) => l.screenId === sid);
+
     this.drawSwitchLinks(ctx);
-    for (const line of Object.values(this.data.lines)) line.drawGlow(ctx, this.data.elapsedSeconds);
-    for (const line of Object.values(this.data.lines)) line.draw(ctx);
+    for (const line of visibleLines) line.drawGlow(ctx, this.data.elapsedSeconds);
+    for (const line of visibleLines) line.draw(ctx);
+
+    for (const sg of Object.values(this.data.screenGates)) {
+      if (sg.targetScreenId !== sid) continue;
+      if (sg.entryKey) {
+        const [eLineId, eEp] = sg.entryKey.split("::");
+        const eLine = this.data.lines[eLineId];
+        if (eLine) {
+          const pt = eEp === "end" ? eLine.end : eLine.start;
+          ctx.fillStyle = "#000";
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      if (sg.exitKey) {
+        const [xLineId, xEp] = sg.exitKey.split("::");
+        const xLine = this.data.lines[xLineId];
+        if (xLine) {
+          const pt = xEp === "end" ? xLine.end : xLine.start;
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 2;
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = "#000";
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
 
     for (const sw of Object.values(this.data.switches)) {
       sw.prepareFrame(this.data.lines, this.data.links, this.data.linkMap);
+      const link = this.data.links[sw.linkIds[0]];
+      if (!link) continue;
+      if (this.data.lines[link.line1.lineId]?.screenId !== sid) continue;
       sw.draw(ctx);
     }
 
@@ -227,7 +286,7 @@ export class PreviewManager extends Manager<LinePreview> {
       const link = this.data.links[tr.linkId];
       if (!link) continue;
       const line = this.data.lines[link.line1.lineId];
-      if (!line) continue;
+      if (!line || line.screenId !== sid) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
       tr.draw(ctx, pt, this.data.elapsedSeconds);
     }
@@ -235,7 +294,7 @@ export class PreviewManager extends Manager<LinePreview> {
     if (this.data.arrival) {
       const arrival = this.data.arrival;
       const line = this.data.lines[arrival.lineId];
-      if (line) {
+      if (line && line.screenId === sid) {
         const pt = arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
         if (pt) arrival.draw(ctx, pt);
       }
@@ -244,7 +303,7 @@ export class PreviewManager extends Manager<LinePreview> {
     if (this.data.start) {
       const start = this.data.start;
       const line = this.data.lines[start.lineId];
-      if (line) {
+      if (line && line.screenId === sid) {
         const pt = start.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
         if (pt) {
           const nextWaiting = this.data.tokens
@@ -258,17 +317,31 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
+      const inPortal = !!token.portalContext;
+      const tokenScreenId = this.data.lines[token.lineId]?.screenId ?? "main";
+      if (sid === "main" && inPortal) continue;
+      if (sid !== "main" && (!inPortal || tokenScreenId !== sid)) continue;
       const line = this.data.lines[token.lineId];
       if (!line || line.points.length === 0) continue;
       const pt = line.points[token.pointIndex];
       if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points);
     }
 
+    for (const sg of Object.values(this.data.screenGates)) {
+      if (sg.screenId !== sid) continue;
+      const link = this.data.links[sg.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line) continue;
+      const pt = link.line1.endpoint === "end" ? line.end : line.start;
+      sg.draw(ctx, pt);
+    }
+
     for (const inv of Object.values(this.data.inverters)) {
       const link = this.data.links[inv.linkId];
       if (!link) continue;
       const line = this.data.lines[link.line1.lineId];
-      if (!line || line.points.length === 0) continue;
+      if (!line || line.screenId !== sid || line.points.length === 0) continue;
       const isEnd = link.line1.endpoint === "end";
       const pt = isEnd ? line.end : line.start;
       const ptAngle = isEnd ? line.points[line.points.length - 1] : line.points[0];
@@ -310,6 +383,38 @@ export class PreviewManager extends Manager<LinePreview> {
       }
     }
     ctx.restore();
+  };
+
+  clickAt = (x: number, y: number) => {
+    if (this.data.previewScreenId !== "main") {
+      for (const sg of Object.values(this.data.screenGates)) {
+        if (sg.targetScreenId !== this.data.previewScreenId) continue;
+        if (!sg.exitKey) continue;
+        const [xLineId, xEp] = sg.exitKey.split("::");
+        const xLine = this.data.lines[xLineId];
+        if (!xLine) continue;
+        const pt = xEp === "end" ? xLine.end : xLine.start;
+        if ((x - pt.x) ** 2 + (y - pt.y) ** 2 <= 12 ** 2) {
+          this.data.previewScreenId = this.data.previewScreenHistory.pop() ?? "main";
+          return;
+        }
+      }
+    }
+    for (const sg of Object.values(this.data.screenGates)) {
+      if (sg.screenId !== this.data.previewScreenId) continue;
+      if (!sg.targetScreenId) continue;
+      const link = this.data.links[sg.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line) continue;
+      const pt = link.line1.endpoint === "end" ? line.end : line.start;
+      if (Math.abs(x - pt.x) <= 18 && Math.abs(y - pt.y) <= 32) {
+        this.data.previewScreenHistory.push(this.data.previewScreenId);
+        this.data.previewScreenId = sg.targetScreenId;
+        return;
+      }
+    }
+    this.cycleSwitchAt(x, y);
   };
 
   cycleSwitchAt = (x: number, y: number) => {

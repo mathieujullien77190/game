@@ -20,12 +20,14 @@ export class Transformer {
   amount: number
   color: string
   targetType: string
-  constructor(linkId: string, type: TransformerType = "color", id?: string, amount = 0.5, color = "#e53935", targetType = "square") {
+  screenId: string = "main"
+  constructor(linkId: string, type: TransformerType = "color", id?: string, amount = 0.5, color = "#e53935", targetType = "square", screenId?: string) {
     this.id = id ?? generateTransformerId()
     this.linkId = linkId
     this.type = type
     this.amount = amount
     this.color = color
     this.targetType = targetType
+    if (screenId) this.screenId = screenId
   }
 }

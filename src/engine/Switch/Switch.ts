@@ -12,10 +12,12 @@ export class Switch {
   id: string
   linkIds: string[]
   activeLinkId: string | null
+  screenId: string = "main"
 
-  constructor(id?: string, linkIds?: string[], activeLinkId?: string | null) {
+  constructor(id?: string, linkIds?: string[], activeLinkId?: string | null, screenId?: string) {
     this.id = id ?? `switch${switchCounter++}`
     this.linkIds = linkIds ?? []
     this.activeLinkId = activeLinkId ?? null
+    if (screenId) this.screenId = screenId
   }
 }

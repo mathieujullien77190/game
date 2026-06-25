@@ -9,9 +9,10 @@ import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import type { Transformer, TransformerType } from "engine/Transformer/Transformer"
 import type { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import type { Inverter } from "engine/Inverter/Inverter"
+import type { ScreenGate } from "engine/ScreenGate/ScreenGate"
 import type { Point } from "engine/types"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransformer" | "addArrival" | "addInverter"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransformer" | "addArrival" | "addInverter" | "addScreenGate"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -34,6 +35,10 @@ export interface StoreState {
   pendingPoint: Point | null
   pendingTransformerType: TransformerType
   lineType: LineType
+  screenGates: Record<string, ScreenGate>
+  hoveredScreenGateId: string | null
+  screens: string[]
+  currentScreenId: string
 }
 
 export interface StoreActions {
@@ -77,6 +82,15 @@ export interface StoreActions {
   setViewMode: (viewMode: ViewMode) => void
   setPendingPoint: (point: Point | null) => void
   setLineType: (lineType: LineType) => void
+  addScreenGate: (linkId: string) => void
+  removeScreenGate: (id: string) => void
+  setHoveredScreenGateId: (id: string | null) => void
+  updateScreenGateTargetScreen: (id: string, targetScreenId: string) => void
+  updateScreenGateEntryKey: (id: string, entryKey: string) => void
+  updateScreenGateExitKey: (id: string, exitKey: string) => void
+  addScreen: () => void
+  setCurrentScreen: (id: string) => void
+  removeScreen: (id: string) => void
 }
 
 export type Store = StoreState & StoreActions

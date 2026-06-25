@@ -9,6 +9,7 @@ import { InverterEditor } from "../Inverter/InverterEditor"
 import { TransformerEditor } from "../Transformer/TransformerEditor"
 import type { TransformerType } from "../Transformer/Transformer"
 import { ArrivalEditor } from "../Arrival/ArrivalEditor"
+import { ScreenGateEditor } from "../ScreenGate/ScreenGateEditor"
 import { drawStats } from "../stats"
 import { Manager } from "./Manager"
 
@@ -117,7 +118,12 @@ export class EditorManager extends Manager<LineEditor> {
     hoveredInverterId: string | null = null,
     previewInverterPt: Point | null = null,
     arrival: ArrivalEditor | null = null,
-    previewArrivalPt: Point | null = null
+    previewArrivalPt: Point | null = null,
+    screenGates: ScreenGateEditor[] = [],
+    hoveredScreenGateId: string | null = null,
+    previewScreenGatePt: Point | null = null,
+    screenGateMarkers: { entryKey: string; exitKey: string }[] = [],
+    visibleLineIds?: Set<string>
   ) => {
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -193,7 +199,39 @@ export class EditorManager extends Manager<LineEditor> {
     }
 
     for (const line of Object.values(this.data.lines)) {
+      if (visibleLineIds && !visibleLineIds.has(line.id)) continue
       line.draw(ctx, line.id === hoveredLineId, showIds)
+    }
+
+    for (const { entryKey, exitKey } of screenGateMarkers) {
+      if (entryKey) {
+        const [eLineId, eEp] = entryKey.split("::")
+        const eLine = this.data.lines[eLineId]
+        if (eLine) {
+          const pt = eEp === "end" ? eLine.end : eLine.start
+          ctx.fillStyle = "#000"
+          ctx.beginPath()
+          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
+      if (exitKey) {
+        const [xLineId, xEp] = exitKey.split("::")
+        const xLine = this.data.lines[xLineId]
+        if (xLine) {
+          const pt = xEp === "end" ? xLine.end : xLine.start
+          ctx.strokeStyle = "#000"
+          ctx.lineWidth = 2
+          ctx.setLineDash([])
+          ctx.beginPath()
+          ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2)
+          ctx.stroke()
+          ctx.fillStyle = "#000"
+          ctx.beginPath()
+          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
     }
 
     for (const start of starts) {
@@ -219,6 +257,29 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.fill()
       ctx.fillStyle = "#fff"
       ctx.fillRect(previewArrivalPt.x - 5, previewArrivalPt.y - 5, 10, 10)
+      ctx.globalAlpha = 1
+    }
+
+    for (const sg of screenGates) {
+      const link = this.data.links[sg.linkId]
+      if (!link) continue
+      const line = this.data.lines[link.line1.lineId]
+      if (!line) continue
+      const pt = link.line1.endpoint === "end" ? line.end : line.start
+      ctx.globalAlpha = hoveredScreenGateId === sg.id ? 1 : 0.4
+      sg.draw(ctx, pt)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewScreenGatePt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#fff"
+      ctx.strokeStyle = "#000"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.roundRect(previewScreenGatePt.x - 18, previewScreenGatePt.y - 32, 36, 64, 5)
+      ctx.fill()
+      ctx.stroke()
       ctx.globalAlpha = 1
     }
 

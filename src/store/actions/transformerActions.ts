@@ -2,9 +2,9 @@ import { Transformer, syncTransformerCounter, type TransformerType } from "engin
 import type { Set } from "store/types"
 
 export const createTransformerActions = (set: Set) => ({
-  addTransformer: (linkId: string, type: TransformerType) =>
+  addTransformer: (linkId: string, type: TransformerType, screenId?: string) =>
     set((state) => {
-      const tr = new Transformer(linkId, type)
+      const tr = new Transformer(linkId, type, undefined, 0.5, "#e53935", "square", screenId ?? state.currentScreenId)
       return { transformers: { ...state.transformers, [tr.id]: tr }, revision: state.revision + 1 }
     }),
 

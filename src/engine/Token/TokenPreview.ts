@@ -4,6 +4,7 @@ import type { LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
 import type { TransformerPreview } from "../Transformer/TransformerPreview"
+import type { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview"
 import { Token } from "./Token"
 
 export type TransitionCtx = {
@@ -16,6 +17,8 @@ export type TransitionCtx = {
   transformerByLinkId: Record<string, string>
   inverterLinkIds: Set<string>
   isInverted: boolean
+  screenGateByLinkId: Record<string, ScreenGatePreview>
+  screenGateByExitKey: Record<string, ScreenGatePreview>
 }
 
 export class TokenPreview extends Token {
@@ -42,6 +45,7 @@ export class TokenPreview extends Token {
   pendingPointIndex: number = 0
   pendingDirection: 1 | -1 = 1
   pendingRemainder: number = 0
+  portalContext: { returnLineId: string; returnPointIndex: number; returnDirection: 1 | -1; returnRemainder: number } | null = null
 
   advance = (deltaSeconds: number, pointCount: number): { hit: "start" | "end"; excess: number } | null => {
     let budget = Math.max(1, this.currentSpeed) * deltaSeconds + this.remainder
@@ -60,6 +64,18 @@ export class TokenPreview extends Token {
   transition = (arrivedAt: "start" | "end", excess: number, ctx: TransitionCtx): { isInverted: boolean } => {
     let isInverted = ctx.isInverted
 
+    if (this.portalContext) {
+      const exitGate = ctx.screenGateByExitKey[`${this.lineId}::${arrivedAt}`]
+      if (exitGate) {
+        this.lineId = this.portalContext.returnLineId
+        this.pointIndex = this.portalContext.returnPointIndex
+        this.direction = this.portalContext.returnDirection
+        this.remainder = this.portalContext.returnRemainder
+        this.portalContext = null
+        return { isInverted }
+      }
+    }
+
     if (ctx.arrivalKey && ctx.arrivalKey === `${this.lineId}::${arrivedAt}`) {
       if (ctx.arrival) {
         ctx.arrival.isFading = true
@@ -76,6 +92,29 @@ export class TokenPreview extends Token {
     if (transformer?.type === "fade") this.opacity = transformer.amount
     if (linkId && ctx.inverterLinkIds.has(linkId)) {
       isInverted = !isInverted
+    }
+
+    const screenGate = linkId ? ctx.screenGateByLinkId[linkId] : undefined
+    if (screenGate) {
+      const other = ctx.linkMap[`${this.lineId}::${arrivedAt}`]
+      if (other) {
+        const returnLine = ctx.lines[other.lineId]
+        this.portalContext = {
+          returnLineId: other.lineId,
+          returnPointIndex: other.endpoint === "start" ? 0 : (returnLine?.points.length ?? 1) - 1,
+          returnDirection: other.endpoint === "start" ? 1 : -1,
+          returnRemainder: excess,
+        }
+      }
+      const [entryLineId, entryEndpoint] = screenGate.entryKey.split("::")
+      const entryLine = ctx.lines[entryLineId]
+      if (entryLine) {
+        this.lineId = entryLineId
+        this.pointIndex = entryEndpoint === "start" ? 0 : entryLine.points.length - 1
+        this.direction = entryEndpoint === "start" ? 1 : -1
+        this.remainder = excess
+      }
+      return { isInverted }
     }
 
     if (transformer?.type === "color" || transformer?.type === "shape") {

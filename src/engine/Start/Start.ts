@@ -13,11 +13,13 @@ export class Start {
   lineId: string
   endpoint: "start" | "end"
   delay: number
+  screenId: string = "main"
 
-  constructor(lineId: string, endpoint: "start" | "end", delay: number = 6, id?: string) {
+  constructor(lineId: string, endpoint: "start" | "end", delay: number = 6, id?: string, screenId?: string) {
     this.id = id ?? `start${startCounter++}`
     this.lineId = lineId
     this.endpoint = endpoint
     this.delay = delay
+    if (screenId) this.screenId = screenId
   }
 }

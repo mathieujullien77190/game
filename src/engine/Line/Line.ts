@@ -33,9 +33,11 @@ export class Line {
   boost: number = 0
   frequency: number = 1
   amplitude: number = 20
+  screenId: string = "main"
 
-  constructor(start: Point, end: Point, type: LineType = "straight", id?: string, cp1?: Point, cp2?: Point) {
+  constructor(start: Point, end: Point, type: LineType = "straight", id?: string, cp1?: Point, cp2?: Point, screenId?: string) {
     this.id = id ?? generateLineId()
+    if (screenId) this.screenId = screenId
     this.type = type
     this.start = { ...start }
     this.end = { ...end }

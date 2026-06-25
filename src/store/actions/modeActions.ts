@@ -17,9 +17,10 @@ export const createModeActions = (set: Set) => ({
             lp.amplitude = l.amplitude
             lp.computePoints()
           }
+          lp.screenId = l.screenId
           state.previewManager.addLine(lp)
         })
-        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters)
+        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screenGates)
       }
       return { viewMode }
     }),

@@ -79,6 +79,38 @@ export const RestartButton = styled.button`
   }
 `
 
+export const ScreenBar = styled.div`
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+`
+
+export const ScreenBtn = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: ${({ $active }) => ($active ? "#333" : "rgba(255,255,255,0.85)")};
+  color: ${({ $active }) => ($active ? "#fff" : "#666")};
+  border: 1px solid ${({ $active }) => ($active ? "#333" : "#ccc")};
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  &:hover { background: ${({ $active }) => ($active ? "#444" : "#e0e0e0")}; }
+`
+
+export const ScreenClose = styled.span`
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.6;
+  &:hover { opacity: 1; }
+`
+
 export const IdsButton = styled.button<{ $active: boolean }>`
   position: absolute;
   bottom: 8px;

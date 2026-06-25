@@ -6,6 +6,7 @@ import { InverterEditor } from "engine/Inverter/InverterEditor"
 import { TransformerEditor } from "engine/Transformer/TransformerEditor"
 import type { TransformerType } from "engine/Transformer/Transformer"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
+import { ScreenGateEditor } from "engine/ScreenGate/ScreenGateEditor"
 import { smoothFps } from "engine/stats"
 import type { Point } from "engine/types"
 
@@ -32,6 +33,11 @@ export const useCanvasDraw = (
   previewInverterPt: Point | null = null,
   arrival: ArrivalEditor | null = null,
   previewArrivalPt: Point | null = null,
+  screenGates: ScreenGateEditor[] = [],
+  hoveredScreenGateId: string | null = null,
+  previewScreenGatePt: Point | null = null,
+  screenGateMarkers: { entryKey: string; exitKey: string }[] = [],
+  visibleLineIds?: Set<string>,
 ) => {
   const lastTimestampRef = useRef<number | null>(null)
   const fpsRef = useRef(0)
@@ -53,8 +59,11 @@ export const useCanvasDraw = (
       fpsRef.current, frameMsRef.current, hoveredSwitchId,
       transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType,
       inverters, hoveredInverterId, previewInverterPt,
-      arrival, previewArrivalPt
+      arrival, previewArrivalPt,
+      screenGates, hoveredScreenGateId, previewScreenGatePt,
+      screenGateMarkers,
+      visibleLineIds
     )
     frameMsRef.current = performance.now() - t0
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds])
 }

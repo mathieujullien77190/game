@@ -7,6 +7,7 @@ import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
 import { Transformer, syncTransformerCounter, type TransformerType } from "engine/Transformer/Transformer"
 import { Inverter, syncInverterCounter } from "engine/Inverter/Inverter"
+import { ScreenGate, syncScreenGateCounter } from "engine/ScreenGate/ScreenGate"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { syncArrivalCounter } from "engine/Arrival/Arrival"
 import type { EditorManager } from "engine/Manager/EditorManager"
@@ -15,14 +16,16 @@ import type { StartEditor as StartEditorType } from "engine/Start/StartEditor"
 import type { SwitchEditor as SwitchEditorType } from "engine/Switch/SwitchEditor"
 
 export type MapJson = {
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; frequency?: number; amplitude?: number }[]
+  screens?: string[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; frequency?: number; amplitude?: number; screenId?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
-  starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number }[]
-  switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[] }>
-  transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string }[]
-  inverters?: { id: string; linkId: string }[]
-  arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[] } | null
+  starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
+  switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string }>
+  transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
+  inverters?: { id: string; linkId: string; screenId?: string }[]
+  arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
+  screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
   // legacy fields for backward compat
   tokenEffects?: { id: string; linkId: string; type: "fade" | "rotate"; amount: number }[]
   rotators?: { id: string; linkId: string }[]
@@ -39,7 +42,10 @@ export const serializeMap = (
   transformers: Record<string, Transformer> = {},
   arrival: ArrivalEditor | null = null,
   inverters: Record<string, Inverter> = {},
+  screens: string[] = ["main"],
+  screenGates: Record<string, ScreenGate> = {},
 ): MapJson => ({
+  screens,
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
     start: l.start,
@@ -49,6 +55,7 @@ export const serializeMap = (
     ...(l.cp2 ? { cp2: l.cp2 } : {}),
     ...(l.boost !== 0 ? { boost: l.boost } : {}),
     ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
+    ...(l.screenId !== "main" ? { screenId: l.screenId } : {}),
   })),
   links: Object.values(editorManager.data.links).map((lk) => ({
     id: lk.id,
@@ -67,11 +74,17 @@ export const serializeMap = (
     lineId: s.lineId,
     endpoint: s.endpoint,
     delay: s.delay,
+    ...(s.screenId !== "main" ? { screenId: s.screenId } : {}),
   })),
   switches: Object.fromEntries(
     Object.values(switches).map((sw) => [
       sw.id,
-      { linkIds: sw.linkIds, activeLinkId: sw.activeLinkId, linkedSwitchIds: switchLinks[sw.id] ?? [] },
+      {
+        linkIds: sw.linkIds,
+        activeLinkId: sw.activeLinkId,
+        linkedSwitchIds: switchLinks[sw.id] ?? [],
+        ...(sw.screenId !== "main" ? { screenId: sw.screenId } : {}),
+      },
     ])
   ),
   transformers: Object.values(transformers).map((tr) => ({
@@ -81,17 +94,38 @@ export const serializeMap = (
     amount: tr.amount,
     color: tr.color,
     targetType: tr.targetType,
+    ...(tr.screenId !== "main" ? { screenId: tr.screenId } : {}),
   })),
-  inverters: Object.values(inverters).map((inv) => ({ id: inv.id, linkId: inv.linkId })),
-  arrival: arrival ? { id: arrival.id, lineId: arrival.lineId, endpoint: arrival.endpoint, demands: arrival.demands } : null,
+  inverters: Object.values(inverters).map((inv) => ({
+    id: inv.id,
+    linkId: inv.linkId,
+    ...(inv.screenId !== "main" ? { screenId: inv.screenId } : {}),
+  })),
+  arrival: arrival
+    ? {
+        id: arrival.id,
+        lineId: arrival.lineId,
+        endpoint: arrival.endpoint,
+        demands: arrival.demands,
+        ...(arrival.screenId !== "main" ? { screenId: arrival.screenId } : {}),
+      }
+    : null,
+  screenGates: Object.values(screenGates).map((sg) => ({
+    id: sg.id,
+    linkId: sg.linkId,
+    targetScreenId: sg.targetScreenId,
+    entryKey: sg.entryKey,
+    exitKey: sg.exitKey,
+    ...(sg.screenId !== "main" ? { screenId: sg.screenId } : {}),
+  })),
 })
 
 export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, frequency, amplitude }) => {
-    const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2)
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, frequency, amplitude, screenId }) => {
+    const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2, screenId)
     if (boost) line.boost = boost
     if (type === "sine") {
       if (frequency !== undefined) line.frequency = frequency
@@ -115,42 +149,37 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   syncTokenCounter(Object.keys(tokens))
 
   const starts: Record<string, StartEditorType> = {}
-  json.starts?.forEach(({ id, lineId, endpoint, delay }) => {
-    const s = new StartEditor(lineId, endpoint, delay, id)
+  json.starts?.forEach(({ id, lineId, endpoint, delay, screenId }) => {
+    const s = new StartEditor(lineId, endpoint, delay, id, screenId)
     starts[s.id] = s
   })
   syncStartCounter(Object.keys(starts))
 
   const switches: Record<string, SwitchEditorType> = {}
   const switchLinks: Record<string, string[]> = {}
-  Object.entries(json.switches ?? {}).forEach(([id, { linkIds, activeLinkId, linkedSwitchIds }]) => {
-    const sw = new SwitchEditor(id, linkIds ?? [], activeLinkId ?? null)
+  Object.entries(json.switches ?? {}).forEach(([id, { linkIds, activeLinkId, linkedSwitchIds, screenId }]) => {
+    const sw = new SwitchEditor(id, linkIds ?? [], activeLinkId ?? null, screenId)
     switches[sw.id] = sw
     switchLinks[id] = linkedSwitchIds ?? []
   })
   syncSwitchCounter(Object.keys(switches))
 
   const transformers: Record<string, Transformer> = {}
-  // Current format
-  json.transformers?.forEach(({ id, linkId, type, amount, color, targetType }) => {
-    transformers[id] = new Transformer(linkId, type, id, amount ?? 0.5, color ?? "#e53935", targetType ?? "square")
+  json.transformers?.forEach(({ id, linkId, type, amount, color, targetType, screenId }) => {
+    transformers[id] = new Transformer(linkId, type, id, amount ?? 0.5, color ?? "#e53935", targetType ?? "square", screenId)
   })
-  // Migration: tokenEffects (previous merge)
   json.tokenEffects?.forEach(({ id, linkId, type, amount }) => {
     const migId = `transform_te_${id}`
     transformers[migId] = new Transformer(linkId, type, migId, amount ?? 0.5)
   })
-  // Migration: old rotators
   json.rotators?.forEach(({ id, linkId }) => {
     const migId = `transform_rot_${id}`
     transformers[migId] = new Transformer(linkId, "rotate", migId)
   })
-  // Migration: old faders
   json.faders?.forEach(({ id, linkId, amount }) => {
     const migId = `transform_fad_${id}`
     transformers[migId] = new Transformer(linkId, "fade", migId, amount ?? 0.5)
   })
-  // Migration: old painters → color transformer
   json.painters?.forEach(({ id, linkId, color }) => {
     const migId = `transform_pt_${id}`
     transformers[migId] = new Transformer(linkId, "color", migId, 0.5, color)
@@ -158,16 +187,24 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   syncTransformerCounter(Object.keys(transformers))
 
   const inverters: Record<string, Inverter> = {}
-  json.inverters?.forEach(({ id, linkId }) => {
-    inverters[id] = new Inverter(linkId, id)
+  json.inverters?.forEach(({ id, linkId, screenId }) => {
+    inverters[id] = new Inverter(linkId, id, screenId)
   })
   syncInverterCounter(Object.keys(inverters))
 
   let arrival: ArrivalEditor | null = null
   if (json.arrival) {
-    arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any)
+    arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any, json.arrival.screenId)
     syncArrivalCounter([json.arrival.id])
   }
 
-  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival }
+  const screens = json.screens ?? ["main"]
+
+  const screenGates: Record<string, ScreenGate> = {}
+  json.screenGates?.forEach(({ id, linkId, screenId, targetScreenId, entryKey, exitKey }) => {
+    screenGates[id] = new ScreenGate(linkId, id, screenId, targetScreenId, entryKey, exitKey)
+  })
+  syncScreenGateCounter(Object.keys(screenGates))
+
+  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates }
 }

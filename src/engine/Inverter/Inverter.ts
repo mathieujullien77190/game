@@ -14,8 +14,10 @@ const generateInverterId = () => `inv${++inverterCounter}`
 export class Inverter {
   id: string
   linkId: string
-  constructor(linkId: string, id?: string) {
+  screenId: string = "main"
+  constructor(linkId: string, id?: string, screenId?: string) {
     this.id = id ?? generateInverterId()
     this.linkId = linkId
+    if (screenId) this.screenId = screenId
   }
 }

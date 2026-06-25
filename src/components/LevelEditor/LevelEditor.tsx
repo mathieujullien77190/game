@@ -6,6 +6,7 @@ import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { TransformerEditor } from "engine/Transformer/TransformerEditor"
 import { InverterEditor } from "engine/Inverter/InverterEditor"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
+import { ScreenGateEditor } from "engine/ScreenGate/ScreenGateEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
@@ -60,6 +61,7 @@ export const LevelEditor = () => {
   const [addTransformerSnap, setAddTransformerSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addArrivalSnap, setAddArrivalSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addInverterSnap, setAddInverterSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
+  const [addScreenGateSnap, setAddScreenGateSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
 
   const leftRef = useRef<HTMLDivElement>(null)
   const canvasAreaRef = useRef<HTMLDivElement>(null)
@@ -72,11 +74,12 @@ export const LevelEditor = () => {
   const {
     editorManager, previewManager, revision, arrival,
     mode, viewMode, pendingPoint, pendingTransformerType,
-    starts, switches, transformers, inverters,
-    hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId,
-    lineType,
-    addLine, addStart, addSwitch, addTransformer, addInverter, setArrival,
+    starts, switches, transformers, inverters, screenGates,
+    hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredScreenGateId,
+    lineType, screens, currentScreenId,
+    addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, addScreenGate,
     setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
+    addScreen, setCurrentScreen, removeScreen,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -91,16 +94,21 @@ export const LevelEditor = () => {
       switches: s.switches,
       transformers: s.transformers,
       inverters: s.inverters,
+      screenGates: s.screenGates,
       hoveredLineId: s.hoveredLineId,
       hoveredSwitchId: s.hoveredSwitchId,
       hoveredTransformerId: s.hoveredTransformerId,
       hoveredInverterId: s.hoveredInverterId,
+      hoveredScreenGateId: s.hoveredScreenGateId,
       lineType: s.lineType,
+      screens: s.screens,
+      currentScreenId: s.currentScreenId,
       addLine: s.addLine,
       addStart: s.addStart,
       addSwitch: s.addSwitch,
       addTransformer: s.addTransformer,
       addInverter: s.addInverter,
+      addScreenGate: s.addScreenGate,
       setArrival: s.setArrival,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
@@ -108,14 +116,34 @@ export const LevelEditor = () => {
       updateLineEndpoint: s.updateLineEndpoint,
       updateLineControlPoint: s.updateLineControlPoint,
       setHoveredLineId: s.setHoveredLineId,
+      addScreen: s.addScreen,
+      setCurrentScreen: s.setCurrentScreen,
+      removeScreen: s.removeScreen,
     }))
   )
 
-  const startsArray = Object.values(starts)
-  const switchesArray = Object.values(switches)
-  const transformersArray = Object.values(transformers).map((tr) => new TransformerEditor(tr.linkId, tr.type, tr.id, tr.amount, tr.color, tr.targetType))
-  const invertersArray = Object.values(inverters).map((inv) => new InverterEditor(inv.linkId, inv.id))
-  const arrivalEditor = arrival ? new ArrivalEditor(arrival.lineId, arrival.endpoint, arrival.id) : null
+  const visibleLineIds = new Set(
+    Object.values(editorManager.data.lines)
+      .filter((l) => l.screenId === currentScreenId)
+      .map((l) => l.id)
+  )
+  const startsArray = Object.values(starts).filter((s) => s.screenId === currentScreenId)
+  const switchesArray = Object.values(switches).filter((sw) => sw.screenId === currentScreenId)
+  const transformersArray = Object.values(transformers)
+    .filter((tr) => tr.screenId === currentScreenId)
+    .map((tr) => new TransformerEditor(tr.linkId, tr.type, tr.id, tr.amount, tr.color, tr.targetType))
+  const invertersArray = Object.values(inverters)
+    .filter((inv) => inv.screenId === currentScreenId)
+    .map((inv) => new InverterEditor(inv.linkId, inv.id))
+  const arrivalEditor = arrival && arrival.screenId === currentScreenId
+    ? new ArrivalEditor(arrival.lineId, arrival.endpoint, arrival.id)
+    : null
+  const screenGatesArray = Object.values(screenGates)
+    .filter((sg) => sg.screenId === currentScreenId)
+    .map((sg) => new ScreenGateEditor(sg.linkId, sg.id, sg.screenId, sg.targetScreenId, sg.entryKey, sg.exitKey))
+  const screenGateMarkersArray = Object.values(screenGates)
+    .filter((sg) => sg.targetScreenId === currentScreenId)
+    .map((sg) => ({ entryKey: sg.entryKey, exitKey: sg.exitKey }))
 
   useCanvasDraw(
     editorCanvasRef, editorManager, revision,
@@ -138,6 +166,11 @@ export const LevelEditor = () => {
     mode === "addInverter" ? (addInverterSnap?.pt ?? null) : null,
     arrivalEditor,
     mode === "addArrival" ? (addArrivalSnap?.pt ?? null) : null,
+    screenGatesArray,
+    hoveredScreenGateId,
+    mode === "addScreenGate" ? (addScreenGateSnap?.pt ?? null) : null,
+    screenGateMarkersArray,
+    visibleLineIds,
   )
   useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale)
 
@@ -255,6 +288,16 @@ export const LevelEditor = () => {
         setAddInverterSnap(null)
         setHoverNearEndpoint(false)
       }
+    } else if (mode === "addScreenGate") {
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddScreenGateSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddScreenGateSnap(null)
+        setHoverNearEndpoint(false)
+      }
     } else {
       setSnapPoint(point)
       if (mode === "select") {
@@ -284,6 +327,7 @@ export const LevelEditor = () => {
     setAddTransformerSnap(null)
     setAddArrivalSnap(null)
     setAddInverterSnap(null)
+    setAddScreenGateSnap(null)
     setHoverNearEndpoint(false)
     setHoveredLineId(null)
     draggingEndpoint.current = null
@@ -295,7 +339,7 @@ export const LevelEditor = () => {
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       if (mode === "addStart") {
         if (addStartSnap) {
-          addStart(new StartEditor(addStartSnap.lineId, addStartSnap.endpoint))
+          addStart(new StartEditor(addStartSnap.lineId, addStartSnap.endpoint, undefined, undefined, currentScreenId))
           setAddStartSnap(null)
           setMode("select")
         }
@@ -309,7 +353,7 @@ export const LevelEditor = () => {
               (lk.line2.lineId === addSwitchSnap.lineId && lk.line2.endpoint === addSwitchSnap.endpoint)
             )
             .map((lk) => lk.id)
-          addSwitch(new SwitchEditor(undefined, linkIds, linkIds[0] ?? null))
+          addSwitch(new SwitchEditor(undefined, linkIds, linkIds[0] ?? null, currentScreenId))
           setAddSwitchSnap(null)
           setMode("select")
         }
@@ -351,22 +395,36 @@ export const LevelEditor = () => {
         }
         return
       }
+      if (mode === "addScreenGate") {
+        if (addScreenGateSnap) {
+          const linkId = Object.values(editorManager.data.links).find((lk) =>
+            (lk.line1.lineId === addScreenGateSnap.lineId && lk.line1.endpoint === addScreenGateSnap.endpoint) ||
+            (lk.line2.lineId === addScreenGateSnap.lineId && lk.line2.endpoint === addScreenGateSnap.endpoint)
+          )?.id
+          if (linkId) {
+            addScreenGate(linkId)
+            setAddScreenGateSnap(null)
+            setMode("select")
+          }
+        }
+        return
+      }
       if (mode !== "addLine") return
       const point = snapToGrid(getCanvasPoint(e))
       if (!pendingPoint) {
         setPendingPoint(point)
       } else {
-        addLine(new LineEditor(pendingPoint, point, lineType))
+        addLine(new LineEditor(pendingPoint, point, lineType, undefined, undefined, undefined, currentScreenId))
         setPendingPoint(null)
         setMode("select")
       }
     },
-    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, lineType, addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, setPendingPoint, setMode]
+    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
-    : (mode === "addStart" || mode === "addSwitch" || mode === "addTransformer" || mode === "addArrival" || mode === "addInverter")
+    : (mode === "addStart" || mode === "addSwitch" || mode === "addTransformer" || mode === "addArrival" || mode === "addInverter" || mode === "addScreenGate")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging
       ? "grabbing"
@@ -416,14 +474,27 @@ export const LevelEditor = () => {
                   const rect = e.currentTarget.getBoundingClientRect()
                   const x = (e.clientX - rect.left) * (CANVAS_W / rect.width)
                   const y = (e.clientY - rect.top) * (CANVAS_H / rect.height)
-                  previewManager.cycleSwitchAt(x, y)
+                  previewManager.clickAt(x, y)
                 }}
               />
             </S.CanvasWrapper>
             {viewMode === "editor" && (
-              <S.IdsButton $active={showIds} onClick={() => setShowIds((v) => !v)}>
-                IDs
-              </S.IdsButton>
+              <>
+                <S.ScreenBar>
+                  {screens.map((s) => (
+                    <S.ScreenBtn key={s} $active={currentScreenId === s} onClick={() => setCurrentScreen(s)}>
+                      {s === "main" ? "main" : s.replace("screen", "")}
+                      {s !== "main" && (
+                        <S.ScreenClose onClick={(e) => { e.stopPropagation(); removeScreen(s) }}>×</S.ScreenClose>
+                      )}
+                    </S.ScreenBtn>
+                  ))}
+                  <S.ScreenBtn $active={false} onClick={addScreen}>+</S.ScreenBtn>
+                </S.ScreenBar>
+                <S.IdsButton $active={showIds} onClick={() => setShowIds((v) => !v)}>
+                  IDs
+                </S.IdsButton>
+              </>
             )}
             {viewMode === "preview" && (
               <S.RestartButton onClick={() => setViewMode("preview")}>

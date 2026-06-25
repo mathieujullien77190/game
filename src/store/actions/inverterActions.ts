@@ -2,9 +2,9 @@ import { Inverter, syncInverterCounter } from "engine/Inverter/Inverter"
 import type { Set } from "store/types"
 
 export const createInverterActions = (set: Set) => ({
-  addInverter: (linkId: string) =>
+  addInverter: (linkId: string, screenId?: string) =>
     set((state) => {
-      const inv = new Inverter(linkId)
+      const inv = new Inverter(linkId, undefined, screenId ?? state.currentScreenId)
       return { inverters: { ...state.inverters, [inv.id]: inv }, revision: state.revision + 1 }
     }),
 

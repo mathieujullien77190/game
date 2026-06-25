@@ -30,11 +30,13 @@ export class Arrival {
   lineId: string
   endpoint: "start" | "end"
   demands: Demand[]
+  screenId: string = "main"
 
-  constructor(lineId: string, endpoint: "start" | "end", id?: string, demands: Demand[] = []) {
+  constructor(lineId: string, endpoint: "start" | "end", id?: string, demands: Demand[] = [], screenId?: string) {
     this.id = id ?? `arrival${arrivalCounter++}`
     this.lineId = lineId
     this.endpoint = endpoint
     this.demands = demands
+    if (screenId) this.screenId = screenId
   }
 }
