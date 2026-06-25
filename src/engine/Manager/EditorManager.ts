@@ -6,9 +6,9 @@ import { StartEditor } from "../Start/StartEditor"
 import { SwitchEditor } from "../Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "../Switch/switchUtils"
 import { RotatorEditor } from "../Rotator/RotatorEditor"
-import { PainterEditor } from "../Painter/PainterEditor"
 import { FaderEditor } from "../Fader/FaderEditor"
 import { InverterEditor } from "../Inverter/InverterEditor"
+import { TransformerEditor } from "../Transformer/TransformerEditor"
 import { ArrivalEditor } from "../Arrival/ArrivalEditor"
 import { drawStats } from "../stats"
 import { Manager } from "./Manager"
@@ -113,15 +113,15 @@ export class EditorManager extends Manager<LineEditor> {
     rotators: RotatorEditor[] = [],
     hoveredRotatorId: string | null = null,
     previewRotatorPt: Point | null = null,
-    painters: PainterEditor[] = [],
-    hoveredPainterId: string | null = null,
-    previewPainterPt: Point | null = null,
     faders: FaderEditor[] = [],
     hoveredFaderId: string | null = null,
     previewFaderPt: Point | null = null,
     inverters: InverterEditor[] = [],
     hoveredInverterId: string | null = null,
     previewInverterPt: Point | null = null,
+    transformers: TransformerEditor[] = [],
+    hoveredTransformerId: string | null = null,
+    previewTransformerPt: Point | null = null,
     arrival: ArrivalEditor | null = null,
     previewArrivalPt: Point | null = null
   ) => {
@@ -172,27 +172,6 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.globalAlpha = 1
     }
 
-    for (const p of painters) {
-      const link = this.data.links[p.linkId]
-      if (!link) continue
-      const line = this.data.lines[link.line1.lineId]
-      if (!line) continue
-      const pt = link.line1.endpoint === "end" ? line.end : line.start
-      const painterHovered = hoveredPainterId === p.id
-      ctx.globalAlpha = painterHovered ? 1 : 0.4
-      p.draw(ctx, pt, painterHovered)
-      ctx.globalAlpha = 1
-    }
-
-    if (previewPainterPt) {
-      ctx.globalAlpha = 0.45
-      ctx.fillStyle = "#e91e63"
-      ctx.beginPath()
-      ctx.arc(previewPainterPt.x, previewPainterPt.y, 18, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.globalAlpha = 1
-    }
-
     for (const f of faders) {
       const link = this.data.links[f.linkId]
       if (!link) continue
@@ -223,6 +202,26 @@ export class EditorManager extends Manager<LineEditor> {
       const angle = Math.atan2(line.end.y - line.start.y, line.end.x - line.start.x)
       ctx.globalAlpha = hoveredInverterId === inv.id ? 1 : 0.4
       inv.draw(ctx, pt, angle)
+      ctx.globalAlpha = 1
+    }
+
+    for (const tr of transformers) {
+      const link = this.data.links[tr.linkId]
+      if (!link) continue
+      const line = this.data.lines[link.line1.lineId]
+      if (!line) continue
+      const pt = link.line1.endpoint === "end" ? line.end : line.start
+      ctx.globalAlpha = hoveredTransformerId === tr.id ? 1 : 0.4
+      tr.draw(ctx, pt)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewTransformerPt) {
+      ctx.globalAlpha = 0.45
+      ctx.fillStyle = "#2e7d32"
+      ctx.beginPath()
+      ctx.arc(previewTransformerPt.x, previewTransformerPt.y, 18, 0, Math.PI * 2)
+      ctx.fill()
       ctx.globalAlpha = 1
     }
 

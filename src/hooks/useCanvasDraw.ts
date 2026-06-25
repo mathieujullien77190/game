@@ -3,9 +3,9 @@ import { EditorManager } from "engine/Manager/EditorManager"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { RotatorEditor } from "engine/Rotator/RotatorEditor"
-import { PainterEditor } from "engine/Painter/PainterEditor"
 import { FaderEditor } from "engine/Fader/FaderEditor"
 import { InverterEditor } from "engine/Inverter/InverterEditor"
+import { TransformerEditor } from "engine/Transformer/TransformerEditor"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { smoothFps } from "engine/stats"
 import type { Point } from "engine/types"
@@ -27,9 +27,6 @@ export const useCanvasDraw = (
   rotators: RotatorEditor[] = [],
   hoveredRotatorId: string | null = null,
   previewRotatorPt: Point | null = null,
-  painters: PainterEditor[] = [],
-  hoveredPainterId: string | null = null,
-  previewPainterPt: Point | null = null,
   faders: FaderEditor[] = [],
   hoveredFaderId: string | null = null,
   previewFaderPt: Point | null = null,
@@ -37,7 +34,10 @@ export const useCanvasDraw = (
   hoveredInverterId: string | null = null,
   previewInverterPt: Point | null = null,
   arrival: ArrivalEditor | null = null,
-  previewArrivalPt: Point | null = null
+  previewArrivalPt: Point | null = null,
+  transformers: TransformerEditor[] = [],
+  hoveredTransformerId: string | null = null,
+  previewTransformerPt: Point | null = null
 ) => {
   const lastTimestampRef = useRef<number | null>(null)
   const fpsRef = useRef(0)
@@ -57,11 +57,12 @@ export const useCanvasDraw = (
       ctx, hoveredLineId, snapPoint, pendingPoint, showIds,
       starts, switches, previewStartPt, previewSwitchPt,
       fpsRef.current, frameMsRef.current, hoveredSwitchId, rotators,
-      hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt,
+      hoveredRotatorId, previewRotatorPt,
       faders, hoveredFaderId, previewFaderPt,
       inverters, hoveredInverterId, previewInverterPt,
+      transformers, hoveredTransformerId, previewTransformerPt,
       arrival, previewArrivalPt
     )
     frameMsRef.current = performance.now() - t0
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, rotators, hoveredRotatorId, previewRotatorPt, painters, hoveredPainterId, previewPainterPt, faders, hoveredFaderId, previewFaderPt, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, rotators, hoveredRotatorId, previewRotatorPt, faders, hoveredFaderId, previewFaderPt, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt, transformers, hoveredTransformerId, previewTransformerPt])
 }

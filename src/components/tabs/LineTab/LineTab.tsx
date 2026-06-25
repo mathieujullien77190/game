@@ -85,7 +85,7 @@ export const LineTab = () => {
                 <NumberInput
                   value={line.boost}
                   onChange={(v) => updateLineBoost(line.id, v)}
-                  min={-MAX_BOOST}
+                  min={0}
                   step={10}
                 />
               </S.BoostRow>

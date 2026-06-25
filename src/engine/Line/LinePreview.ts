@@ -1,4 +1,3 @@
-import { MAX_BOOST } from "../constants"
 import { Line } from "./Line"
 
 export class LinePreview extends Line {
@@ -14,20 +13,24 @@ export class LinePreview extends Line {
     }
   }
 
-  drawGlow = (ctx: CanvasRenderingContext2D) => {
+  drawGlow = (ctx: CanvasRenderingContext2D, elapsedSeconds = 0) => {
     if (this.boost === 0) return
-    const intensity = Math.min(Math.abs(this.boost) / MAX_BOOST, 1)
-    const r = this.boost > 0 ? 255 : Math.round(120 - 90 * intensity)
-    const g = this.boost > 0 ? Math.round(180 * (1 - intensity)) : Math.round(170 - 110 * intensity)
-    const b = this.boost > 0 ? 0 : 255
+    const pts = this.points
+    if (pts.length < 2) return
+    const total = pts.length
+    const winSize = Math.max(2, Math.floor(total * 0.3))
+    const offset = Math.floor((elapsedSeconds * Math.abs(this.boost)) % total)
     ctx.save()
-    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.9)`
-    ctx.shadowBlur = 6 + intensity * 14
-    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${0.55 + intensity * 0.35})`
+    ctx.shadowColor = "rgba(255, 140, 0, 0.9)"
+    ctx.shadowBlur = 12
+    ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"
     ctx.lineWidth = 3
     ctx.lineCap = "round"
     ctx.setLineDash([])
-    this.tracePath(ctx)
+    if (offset + winSize >= total) { ctx.restore(); return }
+    ctx.beginPath()
+    ctx.moveTo(pts[offset].x, pts[offset].y)
+    for (let i = 1; i <= winSize; i++) ctx.lineTo(pts[offset + i].x, pts[offset + i].y)
     ctx.stroke()
     ctx.restore()
   }

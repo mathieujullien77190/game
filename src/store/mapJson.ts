@@ -6,10 +6,10 @@ import { syncStartCounter } from "engine/Start/Start"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { syncSwitchCounter } from "engine/Switch/Switch"
 import { Rotator, syncRotatorCounter } from "engine/Rotator/Rotator"
-import { Painter, syncPainterCounter } from "engine/Painter/Painter"
 import { Fader, syncFaderCounter } from "engine/Fader/Fader"
 import { Inverter, syncInverterCounter } from "engine/Inverter/Inverter"
-import { ArrivalEditor, } from "engine/Arrival/ArrivalEditor"
+import { Transformer, syncTransformerCounter, type TransformerMode } from "engine/Transformer/Transformer"
+import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { syncArrivalCounter } from "engine/Arrival/Arrival"
 import type { EditorManager } from "engine/Manager/EditorManager"
 import type { Point } from "engine/types"
@@ -26,6 +26,7 @@ export type MapJson = {
   painters?: { id: string; linkId: string; color: string }[]
   faders?: { id: string; linkId: string; amount: number }[]
   inverters?: { id: string; linkId: string }[]
+  transformers?: { id: string; linkId: string; targetType: string; mode?: TransformerMode; color?: string }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[] } | null
 }
 
@@ -36,10 +37,10 @@ export const serializeMap = (
   switches: Record<string, SwitchEditorType>,
   switchLinks: Record<string, string[]>,
   rotators: Record<string, Rotator> = {},
-  painters: Record<string, Painter> = {},
   arrival: ArrivalEditor | null = null,
   faders: Record<string, Fader> = {},
-  inverters: Record<string, Inverter> = {}
+  inverters: Record<string, Inverter> = {},
+  transformers: Record<string, Transformer> = {},
 ): MapJson => ({
   lines: Object.values(editorManager.data.lines).map((l) => ({
     id: l.id,
@@ -76,9 +77,15 @@ export const serializeMap = (
     ])
   ),
   rotators: Object.values(rotators).map((r) => ({ id: r.id, linkId: r.linkId })),
-  painters: Object.values(painters).map((p) => ({ id: p.id, linkId: p.linkId, color: p.color })),
   faders: Object.values(faders).map((f) => ({ id: f.id, linkId: f.linkId, amount: f.amount })),
   inverters: Object.values(inverters).map((inv) => ({ id: inv.id, linkId: inv.linkId })),
+  transformers: Object.values(transformers).map((tr) => ({
+    id: tr.id,
+    linkId: tr.linkId,
+    targetType: tr.targetType,
+    mode: tr.mode,
+    color: tr.color,
+  })),
   arrival: arrival ? { id: arrival.id, lineId: arrival.lineId, endpoint: arrival.endpoint, demands: arrival.demands } : null,
 })
 
@@ -132,12 +139,6 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncRotatorCounter(Object.keys(rotators))
 
-  const painters: Record<string, Painter> = {}
-  json.painters?.forEach(({ id, linkId, color }) => {
-    painters[id] = new Painter(linkId, color, id)
-  })
-  syncPainterCounter(Object.keys(painters))
-
   const faders: Record<string, Fader> = {}
   json.faders?.forEach(({ id, linkId, amount }) => {
     faders[id] = new Fader(linkId, id, amount ?? 0.5)
@@ -150,11 +151,22 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncInverterCounter(Object.keys(inverters))
 
+  const transformers: Record<string, Transformer> = {}
+  json.transformers?.forEach(({ id, linkId, targetType, mode, color }) => {
+    transformers[id] = new Transformer(linkId, mode ?? "shape", color ?? "#e53935", targetType ?? "square", id)
+  })
+  // Migration: old painters → transformers with mode "color"
+  json.painters?.forEach(({ id, linkId, color }) => {
+    const migId = `migrated_${id}`
+    transformers[migId] = new Transformer(linkId, "color", color, "square", migId)
+  })
+  syncTransformerCounter(Object.keys(transformers))
+
   let arrival: ArrivalEditor | null = null
   if (json.arrival) {
     arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any)
     syncArrivalCounter([json.arrival.id])
   }
 
-  return { tokens, starts, switches, switchLinks, rotators, painters, faders, inverters, arrival }
+  return { tokens, starts, switches, switchLinks, rotators, faders, inverters, transformers, arrival }
 }

@@ -7,13 +7,13 @@ import { Token } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import type { Rotator } from "engine/Rotator/Rotator"
-import type { Painter } from "engine/Painter/Painter"
 import type { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import type { Fader } from "engine/Fader/Fader"
 import type { Inverter } from "engine/Inverter/Inverter"
+import type { Transformer } from "engine/Transformer/Transformer"
 import type { Point } from "engine/types"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator" | "addPainter" | "addArrival" | "addFader" | "addInverter"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addRotator" | "addArrival" | "addFader" | "addInverter" | "addTransformer"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -24,16 +24,16 @@ export interface StoreState {
   switches: Record<string, SwitchEditor>
   switchLinks: Record<string, string[]>
   rotators: Record<string, Rotator>
-  painters: Record<string, Painter>
   faders: Record<string, Fader>
   inverters: Record<string, Inverter>
+  transformers: Record<string, Transformer>
   arrival: ArrivalEditor | null
   hoveredLineId: string | null
   hoveredSwitchId: string | null
   hoveredRotatorId: string | null
-  hoveredPainterId: string | null
   hoveredFaderId: string | null
   hoveredInverterId: string | null
+  hoveredTransformerId: string | null
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -70,10 +70,12 @@ export interface StoreActions {
   addInverter: (linkId: string) => void
   removeInverter: (id: string) => void
   setHoveredInverterId: (id: string | null) => void
-  addPainter: (linkId: string) => void
-  removePainter: (id: string) => void
-  setPainterColor: (id: string, color: string) => void
-  setHoveredPainterId: (id: string | null) => void
+  addTransformer: (linkId: string) => void
+  removeTransformer: (id: string) => void
+  setHoveredTransformerId: (id: string | null) => void
+  updateTransformerTargetType: (id: string, targetType: string) => void
+  updateTransformerColor: (id: string, color: string) => void
+  updateTransformerMode: (id: string, mode: "color" | "shape") => void
   setArrival: (lineId: string, endpoint: "start" | "end") => void
   removeArrival: () => void
   addArrivalDemand: () => void

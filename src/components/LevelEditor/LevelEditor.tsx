@@ -4,9 +4,9 @@ import { LineEditor } from "engine/Line/LineEditor"
 import { StartEditor } from "engine/Start/StartEditor"
 import { SwitchEditor } from "engine/Switch/SwitchEditor"
 import { RotatorEditor } from "engine/Rotator/RotatorEditor"
-import { PainterEditor } from "engine/Painter/PainterEditor"
 import { FaderEditor } from "engine/Fader/FaderEditor"
 import { InverterEditor } from "engine/Inverter/InverterEditor"
+import { TransformerEditor } from "engine/Transformer/TransformerEditor"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
@@ -60,10 +60,10 @@ export const LevelEditor = () => {
   const [addStartSnap, setAddStartSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addSwitchSnap, setAddSwitchSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addRotatorSnap, setAddRotatorSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
-  const [addPainterSnap, setAddPainterSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addArrivalSnap, setAddArrivalSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addFaderSnap, setAddFaderSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addInverterSnap, setAddInverterSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
+  const [addTransformerSnap, setAddTransformerSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
 
   const leftRef = useRef<HTMLDivElement>(null)
   const canvasAreaRef = useRef<HTMLDivElement>(null)
@@ -75,8 +75,8 @@ export const LevelEditor = () => {
 
   const {
     editorManager, previewManager, revision, arrival,
-    mode, viewMode, pendingPoint, starts, switches, rotators, painters, faders, inverters, hoveredLineId, hoveredSwitchId, hoveredRotatorId, hoveredPainterId, hoveredFaderId, hoveredInverterId, lineType,
-    addLine, addStart, addSwitch, addRotator, addPainter, addFader, addInverter, setArrival, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
+    mode, viewMode, pendingPoint, starts, switches, rotators, faders, inverters, transformers, hoveredLineId, hoveredSwitchId, hoveredRotatorId, hoveredFaderId, hoveredInverterId, hoveredTransformerId, lineType,
+    addLine, addStart, addSwitch, addRotator, addFader, addInverter, addTransformer, setArrival, setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
   } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
@@ -89,23 +89,23 @@ export const LevelEditor = () => {
       starts: s.starts,
       switches: s.switches,
       rotators: s.rotators,
-      painters: s.painters,
       faders: s.faders,
       inverters: s.inverters,
+      transformers: s.transformers,
       hoveredLineId: s.hoveredLineId,
       hoveredSwitchId: s.hoveredSwitchId,
       hoveredRotatorId: s.hoveredRotatorId,
-      hoveredPainterId: s.hoveredPainterId,
       hoveredFaderId: s.hoveredFaderId,
       hoveredInverterId: s.hoveredInverterId,
+      hoveredTransformerId: s.hoveredTransformerId,
       lineType: s.lineType,
       addLine: s.addLine,
       addStart: s.addStart,
       addSwitch: s.addSwitch,
       addRotator: s.addRotator,
-      addPainter: s.addPainter,
       addFader: s.addFader,
       addInverter: s.addInverter,
+      addTransformer: s.addTransformer,
       setArrival: s.setArrival,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
@@ -119,9 +119,9 @@ export const LevelEditor = () => {
   const startsArray = Object.values(starts)
   const switchesArray = Object.values(switches)
   const rotatorsArray = Object.values(rotators).map((r) => new RotatorEditor(r.linkId, r.id))
-  const paintersArray = Object.values(painters).map((p) => new PainterEditor(p.linkId, p.color, p.id))
   const fadersArray = Object.values(faders).map((f) => new FaderEditor(f.linkId, f.id))
   const invertersArray = Object.values(inverters).map((inv) => new InverterEditor(inv.linkId, inv.id))
+  const transformersArray = Object.values(transformers).map((tr) => new TransformerEditor(tr.linkId, tr.mode, tr.color, tr.targetType, tr.id))
   const arrivalEditor = arrival ? new ArrivalEditor(arrival.lineId, arrival.endpoint, arrival.id) : null
 
   useCanvasDraw(
@@ -139,9 +139,6 @@ export const LevelEditor = () => {
     rotatorsArray,
     hoveredRotatorId,
     mode === "addRotator" ? (addRotatorSnap?.pt ?? null) : null,
-    paintersArray,
-    hoveredPainterId,
-    mode === "addPainter" ? (addPainterSnap?.pt ?? null) : null,
     fadersArray,
     hoveredFaderId,
     mode === "addFader" ? (addFaderSnap?.pt ?? null) : null,
@@ -149,7 +146,10 @@ export const LevelEditor = () => {
     hoveredInverterId,
     mode === "addInverter" ? (addInverterSnap?.pt ?? null) : null,
     arrivalEditor,
-    mode === "addArrival" ? (addArrivalSnap?.pt ?? null) : null
+    mode === "addArrival" ? (addArrivalSnap?.pt ?? null) : null,
+    transformersArray,
+    hoveredTransformerId,
+    mode === "addTransformer" ? (addTransformerSnap?.pt ?? null) : null
   )
   useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale)
 
@@ -247,16 +247,6 @@ export const LevelEditor = () => {
         setAddRotatorSnap(null)
         setHoverNearEndpoint(false)
       }
-    } else if (mode === "addPainter") {
-      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
-      if (hit) {
-        const line = editorManager.data.lines[hit.lineId]
-        setAddPainterSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
-        setHoverNearEndpoint(true)
-      } else {
-        setAddPainterSnap(null)
-        setHoverNearEndpoint(false)
-      }
     } else if (mode === "addArrival") {
       const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
       if (hit) {
@@ -287,6 +277,16 @@ export const LevelEditor = () => {
         setAddInverterSnap(null)
         setHoverNearEndpoint(false)
       }
+    } else if (mode === "addTransformer") {
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddTransformerSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddTransformerSnap(null)
+        setHoverNearEndpoint(false)
+      }
     } else {
       setSnapPoint(point)
       if (mode === "select") {
@@ -314,10 +314,10 @@ export const LevelEditor = () => {
     setAddStartSnap(null)
     setAddSwitchSnap(null)
     setAddRotatorSnap(null)
-    setAddPainterSnap(null)
     setAddArrivalSnap(null)
     setAddFaderSnap(null)
     setAddInverterSnap(null)
+    setAddTransformerSnap(null)
     setHoverNearEndpoint(false)
     setHoveredLineId(null)
     draggingEndpoint.current = null
@@ -363,20 +363,6 @@ export const LevelEditor = () => {
         }
         return
       }
-      if (mode === "addPainter") {
-        if (addPainterSnap) {
-          const linkId = Object.values(editorManager.data.links).find((lk) =>
-            (lk.line1.lineId === addPainterSnap.lineId && lk.line1.endpoint === addPainterSnap.endpoint) ||
-            (lk.line2.lineId === addPainterSnap.lineId && lk.line2.endpoint === addPainterSnap.endpoint)
-          )?.id
-          if (linkId) {
-            addPainter(linkId)
-            setAddPainterSnap(null)
-            setMode("select")
-          }
-        }
-        return
-      }
       if (mode === "addArrival") {
         if (addArrivalSnap) {
           setArrival(addArrivalSnap.lineId, addArrivalSnap.endpoint)
@@ -413,6 +399,20 @@ export const LevelEditor = () => {
         }
         return
       }
+      if (mode === "addTransformer") {
+        if (addTransformerSnap) {
+          const linkId = Object.values(editorManager.data.links).find((lk) =>
+            (lk.line1.lineId === addTransformerSnap.lineId && lk.line1.endpoint === addTransformerSnap.endpoint) ||
+            (lk.line2.lineId === addTransformerSnap.lineId && lk.line2.endpoint === addTransformerSnap.endpoint)
+          )?.id
+          if (linkId) {
+            addTransformer(linkId)
+            setAddTransformerSnap(null)
+            setMode("select")
+          }
+        }
+        return
+      }
       if (mode !== "addLine") return
       const point = snapToGrid(getCanvasPoint(e))
       if (!pendingPoint) {
@@ -423,18 +423,18 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, addStartSnap, addSwitchSnap, addRotatorSnap, addPainterSnap, addArrivalSnap, addFaderSnap, addInverterSnap, lineType, addLine, addStart, addSwitch, addRotator, addPainter, addFader, addInverter, setArrival, setPendingPoint, setMode]
+    [mode, pendingPoint, addStartSnap, addSwitchSnap, addRotatorSnap, addArrivalSnap, addFaderSnap, addInverterSnap, addTransformerSnap, lineType, addLine, addStart, addSwitch, addRotator, addFader, addInverter, addTransformer, setArrival, setPendingPoint, setMode]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
-    : (mode === "addStart" || mode === "addSwitch" || mode === "addRotator" || mode === "addPainter" || mode === "addArrival" || mode === "addFader" || mode === "addInverter")
+    : (mode === "addStart" || mode === "addSwitch" || mode === "addRotator" || mode === "addArrival" || mode === "addFader" || mode === "addInverter" || mode === "addTransformer")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging
-        ? "grabbing"
-        : hoverNearEndpoint
-          ? "grab"
-          : "crosshair"
+      ? "grabbing"
+      : hoverNearEndpoint
+        ? "grab"
+        : "crosshair"
 
   return (
     <S.Container>

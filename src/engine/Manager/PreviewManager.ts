@@ -10,12 +10,12 @@ import type { Token } from "../Token/Token";
 import { TokenPreview } from "../Token/TokenPreview";
 import type { Rotator } from "../Rotator/Rotator";
 import { RotatorPreview } from "../Rotator/RotatorPreview";
-import type { Painter } from "../Painter/Painter";
-import { PainterPreview } from "../Painter/PainterPreview";
 import type { Fader } from "../Fader/Fader";
 import { FaderPreview } from "../Fader/FaderPreview";
 import type { Inverter } from "../Inverter/Inverter";
 import { InverterPreview } from "../Inverter/InverterPreview";
+import type { Transformer } from "../Transformer/Transformer";
+import { TransformerPreview } from "../Transformer/TransformerPreview";
 import type { Arrival } from "../Arrival/Arrival";
 import { ArrivalPreview } from "../Arrival/ArrivalPreview";
 import { Manager } from "./Manager";
@@ -41,13 +41,13 @@ export class PreviewManager extends Manager<LinePreview> {
     rotators: {} as Record<string, RotatorPreview>,
     rotatorLinkIds: new Set<string>(),
     linkByEndpointKey: {} as Record<string, string>,
-    painters: {} as Record<string, PainterPreview>,
-    painterByLinkId: {} as Record<string, PainterPreview>,
     faders: {} as Record<string, FaderPreview>,
     faderLinkIds: new Set<string>(),
     inverters: {} as Record<string, InverterPreview>,
     inverterLinkIds: new Set<string>(),
     isInverted: false,
+    transformers: {} as Record<string, TransformerPreview>,
+    transformerByLinkId: {} as Record<string, TransformerPreview>,
     arrival: null as ArrivalPreview | null,
     arrivalKey: "" as string,
     elapsedSeconds: 0,
@@ -63,10 +63,10 @@ export class PreviewManager extends Manager<LinePreview> {
     switches: Record<string, Switch> = {},
     switchLinks: Record<string, string[]> = {},
     rotators: Record<string, Rotator> = {},
-    painters: Record<string, Painter> = {},
     arrival: Arrival | null = null,
     faders: Record<string, Fader> = {},
     inverters: Record<string, Inverter> = {},
+    transformers: Record<string, Transformer> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -90,14 +90,6 @@ export class PreviewManager extends Manager<LinePreview> {
     for (const r of Object.values(rotators)) {
       this.data.rotators[r.id] = new RotatorPreview(r.linkId, r.id);
       this.data.rotatorLinkIds.add(r.linkId);
-    }
-
-    this.data.painters = {};
-    this.data.painterByLinkId = {};
-    for (const p of Object.values(painters)) {
-      const pp = new PainterPreview(p.linkId, p.color, p.id);
-      this.data.painters[p.id] = pp;
-      this.data.painterByLinkId[p.linkId] = pp;
     }
 
     this.data.switches = {};
@@ -124,6 +116,14 @@ export class PreviewManager extends Manager<LinePreview> {
     for (const inv of Object.values(inverters)) {
       this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
       this.data.inverterLinkIds.add(inv.linkId);
+    }
+
+    this.data.transformers = {};
+    this.data.transformerByLinkId = {};
+    for (const tr of Object.values(transformers)) {
+      const tp = new TransformerPreview(tr.linkId, tr.mode, tr.color, tr.targetType, tr.id);
+      this.data.transformers[tp.id] = tp;
+      this.data.transformerByLinkId[tr.linkId] = tp;
     }
 
     this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
@@ -180,16 +180,19 @@ export class PreviewManager extends Manager<LinePreview> {
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
 
-      if (token.isPainting) {
-        token.paintProgress = Math.min(1, token.paintProgress + deltaSeconds / PAINT_DURATION);
-        const activePainter = this.data.painterByLinkId[token.paintingLinkId];
-        if (activePainter) {
-          activePainter.paintProgress = token.paintProgress;
-          activePainter.currentTokenColor = token.displayColor || (token.color as string);
+      if (token.isTransforming) {
+        token.transformProgress = Math.min(1, token.transformProgress + deltaSeconds / PAINT_DURATION);
+        const activeTransformer = this.data.transformerByLinkId[token.transformingLinkId];
+        if (activeTransformer) {
+          activeTransformer.transformProgress = token.transformProgress;
+          if (token.transformMode === "color") {
+            activeTransformer.currentTokenColor = token.displayColor || (token.color as string);
+          }
         }
-        if (token.paintProgress >= 1) {
-          token.isPainting = false;
-          if (activePainter) { activePainter.paintProgress = -1; activePainter.currentTokenColor = ""; }
+        if (token.transformProgress >= 1) {
+          token.isTransforming = false;
+          if (token.transformMode === "shape") token.type = token.pendingType as any;
+          if (activeTransformer) { activeTransformer.transformProgress = -1; activeTransformer.currentTokenColor = ""; }
           if (token.pendingLineId) {
             token.lineId = token.pendingLineId;
             token.pointIndex = token.pendingPointIndex;
@@ -202,18 +205,20 @@ export class PreviewManager extends Manager<LinePreview> {
         if (token.direction === 0 || token.speed === 0) continue;
         const line = this.data.lines[token.lineId];
         if (!line) continue;
-        const targetSpeed = Math.max(1, token.speed + line.boost);
+        const targetSpeed = line.boost !== 0 ? Math.max(1, line.boost) : Math.max(1, token.speed);
         const k = ACCEL_TIME > 0 ? 1 - Math.exp(-deltaSeconds / ACCEL_TIME) : 1;
         token.currentSpeed += (targetSpeed - token.currentSpeed) * k;
         const result = token.advance(deltaSeconds, line.points.length);
-        if (result) this.transitionToken(token, result.hit, result.excess);
+        if (result) {
+          const { isInverted } = token.transition(result.hit, result.excess, this.data);
+          this.data.isInverted = isInverted;
+        }
 
         if (token.rotationOffset !== token.targetRotationOffset) {
           const diff = token.targetRotationOffset - token.rotationOffset;
           const step = ROTATION_SPEED * deltaSeconds;
           token.rotationOffset = Math.abs(diff) <= step ? token.targetRotationOffset : token.rotationOffset + Math.sign(diff) * step;
         }
-
       }
 
       if (token.colorProgress < 1) {
@@ -226,67 +231,6 @@ export class PreviewManager extends Manager<LinePreview> {
     }
   };
 
-  private transitionToken = (token: TokenPreview, arrivedAt: "start" | "end", excess: number) => {
-    if (this.data.arrivalKey && this.data.arrivalKey === `${token.lineId}::${arrivedAt}`) {
-      if (this.data.arrival) {
-        this.data.arrival.isFading = true;
-        this.data.arrival.fadeAlpha = 1;
-      }
-      token.arrived = true;
-      token.direction = 0;
-      return;
-    }
-    const linkId = this.data.linkByEndpointKey[`${token.lineId}::${arrivedAt}`];
-    if (linkId && this.data.rotatorLinkIds.has(linkId)) {
-      token.targetRotationOffset += Math.PI * 2.25;
-    }
-    if (linkId && this.data.faderLinkIds.has(linkId)) {
-      const fader = Object.values(this.data.faders).find((f) => f.linkId === linkId);
-      if (fader) token.opacity = fader.amount;
-    }
-    if (linkId && this.data.inverterLinkIds.has(linkId)) {
-      this.data.isInverted = !this.data.isInverted;
-    }
-    const painter = linkId ? this.data.painterByLinkId[linkId] : undefined;
-    if (painter) {
-      token.colorTransitionFrom = token.displayColor || (token.color as string);
-      token.color = painter.color as any;
-      token.colorProgress = 0;
-      token.isPainting = true;
-      token.paintProgress = 0;
-      token.paintingLinkId = linkId;
-      token.direction = 0;
-      painter.paintProgress = 0;
-      const other = this.data.linkMap[`${token.lineId}::${arrivedAt}`];
-      if (other) {
-        const newLine = this.data.lines[other.lineId];
-        token.pendingLineId = other.lineId;
-        token.pendingPointIndex = other.endpoint === "start" ? 0 : (newLine?.points.length ?? 1) - 1;
-        token.pendingDirection = other.endpoint === "start" ? 1 : -1;
-        token.pendingRemainder = excess;
-      } else {
-        const line = this.data.lines[token.lineId];
-        token.pointIndex = arrivedAt === "end" ? (line?.points.length ?? 1) - 1 : 0;
-        token.remainder = 0;
-        token.pendingLineId = "";
-      }
-      return;
-    }
-    const other = this.data.linkMap[`${token.lineId}::${arrivedAt}`];
-    if (other) {
-      token.lineId = other.lineId;
-      const newLine = this.data.lines[token.lineId];
-      token.pointIndex = other.endpoint === "start" ? 0 : (newLine?.points.length ?? 1) - 1;
-      token.direction = other.endpoint === "start" ? 1 : -1;
-      token.remainder = excess;
-    } else {
-      const line = this.data.lines[token.lineId];
-      token.pointIndex = arrivedAt === "end" ? (line?.points.length ?? 1) - 1 : 0;
-      token.remainder = 0;
-      token.direction = 0;
-    }
-  };
-
   drawAllPreview = (ctx: CanvasRenderingContext2D) => {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -295,7 +239,7 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
     this.drawSwitchLinks(ctx);
-    for (const line of Object.values(this.data.lines)) line.drawGlow(ctx);
+    for (const line of Object.values(this.data.lines)) line.drawGlow(ctx, this.data.elapsedSeconds);
     for (const line of Object.values(this.data.lines)) line.draw(ctx);
 
     for (const sw of Object.values(this.data.switches)) {
@@ -312,13 +256,13 @@ export class PreviewManager extends Manager<LinePreview> {
       rot.draw(ctx, pt, this.data.elapsedSeconds);
     }
 
-    for (const p of Object.values(this.data.painters)) {
-      const link = this.data.links[p.linkId];
+    for (const tr of Object.values(this.data.transformers)) {
+      const link = this.data.links[tr.linkId];
       if (!link) continue;
       const line = this.data.lines[link.line1.lineId];
       if (!line) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      p.draw(ctx, pt, this.data.elapsedSeconds);
+      tr.draw(ctx, pt, this.data.elapsedSeconds);
     }
 
     if (this.data.arrival) {

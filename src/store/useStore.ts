@@ -11,10 +11,10 @@ import { createModeActions } from "./actions/modeActions"
 import { createStartActions } from "./actions/startActions"
 import { createSwitchActions } from "./actions/switchActions"
 import { createRotatorActions } from "./actions/rotatorActions"
-import { createPainterActions } from "./actions/painterActions"
 import { createArrivalActions } from "./actions/arrivalActions"
 import { createFaderActions } from "./actions/faderActions"
 import { createInverterActions } from "./actions/inverterActions"
+import { createTransformerActions } from "./actions/transformerActions"
 import { serializeMap, deserializeMap, type MapJson } from "./mapJson"
 
 const editorManager = new EditorManager()
@@ -49,16 +49,16 @@ export const useStore = create<Store>()(
       switches: {},
       switchLinks: {},
       rotators: {},
-      painters: {},
       faders: {},
       inverters: {},
+      transformers: {},
       arrival: null,
       hoveredLineId: null,
       hoveredSwitchId: null,
       hoveredRotatorId: null,
-      hoveredPainterId: null,
       hoveredFaderId: null,
       hoveredInverterId: null,
+      hoveredTransformerId: null,
       revision: 0,
       mode: "select",
       viewMode: "editor",
@@ -71,20 +71,20 @@ export const useStore = create<Store>()(
       ...createStartActions(set),
       ...createSwitchActions(set),
       ...createRotatorActions(set),
-      ...createPainterActions(set),
       ...createArrivalActions(set),
       ...createFaderActions(set),
       ...createInverterActions(set),
+      ...createTransformerActions(set),
     }),
     {
       name: "game2-map",
       storage: mapStorage as any,
       partialize: (state) =>
-        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.rotators, state.painters, state.arrival, state.faders, state.inverters) as any,
+        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.rotators, state.arrival, state.faders, state.inverters, state.transformers) as any,
       merge: (persisted, current) => {
         const json = persisted as MapJson
-        const { tokens, starts, switches, switchLinks, rotators, painters, faders, inverters, arrival } = deserializeMap(json, current.editorManager)
-        return { ...current, tokens, starts, switches, switchLinks, rotators, painters, faders, inverters, arrival, revision: 1 }
+        const { tokens, starts, switches, switchLinks, rotators, faders, inverters, transformers, arrival } = deserializeMap(json, current.editorManager)
+        return { ...current, tokens, starts, switches, switchLinks, rotators, faders, inverters, transformers, arrival, revision: 1 }
       },
     }
   )

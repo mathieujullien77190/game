@@ -1,6 +1,25 @@
 import { POINT_SPACING } from "../constants"
 import type { LinePoint } from "../types"
+import type { LinkEndpoint } from "../Link/Link"
+import type { LinePreview } from "../Line/LinePreview"
+import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
+import type { FaderPreview } from "../Fader/FaderPreview"
+import type { TransformerPreview } from "../Transformer/TransformerPreview"
 import { Token } from "./Token"
+
+export type TransitionCtx = {
+  arrivalKey: string
+  arrival: ArrivalPreview | null
+  linkByEndpointKey: Record<string, string>
+  linkMap: Record<string, LinkEndpoint>
+  lines: Record<string, LinePreview>
+  rotatorLinkIds: Set<string>
+  faderLinkIds: Set<string>
+  faders: Record<string, FaderPreview>
+  inverterLinkIds: Set<string>
+  isInverted: boolean
+  transformerByLinkId: Record<string, TransformerPreview>
+}
 
 export class TokenPreview extends Token {
   startId: string = ""
@@ -17,9 +36,11 @@ export class TokenPreview extends Token {
   colorProgress: number = 1
   opacity: number = 1
   arrived: boolean = false
-  isPainting: boolean = false
-  paintProgress: number = 0
-  paintingLinkId: string = ""
+  isTransforming: boolean = false
+  transformProgress: number = 0
+  transformingLinkId: string = ""
+  transformMode: "color" | "shape" = "shape"
+  pendingType: string = "round"
   pendingLineId: string = ""
   pendingPointIndex: number = 0
   pendingDirection: 1 | -1 = 1
@@ -37,6 +58,86 @@ export class TokenPreview extends Token {
     }
     this.remainder = budget
     return null
+  }
+
+  transition = (arrivedAt: "start" | "end", excess: number, ctx: TransitionCtx): { isInverted: boolean } => {
+    let isInverted = ctx.isInverted
+
+    if (ctx.arrivalKey && ctx.arrivalKey === `${this.lineId}::${arrivedAt}`) {
+      if (ctx.arrival) {
+        ctx.arrival.isFading = true
+        ctx.arrival.fadeAlpha = 1
+      }
+      this.arrived = true
+      this.direction = 0
+      return { isInverted }
+    }
+
+    const linkId = ctx.linkByEndpointKey[`${this.lineId}::${arrivedAt}`]
+    if (linkId && ctx.rotatorLinkIds.has(linkId)) {
+      this.targetRotationOffset += Math.PI * 2.25
+    }
+    if (linkId && ctx.faderLinkIds.has(linkId)) {
+      const fader = Object.values(ctx.faders).find((f) => f.linkId === linkId)
+      if (fader) this.opacity = fader.amount
+    }
+    if (linkId && ctx.inverterLinkIds.has(linkId)) {
+      isInverted = !isInverted
+    }
+
+    const transformer = linkId ? ctx.transformerByLinkId[linkId] : undefined
+    if (transformer) {
+      const currentColor = this.displayColor || (this.color as string)
+      const needsColor = transformer.mode === "color" && currentColor !== transformer.color
+      const needsShape = transformer.mode === "shape" && (this.type as string) !== transformer.targetType
+      if (needsColor || needsShape) {
+        this.isTransforming = true
+        this.transformProgress = 0
+        this.transformingLinkId = linkId
+        this.transformMode = transformer.mode
+        this.direction = 0
+        this.currentSpeed = this.speed
+        transformer.transformProgress = 0
+        if (needsColor) {
+          this.colorTransitionFrom = currentColor
+          this.color = transformer.color as any
+          this.colorProgress = 0
+        }
+        if (needsShape) {
+          this.pendingType = transformer.targetType
+        }
+        const other = ctx.linkMap[`${this.lineId}::${arrivedAt}`]
+        if (other) {
+          const newLine = ctx.lines[other.lineId]
+          this.pendingLineId = other.lineId
+          this.pendingPointIndex = other.endpoint === "start" ? 0 : (newLine?.points.length ?? 1) - 1
+          this.pendingDirection = other.endpoint === "start" ? 1 : -1
+          this.pendingRemainder = excess
+        } else {
+          const line = ctx.lines[this.lineId]
+          this.pointIndex = arrivedAt === "end" ? (line?.points.length ?? 1) - 1 : 0
+          this.remainder = 0
+          this.pendingLineId = ""
+        }
+        return { isInverted }
+      }
+    }
+
+    const other = ctx.linkMap[`${this.lineId}::${arrivedAt}`]
+    if (other) {
+      this.lineId = other.lineId
+      const newLine = ctx.lines[this.lineId]
+      this.pointIndex = other.endpoint === "start" ? 0 : (newLine?.points.length ?? 1) - 1
+      this.direction = other.endpoint === "start" ? 1 : -1
+      this.remainder = excess
+    } else {
+      const line = ctx.lines[this.lineId]
+      this.pointIndex = arrivedAt === "end" ? (line?.points.length ?? 1) - 1 : 0
+      this.remainder = 0
+      this.direction = 0
+    }
+
+    return { isInverted }
   }
 
   drawBoostTrail = (ctx: CanvasRenderingContext2D, speedDelta: number, points: LinePoint[]) => {
@@ -57,13 +158,11 @@ export class TokenPreview extends Token {
     ctx.globalAlpha = 1
   }
 
-  draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[]) => {
-    if (points) this.drawBoostTrail(ctx, speedDelta, points)
-    ctx.globalAlpha = this.opacity
+  private drawShape = (ctx: CanvasRenderingContext2D, pt: LinePoint, type: string) => {
     ctx.fillStyle = this.displayColor || (this.color as string)
     ctx.strokeStyle = "#000"
     ctx.lineWidth = 2
-    if (this.type === "square") {
+    if (type === "square") {
       const angle = (this.direction === -1 ? pt.angle + Math.PI : pt.angle) + this.rotationOffset
       ctx.save()
       ctx.translate(pt.x, pt.y)
@@ -79,6 +178,20 @@ export class TokenPreview extends Token {
       ctx.fill()
       ctx.stroke()
     }
+  }
+
+  draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[]) => {
+    if (points) this.drawBoostTrail(ctx, speedDelta, points)
+    if (this.isTransforming && this.transformProgress > 0 && this.transformMode === "shape") {
+      ctx.globalAlpha = this.opacity * (1 - this.transformProgress)
+      this.drawShape(ctx, pt, this.type as string)
+      ctx.globalAlpha = this.opacity * this.transformProgress
+      this.drawShape(ctx, pt, this.pendingType)
+      ctx.globalAlpha = 1
+      return
+    }
+    ctx.globalAlpha = this.opacity
+    this.drawShape(ctx, pt, this.type as string)
     ctx.globalAlpha = 1
   }
 }
