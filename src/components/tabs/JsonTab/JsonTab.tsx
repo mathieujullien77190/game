@@ -21,15 +21,10 @@ export const JsonTab = () => {
 
   const json = JSON.stringify(serializeMap(editorManager, tokens, starts, switches, switchLinks, transformers, arrival, inverters, screens, screenGates, screenTimeMultipliers), null, 2)
 
-  const handleClear = () => {
-    localStorage.removeItem("game2-map")
-    window.location.reload()
-  }
-
   return (
     <S.Container>
       <S.ButtonRow>
-        <S.ClearButton onClick={handleClear}>Clear map</S.ClearButton>
+        <S.ClearButton onClick={() => { localStorage.removeItem("game2-map"); window.location.reload() }}>Clear map</S.ClearButton>
         <S.CopyButton onClick={() => navigator.clipboard.writeText(json)}>Copy</S.CopyButton>
       </S.ButtonRow>
       <S.Pre key={revision}>{json}</S.Pre>

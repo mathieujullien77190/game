@@ -1,4 +1,7 @@
 import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H } from "../constants";
+
+const EXPLOSION_DURATION = 2;
+
 import { LinePreview } from "../Line/LinePreview";
 import type { Link, LinkEndpoint } from "../Link/Link";
 import type { Start } from "../Start/Start";
@@ -233,6 +236,36 @@ export class PreviewManager extends Manager<LinePreview> {
     if (this.data.tokens.some(t => t.arrived)) {
       this.data.tokens = this.data.tokens.filter(t => !t.arrived);
     }
+
+    const active = this.data.tokens.filter(
+      t => this.data.elapsedSeconds >= t.startAt && t.direction !== 0 && t.opacity >= 1
+    );
+    for (let i = 0; i < active.length; i++) {
+      const lineA = this.data.lines[active[i].lineId];
+      const pa = lineA?.points[active[i].pointIndex];
+      if (!pa) continue;
+      for (let j = i + 1; j < active.length; j++) {
+        const lineB = this.data.lines[active[j].lineId];
+        if ((lineA?.screenId ?? "main") !== (lineB?.screenId ?? "main")) continue;
+        const pb = lineB?.points[active[j].pointIndex];
+        if (!pb) continue;
+        const dx = pa.x - pb.x, dy = pa.y - pb.y;
+        if (dx * dx + dy * dy < 16 * 16) {
+          active[i].exploding = true; active[i].direction = 0;
+          active[j].exploding = true; active[j].direction = 0;
+        }
+      }
+    }
+    const FADE_DURATION = 8;
+    for (const t of this.data.tokens) {
+      if (!t.exploding) continue;
+      if (t.explosionProgress < 1) {
+        t.explosionProgress = Math.min(t.explosionProgress + deltaSeconds / EXPLOSION_DURATION, 1);
+      } else {
+        t.explosionFadeProgress = Math.min(t.explosionFadeProgress + deltaSeconds / FADE_DURATION, 1);
+      }
+    }
+    this.data.tokens = this.data.tokens.filter(t => !t.exploding || t.explosionFadeProgress < 1);
   };
 
   drawAllPreview = (ctx: CanvasRenderingContext2D) => {
@@ -330,7 +363,9 @@ export class PreviewManager extends Manager<LinePreview> {
       const line = this.data.lines[token.lineId];
       if (!line || line.points.length === 0) continue;
       const pt = line.points[token.pointIndex];
-      if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points, line.tunnel ? 0 : undefined);
+      if (!pt) continue;
+      if (token.exploding) token.drawExplosion(ctx, pt);
+      else token.draw(ctx, pt, token.currentSpeed - token.speed, line.points, line.tunnel ? 0 : undefined);
     }
 
     for (const sg of Object.values(this.data.screenGates)) {

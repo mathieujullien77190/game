@@ -16,7 +16,8 @@ import { createInverterActions } from "./actions/inverterActions"
 import { createScreenActions } from "./actions/screenActions"
 import { createScreenGateActions } from "./actions/screenGateActions"
 import { serializeMap, deserializeMap, type MapJson } from "./mapJson"
-import { DEFAULT_MAP } from "./defaultMap"
+
+const EMPTY_MAP: MapJson = { lines: [], links: [], tokens: [], starts: [], switches: {} }
 
 const editorManager = new EditorManager()
 const previewManager = new PreviewManager()
@@ -25,11 +26,11 @@ const previewManager = new PreviewManager()
 const mapStorage = {
   getItem: (name: string) => {
     const str = localStorage.getItem(name)
-    if (!str) return { state: DEFAULT_MAP, version: 0 }
+    if (!str) return { state: EMPTY_MAP, version: 0 }
     try {
       return { state: JSON.parse(str) as MapJson, version: 0 }
     } catch {
-      return { state: DEFAULT_MAP, version: 0 }
+      return { state: EMPTY_MAP, version: 0 }
     }
   },
   setItem: (name: string, value: { state: unknown }) => {

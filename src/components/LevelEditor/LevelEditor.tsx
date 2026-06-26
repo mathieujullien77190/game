@@ -56,6 +56,7 @@ export const LevelEditor = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [hoverNearEndpoint, setHoverNearEndpoint] = useState(false)
   const [showIds, setShowIds] = useState(true)
+  const [paused, setPaused] = useState(false)
   const [addStartSnap, setAddStartSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addSwitchSnap, setAddSwitchSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
   const [addTransformerSnap, setAddTransformerSnap] = useState<{ lineId: string; endpoint: "start" | "end"; pt: Point } | null>(null)
@@ -174,7 +175,7 @@ export const LevelEditor = () => {
     screenGateMarkersArray,
     visibleLineIds,
   )
-  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale)
+  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale, paused)
 
   useEffect(() => {
     const el = canvasAreaRef.current
@@ -504,9 +505,14 @@ export const LevelEditor = () => {
               </>
             )}
             {viewMode === "preview" && (
-              <S.RestartButton onClick={() => setViewMode("preview")}>
-                ↺ Restart
-              </S.RestartButton>
+              <>
+                <S.RestartButton onClick={() => { setPaused(false); setViewMode("preview") }}>
+                  ↺ Restart
+                </S.RestartButton>
+                <S.PauseButton $active={paused} onClick={() => setPaused((v) => !v)}>
+                  {paused ? "▶" : "⏸"}
+                </S.PauseButton>
+              </>
             )}
           </S.CanvasOuter>
         </S.CanvasArea>

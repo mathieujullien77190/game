@@ -79,6 +79,26 @@ export const RestartButton = styled.button`
   }
 `
 
+export const PauseButton = styled.button<{ $active: boolean }>`
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 10px;
+  background: ${({ $active }) => $active ? "#333" : "rgba(255,255,255,0.85)"};
+  color: ${({ $active }) => $active ? "#fff" : "#333"};
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  z-index: 10;
+
+  &:hover {
+    background: #e0e0e0;
+    color: #333;
+  }
+`
+
 export const ScreenBar = styled.div`
   position: absolute;
   top: 8px;

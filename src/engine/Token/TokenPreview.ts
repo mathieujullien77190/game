@@ -46,6 +46,9 @@ export class TokenPreview extends Token {
   pendingDirection: 1 | -1 = 1
   pendingRemainder: number = 0
   portalContext: { returnLineId: string; returnPointIndex: number; returnDirection: 1 | -1; returnRemainder: number } | null = null
+  exploding: boolean = false
+  explosionProgress: number = 0
+  explosionFadeProgress: number = 0
 
   advance = (deltaSeconds: number, pointCount: number): { hit: "start" | "end"; excess: number } | null => {
     let budget = Math.max(1, this.currentSpeed) * deltaSeconds + this.remainder
@@ -209,6 +212,70 @@ export class TokenPreview extends Token {
       ctx.fill()
       ctx.stroke()
     }
+  }
+
+  drawExplosion = (ctx: CanvasRenderingContext2D, pt: LinePoint) => {
+    const progress = this.explosionProgress
+    const fade = 1 - this.explosionFadeProgress
+    const color = this.displayColor || (this.color as string)
+    const x = pt.x, y = pt.y
+    const seed = ((x * 73.1 + y * 31.7) | 0)
+    const rng = (i: number) => { const n = Math.sin(seed + i * 9301 + 49297) * 233280; return n - Math.floor(n) }
+    const isSquare = this.type === "square"
+
+    const drawPiece = (px: number, py: number, r: number, alpha: number) => {
+      ctx.globalAlpha = Math.max(0, alpha * fade)
+      ctx.fillStyle = color
+      ctx.beginPath()
+      if (isSquare) ctx.rect(px - r, py - r, r * 2, r * 2)
+      else ctx.arc(px, py, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    ctx.save()
+
+    for (let k = 0; k < 8; k++) {
+      const angle = rng(k) * Math.PI * 2
+      const speed = 30 + rng(k + 10) * 70
+      const size = 2 + rng(k + 20) * 4
+      const target = 0.2 + rng(k + 25) * 0.8
+      const alpha = 1 - progress * (1 - target)
+      const f = 1 - Math.pow(1 - progress, 4)
+      const px = x + Math.cos(angle) * f * speed
+      const py = y + Math.sin(angle) * f * speed
+      drawPiece(px, py, size, alpha)
+    }
+
+    for (let k = 0; k < 4; k++) {
+      const angle = rng(k) * Math.PI * 2
+      const speed = 30 + rng(k + 10) * 70
+      const target = 0.2 + rng(k + 35) * 0.8
+      const alpha = 1 - progress * (1 - target)
+      const f = 1 - Math.pow(1 - progress, 4)
+      const px = x + Math.cos(angle) * f * speed
+      const py = y + Math.sin(angle) * f * speed
+      const rotDir = rng(k + 30) > 0.5 ? 1 : -1
+      const rot = angle + rotDir * progress * Math.PI * 0.5
+      ctx.globalAlpha = alpha * fade
+      ctx.strokeStyle = "#000"
+      ctx.lineWidth = 2
+      ctx.save()
+      ctx.translate(px, py)
+      if (isSquare) {
+        ctx.rotate(rot)
+        ctx.beginPath()
+        ctx.moveTo(-8, 0)
+        ctx.lineTo(8, 0)
+        ctx.stroke()
+      } else {
+        ctx.beginPath()
+        ctx.arc(0, 0, 8, rot, rot + Math.PI / 2)
+        ctx.stroke()
+      }
+      ctx.restore()
+    }
+
+    ctx.restore()
   }
 
   draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[], opacityOverride?: number) => {

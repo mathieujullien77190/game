@@ -5,6 +5,7 @@ export const useCanvasDrawPreview = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
   manager: PreviewManager | null,
   dpr: number,
+  paused: boolean,
 ) => {
   useEffect(() => {
     if (!manager) return;
@@ -17,12 +18,12 @@ export const useCanvasDrawPreview = (
       if (!ctx) return;
       const t0 = performance.now();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      manager.tickSim(timestamp);
+      if (!paused) manager.tickSim(timestamp);
       manager.drawAllPreview(ctx);
       manager.data.frameMs = performance.now() - t0;
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [canvasRef, manager, dpr]);
+  }, [canvasRef, manager, dpr, paused]);
 };

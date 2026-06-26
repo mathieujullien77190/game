@@ -28,4 +28,5 @@ export const createModeActions = (set: Set) => ({
 
   setPendingPoint: (point: Point | null) => set(() => ({ pendingPoint: point })),
   setLinePreset: (preset: "arc" | null) => set(() => ({ linePreset: preset })),
+
 })
