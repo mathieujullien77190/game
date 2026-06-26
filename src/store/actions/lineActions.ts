@@ -109,6 +109,15 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
+  updateLineSpiral: (id: string, turns: number) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.turns = turns
+      line.computePoints()
+      return { revision: state.revision + 1 }
+    }),
+
   updateLineTunnel: (id: string, tunnel: boolean) =>
     set((state) => {
       const line = state.editorManager.data.lines[id]

@@ -24,6 +24,10 @@ export const createModeActions = (set: Set) => ({
             lp.flip = true
             lp.computePoints()
           }
+          if (l.type === "spiral") {
+            lp.turns = l.turns
+            lp.computePoints()
+          }
           lp.screenId = l.screenId
           state.previewManager.addLine(lp)
         })

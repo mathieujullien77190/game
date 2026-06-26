@@ -54,6 +54,7 @@ export interface StoreActions {
   updateLineShowSpeed: (id: string, showSpeed: boolean) => void
   updateLineLimitation: (id: string, limitation: number) => void
   updateLineSine: (id: string, frequency: number, amplitude: number) => void
+  updateLineSpiral: (id: string, turns: number) => void
   toggleLinkActivated: (linkId: string) => void
   addToken: (token: Token) => void
   removeToken: (id: string) => void

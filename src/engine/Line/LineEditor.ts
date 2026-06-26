@@ -30,7 +30,7 @@ export class LineEditor extends Line {
     ctx.moveTo(this.start.x, this.start.y)
     if (this.type === "curve") {
       ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
-    } else if (this.type === "sine") {
+    } else if (this.type === "sine" || this.type === "spiral") {
       for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y)
     } else if (this.type === "elbow") {
       ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)

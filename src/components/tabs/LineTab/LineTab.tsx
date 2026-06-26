@@ -15,7 +15,7 @@ export const LineTab = () => {
       return next
     })
 
-  const { editorManager, revision, mode, lineType, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineSine, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, revision, mode, lineType, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       revision: s.revision,
@@ -30,6 +30,7 @@ export const LineTab = () => {
       updateLineShowSpeed: s.updateLineShowSpeed,
       updateLineLimitation: s.updateLineLimitation,
       updateLineSine: s.updateLineSine,
+      updateLineSpiral: s.updateLineSpiral,
       toggleLinkActivated: s.toggleLinkActivated,
       setHoveredLineId: s.setHoveredLineId,
     }))
@@ -72,6 +73,12 @@ export const LineTab = () => {
             onClick={() => { setLineType("elbow"); setMode("addLine") }}
           >
             + Elbow
+          </S.TypeButton>
+          <S.TypeButton
+            $active={false}
+            onClick={() => { setLineType("spiral"); setMode("addLine") }}
+          >
+            + Spiral
           </S.TypeButton>
         </S.TypeRow>
       )}
@@ -117,6 +124,16 @@ export const LineTab = () => {
                 <S.BoostLabel>limitation</S.BoostLabel>
                 <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
               </S.BoostRow>
+              {line.type === "spiral" && (
+                <S.BoostRow>
+                  <S.BoostLabel>turns</S.BoostLabel>
+                  <NumberInput
+                    value={line.turns}
+                    onChange={(v) => updateLineSpiral(line.id, v)}
+                    step={1}
+                  />
+                </S.BoostRow>
+              )}
               {line.type === "sine" && (
                 <>
                   <S.BoostRow>

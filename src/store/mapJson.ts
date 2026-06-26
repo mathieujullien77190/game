@@ -17,7 +17,7 @@ import type { SwitchEditor as SwitchEditorType } from "engine/Switch/SwitchEdito
 
 export type MapJson = {
   screens?: string[]
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; screenId?: string }[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; turns?: number; screenId?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
@@ -61,6 +61,7 @@ export const serializeMap = (
     ...(l.showSpeed ? { showSpeed: true } : {}),
     ...(l.limitation !== 0 ? { limitation: l.limitation } : {}),
     ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
+    ...(l.type === "spiral" ? { turns: l.turns } : {}),
     ...(l.screenId !== "main" ? { screenId: l.screenId } : {}),
   })),
   links: Object.values(editorManager.data.links).map((lk) => ({
@@ -132,7 +133,7 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, flip, tunnel, showSpeed, limitation, frequency, amplitude, screenId }) => {
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, flip, tunnel, showSpeed, limitation, frequency, amplitude, turns, screenId }) => {
     const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2, screenId)
     if (boost) line.boost = boost
     if (flip) { line.flip = true; line.computePoints() }
@@ -142,6 +143,10 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
     if (type === "sine") {
       if (frequency !== undefined) line.frequency = frequency
       if (amplitude !== undefined) line.amplitude = amplitude
+      line.computePoints()
+    }
+    if (type === "spiral") {
+      if (turns !== undefined) line.turns = turns
       line.computePoints()
     }
     editorManager.addLine(line)

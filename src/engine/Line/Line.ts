@@ -1,7 +1,7 @@
 import { POINT_SPACING } from "../constants"
 import type { Point, LinePoint } from "../types"
 
-export type LineType = "straight" | "curve" | "sine" | "elbow"
+export type LineType = "straight" | "curve" | "sine" | "elbow" | "spiral"
 
 let lineCounter = 0
 
@@ -37,6 +37,7 @@ export class Line {
   limitation: number = 0
   frequency: number = 1
   amplitude: number = 20
+  turns: number = 2
   screenId: string = "main"
 
   constructor(start: Point, end: Point, type: LineType = "straight", id?: string, cp1?: Point, cp2?: Point, screenId?: string) {
@@ -53,6 +54,47 @@ export class Line {
   }
 
   computePoints = () => {
+    if (this.type === "spiral") {
+      const dx = this.end.x - this.start.x
+      const dy = this.end.y - this.start.y
+      const rEnd = Math.sqrt(dx * dx + dy * dy)
+      if (rEnd < 0.001) { this.points = [{ x: this.start.x, y: this.start.y, angle: 0 }]; return }
+      const thetaEnd = Math.atan2(dy, dx)
+      const thetaStart = thetaEnd - this.turns * Math.PI * 2
+      const dtheta = thetaEnd - thetaStart
+      const N = Math.max(200, Math.abs(this.turns) * 150)
+      const sampledX = new Float64Array(N + 1)
+      const sampledY = new Float64Array(N + 1)
+      for (let i = 0; i <= N; i++) {
+        const t = i / N
+        const r = rEnd * t
+        const theta = thetaStart + dtheta * t
+        sampledX[i] = this.start.x + r * Math.cos(theta)
+        sampledY[i] = this.start.y + r * Math.sin(theta)
+      }
+      const arcLengths = new Float64Array(N + 1)
+      for (let i = 1; i <= N; i++) {
+        const ddx = sampledX[i] - sampledX[i - 1]
+        const ddy = sampledY[i] - sampledY[i - 1]
+        arcLengths[i] = arcLengths[i - 1] + Math.sqrt(ddx * ddx + ddy * ddy)
+      }
+      const totalLength = arcLengths[N]
+      const count = Math.max(1, Math.floor(totalLength / POINT_SPACING))
+      this.points = Array.from({ length: count + 1 }, (_, i) => {
+        const targetLen = (i / count) * totalLength
+        let lo = 0, hi = N
+        while (lo < hi - 1) { const mid = (lo + hi) >> 1; if (arcLengths[mid] < targetLen) lo = mid; else hi = mid }
+        const span = arcLengths[hi] - arcLengths[lo]
+        const frac = span === 0 ? 0 : (targetLen - arcLengths[lo]) / span
+        const t = (lo + frac) / N
+        const r = rEnd * t
+        const theta = thetaStart + dtheta * t
+        const tanX = rEnd * Math.cos(theta) - r * dtheta * Math.sin(theta)
+        const tanY = rEnd * Math.sin(theta) + r * dtheta * Math.cos(theta)
+        return { x: this.start.x + r * Math.cos(theta), y: this.start.y + r * Math.sin(theta), angle: Math.atan2(tanY, tanX) }
+      })
+      return
+    }
     if (this.type === "elbow") {
       const k = 0.5522847498
       const { x: sx, y: sy } = this.start
