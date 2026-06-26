@@ -211,22 +211,29 @@ export class TokenPreview extends Token {
       ctx.stroke()
       return
     }
+    const phase = (parseInt(this.id.replace(/\D/g, "") || "0") * 1.7) % (Math.PI * 2)
+    const pulse = 1 + Math.sin(Date.now() / 700 + phase) * 0.13
     ctx.fillStyle = this.displayColor || (this.color as string)
     if (type === "square") {
       const angle = (this.direction === -1 ? pt.angle + Math.PI : pt.angle) + this.rotationOffset
       ctx.save()
       ctx.translate(pt.x, pt.y)
       ctx.rotate(angle)
+      ctx.scale(pulse, pulse)
       ctx.beginPath()
       ctx.roundRect(-8, -8, 16, 16, 3)
       ctx.fill()
       ctx.stroke()
       ctx.restore()
     } else {
+      ctx.save()
+      ctx.translate(pt.x, pt.y)
+      ctx.scale(pulse, pulse)
       ctx.beginPath()
-      ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2)
+      ctx.arc(0, 0, 8, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
+      ctx.restore()
     }
   }
 

@@ -23,6 +23,16 @@ const snapToGrid = (p: Point): Point => ({
   y: Math.round(p.y / GRID_SIZE) * GRID_SIZE,
 })
 
+const findElbowFlipAt = (lines: LineEditor[], point: Point) => {
+  for (const line of lines) {
+    if (line.type !== "elbow") continue
+    const corner = line.flip ? { x: line.end.x, y: line.start.y } : { x: line.start.x, y: line.end.y }
+    const dx = point.x - corner.x, dy = point.y - corner.y
+    if (Math.sqrt(dx * dx + dy * dy) <= HIT_RADIUS) return line.id
+  }
+  return null
+}
+
 const findControlPointAt = (lines: LineEditor[], point: Point) => {
   for (const line of lines) {
     if (line.type !== "curve") continue
@@ -79,7 +89,7 @@ export const LevelEditor = () => {
     hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredScreenGateId,
     lineType, linePreset, screens, currentScreenId,
     addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, addScreenGate,
-    setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId, setLinePreset,
+    setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, toggleLineFlip, setHoveredLineId, setLinePreset,
     addScreen, setCurrentScreen, removeScreen,
   } = useStore(
     useShallow((s) => ({
@@ -117,6 +127,7 @@ export const LevelEditor = () => {
       setViewMode: s.setViewMode,
       updateLineEndpoint: s.updateLineEndpoint,
       updateLineControlPoint: s.updateLineControlPoint,
+      toggleLineFlip: s.toggleLineFlip,
       setHoveredLineId: s.setHoveredLineId,
       setLinePreset: s.setLinePreset,
       addScreen: s.addScreen,
@@ -413,6 +424,12 @@ export const LevelEditor = () => {
         }
         return
       }
+      if (mode === "select") {
+        const pt = getCanvasPoint(e)
+        const lines = Object.values(editorManager.data.lines).filter((l) => l.screenId === currentScreenId)
+        const flipId = findElbowFlipAt(lines, pt)
+        if (flipId) { toggleLineFlip(flipId); return }
+      }
       if (mode !== "addLine") return
       const point = snapToGrid(getCanvasPoint(e))
       if (!pendingPoint) {
@@ -427,7 +444,7 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode, setLinePreset]
+    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
   )
 
   const canvasCursor = mode === "addLine"

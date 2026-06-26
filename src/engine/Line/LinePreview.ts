@@ -9,6 +9,8 @@ export class LinePreview extends Line {
       ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
     } else if (this.type === "sine") {
       for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y)
+    } else if (this.type === "elbow") {
+      ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
     } else {
       ctx.lineTo(this.end.x, this.end.y)
     }
@@ -77,7 +79,7 @@ export class LinePreview extends Line {
     ctx.shadowColor = "rgba(255, 140, 0, 0.9)"
     ctx.shadowBlur = 12
     ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"
-    ctx.lineWidth = 3
+    ctx.lineWidth = 2
     ctx.lineCap = "round"
     ctx.setLineDash([])
     ctx.beginPath()

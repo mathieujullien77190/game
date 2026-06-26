@@ -48,6 +48,7 @@ export interface StoreActions {
   removeLine: (id: string) => void
   updateLineEndpoint: (id: string, endpoint: "start" | "end", point: Point) => void
   updateLineControlPoint: (id: string, cp: "cp1" | "cp2", point: Point) => void
+  toggleLineFlip: (id: string) => void
   updateLineBoost: (id: string, boost: number) => void
   updateLineTunnel: (id: string, tunnel: boolean) => void
   updateLineShowSpeed: (id: string, showSpeed: boolean) => void

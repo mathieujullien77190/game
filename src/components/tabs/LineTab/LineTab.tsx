@@ -67,6 +67,12 @@ export const LineTab = () => {
           >
             + Arc
           </S.TypeButton>
+          <S.TypeButton
+            $active={false}
+            onClick={() => { setLineType("elbow"); setMode("addLine") }}
+          >
+            + Elbow
+          </S.TypeButton>
         </S.TypeRow>
       )}
 

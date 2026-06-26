@@ -1,7 +1,7 @@
 import { POINT_SPACING } from "../constants"
 import type { Point, LinePoint } from "../types"
 
-export type LineType = "straight" | "curve" | "sine"
+export type LineType = "straight" | "curve" | "sine" | "elbow"
 
 let lineCounter = 0
 
@@ -31,6 +31,7 @@ export class Line {
   cp2: Point
   points: LinePoint[] = []
   boost: number = 0
+  flip: boolean = false
   tunnel: boolean = false
   showSpeed: boolean = false
   limitation: number = 0
@@ -52,6 +53,18 @@ export class Line {
   }
 
   computePoints = () => {
+    if (this.type === "elbow") {
+      const k = 0.5522847498
+      const { x: sx, y: sy } = this.start
+      const { x: ex, y: ey } = this.end
+      if (!this.flip) {
+        this.cp1 = { x: sx, y: sy + k * (ey - sy) }
+        this.cp2 = { x: ex + k * (sx - ex), y: ey }
+      } else {
+        this.cp1 = { x: sx + k * (ex - sx), y: sy }
+        this.cp2 = { x: ex, y: ey + k * (sy - ey) }
+      }
+    }
     if (this.type === "sine") {
       const dx = this.end.x - this.start.x
       const dy = this.end.y - this.start.y

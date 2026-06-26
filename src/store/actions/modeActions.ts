@@ -20,6 +20,10 @@ export const createModeActions = (set: Set) => ({
             lp.amplitude = l.amplitude
             lp.computePoints()
           }
+          if (l.type === "elbow" && l.flip) {
+            lp.flip = true
+            lp.computePoints()
+          }
           lp.screenId = l.screenId
           state.previewManager.addLine(lp)
         })

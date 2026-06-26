@@ -32,6 +32,8 @@ export class LineEditor extends Line {
       ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
     } else if (this.type === "sine") {
       for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y)
+    } else if (this.type === "elbow") {
+      ctx.bezierCurveTo(this.cp1.x, this.cp1.y, this.cp2.x, this.cp2.y, this.end.x, this.end.y)
     } else {
       ctx.lineTo(this.end.x, this.end.y)
     }
@@ -61,6 +63,19 @@ export class LineEditor extends Line {
       ctx.beginPath()
       ctx.arc(this.cp2.x, this.cp2.y, 5, 0, Math.PI * 2)
       ctx.fill()
+    }
+
+    if (this.type === "elbow") {
+      const corner = this.flip
+        ? { x: this.end.x, y: this.start.y }
+        : { x: this.start.x, y: this.end.y }
+      ctx.fillStyle = "#fff"
+      ctx.strokeStyle = "#666"
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(corner.x, corner.y, 5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
     }
 
     ctx.fillStyle = "#f9ab00"

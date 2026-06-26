@@ -82,6 +82,15 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
+  toggleLineFlip: (id: string) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line || line.type !== "elbow") return {}
+      line.flip = !line.flip
+      line.computePoints()
+      return { revision: state.revision + 1 }
+    }),
+
   updateLineBoost: (id: string, boost: number) =>
     set((state) => {
       const line = state.editorManager.data.lines[id]
