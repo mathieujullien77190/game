@@ -15,8 +15,9 @@ export type TransitionCtx = {
   lines: Record<string, LinePreview>
   transformers: Record<string, TransformerPreview>
   transformerByLinkId: Record<string, string>
-  inverterLinkIds: Set<string>
+  inverterLinkMap: Map<string, "invert" | "grayscale">
   isInverted: boolean
+  isGrayscale: boolean
   screenGateByLinkId: Record<string, ScreenGatePreview>
   screenGateByExitKey: Record<string, ScreenGatePreview>
 }
@@ -66,8 +67,9 @@ export class TokenPreview extends Token {
     return null
   }
 
-  transition = (arrivedAt: "start" | "end", excess: number, ctx: TransitionCtx): { isInverted: boolean } => {
+  transition = (arrivedAt: "start" | "end", excess: number, ctx: TransitionCtx): { isInverted: boolean; isGrayscale: boolean } => {
     let isInverted = ctx.isInverted
+    let isGrayscale = ctx.isGrayscale
 
     if (this.portalContext) {
       const exitGate = ctx.screenGateByExitKey[`${this.lineId}::${arrivedAt}`]
@@ -77,7 +79,7 @@ export class TokenPreview extends Token {
         this.direction = this.portalContext.returnDirection
         this.remainder = this.portalContext.returnRemainder
         this.portalContext = null
-        return { isInverted }
+        return { isInverted, isGrayscale }
       }
     }
 
@@ -88,16 +90,16 @@ export class TokenPreview extends Token {
       }
       this.arrived = true
       this.direction = 0
-      return { isInverted }
+      return { isInverted, isGrayscale }
     }
 
     const linkId = ctx.linkByEndpointKey[`${this.lineId}::${arrivedAt}`]
     const transformer = linkId ? ctx.transformers[ctx.transformerByLinkId[linkId]] : undefined
     if (transformer?.type === "rotate") this.targetRotationOffset += Math.PI * 2.25
     if (transformer?.type === "fade") this.opacity = transformer.amount
-    if (linkId && ctx.inverterLinkIds.has(linkId)) {
-      isInverted = !isInverted
-    }
+    const inverterEffect = linkId ? ctx.inverterLinkMap.get(linkId) : undefined
+    if (inverterEffect === "invert") isInverted = !isInverted
+    else if (inverterEffect === "grayscale") isGrayscale = !isGrayscale
 
     const screenGate = linkId ? ctx.screenGateByLinkId[linkId] : undefined
     if (screenGate) {
@@ -119,7 +121,7 @@ export class TokenPreview extends Token {
         this.direction = entryEndpoint === "start" ? 1 : -1
         this.remainder = excess
       }
-      return { isInverted }
+      return { isInverted, isGrayscale }
     }
 
     if (transformer?.type === "color" || transformer?.type === "shape") {
@@ -155,7 +157,7 @@ export class TokenPreview extends Token {
           this.remainder = 0
           this.pendingLineId = ""
         }
-        return { isInverted }
+        return { isInverted, isGrayscale }
       }
     }
 
@@ -173,7 +175,7 @@ export class TokenPreview extends Token {
       this.direction = 0
     }
 
-    return { isInverted }
+    return { isInverted, isGrayscale }
   }
 
   drawBoostTrail = (ctx: CanvasRenderingContext2D, speedDelta: number, points: LinePoint[], eff: number) => {

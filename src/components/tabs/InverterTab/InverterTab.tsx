@@ -3,13 +3,14 @@ import { useStore } from "store"
 import * as S from "./UI"
 
 export const InverterTab = () => {
-  const { inverters, revision: _revision, mode, setMode, removeInverter, setHoveredInverterId } = useStore(
+  const { inverters, revision: _revision, mode, setMode, removeInverter, updateInverterEffect, setHoveredInverterId } = useStore(
     useShallow((s) => ({
       inverters: s.inverters,
       revision: s.revision,
       mode: s.mode,
       setMode: s.setMode,
       removeInverter: s.removeInverter,
+      updateInverterEffect: s.updateInverterEffect,
       setHoveredInverterId: s.setHoveredInverterId,
     }))
   )
@@ -32,6 +33,14 @@ export const InverterTab = () => {
               <S.InverterId>{inv.id}</S.InverterId>
               <S.DeleteButton onClick={() => removeInverter(inv.id)}>✕</S.DeleteButton>
             </S.Row>
+            <S.EffectRow>
+              <S.EffectButton $active={inv.effect !== "grayscale"} onClick={() => updateInverterEffect(inv.id, "invert")}>
+                invert
+              </S.EffectButton>
+              <S.EffectButton $active={inv.effect === "grayscale"} onClick={() => updateInverterEffect(inv.id, "grayscale")}>
+                grayscale
+              </S.EffectButton>
+            </S.EffectRow>
           </S.InverterCard>
         ))}
       </S.InverterList>

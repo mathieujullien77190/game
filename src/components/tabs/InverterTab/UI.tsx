@@ -57,6 +57,30 @@ export const InverterId = styled.span`
   color: #4a148c;
 `
 
+export const EffectRow = styled.div`
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+`
+
+export const EffectButton = styled.button<{ $active: boolean }>`
+  flex: 1;
+  padding: 3px 0;
+  background: ${(p) => (p.$active ? "#7b1fa2" : "transparent")};
+  color: ${(p) => (p.$active ? "#fff" : "#888")};
+  border: 1px solid ${(p) => (p.$active ? "#7b1fa2" : "#ddd")};
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+
+  &:hover {
+    background: ${(p) => (p.$active ? "#6a1b9a" : "#ede7f6")};
+  }
+`
+
 export const DeleteButton = styled.button`
   background: transparent;
   border: none;

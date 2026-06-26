@@ -15,6 +15,7 @@ export class Inverter {
   id: string
   linkId: string
   screenId: string = "main"
+  effect: "invert" | "grayscale" = "invert"
   constructor(linkId: string, id?: string, screenId?: string) {
     this.id = id ?? generateInverterId()
     this.linkId = linkId

@@ -43,8 +43,9 @@ export class PreviewManager extends Manager<LinePreview> {
     transformerByLinkId: {} as Record<string, string>,
     linkByEndpointKey: {} as Record<string, string>,
     inverters: {} as Record<string, InverterPreview>,
-    inverterLinkIds: new Set<string>(),
+    inverterLinkMap: new Map<string, "invert" | "grayscale">(),
     isInverted: false,
+    isGrayscale: false,
     screenGates: {} as Record<string, ScreenGatePreview>,
     screenGateByLinkId: {} as Record<string, ScreenGatePreview>,
     screenGateByExitKey: {} as Record<string, ScreenGatePreview>,
@@ -108,11 +109,12 @@ export class PreviewManager extends Manager<LinePreview> {
     }
 
     this.data.inverters = {};
-    this.data.inverterLinkIds = new Set();
+    this.data.inverterLinkMap = new Map();
     this.data.isInverted = false;
+    this.data.isGrayscale = false;
     for (const inv of Object.values(inverters)) {
       this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
-      this.data.inverterLinkIds.add(inv.linkId);
+      this.data.inverterLinkMap.set(inv.linkId, inv.effect);
     }
 
     this.data.screenGates = {};
@@ -237,8 +239,9 @@ export class PreviewManager extends Manager<LinePreview> {
         if (result) {
           token.speed = token.currentSpeed;
           token.speedingLineId = "";
-          const { isInverted } = token.transition(result.hit, result.excess, this.data);
+          const { isInverted, isGrayscale } = token.transition(result.hit, result.excess, this.data);
           this.data.isInverted = isInverted;
+          this.data.isGrayscale = isGrayscale;
         }
 
         if (token.rotationOffset !== token.targetRotationOffset) {
@@ -292,6 +295,7 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
@@ -418,6 +422,15 @@ export class PreviewManager extends Manager<LinePreview> {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalCompositeOperation = "difference";
       ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.restore();
+    }
+
+    if (this.data.isGrayscale) {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalCompositeOperation = "color";
+      ctx.fillStyle = "#808080";
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.restore();
     }

@@ -14,6 +14,12 @@ export const createInverterActions = (set: Set) => ({
       return { inverters: rest, revision: state.revision + 1 }
     }),
 
+  updateInverterEffect: (id: string, effect: "invert" | "grayscale") =>
+    set((state) => ({
+      inverters: { ...state.inverters, [id]: { ...state.inverters[id], effect } },
+      revision: state.revision + 1,
+    })),
+
   setHoveredInverterId: (id: string | null) => set(() => ({ hoveredInverterId: id })),
 })
 

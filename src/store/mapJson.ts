@@ -23,7 +23,7 @@ export type MapJson = {
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
-  inverters?: { id: string; linkId: string; screenId?: string }[]
+  inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
   screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
   screenTimeMultipliers?: Record<string, number>
@@ -105,6 +105,7 @@ export const serializeMap = (
     id: inv.id,
     linkId: inv.linkId,
     ...(inv.screenId !== "main" ? { screenId: inv.screenId } : {}),
+    ...(inv.effect !== "invert" ? { effect: inv.effect } : {}),
   })),
   arrival: arrival
     ? {
@@ -196,8 +197,10 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   syncTransformerCounter(Object.keys(transformers))
 
   const inverters: Record<string, Inverter> = {}
-  json.inverters?.forEach(({ id, linkId, screenId }) => {
-    inverters[id] = new Inverter(linkId, id, screenId)
+  json.inverters?.forEach(({ id, linkId, screenId, effect }) => {
+    const inv = new Inverter(linkId, id, screenId)
+    if (effect) inv.effect = effect
+    inverters[id] = inv
   })
   syncInverterCounter(Object.keys(inverters))
 
