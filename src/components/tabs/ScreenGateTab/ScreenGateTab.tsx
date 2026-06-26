@@ -1,13 +1,36 @@
+import { useState, useEffect } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import * as S from "./UI"
 
+const MultiplierField = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
+  const [local, setLocal] = useState(String(value))
+
+  useEffect(() => { setLocal(String(value)) }, [value])
+
+  return (
+    <S.MultiplierInput
+      type="number"
+      min={0.01}
+      step={0.1}
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={() => {
+        const v = parseFloat(local)
+        if (!isNaN(v) && v > 0) onChange(v)
+        else setLocal(String(value))
+      }}
+    />
+  )
+}
+
 export const ScreenGateTab = () => {
   const {
     screenGates, revision: _revision, mode, screens, currentScreenId,
-    editorManager,
+    editorManager, screenTimeMultipliers,
     setMode, removeScreenGate, setHoveredScreenGateId,
     updateScreenGateTargetScreen, updateScreenGateEntryKey, updateScreenGateExitKey,
+    setScreenTimeMultiplier,
   } = useStore(
     useShallow((s) => ({
       screenGates: s.screenGates,
@@ -16,12 +39,14 @@ export const ScreenGateTab = () => {
       screens: s.screens,
       currentScreenId: s.currentScreenId,
       editorManager: s.editorManager,
+      screenTimeMultipliers: s.screenTimeMultipliers,
       setMode: s.setMode,
       removeScreenGate: s.removeScreenGate,
       setHoveredScreenGateId: s.setHoveredScreenGateId,
       updateScreenGateTargetScreen: s.updateScreenGateTargetScreen,
       updateScreenGateEntryKey: s.updateScreenGateEntryKey,
       updateScreenGateExitKey: s.updateScreenGateExitKey,
+      setScreenTimeMultiplier: s.setScreenTimeMultiplier,
     }))
   )
 
@@ -69,6 +94,15 @@ export const ScreenGateTab = () => {
                   ))}
                 </S.Select>
               </div>
+              {sg.targetScreenId && (
+                <S.ScreenTimeRow>
+                  <S.Label>Time ×</S.Label>
+                  <MultiplierField
+                    value={screenTimeMultipliers[sg.targetScreenId] ?? 1}
+                    onChange={(v) => setScreenTimeMultiplier(sg.targetScreenId, v)}
+                  />
+                </S.ScreenTimeRow>
+              )}
               {sg.targetScreenId && (
                 <>
                   <div>

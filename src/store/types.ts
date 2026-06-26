@@ -35,10 +35,12 @@ export interface StoreState {
   pendingPoint: Point | null
   pendingTransformerType: TransformerType
   lineType: LineType
+  linePreset: "arc" | null
   screenGates: Record<string, ScreenGate>
   hoveredScreenGateId: string | null
   screens: string[]
   currentScreenId: string
+  screenTimeMultipliers: Record<string, number>
 }
 
 export interface StoreActions {
@@ -47,6 +49,7 @@ export interface StoreActions {
   updateLineEndpoint: (id: string, endpoint: "start" | "end", point: Point) => void
   updateLineControlPoint: (id: string, cp: "cp1" | "cp2", point: Point) => void
   updateLineBoost: (id: string, boost: number) => void
+  updateLineTunnel: (id: string, tunnel: boolean) => void
   updateLineSine: (id: string, frequency: number, amplitude: number) => void
   toggleLinkActivated: (linkId: string) => void
   addToken: (token: Token) => void
@@ -82,6 +85,7 @@ export interface StoreActions {
   setViewMode: (viewMode: ViewMode) => void
   setPendingPoint: (point: Point | null) => void
   setLineType: (lineType: LineType) => void
+  setLinePreset: (preset: "arc" | null) => void
   addScreenGate: (linkId: string) => void
   removeScreenGate: (id: string) => void
   setHoveredScreenGateId: (id: string | null) => void
@@ -91,6 +95,7 @@ export interface StoreActions {
   addScreen: () => void
   setCurrentScreen: (id: string) => void
   removeScreen: (id: string) => void
+  setScreenTimeMultiplier: (id: string, mult: number) => void
 }
 
 export type Store = StoreState & StoreActions

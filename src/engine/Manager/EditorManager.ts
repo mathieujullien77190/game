@@ -23,6 +23,7 @@ export class EditorManager extends Manager<LineEditor> {
 
   addLine = (line: LineEditor) => {
     for (const existing of Object.values(this.data.lines)) {
+      if (existing.screenId !== line.screenId) continue
       for (const ep1 of ["start", "end"] as const) {
         for (const ep2 of ["start", "end"] as const) {
           if (pointsEqual(existing[ep1], line[ep2])) {
@@ -63,6 +64,7 @@ export class EditorManager extends Manager<LineEditor> {
     const movedPoint = movedLine[endpoint]
     for (const other of Object.values(this.data.lines)) {
       if (other.id === lineId) continue
+      if (other.screenId !== movedLine.screenId) continue
       for (const ep of ["start", "end"] as const) {
         if (pointsEqual(movedPoint, other[ep])) {
           const link = new Link(

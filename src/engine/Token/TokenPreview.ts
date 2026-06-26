@@ -171,7 +171,7 @@ export class TokenPreview extends Token {
     return { isInverted }
   }
 
-  drawBoostTrail = (ctx: CanvasRenderingContext2D, speedDelta: number, points: LinePoint[]) => {
+  drawBoostTrail = (ctx: CanvasRenderingContext2D, speedDelta: number, points: LinePoint[], eff: number) => {
     if (speedDelta <= 0.5 || this.direction === 0) return
     const intensity = Math.min(speedDelta / 100, 1)
     const trailLen = Math.round(10 + 30 * intensity)
@@ -180,7 +180,7 @@ export class TokenPreview extends Token {
       if (idx < 0 || idx >= points.length) break
       const tpt = points[idx]
       const frac = 1 - i / (trailLen + 1)
-      ctx.globalAlpha = frac * 0.55 * this.opacity
+      ctx.globalAlpha = frac * 0.55 * eff
       ctx.fillStyle = this.displayColor || (this.color as string)
       ctx.beginPath()
       ctx.arc(tpt.x, tpt.y, 8 * frac * 0.75, 0, Math.PI * 2)
@@ -211,17 +211,18 @@ export class TokenPreview extends Token {
     }
   }
 
-  draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[]) => {
-    if (points) this.drawBoostTrail(ctx, speedDelta, points)
+  draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[], opacityOverride?: number) => {
+    const eff = opacityOverride !== undefined ? Math.min(this.opacity, opacityOverride) : this.opacity
+    if (points) this.drawBoostTrail(ctx, speedDelta, points, eff)
     if (this.isTransforming && this.transformProgress > 0 && this.transformMode === "shape") {
-      ctx.globalAlpha = this.opacity * (1 - this.transformProgress)
+      ctx.globalAlpha = eff * (1 - this.transformProgress)
       this.drawShape(ctx, pt, this.type as string)
-      ctx.globalAlpha = this.opacity * this.transformProgress
+      ctx.globalAlpha = eff * this.transformProgress
       this.drawShape(ctx, pt, this.pendingType)
       ctx.globalAlpha = 1
       return
     }
-    ctx.globalAlpha = this.opacity
+    ctx.globalAlpha = eff
     this.drawShape(ctx, pt, this.type as string)
     ctx.globalAlpha = 1
   }

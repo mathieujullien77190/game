@@ -12,6 +12,7 @@ export const createModeActions = (set: Set) => ({
         Object.values(state.editorManager.data.lines).forEach((l) => {
           const lp = new LinePreview(l.start, l.end, l.type, l.id, l.cp1, l.cp2)
           lp.boost = l.boost
+          lp.tunnel = l.tunnel
           if (l.type === "sine") {
             lp.frequency = l.frequency
             lp.amplitude = l.amplitude
@@ -20,10 +21,11 @@ export const createModeActions = (set: Set) => ({
           lp.screenId = l.screenId
           state.previewManager.addLine(lp)
         })
-        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screenGates)
+        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screenGates, state.screenTimeMultipliers)
       }
       return { viewMode }
     }),
 
   setPendingPoint: (point: Point | null) => set(() => ({ pendingPoint: point })),
+  setLinePreset: (preset: "arc" | null) => set(() => ({ linePreset: preset })),
 })

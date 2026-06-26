@@ -31,6 +31,7 @@ export class Line {
   cp2: Point
   points: LinePoint[] = []
   boost: number = 0
+  tunnel: boolean = false
   frequency: number = 1
   amplitude: number = 20
   screenId: string = "main"

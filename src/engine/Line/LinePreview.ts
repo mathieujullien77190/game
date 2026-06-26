@@ -19,7 +19,11 @@ export class LinePreview extends Line {
     if (pts.length < 2) return
     const total = pts.length
     const winSize = Math.max(2, Math.floor(total * 0.3))
-    const offset = Math.floor((elapsedSeconds * Math.abs(this.boost)) % total)
+    const cycle = total + winSize
+    const rawOffset = Math.floor((elapsedSeconds * Math.abs(this.boost)) % cycle) - winSize
+    const tail = Math.max(rawOffset, 0)
+    const head = Math.min(rawOffset + winSize, total - 1)
+    if (tail >= head) return
     ctx.save()
     ctx.shadowColor = "rgba(255, 140, 0, 0.9)"
     ctx.shadowBlur = 12
@@ -27,15 +31,24 @@ export class LinePreview extends Line {
     ctx.lineWidth = 3
     ctx.lineCap = "round"
     ctx.setLineDash([])
-    if (offset + winSize >= total) { ctx.restore(); return }
     ctx.beginPath()
-    ctx.moveTo(pts[offset].x, pts[offset].y)
-    for (let i = 1; i <= winSize; i++) ctx.lineTo(pts[offset + i].x, pts[offset + i].y)
+    ctx.moveTo(pts[tail].x, pts[tail].y)
+    for (let i = tail + 1; i <= head; i++) ctx.lineTo(pts[i].x, pts[i].y)
     ctx.stroke()
     ctx.restore()
   }
 
   draw = (ctx: CanvasRenderingContext2D) => {
+    if (this.tunnel) {
+      ctx.fillStyle = "#000"
+      ctx.beginPath()
+      ctx.arc(this.start.x, this.start.y, 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(this.end.x, this.end.y, 4, 0, Math.PI * 2)
+      ctx.fill()
+      return
+    }
     ctx.strokeStyle = "#333"
     ctx.lineWidth = 2
     ctx.lineCap = "round"

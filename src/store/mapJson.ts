@@ -17,7 +17,7 @@ import type { SwitchEditor as SwitchEditorType } from "engine/Switch/SwitchEdito
 
 export type MapJson = {
   screens?: string[]
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; frequency?: number; amplitude?: number; screenId?: string }[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; tunnel?: boolean; frequency?: number; amplitude?: number; screenId?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
@@ -26,6 +26,7 @@ export type MapJson = {
   inverters?: { id: string; linkId: string; screenId?: string }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
   screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
+  screenTimeMultipliers?: Record<string, number>
   // legacy fields for backward compat
   tokenEffects?: { id: string; linkId: string; type: "fade" | "rotate"; amount: number }[]
   rotators?: { id: string; linkId: string }[]
@@ -44,6 +45,7 @@ export const serializeMap = (
   inverters: Record<string, Inverter> = {},
   screens: string[] = ["main"],
   screenGates: Record<string, ScreenGate> = {},
+  screenTimeMultipliers: Record<string, number> = {},
 ): MapJson => ({
   screens,
   lines: Object.values(editorManager.data.lines).map((l) => ({
@@ -54,6 +56,7 @@ export const serializeMap = (
     ...(l.cp1 ? { cp1: l.cp1 } : {}),
     ...(l.cp2 ? { cp2: l.cp2 } : {}),
     ...(l.boost !== 0 ? { boost: l.boost } : {}),
+    ...(l.tunnel ? { tunnel: true } : {}),
     ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
     ...(l.screenId !== "main" ? { screenId: l.screenId } : {}),
   })),
@@ -118,15 +121,17 @@ export const serializeMap = (
     exitKey: sg.exitKey,
     ...(sg.screenId !== "main" ? { screenId: sg.screenId } : {}),
   })),
+  ...(Object.keys(screenTimeMultipliers).length > 0 ? { screenTimeMultipliers } : {}),
 })
 
 export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, frequency, amplitude, screenId }) => {
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, tunnel, frequency, amplitude, screenId }) => {
     const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2, screenId)
     if (boost) line.boost = boost
+    if (tunnel) line.tunnel = true
     if (type === "sine") {
       if (frequency !== undefined) line.frequency = frequency
       if (amplitude !== undefined) line.amplitude = amplitude
@@ -206,5 +211,7 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncScreenGateCounter(Object.keys(screenGates))
 
-  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates }
+  const screenTimeMultipliers: Record<string, number> = json.screenTimeMultipliers ?? {}
+
+  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers }
 }

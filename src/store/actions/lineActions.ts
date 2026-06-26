@@ -100,6 +100,14 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
+  updateLineTunnel: (id: string, tunnel: boolean) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.tunnel = tunnel
+      return { revision: state.revision + 1 }
+    }),
+
   setHoveredLineId: (id: string | null) => set(() => ({ hoveredLineId: id })),
 
   setLineType: (lineType: LineType) => set(() => ({ lineType })),

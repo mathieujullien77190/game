@@ -92,3 +92,32 @@ export const Select = styled.select`
   background: #fff;
   color: #333;
 `
+
+export const ScreensSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+`
+
+export const ScreenTimeRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+`
+
+export const MultiplierInput = styled.input`
+  width: 60px;
+  padding: 3px 6px;
+  font-family: monospace;
+  font-size: 11px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  text-align: right;
+`

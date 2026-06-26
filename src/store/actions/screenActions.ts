@@ -17,4 +17,7 @@ export const createScreenActions = (set: Set) => ({
       const currentScreenId = state.currentScreenId === id ? "main" : state.currentScreenId
       return { screens, currentScreenId }
     }),
+
+  setScreenTimeMultiplier: (id: string, mult: number) =>
+    set((state) => ({ screenTimeMultipliers: { ...state.screenTimeMultipliers, [id]: mult } })),
 })

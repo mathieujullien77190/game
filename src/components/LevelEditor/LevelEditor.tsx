@@ -76,9 +76,9 @@ export const LevelEditor = () => {
     mode, viewMode, pendingPoint, pendingTransformerType,
     starts, switches, transformers, inverters, screenGates,
     hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredScreenGateId,
-    lineType, screens, currentScreenId,
+    lineType, linePreset, screens, currentScreenId,
     addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, addScreenGate,
-    setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
+    setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, setHoveredLineId, setLinePreset,
     addScreen, setCurrentScreen, removeScreen,
   } = useStore(
     useShallow((s) => ({
@@ -101,6 +101,7 @@ export const LevelEditor = () => {
       hoveredInverterId: s.hoveredInverterId,
       hoveredScreenGateId: s.hoveredScreenGateId,
       lineType: s.lineType,
+      linePreset: s.linePreset,
       screens: s.screens,
       currentScreenId: s.currentScreenId,
       addLine: s.addLine,
@@ -116,6 +117,7 @@ export const LevelEditor = () => {
       updateLineEndpoint: s.updateLineEndpoint,
       updateLineControlPoint: s.updateLineControlPoint,
       setHoveredLineId: s.setHoveredLineId,
+      setLinePreset: s.setLinePreset,
       addScreen: s.addScreen,
       setCurrentScreen: s.setCurrentScreen,
       removeScreen: s.removeScreen,
@@ -215,7 +217,7 @@ export const LevelEditor = () => {
   const onCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (mode !== "select") return
     const point = getCanvasPoint(e)
-    const lines = Object.values(editorManager.data.lines)
+    const lines = Object.values(editorManager.data.lines).filter((l) => l.screenId === currentScreenId)
     const cpHit = findControlPointAt(lines, point)
     if (cpHit) {
       draggingCP.current = cpHit
@@ -227,7 +229,7 @@ export const LevelEditor = () => {
       draggingEndpoint.current = hit
       setIsDragging(true)
     }
-  }, [mode, editorManager])
+  }, [mode, editorManager, currentScreenId])
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const raw = getCanvasPoint(e)
@@ -289,7 +291,8 @@ export const LevelEditor = () => {
         setHoverNearEndpoint(false)
       }
     } else if (mode === "addScreenGate") {
-      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      const screenLines = Object.values(editorManager.data.lines).filter((l) => l.screenId === currentScreenId)
+      const hit = findEndpointAt(screenLines, raw)
       if (hit) {
         const line = editorManager.data.lines[hit.lineId]
         setAddScreenGateSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
@@ -414,12 +417,16 @@ export const LevelEditor = () => {
       if (!pendingPoint) {
         setPendingPoint(point)
       } else {
-        addLine(new LineEditor(pendingPoint, point, lineType, undefined, undefined, undefined, currentScreenId))
+        const k = 0.5523
+        const cp1 = linePreset === "arc" ? { x: pendingPoint.x + k * (point.x - pendingPoint.x), y: pendingPoint.y } : undefined
+        const cp2 = linePreset === "arc" ? { x: point.x, y: point.y - k * (point.y - pendingPoint.y) } : undefined
+        addLine(new LineEditor(pendingPoint, point, lineType, undefined, cp1, cp2, currentScreenId))
+        if (linePreset) setLinePreset(null)
         setPendingPoint(null)
         setMode("select")
       }
     },
-    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode]
+    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode, setLinePreset]
   )
 
   const canvasCursor = mode === "addLine"

@@ -1,4 +1,4 @@
-import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED } from "../constants";
+import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H } from "../constants";
 import { LinePreview } from "../Line/LinePreview";
 import type { Link, LinkEndpoint } from "../Link/Link";
 import type { Start } from "../Start/Start";
@@ -47,6 +47,7 @@ export class PreviewManager extends Manager<LinePreview> {
     screenGateByExitKey: {} as Record<string, ScreenGatePreview>,
     previewScreenId: "main" as string,
     previewScreenHistory: [] as string[],
+    screenTimeMultipliers: {} as Record<string, number>,
     arrival: null as ArrivalPreview | null,
     arrivalKey: "" as string,
     elapsedSeconds: 0,
@@ -65,6 +66,7 @@ export class PreviewManager extends Manager<LinePreview> {
     arrival: Arrival | null = null,
     inverters: Record<string, Inverter> = {},
     screenGates: Record<string, ScreenGate> = {},
+    screenTimeMultipliers: Record<string, number> = {},
   ) => {
     this.data.switchLinks = switchLinks;
     this.data.links = links;
@@ -115,8 +117,10 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.screenGateByExitKey = {};
     this.data.previewScreenId = "main";
     this.data.previewScreenHistory = [];
+    this.data.screenTimeMultipliers = screenTimeMultipliers;
     for (const sg of Object.values(screenGates)) {
       const sgp = new ScreenGatePreview(sg.linkId, sg.targetScreenId, sg.entryKey, sg.exitKey, sg.id, sg.screenId);
+      sgp.timeMultiplier = screenTimeMultipliers[sg.targetScreenId] ?? 1;
       this.data.screenGates[sgp.id] = sgp;
       this.data.screenGateByLinkId[sg.linkId] = sgp;
       if (sg.exitKey) this.data.screenGateByExitKey[sg.exitKey] = sgp;
@@ -201,10 +205,14 @@ export class PreviewManager extends Manager<LinePreview> {
         if (token.direction === 0 || token.speed === 0) continue;
         const line = this.data.lines[token.lineId];
         if (!line) continue;
+        const viewedMult = this.data.screenTimeMultipliers[this.data.previewScreenId] ?? 1;
+        const tokenScreenId = line.screenId ?? "main";
+        const tokenMult = this.data.screenTimeMultipliers[tokenScreenId] ?? 1;
+        const dt = deltaSeconds * (tokenMult / viewedMult);
         const targetSpeed = line.boost !== 0 ? Math.max(1, line.boost) : Math.max(1, token.speed);
-        const k = ACCEL_TIME > 0 ? 1 - Math.exp(-deltaSeconds / ACCEL_TIME) : 1;
+        const k = ACCEL_TIME > 0 ? 1 - Math.exp(-dt / ACCEL_TIME) : 1;
         token.currentSpeed += (targetSpeed - token.currentSpeed) * k;
-        const result = token.advance(deltaSeconds, line.points.length);
+        const result = token.advance(dt, line.points.length);
         if (result) {
           const { isInverted } = token.transition(result.hit, result.excess, this.data);
           this.data.isInverted = isInverted;
@@ -317,14 +325,12 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
-      const inPortal = !!token.portalContext;
       const tokenScreenId = this.data.lines[token.lineId]?.screenId ?? "main";
-      if (sid === "main" && inPortal) continue;
-      if (sid !== "main" && (!inPortal || tokenScreenId !== sid)) continue;
+      if (tokenScreenId !== sid) continue;
       const line = this.data.lines[token.lineId];
       if (!line || line.points.length === 0) continue;
       const pt = line.points[token.pointIndex];
-      if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points);
+      if (pt) token.draw(ctx, pt, token.currentSpeed - token.speed, line.points, line.tunnel ? 0 : undefined);
     }
 
     for (const sg of Object.values(this.data.screenGates)) {
@@ -334,7 +340,7 @@ export class PreviewManager extends Manager<LinePreview> {
       const line = this.data.lines[link.line1.lineId];
       if (!line) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      sg.draw(ctx, pt);
+      sg.draw(ctx, pt, this.data.tokens, this.data.lines, this.data.elapsedSeconds);
     }
 
     for (const inv of Object.values(this.data.inverters)) {
@@ -356,6 +362,8 @@ export class PreviewManager extends Manager<LinePreview> {
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.restore();
     }
+
+    this.drawMiniMap(ctx);
 
     drawStats(ctx, this.data.fps, this.data.frameMs);
   };
@@ -385,7 +393,63 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.restore();
   };
 
+  drawMiniMap = (ctx: CanvasRenderingContext2D) => {
+    const prevSid = this.data.previewScreenHistory.at(-1)
+    if (!prevSid) return
+
+    const S = 0.1
+    const MW = CANVAS_W * S
+    const MH = CANVAS_H * S
+    const mx = CANVAS_W - MW - 8
+    const my = CANVAS_H - MH - 8
+
+    ctx.beginPath()
+    ctx.roundRect(mx, my, MW, MH, 4)
+    ctx.fillStyle = "#fff"
+    ctx.fill()
+    ctx.strokeStyle = "#000"
+    ctx.lineWidth = 2
+    ctx.setLineDash([])
+    ctx.stroke()
+
+    for (const token of this.data.tokens) {
+      if (this.data.elapsedSeconds < token.startAt) continue
+      const line = this.data.lines[token.lineId]
+      if (!line || line.screenId !== prevSid) continue
+      const pt = line.points[token.pointIndex]
+      if (!pt) continue
+      const dx = mx + pt.x * S
+      const dy = my + pt.y * S
+      const color = (token.displayColor || token.color) as string
+      ctx.fillStyle = color
+      ctx.strokeStyle = "#000"
+      ctx.lineWidth = 1
+      if (token.type === "square") {
+        ctx.beginPath()
+        ctx.rect(dx - 3, dy - 3, 6, 6)
+        ctx.fill()
+        ctx.stroke()
+      } else {
+        ctx.beginPath()
+        ctx.arc(dx, dy, 3, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+      }
+    }
+  };
+
   clickAt = (x: number, y: number) => {
+    if (this.data.previewScreenHistory.length > 0) {
+      const S = 0.1;
+      const MW = CANVAS_W * S;
+      const MH = CANVAS_H * S;
+      const mx = CANVAS_W - MW - 8;
+      const my = CANVAS_H - MH - 8;
+      if (x >= mx && x <= mx + MW && y >= my && y <= my + MH) {
+        this.data.previewScreenId = this.data.previewScreenHistory.pop() ?? "main";
+        return;
+      }
+    }
     if (this.data.previewScreenId !== "main") {
       for (const sg of Object.values(this.data.screenGates)) {
         if (sg.targetScreenId !== this.data.previewScreenId) continue;

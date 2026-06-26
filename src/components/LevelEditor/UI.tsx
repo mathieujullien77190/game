@@ -60,7 +60,7 @@ export const CanvasOuter = styled.div`
 
 export const RestartButton = styled.button`
   position: absolute;
-  bottom: 8px;
+  top: 8px;
   right: 8px;
   padding: 4px 10px;
   background: rgba(255,255,255,0.85);

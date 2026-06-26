@@ -15,7 +15,7 @@ export const LineTab = () => {
       return next
     })
 
-  const { editorManager, revision, mode, lineType, setMode, setLineType, removeLine, updateLineBoost, updateLineSine, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, revision, mode, lineType, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineSine, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       revision: s.revision,
@@ -23,8 +23,10 @@ export const LineTab = () => {
       lineType: s.lineType,
       setMode: s.setMode,
       setLineType: s.setLineType,
+      setLinePreset: s.setLinePreset,
       removeLine: s.removeLine,
       updateLineBoost: s.updateLineBoost,
+      updateLineTunnel: s.updateLineTunnel,
       updateLineSine: s.updateLineSine,
       toggleLinkActivated: s.toggleLinkActivated,
       setHoveredLineId: s.setHoveredLineId,
@@ -57,6 +59,12 @@ export const LineTab = () => {
           >
             + Sine
           </S.TypeButton>
+          <S.TypeButton
+            $active={false}
+            onClick={() => { setLineType("curve"); setLinePreset("arc"); setMode("addLine") }}
+          >
+            + Arc
+          </S.TypeButton>
         </S.TypeRow>
       )}
 
@@ -88,6 +96,10 @@ export const LineTab = () => {
                   min={0}
                   step={10}
                 />
+              </S.BoostRow>
+              <S.BoostRow>
+                <S.BoostLabel>tunnel</S.BoostLabel>
+                <input type="checkbox" checked={line.tunnel} onChange={(e) => updateLineTunnel(line.id, e.target.checked)} />
               </S.BoostRow>
               {line.type === "sine" && (
                 <>
