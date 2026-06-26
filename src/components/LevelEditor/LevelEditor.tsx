@@ -193,11 +193,12 @@ export const LevelEditor = () => {
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect
-      const s = Math.min(
+      const raw = Math.min(
         (width - PADDING * 2) / CANVAS_W,
         (height - PADDING * 2) / CANVAS_H
       )
-      setScale(Math.max(0.1, s))
+      const snapped = Math.round(raw * dpr) / dpr
+      setScale(Math.max(1 / dpr, snapped))
     })
     observer.observe(el)
     return () => observer.disconnect()

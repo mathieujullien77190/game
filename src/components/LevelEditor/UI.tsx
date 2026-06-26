@@ -171,6 +171,7 @@ export const StyledCanvas = styled.canvas<{ $scale: number; $cursor: string; $vi
   height: ${({ $h, $scale }) => $h * $scale}px;
   background: #fff;
   cursor: ${({ $cursor }) => $cursor};
+  will-change: transform;
 `
 
 export const Divider = styled.div`

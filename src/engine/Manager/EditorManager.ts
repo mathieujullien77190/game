@@ -81,21 +81,21 @@ export class EditorManager extends Manager<LineEditor> {
     ctx.setLineDash([])
 
     ctx.strokeStyle = "#f0f0f0"
-    ctx.lineWidth = 0.5
+    ctx.lineWidth = 1
     for (let x = 0; x <= CANVAS_W; x += GRID_MINOR) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, CANVAS_H); ctx.stroke()
     }
     for (let y = 0; y <= CANVAS_H; y += GRID_MINOR) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(CANVAS_W, y + 0.5); ctx.stroke()
     }
 
     ctx.strokeStyle = "#e0e0e0"
     ctx.lineWidth = 1
     for (let x = 0; x <= CANVAS_W; x += GRID_MAJOR) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, CANVAS_H); ctx.stroke()
     }
     for (let y = 0; y <= CANVAS_H; y += GRID_MAJOR) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(CANVAS_W, y + 0.5); ctx.stroke()
     }
   }
 
