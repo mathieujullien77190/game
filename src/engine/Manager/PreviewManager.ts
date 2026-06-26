@@ -43,9 +43,11 @@ export class PreviewManager extends Manager<LinePreview> {
     transformerByLinkId: {} as Record<string, string>,
     linkByEndpointKey: {} as Record<string, string>,
     inverters: {} as Record<string, InverterPreview>,
-    inverterLinkMap: new Map<string, "invert" | "grayscale">(),
+    inverterLinkMap: new Map<string, "invert" | "grayscale" | "dark">(),
     isInverted: false,
     isGrayscale: false,
+    isDark: false,
+    darkCanvas: null as HTMLCanvasElement | null,
     screenGates: {} as Record<string, ScreenGatePreview>,
     screenGateByLinkId: {} as Record<string, ScreenGatePreview>,
     screenGateByExitKey: {} as Record<string, ScreenGatePreview>,
@@ -112,6 +114,7 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.inverterLinkMap = new Map();
     this.data.isInverted = false;
     this.data.isGrayscale = false;
+    this.data.isDark = false;
     for (const inv of Object.values(inverters)) {
       this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
       this.data.inverterLinkMap.set(inv.linkId, inv.effect);
@@ -239,9 +242,10 @@ export class PreviewManager extends Manager<LinePreview> {
         if (result) {
           token.speed = token.currentSpeed;
           token.speedingLineId = "";
-          const { isInverted, isGrayscale } = token.transition(result.hit, result.excess, this.data);
+          const { isInverted, isGrayscale, isDark } = token.transition(result.hit, result.excess, this.data);
           this.data.isInverted = isInverted;
           this.data.isGrayscale = isGrayscale;
+          this.data.isDark = isDark;
         }
 
         if (token.rotationOffset !== token.targetRotationOffset) {
@@ -393,7 +397,7 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const line of visibleLines) {
       const token = this.data.tokens.find(t => t.lineId === line.id && !t.exploding);
-      line.drawAfter(ctx, token?.currentSpeed);
+      line.drawAfter(ctx, token?.currentSpeed, token ? (token.displayColor || token.color as string) : undefined);
     }
 
     for (const sg of Object.values(this.data.screenGates)) {
@@ -432,6 +436,95 @@ export class PreviewManager extends Manager<LinePreview> {
       ctx.globalCompositeOperation = "color";
       ctx.fillStyle = "#808080";
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.restore();
+    }
+
+    if (this.data.isDark) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      if (!this.data.darkCanvas || this.data.darkCanvas.width !== w || this.data.darkCanvas.height !== h) {
+        this.data.darkCanvas = document.createElement("canvas");
+        this.data.darkCanvas.width = w;
+        this.data.darkCanvas.height = h;
+      }
+      const dc = this.data.darkCanvas;
+      const dctx = dc.getContext("2d")!;
+      dctx.clearRect(0, 0, w, h);
+      dctx.fillStyle = "rgba(0,0,0,0.96)";
+      dctx.fillRect(0, 0, w, h);
+      dctx.globalCompositeOperation = "destination-out";
+      const m = ctx.getTransform();
+      dctx.setTransform(m);
+
+      const punch = (x: number, y: number, r: number) => {
+        const px = m.a * x + m.c * y + m.e;
+        const py = m.b * x + m.d * y + m.f;
+        const pr = r * m.a;
+        const g = dctx.createRadialGradient(px, py, 0, px, py, pr);
+        g.addColorStop(0, "rgba(0,0,0,1)");
+        g.addColorStop(0.6, "rgba(0,0,0,0.85)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        dctx.fillStyle = g;
+        dctx.resetTransform();
+        dctx.beginPath();
+        dctx.arc(px, py, pr, 0, Math.PI * 2);
+        dctx.fill();
+        dctx.setTransform(m);
+      };
+
+      for (const token of this.data.tokens) {
+        if (this.data.elapsedSeconds < token.startAt || token.exploding) continue;
+        const tLine = this.data.lines[token.lineId];
+        const tPt = tLine?.points[token.pointIndex];
+        if (tPt) punch(tPt.x, tPt.y, 50);
+      }
+
+      for (const sw of Object.values(this.data.switches)) {
+        const pt = sw.getPoint();
+        if (pt) punch(pt.x, pt.y, 40);
+      }
+
+      if (this.data.start) {
+        const sLine = this.data.lines[this.data.start.lineId];
+        if (sLine && sLine.screenId === sid) {
+          const sPt = this.data.start.endpoint === "end"
+            ? sLine.points[sLine.points.length - 1]
+            : sLine.points[0];
+          if (sPt) punch(sPt.x, sPt.y, 35);
+        }
+      }
+
+      if (this.data.arrival) {
+        const aLine = this.data.lines[this.data.arrival.lineId];
+        if (aLine && aLine.screenId === sid) {
+          const aPt = this.data.arrival.endpoint === "end"
+            ? aLine.points[aLine.points.length - 1]
+            : aLine.points[0];
+          if (aPt) punch(aPt.x, aPt.y, 35);
+        }
+      }
+
+      for (const tr of Object.values(this.data.transformers)) {
+        const link = this.data.links[tr.linkId];
+        if (!link) continue;
+        const tLine = this.data.lines[link.line1.lineId];
+        if (!tLine || tLine.screenId !== sid) continue;
+        const pt = link.line1.endpoint === "end" ? tLine.end : tLine.start;
+        punch(pt.x, pt.y, 25);
+      }
+
+      for (const inv of Object.values(this.data.inverters)) {
+        const link = this.data.links[inv.linkId];
+        if (!link) continue;
+        const iLine = this.data.lines[link.line1.lineId];
+        if (!iLine || iLine.screenId !== sid) continue;
+        const pt = link.line1.endpoint === "end" ? iLine.end : iLine.start;
+        punch(pt.x, pt.y, 25);
+      }
+
+      dctx.globalCompositeOperation = "source-over";
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(dc, 0, 0);
       ctx.restore();
     }
 

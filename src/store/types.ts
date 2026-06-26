@@ -75,7 +75,7 @@ export interface StoreActions {
   setPendingTransformerType: (type: TransformerType) => void
   addInverter: (linkId: string) => void
   removeInverter: (id: string) => void
-  updateInverterEffect: (id: string, effect: "invert" | "grayscale") => void
+  updateInverterEffect: (id: string, effect: "invert" | "grayscale" | "dark") => void
   setHoveredInverterId: (id: string | null) => void
   setArrival: (lineId: string, endpoint: "start" | "end") => void
   removeArrival: () => void

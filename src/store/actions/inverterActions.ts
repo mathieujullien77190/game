@@ -14,7 +14,7 @@ export const createInverterActions = (set: Set) => ({
       return { inverters: rest, revision: state.revision + 1 }
     }),
 
-  updateInverterEffect: (id: string, effect: "invert" | "grayscale") =>
+  updateInverterEffect: (id: string, effect: "invert" | "grayscale" | "dark") =>
     set((state) => ({
       inverters: { ...state.inverters, [id]: { ...state.inverters[id], effect } },
       revision: state.revision + 1,

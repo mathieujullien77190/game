@@ -19,7 +19,7 @@ export class LinePreview extends Line {
     this.draw(ctx)
   }
 
-  drawAfter = (ctx: CanvasRenderingContext2D, speed?: number) => {
+  drawAfter = (ctx: CanvasRenderingContext2D, speed?: number, tokenColor?: string) => {
     const mid = this.points[Math.floor(this.points.length / 2)]
     if (!mid) return
     ctx.font = "bold 9px monospace"
@@ -30,7 +30,7 @@ export class LinePreview extends Line {
       const rw = 26, rh = 19
       const rx = mid.x - rw / 2, ry = mid.y - rh / 2
       ctx.save()
-      ctx.fillStyle = "#fff"
+      ctx.fillStyle = tokenColor ?? "#fff"
       ctx.strokeStyle = "#000"
       ctx.lineWidth = 1.5
       ctx.beginPath()

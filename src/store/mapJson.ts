@@ -23,7 +23,7 @@ export type MapJson = {
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
-  inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" }[]
+  inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" | "dark" }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
   screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
   screenTimeMultipliers?: Record<string, number>

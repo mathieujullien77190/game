@@ -34,11 +34,14 @@ export const InverterTab = () => {
               <S.DeleteButton onClick={() => removeInverter(inv.id)}>✕</S.DeleteButton>
             </S.Row>
             <S.EffectRow>
-              <S.EffectButton $active={inv.effect !== "grayscale"} onClick={() => updateInverterEffect(inv.id, "invert")}>
+              <S.EffectButton $active={!inv.effect || inv.effect === "invert"} onClick={() => updateInverterEffect(inv.id, "invert")}>
                 invert
               </S.EffectButton>
               <S.EffectButton $active={inv.effect === "grayscale"} onClick={() => updateInverterEffect(inv.id, "grayscale")}>
-                grayscale
+                gray
+              </S.EffectButton>
+              <S.EffectButton $active={inv.effect === "dark"} onClick={() => updateInverterEffect(inv.id, "dark")}>
+                dark
               </S.EffectButton>
             </S.EffectRow>
           </S.InverterCard>
