@@ -108,6 +108,22 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
+  updateLineShowSpeed: (id: string, showSpeed: boolean) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.showSpeed = showSpeed
+      return { revision: state.revision + 1 }
+    }),
+
+  updateLineLimitation: (id: string, limitation: number) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.limitation = limitation
+      return { revision: state.revision + 1 }
+    }),
+
   setHoveredLineId: (id: string | null) => set(() => ({ hoveredLineId: id })),
 
   setLineType: (lineType: LineType) => set(() => ({ lineType })),

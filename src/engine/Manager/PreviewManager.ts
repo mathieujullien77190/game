@@ -212,11 +212,31 @@ export class PreviewManager extends Manager<LinePreview> {
         const tokenScreenId = line.screenId ?? "main";
         const tokenMult = this.data.screenTimeMultipliers[tokenScreenId] ?? 1;
         const dt = deltaSeconds * (tokenMult / viewedMult);
-        const targetSpeed = line.boost !== 0 ? Math.max(1, line.boost) : Math.max(1, token.speed);
+        const targetSpeed = line.boost !== 0 ? Math.max(1, token.speed + line.boost) : Math.max(1, token.speed);
         const k = ACCEL_TIME > 0 ? 1 - Math.exp(-dt / ACCEL_TIME) : 1;
         token.currentSpeed += (targetSpeed - token.currentSpeed) * k;
+        if (line.limitation > 0 && token.type !== "cop") {
+          if (token.currentSpeed > line.limitation) {
+            if (token.speedingLineId !== line.id) {
+              token.speedingLineId = line.id;
+              const cop = new TokenPreview("#e53935" as any, token.currentSpeed * 1.1);
+              cop.type = "cop";
+              cop.lineId = token.lineId;
+              cop.pointIndex = Math.max(0, Math.min(line.points.length - 1, token.pointIndex - token.direction * 20));
+              cop.direction = token.direction;
+              cop.remainder = token.remainder;
+              cop.currentSpeed = token.currentSpeed * 1.1;
+              cop.startAt = this.data.elapsedSeconds + 1.5;
+              this.data.tokens.push(cop);
+            }
+          } else {
+            token.speedingLineId = "";
+          }
+        }
         const result = token.advance(dt, line.points.length);
         if (result) {
+          token.speed = token.currentSpeed;
+          token.speedingLineId = "";
           const { isInverted } = token.transition(result.hit, result.excess, this.data);
           this.data.isInverted = isInverted;
         }
@@ -251,8 +271,8 @@ export class PreviewManager extends Manager<LinePreview> {
         if (!pb) continue;
         const dx = pa.x - pb.x, dy = pa.y - pb.y;
         if (dx * dx + dy * dy < 16 * 16) {
-          active[i].exploding = true; active[i].direction = 0;
-          active[j].exploding = true; active[j].direction = 0;
+          active[i].exploding = true; active[i].direction = 0; active[i].explosionSeed = (Math.random() * 999999) | 0;
+          active[j].exploding = true; active[j].direction = 0; active[j].explosionSeed = (Math.random() * 999999) | 0;
         }
       }
     }
@@ -280,8 +300,7 @@ export class PreviewManager extends Manager<LinePreview> {
     const visibleLines = Object.values(this.data.lines).filter((l) => l.screenId === sid);
 
     this.drawSwitchLinks(ctx);
-    for (const line of visibleLines) line.drawGlow(ctx, this.data.elapsedSeconds);
-    for (const line of visibleLines) line.draw(ctx);
+    for (const line of visibleLines) line.drawBefore(ctx, this.data.elapsedSeconds);
 
     for (const sg of Object.values(this.data.screenGates)) {
       if (sg.targetScreenId !== sid) continue;
@@ -365,7 +384,12 @@ export class PreviewManager extends Manager<LinePreview> {
       const pt = line.points[token.pointIndex];
       if (!pt) continue;
       if (token.exploding) token.drawExplosion(ctx, pt);
-      else token.draw(ctx, pt, token.currentSpeed - token.speed, line.points, line.tunnel ? 0 : undefined);
+      else token.draw(ctx, pt, line.boost !== 0 ? line.boost : 0, line.points, line.tunnel ? 0 : undefined);
+    }
+
+    for (const line of visibleLines) {
+      const token = this.data.tokens.find(t => t.lineId === line.id && !t.exploding);
+      line.drawAfter(ctx, token?.currentSpeed);
     }
 
     for (const sg of Object.values(this.data.screenGates)) {

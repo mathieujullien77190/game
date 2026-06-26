@@ -50,6 +50,8 @@ export interface StoreActions {
   updateLineControlPoint: (id: string, cp: "cp1" | "cp2", point: Point) => void
   updateLineBoost: (id: string, boost: number) => void
   updateLineTunnel: (id: string, tunnel: boolean) => void
+  updateLineShowSpeed: (id: string, showSpeed: boolean) => void
+  updateLineLimitation: (id: string, limitation: number) => void
   updateLineSine: (id: string, frequency: number, amplitude: number) => void
   toggleLinkActivated: (linkId: string) => void
   addToken: (token: Token) => void

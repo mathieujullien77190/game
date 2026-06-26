@@ -13,6 +13,8 @@ export const createModeActions = (set: Set) => ({
           const lp = new LinePreview(l.start, l.end, l.type, l.id, l.cp1, l.cp2)
           lp.boost = l.boost
           lp.tunnel = l.tunnel
+          lp.showSpeed = l.showSpeed
+          lp.limitation = l.limitation
           if (l.type === "sine") {
             lp.frequency = l.frequency
             lp.amplitude = l.amplitude

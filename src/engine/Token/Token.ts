@@ -8,7 +8,7 @@ export const syncTokenCounter = (ids: string[]) => {
   if (max >= tokenCounter) tokenCounter = max + 1
 }
 
-export type TokenType = "round" | "square"
+export type TokenType = "round" | "square" | "cop"
 
 export const TOKEN_COLORS = [
   "#e53935",

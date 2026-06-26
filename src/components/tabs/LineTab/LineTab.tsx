@@ -15,7 +15,7 @@ export const LineTab = () => {
       return next
     })
 
-  const { editorManager, revision, mode, lineType, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineSine, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, revision, mode, lineType, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineSine, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       revision: s.revision,
@@ -27,6 +27,8 @@ export const LineTab = () => {
       removeLine: s.removeLine,
       updateLineBoost: s.updateLineBoost,
       updateLineTunnel: s.updateLineTunnel,
+      updateLineShowSpeed: s.updateLineShowSpeed,
+      updateLineLimitation: s.updateLineLimitation,
       updateLineSine: s.updateLineSine,
       toggleLinkActivated: s.toggleLinkActivated,
       setHoveredLineId: s.setHoveredLineId,
@@ -100,6 +102,14 @@ export const LineTab = () => {
               <S.BoostRow>
                 <S.BoostLabel>tunnel</S.BoostLabel>
                 <input type="checkbox" checked={line.tunnel} onChange={(e) => updateLineTunnel(line.id, e.target.checked)} />
+              </S.BoostRow>
+              <S.BoostRow>
+                <S.BoostLabel>show speed</S.BoostLabel>
+                <input type="checkbox" checked={line.showSpeed} onChange={(e) => updateLineShowSpeed(line.id, e.target.checked)} />
+              </S.BoostRow>
+              <S.BoostRow>
+                <S.BoostLabel>limitation</S.BoostLabel>
+                <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
               </S.BoostRow>
               {line.type === "sine" && (
                 <>

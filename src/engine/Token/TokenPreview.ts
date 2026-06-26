@@ -46,9 +46,11 @@ export class TokenPreview extends Token {
   pendingDirection: 1 | -1 = 1
   pendingRemainder: number = 0
   portalContext: { returnLineId: string; returnPointIndex: number; returnDirection: 1 | -1; returnRemainder: number } | null = null
+  speedingLineId: string = ""
   exploding: boolean = false
   explosionProgress: number = 0
   explosionFadeProgress: number = 0
+  explosionSeed: number = 0
 
   advance = (deltaSeconds: number, pointCount: number): { hit: "start" | "end"; excess: number } | null => {
     let budget = Math.max(1, this.currentSpeed) * deltaSeconds + this.remainder
@@ -193,9 +195,18 @@ export class TokenPreview extends Token {
   }
 
   private drawShape = (ctx: CanvasRenderingContext2D, pt: LinePoint, type: string) => {
-    ctx.fillStyle = this.displayColor || (this.color as string)
     ctx.strokeStyle = "#000"
     ctx.lineWidth = 2
+    if (type === "cop") {
+      const flash = Math.sin(Date.now() / 1000 * Math.PI * 4) > 0
+      ctx.fillStyle = flash ? "#e53935" : "#1a73e8"
+      ctx.beginPath()
+      ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      return
+    }
+    ctx.fillStyle = this.displayColor || (this.color as string)
     if (type === "square") {
       const angle = (this.direction === -1 ? pt.angle + Math.PI : pt.angle) + this.rotationOffset
       ctx.save()
@@ -219,7 +230,7 @@ export class TokenPreview extends Token {
     const fade = 1 - this.explosionFadeProgress
     const color = this.displayColor || (this.color as string)
     const x = pt.x, y = pt.y
-    const seed = ((x * 73.1 + y * 31.7) | 0)
+    const seed = this.explosionSeed
     const rng = (i: number) => { const n = Math.sin(seed + i * 9301 + 49297) * 233280; return n - Math.floor(n) }
     const isSquare = this.type === "square"
 

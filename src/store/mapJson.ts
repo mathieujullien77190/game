@@ -17,7 +17,7 @@ import type { SwitchEditor as SwitchEditorType } from "engine/Switch/SwitchEdito
 
 export type MapJson = {
   screens?: string[]
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; tunnel?: boolean; frequency?: number; amplitude?: number; screenId?: string }[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; screenId?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
   starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
@@ -57,6 +57,8 @@ export const serializeMap = (
     ...(l.cp2 ? { cp2: l.cp2 } : {}),
     ...(l.boost !== 0 ? { boost: l.boost } : {}),
     ...(l.tunnel ? { tunnel: true } : {}),
+    ...(l.showSpeed ? { showSpeed: true } : {}),
+    ...(l.limitation !== 0 ? { limitation: l.limitation } : {}),
     ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
     ...(l.screenId !== "main" ? { screenId: l.screenId } : {}),
   })),
@@ -128,10 +130,12 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, tunnel, frequency, amplitude, screenId }) => {
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, tunnel, showSpeed, limitation, frequency, amplitude, screenId }) => {
     const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2, screenId)
     if (boost) line.boost = boost
     if (tunnel) line.tunnel = true
+    if (showSpeed) line.showSpeed = true
+    if (limitation) line.limitation = limitation
     if (type === "sine") {
       if (frequency !== undefined) line.frequency = frequency
       if (amplitude !== undefined) line.amplitude = amplitude
