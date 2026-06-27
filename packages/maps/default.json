@@ -1,0 +1,88 @@
+{
+  "screens": [
+    "main"
+  ],
+  "lines": [
+    {
+      "id": "lineA",
+      "start": {
+        "x": 200,
+        "y": 560
+      },
+      "end": {
+        "x": 240,
+        "y": 180
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 213.33333333333334,
+        "y": 433.3333333333333
+      },
+      "cp2": {
+        "x": 226.66666666666666,
+        "y": 306.66666666666663
+      }
+    },
+    {
+      "id": "lineB",
+      "start": {
+        "x": 240,
+        "y": 180
+      },
+      "end": {
+        "x": 80,
+        "y": 340
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 186.66666666666666,
+        "y": 233.33333333333334
+      },
+      "cp2": {
+        "x": 133.33333333333331,
+        "y": 286.6666666666667
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "lineA::end-lineB::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "activated": true
+    }
+  ],
+  "tokens": [
+    {
+      "id": "token4",
+      "color": "#e53935",
+      "type": "round",
+      "speed": 40
+    },
+    {
+      "id": "token5",
+      "color": "#f9ab00",
+      "type": "round",
+      "speed": 40
+    }
+  ],
+  "starts": [
+    {
+      "id": "start1",
+      "lineId": "lineA",
+      "endpoint": "start",
+      "delay": 6
+    }
+  ],
+  "switches": {},
+  "transformers": [],
+  "inverters": [],
+  "arrival": null,
+  "screenGates": []
+}

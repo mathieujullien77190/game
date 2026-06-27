@@ -1,0 +1,30 @@
+import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react"
+import path from "path"
+import fs from "fs"
+
+export default defineConfig({
+  plugins: [
+    react(),
+    {
+      name: "serve-maps",
+      configureServer(server) {
+        server.middlewares.use("/maps", (req, res, next) => {
+          const name = req.url?.replace(/^\//, "") ?? ""
+          if (!name.endsWith(".json")) { next(); return }
+          const filePath = path.resolve(__dirname, `../maps/${name}`)
+          if (!fs.existsSync(filePath)) { next(); return }
+          res.setHeader("Content-Type", "application/json")
+          res.end(fs.readFileSync(filePath, "utf-8"))
+        })
+      },
+    },
+  ],
+  resolve: {
+    alias: {
+      "engine/": path.resolve(__dirname, "../../packages/engine/src") + "/",
+      "components/": path.resolve(__dirname, "src/components") + "/",
+      "store": path.resolve(__dirname, "src/store.ts"),
+    },
+  },
+})

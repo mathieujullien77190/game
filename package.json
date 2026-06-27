@@ -1,13 +1,18 @@
 {
-  "name": "my-app",
+  "name": "drift",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/engine",
+    "packages/game",
+    "packages/edition"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "yarn workspace @drift/edition dev",
+    "engine": "yarn workspace @drift/engine typecheck",
+    "game": "yarn workspace @drift/game dev",
+    "edition": "yarn workspace @drift/edition dev"
   },
   "dependencies": {
     "react": "^19.2.6",
