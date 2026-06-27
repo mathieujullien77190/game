@@ -10,8 +10,8 @@ import { ScreenGateEditor } from "engine/ScreenGate/ScreenGateEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
-import { useCanvasDraw } from "hooks/useCanvasDraw"
-import { useCanvasDrawPreview } from "hooks/useCanvasDrawPreview"
+import { SvgEditorCanvas } from "components/svg/editor/SvgEditorCanvas"
+import { SvgPreviewCanvas } from "components/svg/preview/SvgPreviewCanvas"
 import * as S from "./UI"
 import ToolsPanel from "components/ToolsPanel"
 
@@ -59,7 +59,6 @@ const findEndpointAt = (lines: LineEditor[], point: Point) => {
 }
 
 export const LevelEditor = () => {
-  const dpr = window.devicePixelRatio || 1
   const [leftWidth, setLeftWidth] = useState(() => Math.round(window.innerWidth * 0.3))
   const [scale, setScale] = useState(1)
   const [snapPoint, setSnapPoint] = useState<Point | null>(null)
@@ -76,8 +75,6 @@ export const LevelEditor = () => {
 
   const leftRef = useRef<HTMLDivElement>(null)
   const canvasAreaRef = useRef<HTMLDivElement>(null)
-  const editorCanvasRef = useRef<HTMLCanvasElement>(null)
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
   const dragging = useRef(false)
   const draggingEndpoint = useRef<{ lineId: string; endpoint: "start" | "end" } | null>(null)
   const draggingCP = useRef<{ lineId: string; cp: "cp1" | "cp2" } | null>(null)
@@ -159,34 +156,6 @@ export const LevelEditor = () => {
     .filter((sg) => sg.targetScreenId === currentScreenId)
     .map((sg) => ({ entryKey: sg.entryKey, exitKey: sg.exitKey }))
 
-  useCanvasDraw(
-    editorCanvasRef, editorManager, revision,
-    hoveredLineId,
-    mode === "addLine" ? snapPoint : null,
-    pendingPoint,
-    showIds,
-    startsArray,
-    switchesArray,
-    mode === "addStart" ? (addStartSnap?.pt ?? null) : null,
-    mode === "addSwitch" ? (addSwitchSnap?.pt ?? null) : null,
-    dpr * scale,
-    hoveredSwitchId,
-    transformersArray,
-    hoveredTransformerId,
-    mode === "addTransformer" ? (addTransformerSnap?.pt ?? null) : null,
-    mode === "addTransformer" ? pendingTransformerType : null,
-    invertersArray,
-    hoveredInverterId,
-    mode === "addInverter" ? (addInverterSnap?.pt ?? null) : null,
-    arrivalEditor,
-    mode === "addArrival" ? (addArrivalSnap?.pt ?? null) : null,
-    screenGatesArray,
-    hoveredScreenGateId,
-    mode === "addScreenGate" ? (addScreenGateSnap?.pt ?? null) : null,
-    screenGateMarkersArray,
-    visibleLineIds,
-  )
-  useCanvasDrawPreview(previewCanvasRef, viewMode === "preview" ? previewManager : null, dpr * scale, paused)
 
   useEffect(() => {
     const el = canvasAreaRef.current
@@ -197,8 +166,7 @@ export const LevelEditor = () => {
         (width - PADDING * 2) / CANVAS_W,
         (height - PADDING * 2) / CANVAS_H
       )
-      const snapped = Math.round(raw * dpr) / dpr
-      setScale(Math.max(1 / dpr, snapped))
+      setScale(Math.max(0.1, raw))
     })
     observer.observe(el)
     return () => observer.disconnect()
@@ -219,7 +187,7 @@ export const LevelEditor = () => {
     window.addEventListener("mouseup", onUp)
   }, [])
 
-  const getCanvasPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point => {
+  const getCanvasPoint = (e: React.MouseEvent<SVGSVGElement>): Point => {
     const rect = e.currentTarget.getBoundingClientRect()
     return {
       x: (e.clientX - rect.left) * (CANVAS_W / rect.width),
@@ -227,7 +195,7 @@ export const LevelEditor = () => {
     }
   }
 
-  const onCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const onCanvasMouseDown = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     if (mode !== "select") return
     const point = getCanvasPoint(e)
     const lines = Object.values(editorManager.data.lines).filter((l) => l.screenId === currentScreenId)
@@ -244,7 +212,7 @@ export const LevelEditor = () => {
     }
   }, [mode, editorManager, currentScreenId])
 
-  const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const onMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     const raw = getCanvasPoint(e)
     const point = snapToGrid(raw)
     if (draggingCP.current) {
@@ -352,7 +320,7 @@ export const LevelEditor = () => {
   }, [setHoveredLineId])
 
   const onCanvasClick = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
+    (e: React.MouseEvent<SVGSVGElement>) => {
       if (mode === "addStart") {
         if (addStartSnap) {
           addStart(new StartEditor(addStartSnap.lineId, addStartSnap.endpoint, undefined, undefined, currentScreenId))
@@ -472,30 +440,44 @@ export const LevelEditor = () => {
         <S.CanvasArea ref={canvasAreaRef}>
           <S.CanvasOuter>
             <S.CanvasWrapper $w={CANVAS_W * scale} $h={CANVAS_H * scale}>
-              <S.StyledCanvas
-                ref={editorCanvasRef}
-                width={CANVAS_W * dpr * scale}
-                height={CANVAS_H * dpr * scale}
-                $w={CANVAS_W}
-                $h={CANVAS_H}
-                $scale={scale}
-                $cursor={canvasCursor}
-                $visible={viewMode === "editor"}
+              <SvgEditorCanvas
+                editorManager={editorManager}
+                hoveredLineId={hoveredLineId}
+                snapPoint={mode === "addLine" ? snapPoint : null}
+                pendingPoint={pendingPoint}
+                showIds={showIds}
+                starts={startsArray}
+                switches={switchesArray}
+                previewStartPt={mode === "addStart" ? (addStartSnap?.pt ?? null) : null}
+                previewSwitchPt={mode === "addSwitch" ? (addSwitchSnap?.pt ?? null) : null}
+                hoveredSwitchId={hoveredSwitchId}
+                transformers={transformersArray}
+                hoveredTransformerId={hoveredTransformerId}
+                previewTransformerPt={mode === "addTransformer" ? (addTransformerSnap?.pt ?? null) : null}
+                previewTransformerType={mode === "addTransformer" ? pendingTransformerType : null}
+                inverters={invertersArray}
+                hoveredInverterId={hoveredInverterId}
+                previewInverterPt={mode === "addInverter" ? (addInverterSnap?.pt ?? null) : null}
+                arrival={arrivalEditor}
+                previewArrivalPt={mode === "addArrival" ? (addArrivalSnap?.pt ?? null) : null}
+                screenGates={screenGatesArray}
+                hoveredScreenGateId={hoveredScreenGateId}
+                previewScreenGatePt={mode === "addScreenGate" ? (addScreenGateSnap?.pt ?? null) : null}
+                screenGateMarkers={screenGateMarkersArray}
+                visibleLineIds={visibleLineIds}
+                cursor={canvasCursor}
+                visible={viewMode === "editor"}
                 onMouseDown={onCanvasMouseDown}
                 onMouseMove={onMouseMove}
                 onMouseUp={onCanvasMouseUp}
                 onMouseLeave={onMouseLeave}
                 onClick={onCanvasClick}
               />
-              <S.StyledCanvas
-                ref={previewCanvasRef}
-                width={CANVAS_W * dpr * scale}
-                height={CANVAS_H * dpr * scale}
-                $w={CANVAS_W}
-                $h={CANVAS_H}
-                $scale={scale}
-                $cursor={viewMode === "preview" && Object.keys(previewManager.data.switches).length > 0 ? "pointer" : "default"}
-                $visible={viewMode === "preview"}
+              <SvgPreviewCanvas
+                manager={viewMode === "preview" ? previewManager : null}
+                paused={paused}
+                visible={viewMode === "preview"}
+                cursor={Object.keys(previewManager.data.switches).length > 0 ? "pointer" : "default"}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect()
                   const x = (e.clientX - rect.left) * (CANVAS_W / rect.width)

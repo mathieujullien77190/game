@@ -1,15 +1,14 @@
+import type { JSX } from "react"
 import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePoint } from "../types"
 import { Switch } from "./Switch"
 import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils"
 
-const SWITCH_R = 18
-
 const animateAngle = (current: number, target: number, speed: number, dt: number): number => {
   let delta = target - current
   while (delta > Math.PI) delta -= 2 * Math.PI
   while (delta < -Math.PI) delta += 2 * Math.PI
-  if (Math.abs(delta) < 0.005) return target
+  if (Math.abs(delta) < SwitchPreview.ANGLE_SNAP_THRESHOLD) return target
   return current + delta * speed * dt
 }
 
@@ -18,6 +17,15 @@ type LinksRef = Record<string, Link>
 type LinkMapRef = Record<string, LinkEndpoint>
 
 export class SwitchPreview extends Switch {
+  static readonly RADIUS = 18
+  static readonly ANGLE_SNAP_THRESHOLD = 0.005
+  static readonly PULSE_DURATION = 0.3
+  static readonly ARM_ANGLE_SPEED = 8
+  static readonly PULSE_EXPAND_R = 12
+  static readonly ARM_STROKE_WIDTH = 2.5
+  static readonly ARM_DOT_R = 4
+  static readonly STROKE_WIDTH = 2
+
   activeIndex: number = 0
   pulseTimer: number = 0
   displayAngle: number | undefined = undefined
@@ -31,7 +39,7 @@ export class SwitchPreview extends Switch {
     if (this.linkIds.length <= 1) return
     this.activeIndex = (this.activeIndex + 1) % this.linkIds.length
     this.activeLinkId = this.linkIds[this.activeIndex]
-    this.pulseTimer = 0.3
+    this.pulseTimer = SwitchPreview.PULSE_DURATION
   }
 
   setTargetAngle = (angle: number | undefined) => {
@@ -47,11 +55,12 @@ export class SwitchPreview extends Switch {
   tick = (deltaSeconds: number) => {
     if (this.pulseTimer > 0) this.pulseTimer = Math.max(0, this.pulseTimer - deltaSeconds)
     if (this.displayAngle !== undefined && this.targetAngle !== undefined) {
-      this.displayAngle = animateAngle(this.displayAngle, this.targetAngle, 8, deltaSeconds)
+      this.displayAngle = animateAngle(this.displayAngle, this.targetAngle, SwitchPreview.ARM_ANGLE_SPEED, deltaSeconds)
     }
   }
 
   prepareFrame = (lines: LinesRef, links: LinksRef, linkMap: LinkMapRef) => {
+    const { RADIUS } = SwitchPreview
     const ep = getSwitchEnterPoint(this.linkIds, links)
     if (!ep) { this._pt = null; return }
     const line = lines[ep.lineId]
@@ -60,14 +69,14 @@ export class SwitchPreview extends Switch {
     if (!pt) { this._pt = null; return }
     this._pt = pt
 
-    this._enterAngle = curveIntersectAngle(line.points, ep.endpoint, pt.x, pt.y, SWITCH_R)
+    this._enterAngle = curveIntersectAngle(line.points, ep.endpoint, pt.x, pt.y, RADIUS)
       ?? (ep.endpoint === "end" ? pt.angle + Math.PI : pt.angle)
 
     const activeDest = linkMap[`${ep.lineId}::${ep.endpoint}`]
     if (activeDest) {
       const destLine = lines[activeDest.lineId]
       if (destLine && destLine.points.length > 0) {
-        const activeAngle = curveIntersectAngle(destLine.points, activeDest.endpoint, pt.x, pt.y, SWITCH_R)
+        const activeAngle = curveIntersectAngle(destLine.points, activeDest.endpoint, pt.x, pt.y, RADIUS)
           ?? (activeDest.endpoint === "end"
             ? destLine.points[destLine.points.length - 1].angle + Math.PI
             : destLine.points[0].angle)
@@ -95,62 +104,46 @@ export class SwitchPreview extends Switch {
     if (!this._pt) return false
     const dx = x - this._pt.x
     const dy = y - this._pt.y
-    return dx * dx + dy * dy <= SWITCH_R * SWITCH_R
+    const { RADIUS } = SwitchPreview
+    return dx * dx + dy * dy <= RADIUS * RADIUS
   }
 
-  draw = (ctx: CanvasRenderingContext2D) => {
-    const pt = this._pt
-    if (!pt) return
-    const r = SWITCH_R
+  render = (lines: LinesRef, links: LinksRef, linkMap: LinkMapRef): JSX.Element | null => {
+    this.prepareFrame(lines, links, linkMap)
+    const pt = this.getPoint()
+    if (!pt) return null
+    const { RADIUS: r, PULSE_DURATION, PULSE_EXPAND_R, ARM_STROKE_WIDTH, ARM_DOT_R, STROKE_WIDTH } = SwitchPreview
+    const enterAngle = this._enterAngle
+    const displayAngle = this.displayAngle
 
-    ctx.save()
-    ctx.setLineDash([])
-
-    if (this.pulseTimer > 0) {
-      const t = 1 - this.pulseTimer / 0.3
-      ctx.globalAlpha = 1 - t
-      ctx.strokeStyle = "#000"
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.arc(pt.x, pt.y, r + t * 12, 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.globalAlpha = 1
-    }
-
-    ctx.fillStyle = "#fff"
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2.5
-    ctx.lineCap = "round"
-
-    if (this._enterAngle !== undefined) {
-      ctx.beginPath()
-      ctx.moveTo(pt.x, pt.y)
-      ctx.lineTo(pt.x + Math.cos(this._enterAngle) * r, pt.y + Math.sin(this._enterAngle) * r)
-      ctx.stroke()
-      ctx.fillStyle = "#000"
-      ctx.beginPath()
-      ctx.arc(pt.x + Math.cos(this._enterAngle) * r, pt.y + Math.sin(this._enterAngle) * r, 4, 0, Math.PI * 2)
-      ctx.fill()
-    }
-
-    if (this.displayAngle !== undefined) {
-      ctx.beginPath()
-      ctx.moveTo(pt.x, pt.y)
-      ctx.lineTo(pt.x + Math.cos(this.displayAngle) * r, pt.y + Math.sin(this.displayAngle) * r)
-      ctx.stroke()
-      ctx.fillStyle = "#000"
-      ctx.beginPath()
-      ctx.arc(pt.x + Math.cos(this.displayAngle) * r, pt.y + Math.sin(this.displayAngle) * r, 4, 0, Math.PI * 2)
-      ctx.fill()
-    }
-
-    ctx.restore()
+    return (
+      <g key={this.id}>
+        {this.pulseTimer > 0 && (() => {
+          const t = 1 - this.pulseTimer / PULSE_DURATION
+          return <circle cx={pt.x} cy={pt.y} r={r + t * PULSE_EXPAND_R} fill="none" stroke="#000" strokeWidth={STROKE_WIDTH} opacity={1 - t}/>
+        })()}
+        <circle cx={pt.x} cy={pt.y} r={r} fill="#fff" stroke="#000" strokeWidth={STROKE_WIDTH}/>
+        {enterAngle !== undefined && (
+          <>
+            <line
+              x1={pt.x} y1={pt.y}
+              x2={pt.x + Math.cos(enterAngle) * r} y2={pt.y + Math.sin(enterAngle) * r}
+              stroke="#000" strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
+            />
+            <circle cx={pt.x + Math.cos(enterAngle) * r} cy={pt.y + Math.sin(enterAngle) * r} r={ARM_DOT_R} fill="#000"/>
+          </>
+        )}
+        {displayAngle !== undefined && (
+          <>
+            <line
+              x1={pt.x} y1={pt.y}
+              x2={pt.x + Math.cos(displayAngle) * r} y2={pt.y + Math.sin(displayAngle) * r}
+              stroke="#000" strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
+            />
+            <circle cx={pt.x + Math.cos(displayAngle) * r} cy={pt.y + Math.sin(displayAngle) * r} r={ARM_DOT_R} fill="#000"/>
+          </>
+        )}
+      </g>
+    )
   }
 }
