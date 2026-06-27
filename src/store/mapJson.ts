@@ -1,4 +1,5 @@
 import { LineEditor } from "engine/Line/LineEditor"
+import { COLOR_TOKEN_RED } from "engine/constants"
 import { syncLineCounter, type LineType } from "engine/Line/Line"
 import { Token, syncTokenCounter, type TokenColor, type TokenType } from "engine/Token/Token"
 import { StartEditor } from "engine/Start/StartEditor"
@@ -183,7 +184,7 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   const transformers: Record<string, Transformer> = {}
   json.transformers?.forEach(({ id, linkId, type, amount, color, targetType, screenId }) => {
-    transformers[id] = new Transformer(linkId, type, id, amount ?? 0.5, color ?? "#e53935", targetType ?? "square", screenId)
+    transformers[id] = new Transformer(linkId, type, id, amount ?? 0.5, color ?? COLOR_TOKEN_RED, targetType ?? "square", screenId)
   })
   json.tokenEffects?.forEach(({ id, linkId, type, amount }) => {
     const migId = `transform_te_${id}`

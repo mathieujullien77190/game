@@ -1,3 +1,9 @@
+import {
+  COLOR_TOKEN_RED, COLOR_TOKEN_ORANGE, COLOR_TOKEN_YELLOW, COLOR_TOKEN_GREEN,
+  COLOR_TOKEN_CYAN, COLOR_TOKEN_BLUE, COLOR_TOKEN_PURPLE, COLOR_TOKEN_PINK,
+  COLOR_TOKEN_SLATE, COLOR_TOKEN_DARK,
+} from "../constants"
+
 let tokenCounter = 1
 
 export const syncTokenCounter = (ids: string[]) => {
@@ -11,16 +17,16 @@ export const syncTokenCounter = (ids: string[]) => {
 export type TokenType = "round" | "square" | "cop"
 
 export const TOKEN_COLORS = [
-  "#e53935",
-  "#fb8c00",
-  "#f9ab00",
-  "#43a047",
-  "#00acc1",
-  "#1a73e8",
-  "#8e24aa",
-  "#e91e63",
-  "#546e7a",
-  "#222222",
+  COLOR_TOKEN_RED,
+  COLOR_TOKEN_ORANGE,
+  COLOR_TOKEN_YELLOW,
+  COLOR_TOKEN_GREEN,
+  COLOR_TOKEN_CYAN,
+  COLOR_TOKEN_BLUE,
+  COLOR_TOKEN_PURPLE,
+  COLOR_TOKEN_PINK,
+  COLOR_TOKEN_SLATE,
+  COLOR_TOKEN_DARK,
 ] as const
 
 export type TokenColor = (typeof TOKEN_COLORS)[number]

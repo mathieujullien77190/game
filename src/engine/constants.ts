@@ -9,3 +9,23 @@ export const ACCEL_TIME = 0.5;
 export const ROTATION_SPEED = Math.PI * 4;
 export const COLOR_LERP_TIME = 0.4;
 export const PAINT_DURATION = 1.5;
+
+export const COLOR_TOKEN_RED = "#e53935" as const;
+export const COLOR_TOKEN_ORANGE = "#fb8c00" as const;
+export const COLOR_TOKEN_YELLOW = "#f9ab00" as const;
+export const COLOR_TOKEN_GREEN = "#43a047" as const;
+export const COLOR_TOKEN_CYAN = "#00acc1" as const;
+export const COLOR_TOKEN_BLUE = "#1a73e8" as const;
+export const COLOR_TOKEN_PURPLE = "#8e24aa" as const;
+export const COLOR_TOKEN_PINK = "#e91e63" as const;
+export const COLOR_TOKEN_SLATE = "#546e7a" as const;
+export const COLOR_TOKEN_DARK = "#222222" as const;
+
+export const COLOR_BLACK = "#000";
+export const COLOR_NEAR_BLACK = "#111";
+export const COLOR_DARK_GRAY = "#333";
+export const COLOR_LIGHT_GRAY = "#bbb";
+export const COLOR_WHITE = "#fff";
+export const COLOR_ORANGE_GLOW = "rgba(255,140,0,0.8)";
+export const COLOR_RED = COLOR_TOKEN_RED;
+export const COLOR_BLUE = COLOR_TOKEN_BLUE;

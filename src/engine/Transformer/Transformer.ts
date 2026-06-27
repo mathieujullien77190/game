@@ -1,3 +1,5 @@
+import { COLOR_TOKEN_RED } from "../constants"
+
 let transformerCounter = 0
 
 export const syncTransformerCounter = (ids: string[]) => {
@@ -21,7 +23,7 @@ export class Transformer {
   color: string
   targetType: string
   screenId: string = "main"
-  constructor(linkId: string, type: TransformerType = "color", id?: string, amount = 0.5, color = "#e53935", targetType = "square", screenId?: string) {
+  constructor(linkId: string, type: TransformerType = "color", id?: string, amount = 0.5, color = COLOR_TOKEN_RED, targetType = "square", screenId?: string) {
     this.id = id ?? generateTransformerId()
     this.linkId = linkId
     this.type = type

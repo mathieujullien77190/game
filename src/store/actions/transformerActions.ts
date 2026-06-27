@@ -1,10 +1,11 @@
 import { Transformer, syncTransformerCounter, type TransformerType } from "engine/Transformer/Transformer"
+import { COLOR_TOKEN_RED } from "engine/constants"
 import type { Set } from "store/types"
 
 export const createTransformerActions = (set: Set) => ({
   addTransformer: (linkId: string, type: TransformerType, screenId?: string) =>
     set((state) => {
-      const tr = new Transformer(linkId, type, undefined, 0.5, "#e53935", "square", screenId ?? state.currentScreenId)
+      const tr = new Transformer(linkId, type, undefined, 0.5, COLOR_TOKEN_RED, "square", screenId ?? state.currentScreenId)
       return { transformers: { ...state.transformers, [tr.id]: tr }, revision: state.revision + 1 }
     }),
 

@@ -44,7 +44,7 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick }: 
   return (
     <svg
       viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-      style={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#fff", cursor }}
+      style={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#fff", cursor, userSelect: "none" }}
       onClick={onClick}
     >
       <defs>
@@ -112,7 +112,7 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick }: 
           const tokenScreenId = data.lines[token.lineId]?.screenId ?? "main"
           if (tokenScreenId !== sid) return null
           const line = data.lines[token.lineId]
-          if (!line || line.points.length === 0) return null
+          if (!line || line.points.length === 0 || line.tunnel) return null
           const pt = line.points[token.pointIndex]
           if (!pt) return null
           return token.render(pt, line)

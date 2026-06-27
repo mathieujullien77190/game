@@ -87,7 +87,7 @@ export const SvgEditorCanvas = ({
   return (
     <svg
       viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-      style={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#fff", cursor }}
+      style={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#fff", cursor, userSelect: "none" }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}

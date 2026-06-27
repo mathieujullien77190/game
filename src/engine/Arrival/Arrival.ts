@@ -1,4 +1,5 @@
 import type { TokenColor, TokenType } from "../Token/Token"
+import { COLOR_TOKEN_RED } from "../constants"
 
 let arrivalCounter = 1
 let demandCounter = 1
@@ -18,7 +19,7 @@ export type Demand = {
   angled: boolean
 }
 
-export const makeDemand = (color: TokenColor = "#e53935", type: TokenType = "round", angled = false): Demand => ({
+export const makeDemand = (color: TokenColor = COLOR_TOKEN_RED, type: TokenType = "round", angled = false): Demand => ({
   id: `demand${demandCounter++}`,
   color,
   type,

@@ -3,6 +3,7 @@ import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePoint } from "../types"
 import { Switch } from "./Switch"
 import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils"
+import { COLOR_BLACK, COLOR_WHITE } from "../constants"
 
 const animateAngle = (current: number, target: number, speed: number, dt: number): number => {
   let delta = target - current
@@ -120,17 +121,17 @@ export class SwitchPreview extends Switch {
       <g key={this.id}>
         {this.pulseTimer > 0 && (() => {
           const t = 1 - this.pulseTimer / PULSE_DURATION
-          return <circle cx={pt.x} cy={pt.y} r={r + t * PULSE_EXPAND_R} fill="none" stroke="#000" strokeWidth={STROKE_WIDTH} opacity={1 - t}/>
+          return <circle cx={pt.x} cy={pt.y} r={r + t * PULSE_EXPAND_R} fill="none" stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH} opacity={1 - t}/>
         })()}
-        <circle cx={pt.x} cy={pt.y} r={r} fill="#fff" stroke="#000" strokeWidth={STROKE_WIDTH}/>
+        <circle cx={pt.x} cy={pt.y} r={r} fill={COLOR_WHITE} stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH}/>
         {enterAngle !== undefined && (
           <>
             <line
               x1={pt.x} y1={pt.y}
               x2={pt.x + Math.cos(enterAngle) * r} y2={pt.y + Math.sin(enterAngle) * r}
-              stroke="#000" strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
+              stroke={COLOR_BLACK} strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
             />
-            <circle cx={pt.x + Math.cos(enterAngle) * r} cy={pt.y + Math.sin(enterAngle) * r} r={ARM_DOT_R} fill="#000"/>
+            <circle cx={pt.x + Math.cos(enterAngle) * r} cy={pt.y + Math.sin(enterAngle) * r} r={ARM_DOT_R} fill={COLOR_BLACK}/>
           </>
         )}
         {displayAngle !== undefined && (
@@ -138,9 +139,9 @@ export class SwitchPreview extends Switch {
             <line
               x1={pt.x} y1={pt.y}
               x2={pt.x + Math.cos(displayAngle) * r} y2={pt.y + Math.sin(displayAngle) * r}
-              stroke="#000" strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
+              stroke={COLOR_BLACK} strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
             />
-            <circle cx={pt.x + Math.cos(displayAngle) * r} cy={pt.y + Math.sin(displayAngle) * r} r={ARM_DOT_R} fill="#000"/>
+            <circle cx={pt.x + Math.cos(displayAngle) * r} cy={pt.y + Math.sin(displayAngle) * r} r={ARM_DOT_R} fill={COLOR_BLACK}/>
           </>
         )}
       </g>

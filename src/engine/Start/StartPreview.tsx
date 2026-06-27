@@ -1,13 +1,14 @@
 import type { JSX } from "react"
 import { Start } from "./Start"
+import { COLOR_BLACK, COLOR_LIGHT_GRAY } from "../constants"
 import type { LinePreview } from "../Line/LinePreview"
 import type { TokenPreview } from "../Token/TokenPreview"
 
 export class StartPreview extends Start {
   static readonly RADIUS = 14
   static readonly STROKE_WIDTH = 3
-  static readonly RING_IDLE_COLOR = "#ddd"
-  static readonly RING_ACTIVE_COLOR = "#000"
+  static readonly RING_IDLE_COLOR = COLOR_LIGHT_GRAY
+  static readonly RING_ACTIVE_COLOR = COLOR_BLACK
 
   render = (lines: Record<string, LinePreview>, tokens: TokenPreview[], elapsed: number, sid: string): JSX.Element | null => {
     const line = lines[this.lineId]

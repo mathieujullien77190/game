@@ -1,5 +1,6 @@
 import type { JSX } from "react"
 import { Inverter } from "./Inverter"
+import { COLOR_BLACK } from "../constants"
 import type { Link } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 
@@ -23,7 +24,7 @@ export class InverterPreview extends Inverter {
     return (
       <line key={this.id}
         x1={pt.x - dx} y1={pt.y - dy} x2={pt.x + dx} y2={pt.y + dy}
-        stroke="#000" strokeWidth={STROKE_WIDTH} strokeLinecap="round"
+        stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH} strokeLinecap="round"
       />
     )
   }

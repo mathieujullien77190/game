@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { Line } from "./Line"
 import { linePath } from "./lineUtils"
+import { COLOR_BLACK, COLOR_WHITE, COLOR_DARK_GRAY, COLOR_RED, COLOR_ORANGE_GLOW } from "../constants"
 import type { TokenPreview } from "../Token/TokenPreview"
 
 const lineMid = (line: LinePreview) => {
@@ -12,10 +13,10 @@ const lineMid = (line: LinePreview) => {
 export class LinePreview extends Line {
   static readonly BOOST_WIN_RATIO = 0.3
   static readonly BOOST_ANIM_SPEED = 4
-  static readonly BOOST_GLOW_COLOR = "rgba(255,140,0,0.8)"
+  static readonly BOOST_GLOW_COLOR = COLOR_ORANGE_GLOW
   static readonly BOOST_STROKE_WIDTH = 2
   static readonly TUNNEL_DOT_R = 4
-  static readonly LINE_STROKE = "#333"
+  static readonly LINE_STROKE = COLOR_DARK_GRAY
   static readonly LINE_STROKE_WIDTH = 2
   static readonly SPEED_BOX_W = 26
   static readonly SPEED_BOX_H = 19
@@ -53,8 +54,8 @@ export class LinePreview extends Line {
         {boostGlow}
         {this.tunnel ? (
           <>
-            <circle cx={this.start.x} cy={this.start.y} r={TUNNEL_DOT_R} fill="#000"/>
-            <circle cx={this.end.x} cy={this.end.y} r={TUNNEL_DOT_R} fill="#000"/>
+            <circle cx={this.start.x} cy={this.start.y} r={TUNNEL_DOT_R} fill={COLOR_BLACK}/>
+            <circle cx={this.end.x} cy={this.end.y} r={TUNNEL_DOT_R} fill={COLOR_BLACK}/>
           </>
         ) : (
           <path d={linePath(this)} fill="none" stroke={LINE_STROKE} strokeWidth={LINE_STROKE_WIDTH} strokeLinecap="round"/>
@@ -72,16 +73,16 @@ export class LinePreview extends Line {
     const mid = lineMid(this)
     const speed = token?.currentSpeed
     const tokenColor = token ? (token.displayColor || (token.color as string)) : undefined
-    if (this.lastSpeed !== undefined && speed !== undefined) this.lastSpeed = speed
+    if (speed !== undefined) this.lastSpeed = speed
 
     return (
       <g key={`ov-${this.id}`}>
         {this.showSpeed && (
           <g>
             <rect x={mid.x - SPEED_BOX_W / 2} y={mid.y - SPEED_BOX_H / 2} width={SPEED_BOX_W} height={SPEED_BOX_H} rx={SPEED_BOX_RX}
-              fill={tokenColor ?? "#fff"} stroke="#000" strokeWidth={1.5}/>
+              fill={tokenColor ?? COLOR_WHITE} stroke={COLOR_BLACK} strokeWidth={1.5}/>
             <text x={mid.x} y={mid.y} textAnchor="middle" dominantBaseline="middle"
-              fontFamily="monospace" fontSize={SPEED_FONT_SIZE} fontWeight="bold" fill="#000">
+              fontFamily="monospace" fontSize={SPEED_FONT_SIZE} fontWeight="bold" fill={COLOR_BLACK}>
               {this.lastSpeed !== undefined ? Math.round(this.lastSpeed) : ""}
             </text>
           </g>
@@ -89,10 +90,10 @@ export class LinePreview extends Line {
         {this.limitation !== 0 && (
           <g>
             <circle cx={mid.x + (this.showSpeed ? LIMIT_OFFSET_X : 0)} cy={mid.y} r={LIMIT_R}
-              fill="#fff" stroke="#e00" strokeWidth={2}/>
+              fill={COLOR_WHITE} stroke={COLOR_RED} strokeWidth={2}/>
             <text x={mid.x + (this.showSpeed ? LIMIT_OFFSET_X : 0)} y={mid.y}
               textAnchor="middle" dominantBaseline="middle"
-              fontFamily="monospace" fontSize={SPEED_FONT_SIZE} fontWeight="bold" fill="#000">
+              fontFamily="monospace" fontSize={SPEED_FONT_SIZE} fontWeight="bold" fill={COLOR_BLACK}>
               {this.limitation}
             </text>
           </g>

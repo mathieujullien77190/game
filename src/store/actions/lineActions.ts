@@ -6,7 +6,7 @@ import type { Link } from "engine/Link/Link"
 import type { Point } from "engine/types"
 import type { Set } from "store/types"
 
-const syncSwitches = (
+export const syncSwitches = (
   switches: Record<string, SwitchEditor>,
   links: Record<string, Link>
 ): Record<string, SwitchEditor> => {

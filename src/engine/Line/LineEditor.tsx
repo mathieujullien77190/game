@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { Line } from "./Line"
 import { linePath } from "./lineUtils"
+import { COLOR_TOKEN_YELLOW, COLOR_TOKEN_BLUE } from "../constants"
 import type { Point } from "../types"
 
 const lineMid = (line: LineEditor): Point => {
@@ -29,9 +30,9 @@ export class LineEditor extends Line {
   static readonly CORNER_STROKE = "#666"
   static readonly CORNER_STROKE_WIDTH = 1.5
   static readonly START_R = 5
-  static readonly START_COLOR = "#f9ab00"
+  static readonly START_COLOR = COLOR_TOKEN_YELLOW
   static readonly END_R = 7
-  static readonly END_COLOR = "#1a73e8"
+  static readonly END_COLOR = COLOR_TOKEN_BLUE
   static readonly LINE_STROKE = "#999"
   static readonly LINE_STROKE_HOVERED = "#000"
   static readonly LINE_STROKE_WIDTH = 2

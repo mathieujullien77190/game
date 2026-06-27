@@ -1,4 +1,5 @@
 import type { Point } from "engine/types"
+import { COLOR_TOKEN_YELLOW, COLOR_TOKEN_BLUE } from "engine/constants"
 
 type Props = {
   pendingPoint: Point | null
@@ -15,13 +16,13 @@ export const SvgPendingLine = ({ pendingPoint, snapPoint }: Props) => (
       />
     )}
     {pendingPoint && (
-      <circle cx={pendingPoint.x} cy={pendingPoint.y} r={5} fill="#f9ab00"/>
+      <circle cx={pendingPoint.x} cy={pendingPoint.y} r={5} fill={COLOR_TOKEN_YELLOW}/>
     )}
     {snapPoint && (
       <circle
         cx={snapPoint.x} cy={snapPoint.y}
         r={pendingPoint ? 7 : 5}
-        fill={pendingPoint ? "#1a73e8" : "#f9ab00"}
+        fill={pendingPoint ? COLOR_TOKEN_BLUE : COLOR_TOKEN_YELLOW}
       />
     )}
   </>

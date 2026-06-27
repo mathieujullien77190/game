@@ -8,6 +8,7 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
   for (const token of data.tokens) {
     if (data.elapsedSeconds < token.startAt || token.exploding) continue
     const line = data.lines[token.lineId]
+    if (line?.tunnel) continue
     const pt = line?.points[token.pointIndex]
     if (pt) punches.push({ x: pt.x, y: pt.y, r: 50 })
   }
@@ -41,22 +42,23 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
   return (
     <>
       <defs>
+        {/* blur + threshold → metaball: overlapping holes merge into one smooth shape */}
+        <filter id="pv-dark-holes" filterUnits="userSpaceOnUse"
+          x={0} y={0} width={CANVAS_W} height={CANVAS_H}>
+          <feGaussianBlur stdDeviation="20"/>
+          <feColorMatrix type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 20 -7"/>
+        </filter>
         <mask id="pv-dark-mask">
-          <rect width={CANVAS_W} height={CANVAS_H} fill="black"/>
-          {punches.map((p, i) => (
-            <radialGradient key={i} id={`pv-dg-${i}`}
-              cx={p.x} cy={p.y} r={p.r} gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="white" stopOpacity={1}/>
-              <stop offset="60%" stopColor="white" stopOpacity={0.85}/>
-              <stop offset="100%" stopColor="white" stopOpacity={0}/>
-            </radialGradient>
-          ))}
-          {punches.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r={p.r} fill={`url(#pv-dg-${i})`}/>
-          ))}
+          <rect width={CANVAS_W} height={CANVAS_H} fill="white"/>
+          <g filter="url(#pv-dark-holes)">
+            {punches.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="black"/>
+            ))}
+          </g>
         </mask>
       </defs>
-      <rect width={CANVAS_W} height={CANVAS_H} fill="rgba(0,0,0,0.96)" mask="url(#pv-dark-mask)"/>
+      <rect width={CANVAS_W} height={CANVAS_H} fill="black" mask="url(#pv-dark-mask)"/>
     </>
   )
 }

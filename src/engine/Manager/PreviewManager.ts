@@ -1,4 +1,4 @@
-import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H } from "../constants";
+import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H, COLOR_TOKEN_RED } from "../constants";
 
 const EXPLOSION_DURATION = 2;
 
@@ -223,7 +223,7 @@ export class PreviewManager extends Manager<LinePreview> {
           if (token.currentSpeed > line.limitation) {
             if (token.speedingLineId !== line.id) {
               token.speedingLineId = line.id;
-              const cop = new TokenPreview("#e53935" as any, token.currentSpeed * 1.1);
+              const cop = new TokenPreview(COLOR_TOKEN_RED, token.currentSpeed * 1.1);
               cop.type = "cop";
               cop.lineId = token.lineId;
               cop.pointIndex = Math.max(0, Math.min(line.points.length - 1, token.pointIndex - token.direction * 20));

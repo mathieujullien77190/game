@@ -1,11 +1,12 @@
 import type { JSX } from "react"
 import { Transformer } from "./Transformer"
+import { COLOR_TOKEN_SLATE, COLOR_TOKEN_CYAN } from "../constants"
 import type { Link } from "../Link/Link"
 import type { LineEditor } from "../Line/LineEditor"
 
 export const TRANSFORMER_COLORS: Record<string, string> = {
-  fade: "#546e7a",
-  rotate: "#00ACC1",
+  fade: COLOR_TOKEN_SLATE,
+  rotate: COLOR_TOKEN_CYAN,
   color: "#7B1FA2",
   shape: "#2e7d32",
 }

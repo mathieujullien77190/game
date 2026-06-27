@@ -1,5 +1,6 @@
 import type { JSX } from "react"
 import { Arrival } from "./Arrival"
+import { COLOR_BLACK } from "../constants"
 import type { LinePreview } from "../Line/LinePreview"
 
 export class ArrivalPreview extends Arrival {
@@ -19,12 +20,12 @@ export class ArrivalPreview extends Arrival {
     if (type === "square") {
       return (
         <rect x={x - dsh} y={y - dsh} width={dsh * 2} height={dsh * 2} rx={drx}
-          fill={color} stroke="#000" strokeWidth={dsw} opacity={alpha}
+          fill={color} stroke={COLOR_BLACK} strokeWidth={dsw} opacity={alpha}
           transform={angled ? `rotate(45,${x},${y})` : undefined}
         />
       )
     }
-    return <circle cx={x} cy={y} r={DEMAND_R} fill={color} stroke="#000" strokeWidth={dsw} opacity={alpha}/>
+    return <circle cx={x} cy={y} r={DEMAND_R} fill={color} stroke={COLOR_BLACK} strokeWidth={dsw} opacity={alpha}/>
   }
 
   render = (lines: Record<string, LinePreview>, sid: string): JSX.Element | null => {
@@ -38,7 +39,7 @@ export class ArrivalPreview extends Arrival {
     const { OUTER_R, OUTER_STROKE_WIDTH } = ArrivalPreview
     return (
       <g key={this.id}>
-        <circle cx={pt.x} cy={pt.y} r={OUTER_R} fill="none" stroke="#000" strokeWidth={OUTER_STROKE_WIDTH}/>
+        <circle cx={pt.x} cy={pt.y} r={OUTER_R} fill="none" stroke={COLOR_BLACK} strokeWidth={OUTER_STROKE_WIDTH}/>
         {demand && ArrivalPreview.demandToken(pt.x, pt.y, demand.color, demand.type, demand.angled, this.fadeAlpha)}
       </g>
     )
