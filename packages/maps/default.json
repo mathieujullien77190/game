@@ -6,8 +6,8 @@
     {
       "id": "lineA",
       "start": {
-        "x": 200,
-        "y": 580
+        "x": 320,
+        "y": 540
       },
       "end": {
         "x": 320,
@@ -30,8 +30,8 @@
         "y": 200
       },
       "end": {
-        "x": 120,
-        "y": 180
+        "x": 160,
+        "y": 200
       },
       "type": "straight",
       "cp1": {
@@ -47,11 +47,11 @@
       "id": "lineC",
       "start": {
         "x": 120,
-        "y": 180
+        "y": 240
       },
       "end": {
-        "x": 140,
-        "y": 460
+        "x": 120,
+        "y": 540
       },
       "type": "straight",
       "cp1": {
@@ -82,6 +82,27 @@
         "x": 360,
         "y": 106.66666666666667
       }
+    },
+    {
+      "id": "lineE",
+      "start": {
+        "x": 160,
+        "y": 200
+      },
+      "end": {
+        "x": 120,
+        "y": 240
+      },
+      "type": "elbow",
+      "cp1": {
+        "x": 137.908610008,
+        "y": 200
+      },
+      "cp2": {
+        "x": 120,
+        "y": 217.908610008
+      },
+      "flip": true
     }
   ],
   "links": [
@@ -94,18 +115,6 @@
       "line2": {
         "lineId": "lineB",
         "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::start-lineB::end",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineB",
-        "endpoint": "end"
       },
       "activated": true
     },
@@ -132,6 +141,30 @@
         "endpoint": "start"
       },
       "activated": true
+    },
+    {
+      "id": "lineB::end-lineE::start",
+      "line1": {
+        "lineId": "lineB",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineE",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineC::start-lineE::end",
+      "line1": {
+        "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineE",
+        "endpoint": "end"
+      },
+      "activated": true
     }
   ],
   "tokens": [
@@ -140,6 +173,12 @@
       "color": "#e53935",
       "type": "round",
       "speed": 40
+    },
+    {
+      "id": "token2",
+      "color": "#546e7a",
+      "type": "round",
+      "speed": 80
     }
   ],
   "starts": [
@@ -147,7 +186,7 @@
       "id": "start1",
       "lineId": "lineA",
       "endpoint": "start",
-      "delay": 6
+      "delay": 3
     }
   ],
   "switches": {

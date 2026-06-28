@@ -24,6 +24,7 @@ type LinkMapRef = Record<string, LinkEndpoint>;
 
 export class SwitchPreview extends Switch {
   static readonly RADIUS = 18;
+  static readonly HIT_RADIUS = 36;
   static readonly ANGLE_SNAP_THRESHOLD = 0.005;
   static readonly PULSE_DURATION = 0.3;
   static readonly ARM_ANGLE_SPEED = 8;
@@ -137,8 +138,8 @@ export class SwitchPreview extends Switch {
     if (!this._pt) return false;
     const dx = x - this._pt.x;
     const dy = y - this._pt.y;
-    const { RADIUS } = SwitchPreview;
-    return dx * dx + dy * dy <= RADIUS * RADIUS;
+    const { HIT_RADIUS } = SwitchPreview;
+    return dx * dx + dy * dy <= HIT_RADIUS * HIT_RADIUS;
   };
 
   render = (

@@ -1,8 +1,8 @@
-# Drift — Level Editor
+﻿# Tickwire — Level Editor
 
 ## Le jeu
 
-Drift est un jeu de routage de balles inspiré d'Inception : les tokens (balles colorées) voyagent sur des lignes, traversent des **screen gates** pour entrer dans des écrans imbriqués (comme des niveaux de rêve) où le temps s'écoule différemment (`screenTimeMultipliers`), changent de couleur/forme via des transformers, et doivent atteindre l'arrivée dans le bon état.
+Tickwire est un jeu de routage de balles inspiré d'Inception : les tokens (balles colorées) voyagent sur des lignes, traversent des **screen gates** pour entrer dans des écrans imbriqués (comme des niveaux de rêve) où le temps s'écoule différemment (`screenTimeMultipliers`), changent de couleur/forme via des transformers, et doivent atteindre l'arrivée dans le bon état.
 
 Mode **editor** : l'utilisateur dessine des lignes, place des entités (start, arrival, switch, transformer, inverter, screen gate), configure les links, importe/exporte le JSON.
 Mode **preview** : simulation en temps réel des tokens sur le canvas.

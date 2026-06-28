@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "es2023",
     "lib": ["ES2023", "DOM"],
@@ -19,7 +19,7 @@
       "store/*": ["./src/store/*"],
       "store": ["./src/store/index"],
       "hooks/*": ["./src/hooks/*"],
-      "@drift/game": ["../game/src/index"]
+      "@tickwire/game": ["../game/src/index"]
     }
   },
   "include": ["src", "../../packages/engine/src", "../game/src"]

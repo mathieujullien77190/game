@@ -1,4 +1,4 @@
-import { defineConfig } from "vite"
+﻿import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
 import fs from "fs"
@@ -40,7 +40,7 @@ export default defineConfig({
       "store/": path.resolve(__dirname, "src/store") + "/",
       "store": path.resolve(__dirname, "src/store/index.ts"),
       "hooks/": path.resolve(__dirname, "src/hooks") + "/",
-      "@drift/game": path.resolve(__dirname, "../game/src/index.ts"),
+      "@tickwire/game": path.resolve(__dirname, "../game/src/index.ts"),
     },
   },
 })

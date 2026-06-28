@@ -4,7 +4,7 @@ import { CANVAS_H, CANVAS_W } from "engine/constants"
 import { useStore } from "store"
 import { serializeMap } from "engine/mapJson"
 import { Edition } from "components/Edition"
-import { Game } from "@drift/game"
+import { Game } from "@tickwire/game"
 import * as S from "./UI"
 import ToolsPanel from "components/ToolsPanel"
 
