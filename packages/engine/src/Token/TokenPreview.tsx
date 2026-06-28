@@ -392,10 +392,7 @@ export class TokenPreview extends Token {
       this.direction = other.endpoint === "start" ? 1 : -1;
       this.remainder = excess;
     } else {
-      const line = ctx.lines[this.lineId];
-      this.pointIndex =
-        arrivedAt === "end" ? (line?.points.length ?? 1) - 1 : 0;
-      this.remainder = 0;
+      this.arrived = true;
       this.direction = 0;
     }
 

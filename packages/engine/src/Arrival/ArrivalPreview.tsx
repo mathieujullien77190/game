@@ -65,8 +65,29 @@ export class ArrivalPreview extends Arrival {
     const demand = this.demands[this.currentDemandIndex]
     const flashOpacity = this.flashColor ? (1 - this.flashProgress) * 0.55 : 0
     const elems: JSX.Element[] = []
+    let firstA0: number | null = null
 
     elems.push(<circle key="base" cx={pt.x} cy={pt.y} r={r} fill="none" stroke={COLOR_GRAY} strokeWidth={sw}/>)
+
+    if (this.arcFill > 0 && n > 0) {
+      const segSpan = (Math.PI * 2) / n
+      const gap = n > 1 ? ARC_GAP : 0
+      const completedFull = Math.floor(this.arcFill)
+      const partial = this.arcFill - completedFull
+
+      for (let k = 0; k < n; k++) {
+        const a0 = lineAngle + k * segSpan + gap / 2
+        const a1 = lineAngle + (k + 1) * segSpan - gap / 2
+        if (k < completedFull) {
+          if (firstA0 === null) firstA0 = a0
+          elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
+        } else if (k === completedFull && partial > 0) {
+          if (firstA0 === null) firstA0 = a0
+          const a1p = a0 + (a1 - a0) * partial
+          elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1p)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
+        }
+      }
+    }
 
     if (this.flashColor)
       elems.push(<circle key="flash" cx={pt.x} cy={pt.y} r={r + sw / 2} fill="none" stroke={this.flashColor} strokeWidth={sw * 2} opacity={flashOpacity}/>)
@@ -74,32 +95,8 @@ export class ArrivalPreview extends Arrival {
     if (demand)
       elems.push(<g key="demand">{ArrivalPreview.demandToken(pt.x, pt.y, demand.color, demand.type, demand.angled)}</g>)
 
-    if (this.arcFill > 0 && n > 0) {
-      const segSpan = (Math.PI * 2) / n
-      const gap = n > 1 ? ARC_GAP : 0
-      const completedFull = Math.floor(this.arcFill)
-      const partial = this.arcFill - completedFull
-      let firstA0: number | null = null
-
-      for (let k = 0; k < n; k++) {
-        const a0 = lineAngle + k * segSpan + gap / 2
-        const a1 = lineAngle + (k + 1) * segSpan - gap / 2
-        if (k < completedFull) {
-          if (firstA0 === null) firstA0 = a0
-          const ex = pt.x + r * Math.cos(a1), ey = pt.y + r * Math.sin(a1)
-          elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
-          elems.push(<circle key={`dot-${k}`} cx={ex} cy={ey} r={3} fill={ARC_COLOR}/>)
-        } else if (k === completedFull && partial > 0) {
-          if (firstA0 === null) firstA0 = a0
-          const a1p = a0 + (a1 - a0) * partial
-          const ex = pt.x + r * Math.cos(a1p), ey = pt.y + r * Math.sin(a1p)
-          elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1p)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
-          elems.push(<circle key={`dot-${k}`} cx={ex} cy={ey} r={3} fill={ARC_COLOR}/>)
-        }
-      }
-      if (firstA0 !== null)
-        elems.unshift(<circle key="dot-start" cx={pt.x + r * Math.cos(firstA0)} cy={pt.y + r * Math.sin(firstA0)} r={3} fill={ARC_COLOR}/>)
-    }
+    if (firstA0 !== null)
+      elems.push(<circle key="dot-start" cx={pt.x + r * Math.cos(firstA0)} cy={pt.y + r * Math.sin(firstA0)} r={3} fill={ARC_COLOR}/>)
 
     return <g key={`aa-${this.id}`}>{elems}</g>
   }
