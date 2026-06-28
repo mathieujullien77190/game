@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Row = styled.div`
   display: flex;
@@ -7,7 +7,7 @@ export const Row = styled.div`
 `
 
 export const Label = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   color: #888;
   text-transform: uppercase;
@@ -20,7 +20,7 @@ export const Input = styled.input`
   padding: 3px 6px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   background: #fff;
   color: #333;

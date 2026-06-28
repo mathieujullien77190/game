@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const ButtonRow = styled.div`
 export const ClearButton = styled.button`
   padding: 6px 10px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: inherit;
   background: #fff0f0;
   color: #c62828;
   border: 1px solid #ef9a9a;
@@ -26,7 +26,7 @@ export const ClearButton = styled.button`
 export const CopyButton = styled.button`
   padding: 6px 10px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: inherit;
   background: #f0f4ff;
   color: #1565c0;
   border: 1px solid #90caf9;
@@ -37,7 +37,7 @@ export const CopyButton = styled.button`
 
 export const Pre = styled.pre`
   margin: 0;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   line-height: 1.6;
   color: #333;

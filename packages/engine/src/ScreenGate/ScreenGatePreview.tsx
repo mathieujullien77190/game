@@ -1,7 +1,7 @@
 import type { JSX } from "react"
 import { ScreenGate } from "./ScreenGate"
 import { GATE_W, GATE_H } from "./ScreenGateEditor"
-import { CANVAS_W, COLOR_BLACK, COLOR_WHITE } from "../constants"
+import { CANVAS_W, COLOR_BLACK, COLOR_WHITE, GAME_FONT } from "../constants"
 import type { Link } from "../Link/Link"
 import type { TokenPreview } from "../Token/TokenPreview"
 import type { LinePreview } from "../Line/LinePreview"
@@ -52,7 +52,7 @@ export class ScreenGatePreview extends ScreenGate {
         <rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}
           fill={COLOR_WHITE} stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH}/>
         <text x={pt.x} y={pt.y - GATE_H / 2 + 3} textAnchor="middle" dominantBaseline="hanging"
-          fontFamily="monospace" fontSize={LABEL_FONT_SIZE} fontWeight="bold" fill={COLOR_BLACK} opacity={0.5}>
+          fontFamily={GAME_FONT} fontSize={LABEL_FONT_SIZE} fontWeight="bold" fill={COLOR_BLACK} opacity={0.5}>
           {this.timeMultiplier >= 1
             ? `×${Math.round(this.timeMultiplier * 10) / 10}`
             : `×${(Math.round(this.timeMultiplier * 10) / 10).toFixed(1)}`}

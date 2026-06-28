@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const AddButton = styled.button<{ $active?: boolean }>`
   border: 1px solid ${(p) => (p.$active ? "#333" : "#ddd")};
   border-radius: 6px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -47,7 +47,7 @@ export const StartHeader = styled.div`
 `
 
 export const StartInfo = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   font-weight: bold;
   color: #555;

@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const AddButton = styled.button<{ $active?: boolean }>`
   border: 1px solid ${(p) => (p.$active ? "#1a237e" : "#ddd")};
   border-radius: 6px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -54,7 +54,7 @@ export const Row = styled.div`
 `
 
 export const GateId = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 12px;
   font-weight: bold;
   color: #1a237e;
@@ -75,7 +75,7 @@ export const DeleteButton = styled.button`
 `
 
 export const Label = styled.div`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   color: #666;
   text-transform: uppercase;
@@ -85,7 +85,7 @@ export const Label = styled.div`
 export const Select = styled.select`
   width: 100%;
   padding: 4px 6px;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -113,7 +113,7 @@ export const ScreenTimeRow = styled.div`
 export const MultiplierInput = styled.input`
   width: 60px;
   padding: 3px 6px;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   border: 1px solid #ddd;
   border-radius: 4px;

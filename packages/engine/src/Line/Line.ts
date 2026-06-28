@@ -33,7 +33,7 @@ export class Line {
   boost: number = 0
   flip: boolean = false
   tunnel: boolean = false
-  showSpeed: boolean = false
+  showSpeed: "" | "right" | "left" | "top" | "bottom" = ""
   limitation: number = 0
   frequency: number = 1
   amplitude: number = 20

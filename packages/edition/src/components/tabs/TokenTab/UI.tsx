@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const AddButton = styled.button`
   border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -61,7 +61,7 @@ export const TokenShape = styled.div<{ $color: string; $round: boolean }>`
 `
 
 export const TokenId = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   font-weight: bold;
   color: #555;
@@ -74,7 +74,7 @@ export const TypeToggle = styled.div`
 
 export const TypeButton = styled.button<{ $active: boolean }>`
   padding: 2px 6px;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   cursor: pointer;
   border-radius: 3px;
@@ -107,7 +107,7 @@ export const FieldRow = styled.div`
 `
 
 export const FieldLabel = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;

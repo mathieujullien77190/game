@@ -51,7 +51,7 @@ export interface StoreActions {
   toggleLineFlip: (id: string) => void
   updateLineBoost: (id: string, boost: number) => void
   updateLineTunnel: (id: string, tunnel: boolean) => void
-  updateLineShowSpeed: (id: string, showSpeed: boolean) => void
+  updateLineShowSpeed: (id: string, showSpeed: "" | "right" | "left" | "top" | "bottom") => void
   updateLineLimitation: (id: string, limitation: number) => void
   updateLineSine: (id: string, frequency: number, amplitude: number) => void
   updateLineSpiral: (id: string, turns: number) => void
@@ -66,6 +66,7 @@ export interface StoreActions {
   removeSwitch: (id: string) => void
   updateSwitchActiveLink: (id: string, activeLinkId: string) => void
   updateSwitchLinks: (id: string, linkIds: string[], activeLinkId: string | null) => void
+  updateSwitchColor: (id: string, color: string) => void
   toggleSwitchLink: (id1: string, id2: string) => void
   addTransformer: (linkId: string, type: TransformerType) => void
   removeTransformer: (id: string) => void

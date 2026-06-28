@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -21,7 +21,7 @@ export const TabButton = styled.button<{ $active: boolean }>`
   border: none;
   border-bottom: 2px solid ${({ $active }) => ($active ? "#1a73e8" : "transparent")};
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.8px;

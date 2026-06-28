@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const AddButton = styled.button<{ $active: boolean }>`
   border: 1px solid ${({ $active }) => ($active ? "#1a73e8" : "#ddd")};
   border-radius: 6px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -43,7 +43,7 @@ export const LineItem = styled.div`
 export const LineLabel = styled.span<{ $clickable?: boolean }>`
   font-size: 10px;
   color: #555;
-  font-family: monospace;
+  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -64,7 +64,7 @@ export const LinkCount = styled.span`
   border-radius: 8px;
   background: #e0e0e0;
   color: #888;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 9px;
 `
 
@@ -102,7 +102,7 @@ export const LinkItem = styled.div`
   background: #efefef;
   border-left: 2px solid #ccc;
   border-radius: 0 3px 3px 0;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
 `
 
@@ -129,7 +129,7 @@ export const TypeButton = styled.button<{ $active: boolean }>`
   border: 1px solid ${({ $active }) => ($active ? "#333" : "#ddd")};
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -144,7 +144,7 @@ export const TypeBadge = styled.span<{ $type: string }>`
   border-radius: 3px;
   background: ${({ $type }) => $type === "curve" ? "#ede7f6" : $type === "sine" ? "#e8f5e9" : "#e8f0fe"};
   color: ${({ $type }) => $type === "curve" ? "#7b1fa2" : $type === "sine" ? "#2e7d32" : "#1565c0"};
-  font-family: monospace;
+  font-family: inherit;
   font-size: 9px;
   font-weight: bold;
   text-transform: uppercase;
@@ -163,7 +163,7 @@ export const BoostRow = styled.div`
 `
 
 export const BoostLabel = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 9px;
   color: #aaa;
   text-transform: uppercase;
@@ -177,7 +177,7 @@ export const LinkActivated = styled.button<{ $on: boolean }>`
   border: 1px solid ${({ $on }) => ($on ? "#34a853" : "#ccc")};
   background: ${({ $on }) => ($on ? "#e6f4ea" : "#f5f5f5")};
   color: ${({ $on }) => ($on ? "#34a853" : "#aaa")};
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   font-weight: bold;
   cursor: pointer;

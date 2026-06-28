@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Lobby = styled.div`
   position: absolute;
@@ -16,7 +16,7 @@ export const PlayButton = styled.button`
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 18px;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -36,7 +36,7 @@ export const RestartButton = styled.button`
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -57,7 +57,7 @@ export const PauseButton = styled.button<{ $active: boolean }>`
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   z-index: 10;
 

@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -36,7 +36,7 @@ export const ViewButton = styled.button<{ $active: boolean }>`
   border: 1px solid ${({ $active }) => ($active ? "#333" : "#ccc")};
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -78,7 +78,7 @@ export const ScreenBtn = styled.button<{ $active: boolean }>`
   border: 1px solid ${({ $active }) => ($active ? "#333" : "#ccc")};
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   letter-spacing: 0.6px;
   &:hover { background: ${({ $active }) => ($active ? "#444" : "#e0e0e0")}; }
@@ -101,7 +101,7 @@ export const IdsButton = styled.button<{ $active: boolean }>`
   border: 1px solid ${({ $active }) => ($active ? "#333" : "#ccc")};
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -158,7 +158,7 @@ export const SaveButton = styled.button`
   border: 1px solid #236641;
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.6px;

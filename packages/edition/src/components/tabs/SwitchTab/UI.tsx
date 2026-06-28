@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const AddButton = styled.button<{ $active?: boolean }>`
   border: 1px solid ${(p) => (p.$active ? "#7c3aed" : "#ddd")};
   border-radius: 6px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -48,7 +48,7 @@ export const SwitchCard = styled.div`
 `
 
 export const SwitchId = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 12px;
   font-weight: bold;
   color: #3b0764;
@@ -67,7 +67,7 @@ export const Row = styled.div`
 `
 
 export const Label = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -76,7 +76,7 @@ export const Label = styled.span`
 `
 
 export const SwitchInfo = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   font-weight: bold;
   color: #555;
@@ -103,7 +103,7 @@ export const OutputOption = styled.button<{ $active: boolean }>`
   border: 1px solid ${(p) => (p.$active ? "#7c3aed" : "#ddd")};
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-align: left;
 
@@ -114,7 +114,7 @@ export const OutputOption = styled.button<{ $active: boolean }>`
 `
 
 export const NoLinks = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   color: #bbb;
   font-style: italic;

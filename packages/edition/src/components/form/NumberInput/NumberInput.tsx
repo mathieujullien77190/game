@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react"
 import * as S from "./UI"
 
 interface Props {
@@ -6,18 +7,37 @@ interface Props {
   label?: string
   min?: number
   step?: number
+  float?: boolean
 }
 
-export const NumberInput = ({ value, onChange, label, min = 0, step = 1 }: Props) => {
+export const NumberInput = ({ value, onChange, label, min = 0, step = 1, float = false }: Props) => {
+  const [text, setText] = useState(String(value))
+  const focused = useRef(false)
+
+  useEffect(() => {
+    if (!focused.current) setText(String(value))
+  }, [value])
+
   const input = (
     <S.Input
       type="number"
       min={min}
       step={step}
-      value={value}
+      value={text}
+      onFocus={() => { focused.current = true }}
+      onBlur={() => {
+        focused.current = false
+        const v = float ? parseFloat(text) : parseInt(text)
+        if (!isNaN(v) && v >= min) {
+          onChange(v)
+        } else {
+          setText(String(value))
+        }
+      }}
       onChange={(e) => {
-        const v = parseInt(e.target.value)
-        onChange(isNaN(v) || v < (min ?? 0) ? (min ?? 0) : v)
+        setText(e.target.value)
+        const v = float ? parseFloat(e.target.value) : parseInt(e.target.value)
+        if (!isNaN(v) && v >= min) onChange(v)
       }}
     />
   )

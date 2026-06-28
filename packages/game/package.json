@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:network": "vite --host",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit"
   },

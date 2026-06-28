@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const AddButton = styled.button<{ $active?: boolean }>`
   border: 1px solid ${(p) => (p.$active ? "#7b1fa2" : "#ddd")};
   border-radius: 6px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -51,7 +51,7 @@ export const Row = styled.div`
 `
 
 export const InverterId = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 12px;
   font-weight: bold;
   color: #4a148c;
@@ -71,7 +71,7 @@ export const EffectButton = styled.button<{ $active: boolean }>`
   border: 1px solid ${(p) => (p.$active ? "#7b1fa2" : "#ddd")};
   border-radius: 4px;
   cursor: pointer;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.4px;

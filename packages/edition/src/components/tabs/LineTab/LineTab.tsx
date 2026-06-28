@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { NumberInput } from "components/form/NumberInput"
+import { ToggleGroup } from "components/form/ToggleGroup"
 import { MAX_BOOST } from "engine/constants"
 import * as S from "./UI"
 
@@ -118,7 +119,16 @@ export const LineTab = () => {
               </S.BoostRow>
               <S.BoostRow>
                 <S.BoostLabel>show speed</S.BoostLabel>
-                <input type="checkbox" checked={line.showSpeed} onChange={(e) => updateLineShowSpeed(line.id, e.target.checked)} />
+                <ToggleGroup
+                  options={[
+                    { value: "top", label: "↑" },
+                    { value: "bottom", label: "↓" },
+                    { value: "left", label: "←" },
+                    { value: "right", label: "→" },
+                  ]}
+                  value={line.showSpeed}
+                  onChange={(v) => updateLineShowSpeed(line.id, v as "" | "right" | "left" | "top" | "bottom")}
+                />
               </S.BoostRow>
               <S.BoostRow>
                 <S.BoostLabel>limitation</S.BoostLabel>

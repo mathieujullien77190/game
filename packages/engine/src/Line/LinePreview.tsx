@@ -1,12 +1,16 @@
 import type { JSX } from "react";
 import { Line } from "./Line";
 import { linePath } from "./lineUtils";
+import { POINT_SPACING } from "../constants";
+import { svgDot } from "../svgDot";
 import {
   COLOR_BLACK,
   COLOR_WHITE,
   COLOR_DARK_GRAY,
   COLOR_RED,
   COLOR_ORANGE_GLOW,
+  COLOR_TOKEN_ORANGE,
+  GAME_FONT,
 } from "../constants";
 import type { TokenPreview } from "../Token/TokenPreview";
 
@@ -21,25 +25,27 @@ const lineMid = (line: LinePreview) => {
 };
 
 export class LinePreview extends Line {
-  static readonly BOOST_WIN_RATIO = 0.3;
+  static readonly BOOST_WIN_PX = 80;
   static readonly BOOST_ANIM_SPEED = 4;
   static readonly BOOST_GLOW_COLOR = COLOR_ORANGE_GLOW;
-  static readonly BOOST_STROKE_WIDTH = 2;
-  static readonly TUNNEL_DOT_R = 4;
-  static readonly LINE_STROKE = COLOR_DARK_GRAY;
-  static readonly LINE_STROKE_WIDTH = 3;
+  static readonly BOOST_STROKE_WIDTH = 3;
+  static readonly TUNNEL_DOT_R = 7;
+  static readonly LINE_STROKE = "#ccc";
+  static readonly LINE_STROKE_WIDTH = 6;
   static readonly SPEED_BOX_W = 26;
   static readonly SPEED_BOX_H = 19;
   static readonly SPEED_BOX_RX = 4;
-  static readonly SPEED_FONT_SIZE = 9;
+  static readonly SPEED_FONT_SIZE = 10;
   static readonly LIMIT_R = 11;
   static readonly LIMIT_OFFSET_X = 24;
 
   lastSpeed: number | undefined = undefined;
+  private wasSpeeding = false;
+  private limitFlashStart = -999;
 
   render = (elapsed: number): JSX.Element => {
     const {
-      BOOST_WIN_RATIO,
+      BOOST_WIN_PX,
       BOOST_ANIM_SPEED,
       BOOST_GLOW_COLOR,
       BOOST_STROKE_WIDTH,
@@ -50,7 +56,7 @@ export class LinePreview extends Line {
     const boostGlow = (() => {
       if (this.boost === 0 || this.points.length < 2) return null;
       const total = this.points.length;
-      const winSize = Math.max(2, Math.floor(total * BOOST_WIN_RATIO));
+      const winSize = Math.max(2, Math.floor(BOOST_WIN_PX / POINT_SPACING));
       const cycle = total + winSize;
       const rawOffset =
         Math.floor(
@@ -70,33 +76,17 @@ export class LinePreview extends Line {
         <path
           d={d}
           fill="none"
-          stroke={BOOST_GLOW_COLOR}
+          stroke="orange"
           strokeWidth={BOOST_STROKE_WIDTH}
           strokeLinecap="round"
-          filter="url(#pv-boost-blur)"
+          opacity={0.8}
         />
       );
     })();
 
     return (
       <g key={this.id}>
-        {boostGlow}
-        {this.tunnel ? (
-          <>
-            <circle
-              cx={this.start.x}
-              cy={this.start.y}
-              r={TUNNEL_DOT_R}
-              fill={COLOR_BLACK}
-            />
-            <circle
-              cx={this.end.x}
-              cy={this.end.y}
-              r={TUNNEL_DOT_R}
-              fill={COLOR_BLACK}
-            />
-          </>
-        ) : (
+        {!this.tunnel && (
           <path
             d={linePath(this)}
             fill="none"
@@ -105,74 +95,79 @@ export class LinePreview extends Line {
             strokeLinecap="round"
           />
         )}
+        {boostGlow}
       </g>
     );
   };
 
-  renderOverlay = (token?: TokenPreview): JSX.Element | null => {
+  renderTunnelDots = (): JSX.Element | null => {
+    if (!this.tunnel) return null;
+    return (
+      <g key={`td-${this.id}`}>
+        {svgDot(this.start.x, this.start.y, "small")}
+        {svgDot(this.end.x, this.end.y, "small")}
+      </g>
+    );
+  };
+
+  renderOverlay = (tokens: TokenPreview[], elapsed: number): JSX.Element | null => {
     if (!this.showSpeed && this.limitation === 0) return null;
-    const {
-      SPEED_BOX_W,
-      SPEED_BOX_H,
-      SPEED_BOX_RX,
-      SPEED_FONT_SIZE,
-      LIMIT_R,
-      LIMIT_OFFSET_X,
-    } = LinePreview;
+    const OFFSET = 36;
+    const W = 26, H = 18, RX = 3, AW = 4, AH = 5;
+    const offsetMap: Record<string, [number, number]> = {
+      right: [OFFSET, 0], left: [-OFFSET, 0], top: [0, -OFFSET], bottom: [0, OFFSET],
+    };
+    const arrowPoints = (pos: string, cx: number, cy: number) => {
+      if (pos === "top")    return `${cx - AW},${cy + H/2} ${cx + AW},${cy + H/2} ${cx},${cy + H/2 + AH}`;
+      if (pos === "bottom") return `${cx - AW},${cy - H/2} ${cx + AW},${cy - H/2} ${cx},${cy - H/2 - AH}`;
+      if (pos === "left")   return `${cx + W/2},${cy - AW} ${cx + W/2},${cy + AW} ${cx + W/2 + AH},${cy}`;
+      if (pos === "right")  return `${cx - W/2},${cy - AW} ${cx - W/2},${cy + AW} ${cx - W/2 - AH},${cy}`;
+      return "";
+    };
+    const { SPEED_FONT_SIZE, LIMIT_R } = LinePreview;
     const mid = lineMid(this);
-    const speed = token?.currentSpeed;
-    const tokenColor = token
-      ? token.displayColor || (token.color as string)
-      : undefined;
-    if (speed !== undefined) this.lastSpeed = speed;
+    const isSpeeding = this.limitation > 0 && tokens.some((t) => t.type !== "cop" && t.currentSpeed > this.limitation);
+    if (isSpeeding && !this.wasSpeeding) this.limitFlashStart = elapsed;
+    this.wasSpeeding = isSpeeding;
+    const flashOn = elapsed - this.limitFlashStart < 0.35;
 
     return (
       <g key={`ov-${this.id}`}>
-        {this.showSpeed && (
-          <g>
-            <rect
-              x={mid.x - SPEED_BOX_W / 2}
-              y={mid.y - SPEED_BOX_H / 2}
-              width={SPEED_BOX_W}
-              height={SPEED_BOX_H}
-              rx={SPEED_BOX_RX}
-              fill={tokenColor ?? COLOR_WHITE}
-              stroke={COLOR_BLACK}
-              strokeWidth={1.5}
-            />
-            <text
-              x={mid.x}
-              y={mid.y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontFamily="monospace"
-              fontSize={SPEED_FONT_SIZE}
-              fontWeight="bold"
-              fill={COLOR_BLACK}
-            >
-              {this.lastSpeed !== undefined ? Math.round(this.lastSpeed) : ""}
-            </text>
-          </g>
-        )}
+        {this.showSpeed && tokens.filter((t) => t.type !== "cop").map((token) => {
+          const pt = this.points[token.pointIndex];
+          if (!pt) return null;
+          const [ox, oy] = offsetMap[this.showSpeed] ?? [0, -OFFSET];
+          const cx = pt.x + ox;
+          const cy = pt.y + oy;
+          return (
+            <g key={token.id}>
+              <rect x={cx - W/2} y={cy - H/2} width={W} height={H} rx={RX} fill={COLOR_WHITE} />
+              <polygon points={arrowPoints(this.showSpeed, cx, cy)} fill={COLOR_WHITE} />
+              <text
+                x={cx} y={cy}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontFamily={GAME_FONT}
+                fontSize={SPEED_FONT_SIZE}
+                fontWeight="bold"
+                fill={COLOR_DARK_GRAY}
+              >
+                {Math.round(token.currentSpeed)}
+              </text>
+            </g>
+          );
+        })}
         {this.limitation !== 0 && (
           <g>
-            <circle
-              cx={mid.x + (this.showSpeed ? LIMIT_OFFSET_X : 0)}
-              cy={mid.y}
-              r={LIMIT_R}
-              fill={COLOR_WHITE}
-              stroke={COLOR_RED}
-              strokeWidth={2}
-            />
+            <circle cx={mid.x} cy={mid.y} r={LIMIT_R} fill={COLOR_WHITE} stroke={flashOn ? COLOR_RED : "#ccc"} strokeWidth={3} />
             <text
-              x={mid.x + (this.showSpeed ? LIMIT_OFFSET_X : 0)}
-              y={mid.y}
+              x={mid.x} y={mid.y}
               textAnchor="middle"
               dominantBaseline="middle"
-              fontFamily="monospace"
+              fontFamily={GAME_FONT}
               fontSize={SPEED_FONT_SIZE}
               fontWeight="bold"
-              fill={COLOR_BLACK}
+              fill={COLOR_DARK_GRAY}
             >
               {this.limitation}
             </text>

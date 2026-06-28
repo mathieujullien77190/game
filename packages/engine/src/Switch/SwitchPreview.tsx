@@ -4,6 +4,7 @@ import type { LinePoint } from "../types";
 import { Switch } from "./Switch";
 import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils";
 import { COLOR_BLACK, COLOR_WHITE } from "../constants";
+import { svgDot } from "../svgDot";
 
 const animateAngle = (
   current: number,
@@ -23,14 +24,14 @@ type LinksRef = Record<string, Link>;
 type LinkMapRef = Record<string, LinkEndpoint>;
 
 export class SwitchPreview extends Switch {
-  static readonly RADIUS = 18;
+  static readonly RADIUS = 24;
   static readonly HIT_RADIUS = 36;
   static readonly ANGLE_SNAP_THRESHOLD = 0.005;
   static readonly PULSE_DURATION = 0.3;
   static readonly ARM_ANGLE_SPEED = 8;
   static readonly PULSE_EXPAND_R = 12;
-  static readonly ARM_STROKE_WIDTH = 3;
-  static readonly ARM_DOT_R = 4;
+  static readonly ARM_STROKE_WIDTH = 4;
+  static readonly ARM_DOT_R = 7;
   static readonly STROKE_WIDTH = 3;
 
   activeIndex: number = 0;
@@ -39,6 +40,7 @@ export class SwitchPreview extends Switch {
   targetAngle: number | undefined = undefined;
   private _pt: LinePoint | null = null;
   private _enterAngle: number | undefined = undefined;
+  private _allExitAngles: number[] = [];
 
   getActiveLinkId = () => this.linkIds[this.activeIndex] ?? null;
 
@@ -97,6 +99,17 @@ export class SwitchPreview extends Switch {
     this._enterAngle =
       curveIntersectAngle(line.points, ep.endpoint, pt.x, pt.y, RADIUS) ??
       (ep.endpoint === "end" ? pt.angle + Math.PI : pt.angle);
+
+    this._allExitAngles = this.linkIds.flatMap((lid) => {
+      const link = links[lid];
+      if (!link) return [];
+      const dest = (link.line1.lineId === ep.lineId && link.line1.endpoint === ep.endpoint) ? link.line2 : link.line1;
+      const destLine = lines[dest.lineId];
+      if (!destLine || destLine.points.length === 0) return [];
+      const angle = curveIntersectAngle(destLine.points, dest.endpoint, pt.x, pt.y, RADIUS)
+        ?? (dest.endpoint === "end" ? destLine.points[destLine.points.length - 1].angle + Math.PI : destLine.points[0].angle);
+      return [angle];
+    });
 
     const activeDest = linkMap[`${ep.lineId}::${ep.endpoint}`];
     if (activeDest) {
@@ -172,20 +185,16 @@ export class SwitchPreview extends Switch {
                 cy={pt.y}
                 r={r + t * PULSE_EXPAND_R}
                 fill="none"
-                stroke={COLOR_BLACK}
+                stroke="#ccc"
                 strokeWidth={STROKE_WIDTH}
                 opacity={1 - t}
               />
             );
           })()}
-        <circle
-          cx={pt.x}
-          cy={pt.y}
-          r={r}
-          fill={COLOR_WHITE}
-          stroke={COLOR_BLACK}
-          strokeWidth={STROKE_WIDTH}
-        />
+        <circle cx={pt.x} cy={pt.y} r={r} fill="#f5f5f7" />
+        {this._allExitAngles.map((angle, i) => (
+          <g key={i}>{svgDot(pt.x + Math.cos(angle) * r, pt.y + Math.sin(angle) * r, "small")}</g>
+        ))}
         {enterAngle !== undefined && (
           <>
             <line
@@ -193,16 +202,11 @@ export class SwitchPreview extends Switch {
               y1={pt.y}
               x2={pt.x + Math.cos(enterAngle) * r}
               y2={pt.y + Math.sin(enterAngle) * r}
-              stroke={COLOR_BLACK}
+              stroke="#ccc"
               strokeWidth={ARM_STROKE_WIDTH}
               strokeLinecap="round"
             />
-            <circle
-              cx={pt.x + Math.cos(enterAngle) * r}
-              cy={pt.y + Math.sin(enterAngle) * r}
-              r={ARM_DOT_R}
-              fill={COLOR_BLACK}
-            />
+            {svgDot(pt.x + Math.cos(enterAngle) * r, pt.y + Math.sin(enterAngle) * r, "big", this.color)}
           </>
         )}
         {displayAngle !== undefined && (
@@ -212,18 +216,14 @@ export class SwitchPreview extends Switch {
               y1={pt.y}
               x2={pt.x + Math.cos(displayAngle) * r}
               y2={pt.y + Math.sin(displayAngle) * r}
-              stroke={COLOR_BLACK}
+              stroke="#ccc"
               strokeWidth={ARM_STROKE_WIDTH}
               strokeLinecap="round"
             />
-            <circle
-              cx={pt.x + Math.cos(displayAngle) * r}
-              cy={pt.y + Math.sin(displayAngle) * r}
-              r={ARM_DOT_R}
-              fill={COLOR_BLACK}
-            />
+            {svgDot(pt.x + Math.cos(displayAngle) * r, pt.y + Math.sin(displayAngle) * r, "big", this.color)}
           </>
         )}
+        <circle cx={pt.x} cy={pt.y} r={5} fill={this.color} />
       </g>
     );
   };

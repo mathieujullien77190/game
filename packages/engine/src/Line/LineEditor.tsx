@@ -1,7 +1,7 @@
 import type { JSX } from "react"
 import { Line } from "./Line"
 import { linePath } from "./lineUtils"
-import { COLOR_TOKEN_YELLOW, COLOR_TOKEN_BLUE } from "../constants"
+import { COLOR_TOKEN_YELLOW, COLOR_TOKEN_BLUE, GAME_FONT } from "../constants"
 import type { Point } from "../types"
 
 const lineMid = (line: LineEditor): Point => {
@@ -96,7 +96,7 @@ export class LineEditor extends Line {
             x={mid.x} y={mid.y - LABEL_OFFSET_Y}
             textAnchor="middle"
             dominantBaseline="middle"
-            fontFamily="monospace"
+            fontFamily={GAME_FONT}
             fontSize={LABEL_FONT_SIZE}
             fontWeight="bold"
             fill={LABEL_COLOR}

@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 import { T } from "theme"
 
 export const Screen = styled.div`
@@ -54,7 +54,7 @@ export const PauseBtn = styled.button`
 export const Timer = styled.div`
   font-size: 17px;
   font-weight: 700;
-  font-family: monospace;
+  font-family: inherit;
   color: #000000;
   min-width: 52px;
   text-align: right;

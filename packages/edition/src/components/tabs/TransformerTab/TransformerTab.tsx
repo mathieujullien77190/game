@@ -2,6 +2,7 @@ import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { TOKEN_COLORS } from "engine/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
+import { NumberInput } from "components/form/NumberInput"
 import * as S from "./UI"
 import type { TransformerType } from "engine/Transformer/Transformer"
 
@@ -68,16 +69,12 @@ export const TransformerTab = () => {
             {tr.type === "fade" && (
               <S.Row>
                 <S.Label>opacity</S.Label>
-                <S.AmountInput
-                  type="number"
-                  min={0.05}
-                  max={1}
-                  step={0.05}
+                <NumberInput
                   value={tr.amount}
-                  onChange={(ev) => {
-                    const v = parseFloat(ev.target.value)
-                    if (!isNaN(v)) updateTransformerAmount(tr.id, Math.min(1, Math.max(0.05, v)))
-                  }}
+                  min={0.05}
+                  step={0.05}
+                  float
+                  onChange={(v) => updateTransformerAmount(tr.id, Math.min(1, Math.max(0.05, v)))}
                 />
               </S.Row>
             )}

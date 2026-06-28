@@ -24,8 +24,10 @@ export const createSwitchActions = (set: Set) => ({
     set((state) => {
       const sw = state.switches[id]
       if (!sw) return {}
+      const updated = new SwitchEditor(sw.id, sw.linkIds, activeLinkId, sw.screenId)
+      updated.color = sw.color
       return {
-        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, sw.linkIds, activeLinkId) },
+        switches: { ...state.switches, [id]: updated },
         revision: state.revision + 1,
       }
     }),
@@ -34,8 +36,22 @@ export const createSwitchActions = (set: Set) => ({
     set((state) => {
       const sw = state.switches[id]
       if (!sw) return {}
+      const updated = new SwitchEditor(sw.id, linkIds, activeLinkId, sw.screenId)
+      updated.color = sw.color
       return {
-        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, linkIds, activeLinkId) },
+        switches: { ...state.switches, [id]: updated },
+        revision: state.revision + 1,
+      }
+    }),
+
+  updateSwitchColor: (id: string, color: string) =>
+    set((state) => {
+      const sw = state.switches[id]
+      if (!sw) return {}
+      const updated = new SwitchEditor(sw.id, sw.linkIds, sw.activeLinkId, sw.screenId)
+      updated.color = color
+      return {
+        switches: { ...state.switches, [id]: updated },
         revision: state.revision + 1,
       }
     }),

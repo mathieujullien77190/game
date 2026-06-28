@@ -1,4 +1,4 @@
-import styled from "styled-components"
+﻿import styled from "styled-components"
 
 export const Container = styled.div`
   display: flex;
@@ -15,7 +15,7 @@ export const TypeButton = styled.button<{ $active: boolean }>`
   flex: 1;
   padding: 4px 6px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: inherit;
   background: ${({ $active }) => ($active ? "#1565c0" : "#f0f0f0")};
   color: ${({ $active }) => ($active ? "#fff" : "#555")};
   border: 1px solid ${({ $active }) => ($active ? "#1565c0" : "#ccc")};
@@ -26,7 +26,7 @@ export const TypeButton = styled.button<{ $active: boolean }>`
 export const AddButton = styled.button<{ $active: boolean }>`
   padding: 6px 10px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: inherit;
   background: ${({ $active }) => ($active ? "#2e7d32" : "#f5f5f5")};
   color: ${({ $active }) => ($active ? "#fff" : "#333")};
   border: 1px solid ${({ $active }) => ($active ? "#2e7d32" : "#ddd")};
@@ -57,14 +57,14 @@ export const Row = styled.div`
 `
 
 export const TransformerId = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 11px;
   color: #2e7d32;
   flex: 1;
 `
 
 export const Label = styled.span`
-  font-family: monospace;
+  font-family: inherit;
   font-size: 10px;
   color: #888;
   text-transform: uppercase;
@@ -81,7 +81,7 @@ export const TypeButtons = styled.div`
 export const TypeBtn = styled.button<{ $active: boolean }>`
   padding: 3px 8px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: inherit;
   background: ${({ $active }) => ($active ? "#2e7d32" : "#f0f0f0")};
   color: ${({ $active }) => ($active ? "#fff" : "#555")};
   border: 1px solid ${({ $active }) => ($active ? "#2e7d32" : "#ccc")};
@@ -92,7 +92,7 @@ export const TypeBtn = styled.button<{ $active: boolean }>`
 export const AmountInput = styled.input`
   width: 60px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: inherit;
   padding: 2px 4px;
   border: 1px solid #ccc;
   border-radius: 3px;

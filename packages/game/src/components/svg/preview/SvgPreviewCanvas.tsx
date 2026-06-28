@@ -73,34 +73,6 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick, on
       </defs>
 
       <g style={{ filter: filterStr }}>
-        {/* Switch links */}
-        {(() => {
-          if (Object.keys(data.switchLinks).length === 0) return null
-          const drawn = new Set<string>()
-          return Object.entries(data.switchLinks).flatMap(([swId, linked]) =>
-            linked.flatMap((otherId) => {
-              const key = swId < otherId ? `${swId}:${otherId}` : `${otherId}:${swId}`
-              if (drawn.has(key)) return []
-              drawn.add(key)
-              const pa = data.switches[swId]?.getPoint()
-              const pb = data.switches[otherId]?.getPoint()
-              if (!pa || !pb) return []
-              return [
-                <line
-                  key={key}
-                  x1={pa.x}
-                  y1={pa.y}
-                  x2={pb.x}
-                  y2={pb.y}
-                  stroke="#ccc"
-                  strokeWidth={7}
-                  strokeDasharray="6 22"
-                  strokeLinecap="square"
-                />,
-              ]
-            })
-          )
-        })()}
 
         {/* Lines */}
         {visibleLines.map((line) => line.render(data.elapsedSeconds))}
@@ -144,11 +116,18 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick, on
           return token.render(pt, line)
         })}
 
+        {/* Transformer pulse + start ring on top of tokens */}
+        {Object.values(data.transformers).map((tr) => tr.renderAfter())}
+        {data.start && data.start.renderAfter()}
+
         {/* Line overlays: speed badge + limitation */}
         {visibleLines.map((line) => {
-          const token = data.tokens.find((t) => t.lineId === line.id && !t.exploding)
-          return line.renderOverlay(token)
+          const tokens = data.tokens.filter((t) => t.lineId === line.id && !t.exploding)
+          return line.renderOverlay(tokens, data.elapsedSeconds)
         })}
+
+        {/* Tunnel dots on top */}
+        {visibleLines.map((line) => line.renderTunnelDots())}
 
         {/* Screen gates */}
         {Object.values(data.screenGates).map((sg) =>

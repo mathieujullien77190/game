@@ -1,3 +1,4 @@
+export const GAME_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 export const CANVAS_W = 405;
 export const CANVAS_H = 720;
 export const GRID_SIZE = 20;

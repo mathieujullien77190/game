@@ -126,7 +126,7 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
-  updateLineShowSpeed: (id: string, showSpeed: boolean) =>
+  updateLineShowSpeed: (id: string, showSpeed: "" | "right" | "left" | "top" | "bottom") =>
     set((state) => {
       const line = state.editorManager.data.lines[id]
       if (!line) return {}

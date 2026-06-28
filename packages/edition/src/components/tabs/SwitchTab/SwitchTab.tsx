@@ -1,12 +1,15 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { getSwitchEnterPoint } from "engine/Switch/switchUtils"
+import { TOKEN_COLORS } from "engine/Token/Token"
+import { ColorPicker } from "components/form/ColorPicker"
 import * as S from "./UI"
 
 export const SwitchTab = () => {
   const {
     switches, switchLinks, editorManager, revision: _revision,
-    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, toggleSwitchLink, setHoveredSwitchId,
+    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks,
+    updateSwitchColor, toggleSwitchLink, setHoveredSwitchId,
   } = useStore(
     useShallow((s) => ({
       switches: s.switches,
@@ -18,6 +21,7 @@ export const SwitchTab = () => {
       removeSwitch: s.removeSwitch,
       updateSwitchActiveLink: s.updateSwitchActiveLink,
       updateSwitchLinks: s.updateSwitchLinks,
+      updateSwitchColor: s.updateSwitchColor,
       toggleSwitchLink: s.toggleSwitchLink,
       setHoveredSwitchId: s.setHoveredSwitchId,
     }))
@@ -61,6 +65,14 @@ export const SwitchTab = () => {
                 <S.SwitchId>{sw.id}</S.SwitchId>
                 <S.DeleteButton onClick={() => removeSwitch(sw.id)}>✕</S.DeleteButton>
               </S.Row>
+
+              <S.Divider />
+              <S.Label>color</S.Label>
+              <ColorPicker
+                palette={TOKEN_COLORS}
+                value={sw.color}
+                onChange={(c) => updateSwitchColor(sw.id, c)}
+              />
 
               <S.Divider />
               <S.Label>enter</S.Label>

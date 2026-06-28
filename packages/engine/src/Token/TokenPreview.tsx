@@ -153,10 +153,6 @@ const tokenExplosion = (
     EXPLOSION_SPEED_RANGE,
     EXPLOSION_SIZE_MIN,
     EXPLOSION_SIZE_RANGE,
-    EXPLOSION_BORDER_COUNT,
-    EXPLOSION_BORDER_R,
-    EXPLOSION_BORDER_STROKE_WIDTH,
-    EXPLOSION_BORDER_ROT_SPEED,
   } = TokenPreview;
   const progress = token.explosionProgress;
   const fade = 1 - token.explosionFadeProgress;
@@ -185,37 +181,6 @@ const tokenExplosion = (
     }
   }
 
-  for (let k = 0; k < EXPLOSION_BORDER_COUNT; k++) {
-    const angle = rng(seed, k) * Math.PI * 2;
-    const speed = EXPLOSION_SPEED_MIN + rng(seed, k + 10) * EXPLOSION_SPEED_RANGE;
-    const target = 0.2 + rng(seed, k + 35) * 0.8;
-    const alpha = (1 - progress * (1 - target)) * fade;
-    const px = x + Math.cos(angle) * f * speed;
-    const py = y + Math.sin(angle) * f * speed;
-    const rotDir = rng(seed, k + 30) > 0.5 ? 1 : -1;
-    const rot = angle + rotDir * progress * EXPLOSION_BORDER_ROT_SPEED;
-    const r = EXPLOSION_BORDER_R;
-    if (isSquare) {
-      pieces.push(
-        <line
-          key={`bl${k}`}
-          x1={px - r * Math.cos(rot)} y1={py - r * Math.sin(rot)}
-          x2={px + r * Math.cos(rot)} y2={py + r * Math.sin(rot)}
-          stroke={COLOR_BLACK} strokeWidth={EXPLOSION_BORDER_STROKE_WIDTH} opacity={alpha}
-        />,
-      );
-    } else {
-      const a0 = rot;
-      const a1 = rot + Math.PI / 2;
-      pieces.push(
-        <path
-          key={`ba${k}`}
-          d={`M${px + r * Math.cos(a0)},${py + r * Math.sin(a0)}A${r},${r},0,0,1,${px + r * Math.cos(a1)},${py + r * Math.sin(a1)}`}
-          fill="none" stroke={COLOR_BLACK} strokeWidth={EXPLOSION_BORDER_STROKE_WIDTH} opacity={alpha}
-        />,
-      );
-    }
-  }
 
   return <>{pieces}</>;
 };
@@ -229,8 +194,8 @@ export class TokenPreview extends Token {
   static readonly COP_COLOR_A = COLOR_RED;
   static readonly COP_COLOR_B = COLOR_BLUE;
   // base shape
-  static readonly BASE_R = 8;
-  static readonly SQUARE_HALF_BASE = 8;
+  static readonly BASE_R = 9;
+  static readonly SQUARE_HALF_BASE = 9;
   static readonly SQUARE_RX = 3;
   static readonly STROKE_WIDTH = 2;
   // trail
@@ -246,10 +211,6 @@ export class TokenPreview extends Token {
   static readonly EXPLOSION_SIZE_MIN = 2;
   static readonly EXPLOSION_SIZE_RANGE = 4;
   // explosion — border pieces (arcs for round, lines for square)
-  static readonly EXPLOSION_BORDER_COUNT = 4;
-  static readonly EXPLOSION_BORDER_R = 8;
-  static readonly EXPLOSION_BORDER_STROKE_WIDTH = 2;
-  static readonly EXPLOSION_BORDER_ROT_SPEED = Math.PI * 0.5;
 
   startId: string = "";
   lineId: string = "";
@@ -258,6 +219,7 @@ export class TokenPreview extends Token {
   direction: 1 | -1 | 0 = 1;
   startAt: number = 0;
   currentSpeed: number = 0;
+  baseSpeed: number = 0;
   rotationOffset: number = 0;
   targetRotationOffset: number = 0;
   colorTransitionFrom: string = "";
@@ -268,7 +230,8 @@ export class TokenPreview extends Token {
   isTransforming: boolean = false;
   transformProgress: number = 0;
   transformingLinkId: string = "";
-  transformMode: "color" | "shape" = "shape";
+  transformMode: "color" | "shape" | "fade" = "shape";
+  fadeOpacityFrom: number = 1;
   pendingType: string = "round";
   pendingLineId: string = "";
   pendingPointIndex: number = 0;
@@ -323,7 +286,16 @@ export class TokenPreview extends Token {
       : undefined;
     if (transformer?.type === "rotate")
       this.targetRotationOffset += Math.PI * 2.25;
-    if (transformer?.type === "fade") this.opacity = transformer.amount;
+    if (transformer?.type === "fade") {
+      this.fadeOpacityFrom = this.opacity;
+      this.isTransforming = true;
+      this.transformProgress = 0;
+      this.transformingLinkId = linkId;
+      this.transformMode = "fade";
+      this.direction = 0;
+      this.currentSpeed = this.speed;
+      transformer.transformProgress = 0;
+    }
     const inverterEffect = linkId ? ctx.inverterLinkMap.get(linkId) : undefined;
     if (inverterEffect === "invert") isInverted = !isInverted;
     else if (inverterEffect === "grayscale") isGrayscale = !isGrayscale;

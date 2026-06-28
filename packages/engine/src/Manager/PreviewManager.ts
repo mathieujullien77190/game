@@ -98,6 +98,7 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.switches = {};
     for (const s of Object.values(switches)) {
       const sw = new SwitchPreview(s.id, s.linkIds, s.activeLinkId);
+      if (s.color) sw.color = s.color;
       if (s.activeLinkId) {
         const idx = s.linkIds.indexOf(s.activeLinkId);
         if (idx !== -1) sw.activeIndex = idx;
@@ -152,6 +153,7 @@ export class PreviewManager extends Manager<LinePreview> {
           token.direction = direction;
           token.startAt = (i + 1) * start.delay;
           token.currentSpeed = 0;
+          token.baseSpeed = token.speed;
           return token;
         });
       }
@@ -189,6 +191,9 @@ export class PreviewManager extends Manager<LinePreview> {
           activeTransformer.transformProgress = token.transformProgress;
           if (token.transformMode === "color") {
             activeTransformer.currentTokenColor = token.displayColor || (token.color as string);
+          }
+          if (token.transformMode === "fade") {
+            token.opacity = token.fadeOpacityFrom + (activeTransformer.amount - token.fadeOpacityFrom) * token.transformProgress;
           }
         }
         if (token.transformProgress >= 1) {
@@ -234,8 +239,8 @@ export class PreviewManager extends Manager<LinePreview> {
         }
         const result = token.advance(dt, line.points.length);
         if (result) {
-          token.speed = token.currentSpeed;
           token.speedingLineId = "";
+          token.speed = token.currentSpeed;
           const { isInverted, isGrayscale, isDark } = token.transition(result.hit, result.excess, this.data);
           this.data.isInverted = isInverted;
           this.data.isGrayscale = isGrayscale;

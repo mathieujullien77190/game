@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components"
+﻿import styled, { keyframes } from "styled-components"
 import { T } from "theme"
 
 const fadeUp = keyframes`
@@ -95,7 +95,7 @@ export const StatsLabel = styled.div`
 export const StatsTime = styled.div<{ $color: string }>`
   font-size: 26px;
   font-weight: 300;
-  font-family: monospace;
+  font-family: inherit;
   color: ${({ $color }) => $color};
 `
 
