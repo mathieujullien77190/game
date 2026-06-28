@@ -51,7 +51,7 @@ export const CanvasArea = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: auto;
 `
 
 export const CanvasOuter = styled.div`

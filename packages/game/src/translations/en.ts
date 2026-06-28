@@ -1,0 +1,78 @@
+import type { Translation } from "./fr"
+
+export const en: Translation = {
+  app: {
+    name: "tickwire",
+    tagline: "ROUTING · PUZZLE",
+    version: "v1.0",
+  },
+  accueil: {
+    jouer: "PLAY",
+    menu: "MENU",
+  },
+  menu: {
+    title: "MENU",
+    cartes: "Maps",
+    cartesDesc: "Select a level",
+    hautsFaits: "Achievements",
+    hautsFaitsUnlocked: "unlocked",
+    options: "Options",
+    optionsDesc: "Sound, vibrations, language",
+    aPropos: "About",
+    aProposDesc: "Version, credits, licenses",
+    footer: "tickwire · v1.0",
+  },
+  cartes: {
+    title: "MAPS",
+    cardPrefix: "Map",
+    cardLabel: "MAP",
+  },
+  difficulties: {
+    Tutoriel: "Tutorial",
+    Avancé: "Advanced",
+    Expert: "Expert",
+  },
+  jeu: {
+    loading: "loading…",
+    pause: "PAUSE",
+    resume: "RESUME",
+    defaultMap: "Map",
+  },
+  victoire: {
+    complete: "Level complete!",
+    fail: "Try again!",
+    timeLabel: "TIME",
+    newRecord: "🏆 new record!",
+    bestLabel: "best",
+    rejouer: "RETRY",
+    suivant: "NEXT",
+    cartes: "MAPS",
+  },
+  hautsFaits: {
+    title: "ACHIEVEMENTS",
+    unlocked: "UNLOCKED",
+    locked: "LOCKED",
+    unlockedLabel: "UNLOCKED",
+    achievementBanner: "Achievement unlocked",
+  },
+  options: {
+    title: "OPTIONS",
+    language: "Language",
+    langFr: "Français",
+    langEn: "English",
+  },
+  aPropos: {
+    title: "ABOUT",
+    version: "v1.0.0",
+    subtitle: "Routing puzzle game",
+    credit: "Designed and developed with ❤️",
+  },
+  achievements: {
+    "premiers-pas": { name: "First steps", desc: "Complete a map" },
+    speedrun: { name: "Speedrun", desc: "Finish in under 60s" },
+    "sans-faute": { name: "Flawless", desc: "Finish without collision" },
+    perfection: { name: "Perfection", desc: "Get 3★ on a map" },
+    collection: { name: "Collection", desc: "Complete 3 different maps" },
+    maitrise: { name: "Mastery", desc: "Get 3★ on 5 maps" },
+  },
+}

@@ -98,6 +98,7 @@ export const Edition = () => {
       linePreset: s.linePreset,
       screens: s.screens,
       currentScreenId: s.currentScreenId,
+      revision: s.revision,
       addLine: s.addLine,
       addStart: s.addStart,
       addSwitch: s.addSwitch,

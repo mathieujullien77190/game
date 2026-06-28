@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { MouseEvent } from "react"
 import { CANVAS_W, CANVAS_H } from "engine/constants"
+import { perf } from "engine/perf"
 import { DarkOverlay } from "./DarkOverlay"
 import { MiniMap } from "./MiniMap"
 import type { PreviewManager } from "engine/Manager/PreviewManager"
@@ -11,19 +12,26 @@ type Props = {
   visible: boolean
   cursor: string
   onClick: (e: MouseEvent<SVGSVGElement>) => void
+  onTick?: () => void
 }
 
-export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick }: Props) => {
+export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick, onTick }: Props) => {
   const [, setTick] = useState(0)
+
+  const lastTs = useRef<number>(0)
 
   useEffect(() => {
     if (!manager) return
     let raf: number
     const loop = (ts: number) => {
+      const delta = ts - lastTs.current
+      lastTs.current = ts
       const t0 = performance.now()
       if (!paused) manager.tickSim(ts)
-      manager.data.frameMs = performance.now() - t0
+      perf.ms = performance.now() - t0
+      if (delta > 0) perf.fps = 1000 / delta
       setTick((t) => t + 1)
+      onTick?.()
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
@@ -36,20 +44,31 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick }: 
   const sid = data.previewScreenId
   const visibleLines = Object.values(data.lines).filter((l) => l.screenId === sid)
 
-  const filterStr = [
-    data.isInverted ? "invert(1)" : "",
-    data.isGrayscale ? "grayscale(1)" : "",
-  ].filter(Boolean).join(" ") || undefined
+  const filterStr =
+    [data.isInverted ? "invert(1)" : "", data.isGrayscale ? "grayscale(1)" : ""]
+      .filter(Boolean)
+      .join(" ") || undefined
 
   return (
     <svg
       viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-      style={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#fff", cursor, userSelect: "none" }}
+      shapeRendering="auto"
+      style={{
+        display: "block",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "#f5f5f7",
+        cursor,
+        userSelect: "none",
+      }}
       onClick={onClick}
     >
       <defs>
         <filter id="pv-boost-blur" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="3"/>
+          <feGaussianBlur stdDeviation="3" />
         </filter>
       </defs>
 
@@ -67,10 +86,17 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick }: 
               const pb = data.switches[otherId]?.getPoint()
               if (!pa || !pb) return []
               return [
-                <line key={key}
-                  x1={pa.x} y1={pa.y} x2={pb.x} y2={pb.y}
-                  stroke="#ccc" strokeWidth={7} strokeDasharray="6 22" strokeLinecap="square"
-                />
+                <line
+                  key={key}
+                  x1={pa.x}
+                  y1={pa.y}
+                  x2={pb.x}
+                  y2={pb.y}
+                  stroke="#ccc"
+                  strokeWidth={7}
+                  strokeDasharray="6 22"
+                  strokeLinecap="square"
+                />,
               ]
             })
           )
@@ -133,12 +159,8 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick }: 
         {Object.values(data.inverters).map((inv) => inv.render(data.links, data.lines, sid))}
       </g>
 
-      {data.isDark && <DarkOverlay data={data}/>}
-      <MiniMap data={data}/>
-      <text x={8} y={CANVAS_H - 8}
-        fontFamily="monospace" fontSize={11} fontWeight="bold" fill="#333">
-        {Math.round(data.fps)} fps  {Math.ceil(data.frameMs)}ms
-      </text>
+      {data.isDark && <DarkOverlay data={data} />}
+      <MiniMap data={data} />
     </svg>
   )
 }

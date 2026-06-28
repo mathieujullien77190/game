@@ -31,6 +31,7 @@ type ShapeData = {
   color: unknown;
   direction: number;
   rotationOffset: number;
+  currentSpeed: number;
 };
 
 const tokenShape = (
@@ -43,7 +44,6 @@ const tokenShape = (
     BASE_R,
     SQUARE_HALF_BASE,
     SQUARE_RX,
-    STROKE_WIDTH,
     PULSE_SPEED,
     PULSE_AMPLITUDE,
   } = TokenPreview;
@@ -55,45 +55,48 @@ const tokenShape = (
   const rot =
     (data.direction === -1 ? angle + Math.PI : angle) + data.rotationOffset;
 
+  const moving = data.direction !== 0 && data.currentSpeed > 0;
+
   if (data.type === "cop") {
     const { COP_FLASH_SPEED, COP_COLOR_A, COP_COLOR_B } = TokenPreview;
     const flash = Math.sin((Date.now() / 1000) * Math.PI * COP_FLASH_SPEED) > 0;
+    const copColor = flash ? COP_COLOR_A : COP_COLOR_B;
+    const r = BASE_R / 1.6;
     return (
-      <circle
-        cx={x}
-        cy={y}
-        r={BASE_R / 1.6}
-        fill={flash ? COP_COLOR_A : COP_COLOR_B}
-        stroke={COLOR_BLACK}
-        strokeWidth={STROKE_WIDTH}
-      />
+      <g>
+        <circle cx={x} cy={y} r={r * 1.8} fill={copColor} opacity={0.1} />
+        <circle cx={x} cy={y} r={r} fill={copColor} />
+      </g>
     );
   }
   if (data.type === "square") {
     const hw = SQUARE_HALF_BASE * pulse;
+    const hwBig = SQUARE_HALF_BASE * 1.8;
+    const tf = `rotate(${(rot * 180) / Math.PI},${x},${y})`;
     return (
-      <rect
-        x={x - hw}
-        y={y - hw}
-        width={hw * 2}
-        height={hw * 2}
-        rx={SQUARE_RX}
-        fill={color}
-        stroke={COLOR_BLACK}
-        strokeWidth={STROKE_WIDTH}
-        transform={`rotate(${(rot * 180) / Math.PI},${x},${y})`}
-      />
+      <g>
+        {moving && <rect
+          x={x - hwBig} y={y - hwBig}
+          width={hwBig * 2} height={hwBig * 2}
+          rx={SQUARE_RX * 1.8}
+          fill={color} opacity={0.1}
+          transform={tf}
+        />}
+        <rect
+          x={x - hw} y={y - hw}
+          width={hw * 2} height={hw * 2}
+          rx={SQUARE_RX}
+          fill={color}
+          transform={tf}
+        />
+      </g>
     );
   }
   return (
-    <circle
-      cx={x}
-      cy={y}
-      r={BASE_R * pulse}
-      fill={color}
-      stroke="#000"
-      strokeWidth={STROKE_WIDTH}
-    />
+    <g>
+      {moving && <circle cx={x} cy={y} r={BASE_R * 1.8} fill={color} opacity={0.1} />}
+      <circle cx={x} cy={y} r={BASE_R * pulse} fill={color} />
+    </g>
   );
 };
 

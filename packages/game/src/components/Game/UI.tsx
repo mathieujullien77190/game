@@ -31,7 +31,7 @@ export const RestartButton = styled.button`
   top: 8px;
   right: 8px;
   padding: 4px 10px;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   color: #333;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -42,7 +42,9 @@ export const RestartButton = styled.button`
   letter-spacing: 0.6px;
   z-index: 10;
 
-  &:hover { background: #e0e0e0; }
+  &:hover {
+    background: #e0e0e0;
+  }
 `
 
 export const PauseButton = styled.button<{ $active: boolean }>`
@@ -59,5 +61,8 @@ export const PauseButton = styled.button<{ $active: boolean }>`
   font-size: 10px;
   z-index: 10;
 
-  &:hover { background: #e0e0e0; color: #333; }
+  &:hover {
+    background: #e0e0e0;
+    color: #333;
+  }
 `

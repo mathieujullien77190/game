@@ -1,0 +1,68 @@
+<svg width="390" height="844" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <rect width="390" height="844" fill="#ffffff"/>
+
+  <!-- Header HUD -->
+  <rect width="390" height="64" fill="#ffffff"/>
+  <rect x="0" y="63" width="390" height="1" fill="#e8e8f0"/>
+  <text x="24" y="40" fill="#1B2559" opacity="0.5" font-size="22">‹</text>
+  <text x="56" y="40" fill="#1B2559" font-size="15" font-weight="600">Carte 02</text>
+
+  <!-- Pause button -->
+  <rect x="162" y="18" width="66" height="30" rx="8" fill="#f0f0f4"/>
+  <text x="195" y="38" text-anchor="middle" fill="#1B2559" opacity="0.6" font-size="15">⏸</text>
+
+  <!-- Timer -->
+  <text x="366" y="40" text-anchor="end" fill="#FF5630" font-size="18" font-weight="700" font-family="monospace">01:23</text>
+
+  <!-- Game canvas - full white -->
+  <rect x="0" y="64" width="390" height="780" fill="#ffffff"/>
+
+  <!-- Network lines -->
+  <g stroke="#d0d0dc" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M 60 220 L 195 220"/>
+    <path d="M 195 220 Q 270 220 270 295"/>
+    <path d="M 270 295 L 270 500"/>
+    <path d="M 195 220 L 195 420"/>
+    <path d="M 195 420 Q 195 500 270 500"/>
+    <path d="M 270 295 L 360 295"/>
+    <path d="M 360 295 L 360 500"/>
+    <path d="M 360 500 L 270 500"/>
+  </g>
+
+  <!-- Start -->
+  <circle cx="60" cy="220" r="12" fill="#2E9E6B" opacity="0.15"/>
+  <circle cx="60" cy="220" r="8" fill="#2E9E6B"/>
+  <circle cx="60" cy="220" r="4" fill="#ffffff"/>
+
+  <!-- Switch node 1 -->
+  <circle cx="195" cy="220" r="14" fill="#ffffff" stroke="#1B2559" stroke-width="2.5"/>
+  <circle cx="195" cy="220" r="6" fill="#1B2559"/>
+
+  <!-- Switch node 2 -->
+  <circle cx="270" cy="295" r="14" fill="#ffffff" stroke="#3A6FD8" stroke-width="2.5"/>
+  <circle cx="270" cy="295" r="6" fill="#3A6FD8"/>
+
+  <!-- Arrival -->
+  <rect x="244" y="474" width="52" height="52" rx="10" fill="#FF5630" opacity="0.08"/>
+  <rect x="244" y="474" width="52" height="52" rx="10" fill="none" stroke="#FF5630" stroke-width="2"/>
+  <text x="270" y="504" text-anchor="middle" fill="#FF5630" font-size="11" font-weight="700" letter-spacing="0.5">ARRIVÉE</text>
+  <circle cx="270" cy="518" r="5" fill="#FF5630"/>
+
+  <!-- Token 1 on line (moving) -->
+  <circle cx="130" cy="220" r="20" fill="#FF5630" opacity="0.1"/>
+  <circle cx="130" cy="220" r="13" fill="#FF5630"/>
+  <circle cx="130" cy="220" r="7" fill="#ffffff" opacity="0.35"/>
+
+  <!-- Token 2 -->
+  <circle cx="195" cy="340" r="16" fill="#3A6FD8" opacity="0.1"/>
+  <circle cx="195" cy="340" r="11" fill="#3A6FD8"/>
+  <circle cx="195" cy="340" r="6" fill="#ffffff" opacity="0.3"/>
+
+  <!-- Speed badge -->
+  <rect x="298" y="280" width="34" height="22" rx="5" fill="#1B2559" opacity="0.08"/>
+  <rect x="298" y="280" width="34" height="22" rx="5" fill="none" stroke="#1B2559" stroke-width="1" opacity="0.2"/>
+  <text x="315" y="295" text-anchor="middle" fill="#1B2559" opacity="0.6" font-size="11" font-family="monospace" font-weight="600">×2</text>
+
+  <!-- Bottom safe area -->
+  <rect x="155" y="824" width="80" height="4" rx="2" fill="#1a1a2e" opacity="0.12"/>
+</svg>

@@ -16,7 +16,15 @@
     "paths": {
       "engine/*": ["../../packages/engine/src/*"],
       "components/*": ["./src/components/*"],
-      "store": ["./src/store"]
+      "store": ["./src/store"],
+      "screens/*": ["./src/screens/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "translations/*": ["./src/translations/*"],
+      "progressStore": ["./src/progressStore"],
+      "langStore": ["./src/langStore"],
+      "theme": ["./src/theme"],
+      "maps": ["./src/maps"],
+      "devStore": ["./src/devStore"]
     }
   },
   "include": ["src", "../../packages/engine/src"]

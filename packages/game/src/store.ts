@@ -10,8 +10,17 @@ const buildPreviewManager = (json: MapJson): PreviewManager => {
   const editorManager = new EditorManager()
   const previewManager = new PreviewManager()
 
-  const { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screenGates, screenTimeMultipliers } =
-    deserializeMap(json, editorManager)
+  const {
+    tokens,
+    starts,
+    switches,
+    switchLinks,
+    transformers,
+    inverters,
+    arrival,
+    screenGates,
+    screenTimeMultipliers,
+  } = deserializeMap(json, editorManager)
 
   previewManager.data.lines = {}
   for (const l of Object.values(editorManager.data.lines)) {
@@ -47,7 +56,7 @@ const buildPreviewManager = (json: MapJson): PreviewManager => {
     arrival,
     inverters,
     screenGates,
-    screenTimeMultipliers,
+    screenTimeMultipliers
   )
 
   return previewManager
@@ -60,16 +69,15 @@ type GameStore = {
 
 export const useGameStore = create<GameStore>(() => ({
   previewManager: null,
-  loading: true,
+  loading: false,
 }))
 
-const initGame = async () => {
+export const loadMap = async (file: string) => {
+  useGameStore.setState({ loading: true, previewManager: null })
   let json: MapJson = EMPTY_MAP
   try {
-    const res = await fetch("/maps/default.json")
+    const res = await fetch(`/maps/${file}`)
     if (res.ok) json = await res.json()
   } catch {}
   useGameStore.setState({ previewManager: buildPreviewManager(json), loading: false })
 }
-
-initGame()

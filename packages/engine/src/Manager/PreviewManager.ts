@@ -8,7 +8,6 @@ import type { Start } from "../Start/Start";
 import { StartPreview } from "../Start/StartPreview";
 import type { Switch } from "../Switch/Switch";
 import { SwitchPreview } from "../Switch/SwitchPreview";
-import { smoothFps } from "../stats";
 import type { Token } from "../Token/Token";
 import { TokenPreview } from "../Token/TokenPreview";
 import type { Inverter } from "../Inverter/Inverter";
@@ -57,8 +56,6 @@ export class PreviewManager extends Manager<LinePreview> {
     arrivalKey: "" as string,
     elapsedSeconds: 0,
     lastTimestamp: null as number | null,
-    fps: 0,
-    frameMs: 0,
   };
 
   initSimulation = (
@@ -168,8 +165,6 @@ export class PreviewManager extends Manager<LinePreview> {
     }
     const deltaMs = Math.max(1, Math.min(timestamp - this.data.lastTimestamp, 100));
     this.data.lastTimestamp = timestamp;
-    this.data.fps = smoothFps(this.data.fps, deltaMs);
-
     const deltaSeconds = deltaMs / 1000;
     this.data.elapsedSeconds += deltaSeconds;
 

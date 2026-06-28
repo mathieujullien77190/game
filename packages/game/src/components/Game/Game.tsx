@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { IoPause, IoPlay } from "react-icons/io5"
 import { CANVAS_W, CANVAS_H } from "engine/constants"
 import type { PreviewManager } from "engine/Manager/PreviewManager"
 import { SvgPreviewCanvas } from "../svg/preview/SvgPreviewCanvas"
@@ -6,19 +7,11 @@ import * as S from "./UI"
 
 type Props = {
   previewManager: PreviewManager
+  onRestart?: () => void
 }
 
-export const Game = ({ previewManager }: Props) => {
-  const [playing, setPlaying] = useState(false)
+export const Game = ({ previewManager, onRestart }: Props) => {
   const [paused, setPaused] = useState(false)
-
-  if (!playing) {
-    return (
-      <S.Lobby>
-        <S.PlayButton onClick={() => setPlaying(true)}>Jouer</S.PlayButton>
-      </S.Lobby>
-    )
-  }
 
   return (
     <>
@@ -34,12 +27,10 @@ export const Game = ({ previewManager }: Props) => {
           previewManager.clickAt(x, y)
         }}
       />
-      <S.RestartButton onClick={() => { setPaused(false); setPlaying(false) }}>
-        ↺ Restart
-      </S.RestartButton>
       <S.PauseButton $active={paused} onClick={() => setPaused((v) => !v)}>
-        {paused ? "▶" : "⏸"}
+        {paused ? <IoPlay /> : <IoPause />}
       </S.PauseButton>
+      {onRestart && <S.RestartButton onClick={onRestart}>↺</S.RestartButton>}
     </>
   )
 }

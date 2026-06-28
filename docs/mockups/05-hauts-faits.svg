@@ -1,0 +1,75 @@
+<svg width="390" height="844" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <rect width="390" height="844" fill="#f5f5f7"/>
+
+  <!-- Header -->
+  <rect width="390" height="72" fill="#ffffff"/>
+  <rect x="0" y="71" width="390" height="1" fill="#e0e0e8"/>
+  <text x="24" y="44" fill="#1B2559" opacity="0.5" font-size="22">‹</text>
+  <text x="195" y="44" text-anchor="middle" fill="#1B2559" font-size="16" font-weight="700" letter-spacing="1">HAUTS FAITS</text>
+  <text x="366" y="44" text-anchor="end" fill="#FFB800" font-size="14" font-weight="700">12 / 40</text>
+
+  <!-- Global progress bar -->
+  <rect x="24" y="78" width="342" height="5" rx="2.5" fill="#e8e8f0"/>
+  <rect x="24" y="78" width="102" height="5" rx="2.5" fill="#FF5630"/>
+
+  <!-- Achievement 1 - unlocked green -->
+  <rect x="16" y="102" width="358" height="72" rx="14" fill="#ffffff"/>
+  <rect x="16" y="102" width="4" height="72" rx="2" fill="#2E9E6B"/>
+  <circle cx="56" cy="138" r="20" fill="#2E9E6B" opacity="0.1"/>
+  <text x="56" y="144" text-anchor="middle" fill="#2E9E6B" font-size="20">✦</text>
+  <text x="88" y="126" fill="#1B2559" font-size="14" font-weight="600">Premiers pas</text>
+  <text x="88" y="146" fill="#1B2559" opacity="0.45" font-size="12">Terminer la carte 01</text>
+  <text x="88" y="164" fill="#2E9E6B" font-size="10" font-weight="600" letter-spacing="1">DÉBLOQUÉ</text>
+
+  <!-- Achievement 2 - unlocked blue -->
+  <rect x="16" y="186" width="358" height="72" rx="14" fill="#ffffff"/>
+  <rect x="16" y="186" width="4" height="72" rx="2" fill="#3A6FD8"/>
+  <circle cx="56" cy="222" r="20" fill="#3A6FD8" opacity="0.1"/>
+  <text x="56" y="228" text-anchor="middle" fill="#3A6FD8" font-size="20">◷</text>
+  <text x="88" y="210" fill="#1B2559" font-size="14" font-weight="600">Speedrun</text>
+  <text x="88" y="230" fill="#1B2559" opacity="0.45" font-size="12">Terminer une carte en moins de 60s</text>
+  <text x="88" y="248" fill="#3A6FD8" font-size="10" font-weight="600" letter-spacing="1">DÉBLOQUÉ  ·  Carte 04 : 52s</text>
+
+  <!-- Achievement 3 - unlocked red -->
+  <rect x="16" y="270" width="358" height="72" rx="14" fill="#ffffff"/>
+  <rect x="16" y="270" width="4" height="72" rx="2" fill="#FF5630"/>
+  <circle cx="56" cy="306" r="20" fill="#FF5630" opacity="0.1"/>
+  <text x="56" y="312" text-anchor="middle" fill="#FF5630" font-size="20">★</text>
+  <text x="88" y="294" fill="#1B2559" font-size="14" font-weight="600">Sans faute</text>
+  <text x="88" y="314" fill="#1B2559" opacity="0.45" font-size="12">Terminer sans aucune collision</text>
+  <text x="88" y="332" fill="#FF5630" font-size="10" font-weight="600" letter-spacing="1">DÉBLOQUÉ  ·  Carte 02</text>
+
+  <!-- Divider -->
+  <text x="24" y="376" fill="#1B2559" opacity="0.25" font-size="10" font-weight="600" letter-spacing="2">VERROUILLÉ</text>
+  <line x1="114" y1="370" x2="366" y2="370" stroke="#1B2559" stroke-width="1" opacity="0.08"/>
+
+  <!-- Achievement 4 - locked -->
+  <rect x="16" y="388" width="358" height="76" rx="14" fill="#f0f0f4"/>
+  <circle cx="56" cy="426" r="20" fill="#1B2559" opacity="0.05"/>
+  <text x="56" y="432" text-anchor="middle" fill="#1B2559" opacity="0.2" font-size="20">🔒</text>
+  <text x="88" y="414" fill="#1B2559" opacity="0.35" font-size="14" font-weight="600">Maître du temps</text>
+  <text x="88" y="434" fill="#1B2559" opacity="0.25" font-size="12">Obtenir 3★ sur 10 cartes</text>
+  <rect x="88" y="448" width="200" height="4" rx="2" fill="#e0e0e8"/>
+  <rect x="88" y="448" width="60" height="4" rx="2" fill="#1B2559" opacity="0.2"/>
+  <text x="296" y="456" fill="#1B2559" opacity="0.25" font-size="10">3 / 10</text>
+
+  <!-- Achievement 5 - locked -->
+  <rect x="16" y="476" width="358" height="72" rx="14" fill="#f0f0f4"/>
+  <circle cx="56" cy="512" r="20" fill="#1B2559" opacity="0.05"/>
+  <text x="56" y="518" text-anchor="middle" fill="#1B2559" opacity="0.2" font-size="20">🔒</text>
+  <text x="88" y="500" fill="#1B2559" opacity="0.35" font-size="14" font-weight="600">Architecte</text>
+  <text x="88" y="520" fill="#1B2559" opacity="0.25" font-size="12">Créer et sauvegarder une carte</text>
+
+  <!-- Achievement 6 - locked -->
+  <rect x="16" y="560" width="358" height="76" rx="14" fill="#f0f0f4"/>
+  <circle cx="56" cy="598" r="20" fill="#1B2559" opacity="0.05"/>
+  <text x="56" y="604" text-anchor="middle" fill="#1B2559" opacity="0.2" font-size="20">🔒</text>
+  <text x="88" y="586" fill="#1B2559" opacity="0.35" font-size="14" font-weight="600">Tout compléter</text>
+  <text x="88" y="606" fill="#1B2559" opacity="0.25" font-size="12">Terminer toutes les cartes</text>
+  <rect x="88" y="620" width="200" height="4" rx="2" fill="#e0e0e8"/>
+  <rect x="88" y="620" width="28" height="4" rx="2" fill="#1B2559" opacity="0.2"/>
+  <text x="296" y="628" fill="#1B2559" opacity="0.25" font-size="10">4 / 40</text>
+
+  <!-- Bottom safe area -->
+  <rect x="155" y="824" width="80" height="4" rx="2" fill="#1a1a2e" opacity="0.12"/>
+</svg>

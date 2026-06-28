@@ -7,40 +7,80 @@
       "id": "lineA",
       "start": {
         "x": 200,
-        "y": 560
+        "y": 580
       },
       "end": {
-        "x": 240,
-        "y": 180
+        "x": 320,
+        "y": 200
       },
       "type": "straight",
       "cp1": {
-        "x": 213.33333333333334,
-        "y": 433.3333333333333
+        "x": 240,
+        "y": 453.3333333333333
       },
       "cp2": {
-        "x": 226.66666666666666,
-        "y": 306.66666666666663
+        "x": 280,
+        "y": 326.66666666666663
       }
     },
     {
       "id": "lineB",
       "start": {
-        "x": 240,
-        "y": 180
+        "x": 320,
+        "y": 200
       },
       "end": {
-        "x": 80,
-        "y": 340
+        "x": 120,
+        "y": 180
       },
       "type": "straight",
       "cp1": {
-        "x": 186.66666666666666,
-        "y": 233.33333333333334
+        "x": 253.33333333333331,
+        "y": 193.33333333333334
       },
       "cp2": {
-        "x": 133.33333333333331,
+        "x": 186.66666666666666,
+        "y": 186.66666666666666
+      }
+    },
+    {
+      "id": "lineC",
+      "start": {
+        "x": 120,
+        "y": 180
+      },
+      "end": {
+        "x": 140,
+        "y": 460
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 126.66666666666667,
         "y": 286.6666666666667
+      },
+      "cp2": {
+        "x": 133.33333333333334,
+        "y": 373.33333333333337
+      }
+    },
+    {
+      "id": "lineD",
+      "start": {
+        "x": 320,
+        "y": 200
+      },
+      "end": {
+        "x": 380,
+        "y": 60
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 340,
+        "y": 153.33333333333334
+      },
+      "cp2": {
+        "x": 360,
+        "y": 106.66666666666667
       }
     }
   ],
@@ -56,18 +96,48 @@
         "endpoint": "start"
       },
       "activated": true
+    },
+    {
+      "id": "lineC::start-lineB::end",
+      "line1": {
+        "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineB",
+        "endpoint": "end"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineA::end-lineD::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineD",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineB::start-lineD::start",
+      "line1": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineD",
+        "endpoint": "start"
+      },
+      "activated": true
     }
   ],
   "tokens": [
     {
-      "id": "token4",
+      "id": "token1",
       "color": "#e53935",
-      "type": "round",
-      "speed": 40
-    },
-    {
-      "id": "token5",
-      "color": "#f9ab00",
       "type": "round",
       "speed": 40
     }
@@ -80,7 +150,16 @@
       "delay": 6
     }
   ],
-  "switches": {},
+  "switches": {
+    "switch1": {
+      "linkIds": [
+        "lineA::end-lineB::start",
+        "lineA::end-lineD::start"
+      ],
+      "activeLinkId": "lineA::end-lineB::start",
+      "linkedSwitchIds": []
+    }
+  },
   "transformers": [],
   "inverters": [],
   "arrival": null,

@@ -1,0 +1,78 @@
+export const fr = {
+  app: {
+    name: "tickwire",
+    tagline: "ROUTING · PUZZLE",
+    version: "v1.0",
+  },
+  accueil: {
+    jouer: "JOUER",
+    menu: "MENU",
+  },
+  menu: {
+    title: "MENU",
+    cartes: "Cartes",
+    cartesDesc: "Sélectionner un niveau",
+    hautsFaits: "Hauts faits",
+    hautsFaitsUnlocked: "débloqués",
+    options: "Options",
+    optionsDesc: "Son, vibrations, langue",
+    aPropos: "À propos",
+    aProposDesc: "Version, crédits, licences",
+    footer: "tickwire · v1.0",
+  },
+  cartes: {
+    title: "CARTES",
+    cardPrefix: "Carte",
+    cardLabel: "CARTE",
+  },
+  difficulties: {
+    Tutoriel: "Tutoriel",
+    Avancé: "Avancé",
+    Expert: "Expert",
+  } as Record<string, string>,
+  jeu: {
+    loading: "chargement…",
+    pause: "PAUSE",
+    resume: "REPRENDRE",
+    defaultMap: "Carte",
+  },
+  victoire: {
+    complete: "Niveau complété !",
+    fail: "Essaie encore !",
+    timeLabel: "TEMPS",
+    newRecord: "🏆 nouveau record !",
+    bestLabel: "meilleur",
+    rejouer: "REJOUER",
+    suivant: "SUIVANT",
+    cartes: "CARTES",
+  },
+  hautsFaits: {
+    title: "HAUTS FAITS",
+    unlocked: "DÉBLOQUÉS",
+    locked: "VERROUILLÉS",
+    unlockedLabel: "DÉBLOQUÉ",
+    achievementBanner: "Haut fait débloqué",
+  },
+  options: {
+    title: "OPTIONS",
+    language: "Langue",
+    langFr: "Français",
+    langEn: "English",
+  },
+  aPropos: {
+    title: "À PROPOS",
+    version: "v1.0.0",
+    subtitle: "Routing puzzle game",
+    credit: "Conçu et développé avec ❤️",
+  },
+  achievements: {
+    "premiers-pas": { name: "Premiers pas", desc: "Terminer une carte" },
+    speedrun: { name: "Speedrun", desc: "Terminer en moins de 60s" },
+    "sans-faute": { name: "Sans faute", desc: "Terminer sans collision" },
+    perfection: { name: "Perfection", desc: "Obtenir 3★ sur une carte" },
+    collection: { name: "Collection", desc: "Terminer 3 cartes différentes" },
+    maitrise: { name: "Maîtrise", desc: "Obtenir 3★ sur 5 cartes" },
+  } as Record<string, { name: string; desc: string }>,
+}
+
+export type Translation = typeof fr

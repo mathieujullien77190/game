@@ -1,0 +1,63 @@
+<svg width="390" height="844" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <!-- Background: dimmed game -->
+  <rect width="390" height="844" fill="#ffffff"/>
+  <rect width="390" height="844" fill="#f0f0f4" opacity="0.7"/>
+
+  <!-- Confetti -->
+  <circle cx="52" cy="140" r="5" fill="#FF5630" opacity="0.7"/>
+  <circle cx="320" cy="100" r="4" fill="#3A6FD8" opacity="0.7"/>
+  <circle cx="78" cy="210" r="3" fill="#2E9E6B" opacity="0.6"/>
+  <circle cx="348" cy="190" r="5" fill="#FF5630" opacity="0.5"/>
+  <circle cx="35" cy="320" r="4" fill="#3A6FD8" opacity="0.5"/>
+  <circle cx="358" cy="340" r="3" fill="#2E9E6B" opacity="0.6"/>
+  <rect x="62" y="160" width="7" height="5" rx="1" fill="#FF5630" opacity="0.6" transform="rotate(20 65 162)"/>
+  <rect x="308" y="250" width="6" height="5" rx="1" fill="#3A6FD8" opacity="0.6" transform="rotate(-18 311 252)"/>
+  <rect x="145" y="110" width="8" height="4" rx="1" fill="#2E9E6B" opacity="0.6" transform="rotate(30 149 112)"/>
+  <rect x="248" y="390" width="7" height="4" rx="1" fill="#FF5630" opacity="0.5" transform="rotate(-12 251 392)"/>
+
+  <!-- Card -->
+  <rect x="24" y="210" width="342" height="424" rx="24" fill="#ffffff"/>
+  <rect x="24" y="210" width="342" height="424" rx="24" fill="none" stroke="#e0e0e8" stroke-width="1"/>
+
+  <!-- Accent top bar -->
+  <rect x="24" y="210" width="342" height="5" rx="2" fill="#2E9E6B"/>
+
+  <!-- Sparkles -->
+  <text x="114" y="280" text-anchor="middle" fill="#FF5630" font-size="20">✦</text>
+  <text x="195" y="268" text-anchor="middle" fill="#FFB800" font-size="26">✦</text>
+  <text x="276" y="280" text-anchor="middle" fill="#3A6FD8" font-size="20">✦</text>
+
+  <!-- Title -->
+  <text x="195" y="326" text-anchor="middle" fill="#1B2559" font-size="24" font-weight="300" letter-spacing="0.5">Niveau complété !</text>
+
+  <!-- Stars -->
+  <text x="126" y="390" text-anchor="middle" fill="#FFB800" font-size="38">★</text>
+  <text x="195" y="378" text-anchor="middle" fill="#FFB800" font-size="50">★</text>
+  <text x="264" y="390" text-anchor="middle" fill="#e0e0e8" font-size="38">★</text>
+
+  <!-- Stats box -->
+  <rect x="60" y="406" width="270" height="72" rx="12" fill="#f5f5f7"/>
+  <text x="195" y="432" text-anchor="middle" fill="#1B2559" opacity="0.4" font-size="10" letter-spacing="2">CARTE 02  ·  TEMPS</text>
+  <text x="195" y="466" text-anchor="middle" fill="#2E9E6B" font-size="26" font-weight="300" font-family="monospace">01:47</text>
+
+  <!-- Best -->
+  <text x="195" y="508" text-anchor="middle" fill="#1B2559" opacity="0.35" font-size="12">🏆  nouveau record !</text>
+
+  <!-- Buttons -->
+  <rect x="54" y="528" width="122" height="54" rx="12" fill="#f5f5f7"/>
+  <rect x="54" y="528" width="122" height="54" rx="12" fill="none" stroke="#e0e0e8" stroke-width="1"/>
+  <text x="115" y="550" text-anchor="middle" fill="#1B2559" opacity="0.6" font-size="20">↺</text>
+  <text x="115" y="570" text-anchor="middle" fill="#1B2559" opacity="0.4" font-size="10" letter-spacing="1">REJOUER</text>
+
+  <rect x="214" y="528" width="122" height="54" rx="12" fill="#FF5630"/>
+  <text x="275" y="550" text-anchor="middle" fill="#ffffff" font-size="20">›</text>
+  <text x="275" y="570" text-anchor="middle" fill="#ffffff" font-size="10" letter-spacing="1">SUIVANT</text>
+
+  <!-- Achievement unlocked -->
+  <rect x="54" y="598" width="282" height="36" rx="8" fill="#EEF4FF"/>
+  <rect x="54" y="598" width="282" height="36" rx="8" fill="none" stroke="#3A6FD8" stroke-width="1" opacity="0.3"/>
+  <text x="195" y="621" text-anchor="middle" fill="#3A6FD8" font-size="12">✦  Haut fait : Sans faute !</text>
+
+  <!-- Bottom safe area -->
+  <rect x="155" y="824" width="80" height="4" rx="2" fill="#1a1a2e" opacity="0.12"/>
+</svg>

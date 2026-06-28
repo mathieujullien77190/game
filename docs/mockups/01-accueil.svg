@@ -1,0 +1,38 @@
+<svg width="390" height="844" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <rect width="390" height="844" fill="#f5f5f7"/>
+
+  <text x="24" y="32" fill="#1a1a2e" opacity="0.4" font-size="12">9:41</text>
+  <text x="340" y="32" fill="#1a1a2e" opacity="0.4" font-size="12">●●●</text>
+
+  <!-- Logo clock -->
+  <circle cx="195" cy="270" r="88" fill="none" stroke="#1B2559" stroke-width="1.5" opacity="0.1"/>
+  <circle cx="195" cy="270" r="68" fill="#ffffff" stroke="#e8e8f0" stroke-width="1"/>
+  <line x1="195" y1="270" x2="228" y2="243" stroke="#FF5630" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="228" cy="243" r="8" fill="#FF5630"/>
+  <circle cx="228" cy="243" r="16" fill="#FF5630" opacity="0.1"/>
+  <line x1="195" y1="270" x2="195" y2="212" stroke="#3A6FD8" stroke-width="5.5" stroke-linecap="round"/>
+  <circle cx="195" cy="212" r="7" fill="#3A6FD8"/>
+  <circle cx="195" cy="212" r="13" fill="#3A6FD8" opacity="0.1"/>
+  <line x1="195" y1="270" x2="155" y2="316" stroke="#2E9E6B" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="155" cy="316" r="5.5" fill="#2E9E6B"/>
+  <circle cx="155" cy="316" r="11" fill="#2E9E6B" opacity="0.1"/>
+  <circle cx="195" cy="270" r="10" fill="#ffffff" stroke="#1B2559" stroke-width="3.5"/>
+
+  <!-- App name -->
+  <text x="195" y="408" text-anchor="middle" fill="#1B2559" font-size="38" font-weight="300" letter-spacing="6">tickwire</text>
+  <rect x="141" y="418" width="108" height="2.5" rx="1.25" fill="#FF5630"/>
+  <text x="195" y="442" text-anchor="middle" fill="#1B2559" opacity="0.35" font-size="12" letter-spacing="3">ROUTING  ·  PUZZLE</text>
+
+  <!-- JOUER button -->
+  <rect x="60" y="510" width="270" height="56" rx="14" fill="#FF5630"/>
+  <text x="195" y="544" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700" letter-spacing="3">JOUER</text>
+
+  <!-- MENU button -->
+  <rect x="60" y="582" width="270" height="50" rx="14" fill="#ffffff" stroke="#e0e0e8" stroke-width="1.5"/>
+  <text x="195" y="613" text-anchor="middle" fill="#1B2559" font-size="14" font-weight="500" letter-spacing="2">MENU</text>
+
+  <!-- Progress -->
+  <text x="195" y="794" text-anchor="middle" fill="#1B2559" opacity="0.25" font-size="11" letter-spacing="1">★ 3 / 40  ·  v1.0</text>
+
+  <rect x="155" y="824" width="80" height="4" rx="2" fill="#1a1a2e" opacity="0.12"/>
+</svg>

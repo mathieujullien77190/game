@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+﻿import { useCallback, useRef, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { CANVAS_H, CANVAS_W } from "engine/constants"
 import { useStore } from "store"
@@ -8,13 +8,9 @@ import { Game } from "@drift/game"
 import * as S from "./UI"
 import ToolsPanel from "components/ToolsPanel"
 
-const PADDING = 24
-
 export const LevelEditor = () => {
   const [leftWidth, setLeftWidth] = useState(() => Math.round(window.innerWidth * 0.3))
-  const [scale, setScale] = useState(1)
 
-  const canvasAreaRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
 
   const { viewMode, setViewMode, previewManager } = useStore(
@@ -25,20 +21,7 @@ export const LevelEditor = () => {
     }))
   )
 
-  useEffect(() => {
-    const el = canvasAreaRef.current
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect
-      const raw = Math.min(
-        (width - PADDING * 2) / CANVAS_W,
-        (height - PADDING * 2) / CANVAS_H
-      )
-      setScale(Math.max(0.1, raw))
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+  const restartPreview = useCallback(() => setViewMode("preview"), [setViewMode])
 
   const saveMap = useCallback(async () => {
     const s = useStore.getState()
@@ -77,11 +60,11 @@ export const LevelEditor = () => {
           </S.ViewButton>
           <S.SaveButton onClick={saveMap}>Save</S.SaveButton>
         </S.TopBar>
-        <S.CanvasArea ref={canvasAreaRef}>
+        <S.CanvasArea>
           <S.CanvasOuter>
-            <S.CanvasWrapper $w={CANVAS_W * scale} $h={CANVAS_H * scale}>
+            <S.CanvasWrapper $w={CANVAS_W} $h={CANVAS_H}>
               {viewMode === "editor" && <Edition />}
-              {viewMode === "preview" && <Game previewManager={previewManager} />}
+              {viewMode === "preview" && <Game previewManager={previewManager} onRestart={restartPreview} />}
             </S.CanvasWrapper>
           </S.CanvasOuter>
         </S.CanvasArea>

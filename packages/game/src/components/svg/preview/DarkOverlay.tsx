@@ -19,14 +19,16 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
   if (data.start) {
     const line = data.lines[data.start.lineId]
     if (line && line.screenId === sid) {
-      const pt = data.start.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0]
+      const pt =
+        data.start.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0]
       if (pt) punches.push({ x: pt.x, y: pt.y, r: 35 })
     }
   }
   if (data.arrival) {
     const line = data.lines[data.arrival.lineId]
     if (line && line.screenId === sid) {
-      const pt = data.arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0]
+      const pt =
+        data.arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0]
       if (pt) punches.push({ x: pt.x, y: pt.y, r: 35 })
     }
   }
@@ -43,22 +45,27 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
     <>
       <defs>
         {/* blur + threshold → metaball: overlapping holes merge into one smooth shape */}
-        <filter id="pv-dark-holes" filterUnits="userSpaceOnUse"
-          x={0} y={0} width={CANVAS_W} height={CANVAS_H}>
-          <feGaussianBlur stdDeviation="20"/>
-          <feColorMatrix type="matrix"
-            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 20 -7"/>
+        <filter
+          id="pv-dark-holes"
+          filterUnits="userSpaceOnUse"
+          x={0}
+          y={0}
+          width={CANVAS_W}
+          height={CANVAS_H}
+        >
+          <feGaussianBlur stdDeviation="20" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 20 -7" />
         </filter>
         <mask id="pv-dark-mask">
-          <rect width={CANVAS_W} height={CANVAS_H} fill="white"/>
+          <rect width={CANVAS_W} height={CANVAS_H} fill="white" />
           <g filter="url(#pv-dark-holes)">
             {punches.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="black"/>
+              <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="black" />
             ))}
           </g>
         </mask>
       </defs>
-      <rect width={CANVAS_W} height={CANVAS_H} fill="black" mask="url(#pv-dark-mask)"/>
+      <rect width={CANVAS_W} height={CANVAS_H} fill="black" mask="url(#pv-dark-mask)" />
     </>
   )
 }
