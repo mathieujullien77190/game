@@ -2,7 +2,6 @@
 import { useShallow } from "zustand/react/shallow"
 import { CANVAS_H, CANVAS_W } from "engine/constants"
 import { useStore } from "store"
-import { serializeMap } from "engine/mapJson"
 import { Edition } from "components/Edition"
 import { Game } from "@tickwire/game"
 import * as S from "./UI"
@@ -23,16 +22,6 @@ export const LevelEditor = () => {
   )
 
   const restartPreview = useCallback(() => setViewMode("preview"), [setViewMode])
-
-  const saveMap = useCallback(async () => {
-    const s = useStore.getState()
-    const data = serializeMap(s.editorManager, s.tokens, s.starts, s.switches, s.switchLinks, s.transformers, s.arrival, s.inverters, s.screens, s.screenGates, s.screenTimeMultipliers, s.helps)
-    await fetch("/api/save-map", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "default", data }),
-    })
-  }, [])
 
   const onDividerMouseDown = useCallback(() => {
     dragging.current = true
@@ -59,7 +48,6 @@ export const LevelEditor = () => {
           <S.ViewButton $active={viewMode === "preview"} onClick={() => setViewMode("preview")}>
             Preview
           </S.ViewButton>
-          <S.SaveButton onClick={saveMap}>Save</S.SaveButton>
         </S.TopBar>
         <S.CanvasArea>
           <S.CanvasOuter>

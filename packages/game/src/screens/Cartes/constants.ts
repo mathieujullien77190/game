@@ -1,10 +1,13 @@
 import { T } from "theme"
 
-export const DIFF_ACCENT: Record<string, string> = {
-  Tutoriel: T.green,
-  Avancé: T.blue,
-  Expert: T.red,
-}
+export type Difficulty = "Tutorial" | "Beginner" | "Advanced" | "Expert" | "Hidden"
 
-export const DIFFICULTIES = ["Tutoriel", "Avancé", "Expert"] as const
-export type Difficulty = (typeof DIFFICULTIES)[number]
+export const DIFFICULTIES: Difficulty[] = ["Tutorial", "Beginner", "Advanced", "Expert", "Hidden"]
+
+export const DIFF_ACCENT: Record<Difficulty, string> = {
+  Tutorial: T.green,
+  Beginner: "#22aa88",
+  Advanced: T.blue,
+  Expert: T.red,
+  Hidden: "#666",
+}

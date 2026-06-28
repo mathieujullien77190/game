@@ -19,9 +19,22 @@ export default defineConfig({
           req.on("data", (chunk: Buffer) => { body += chunk.toString() })
           req.on("end", () => {
             try {
-              const { name, data } = JSON.parse(body)
-              const filePath = path.resolve(__dirname, `../maps/${name}.json`)
-              fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+              const { name, data, mapList, mapDifficulties, mapStarThresholds } = JSON.parse(body)
+              const mapsDir = path.resolve(__dirname, "../maps")
+              fs.writeFileSync(path.join(mapsDir, `${name}.json`), JSON.stringify(data, null, 2))
+              if (Array.isArray(mapList)) {
+                const diffs: Record<string, string> = mapDifficulties ?? {}
+                const stars: Record<string, { star1?: number; star2?: number; star3?: number }> = mapStarThresholds ?? {}
+                const index = mapList.map((id: string) => ({
+                  id,
+                  file: `${id}.json`,
+                  difficulty: diffs[id] ?? "Tutorial",
+                  star1: stars[id]?.star1 ?? 180,
+                  star2: stars[id]?.star2 ?? 120,
+                  star3: stars[id]?.star3 ?? 60,
+                }))
+                fs.writeFileSync(path.join(mapsDir, "_index.json"), JSON.stringify(index, null, 2))
+              }
               res.setHeader("Content-Type", "application/json")
               res.end(JSON.stringify({ ok: true }))
             } catch (e) {

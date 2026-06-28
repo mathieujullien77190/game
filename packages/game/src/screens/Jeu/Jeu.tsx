@@ -47,7 +47,7 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
     setHelpVisible(true)
     setHelpDismissed(false)
     if (helpFadeTimer.current) clearTimeout(helpFadeTimer.current)
-    if (map) loadMap(map.file)
+    loadMap(map ? map.file : `${mapId}.json`)
   }, [mapId])
 
   const handleTick = useCallback(() => {

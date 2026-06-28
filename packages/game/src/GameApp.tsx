@@ -34,7 +34,7 @@ const renderScreen = (
   if (s.id === "accueil")
     return (
       <Accueil
-        onJouer={() => (lastPlayedMapId ? goJeu(lastPlayedMapId) : goCartes())}
+        onJouer={goCartes}
         onMenu={goMenu}
       />
     )

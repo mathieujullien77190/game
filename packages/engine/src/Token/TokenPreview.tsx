@@ -299,14 +299,19 @@ export class TokenPreview extends Token {
     if (transformer?.type === "rotate")
       this.targetRotationOffset += Math.PI * 2.25;
     if (transformer?.type === "fade") {
-      this.fadeOpacityFrom = this.opacity;
-      this.isTransforming = true;
-      this.transformProgress = 0;
-      this.transformingLinkId = linkId;
-      this.transformMode = "fade";
-      this.direction = 0;
-      this.currentSpeed = this.speed;
-      transformer.transformProgress = 0;
+      if (Math.abs(this.opacity - transformer.amount) < 0.01) {
+        this.opacity = transformer.amount;
+        transformer.transformProgress = -1;
+      } else {
+        this.fadeOpacityFrom = this.opacity;
+        this.isTransforming = true;
+        this.transformProgress = 0;
+        this.transformingLinkId = linkId;
+        this.transformMode = "fade";
+        this.direction = 0;
+        this.currentSpeed = this.speed;
+        transformer.transformProgress = 0;
+      }
     }
     const inverterEffect = linkId ? ctx.inverterLinkMap.get(linkId) : undefined;
     if (inverterEffect === "invert") isInverted = !isInverted;

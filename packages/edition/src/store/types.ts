@@ -109,7 +109,18 @@ export interface StoreActions {
   removeHelp: (id: string) => void
   updateHelp: (id: string, patch: { text?: string; arrow?: import("engine/Help/Help").HelpArrow; x?: number; y?: number }) => void
   setSelectedHelpId: (id: string | null) => void
+  mapList: string[]
+  currentMapId: string
+  mapDifficulties: Record<string, MapDifficulty>
+  mapStarThresholds: Record<string, { star1: number; star2: number; star3: number }>
+  addMap: () => void
+  selectMap: (id: string) => void
+  clearCurrentMap: () => void
+  setMapDifficulty: (difficulty: MapDifficulty) => void
+  setMapStarThresholds: (thresholds: { star1: number; star2: number; star3: number }) => void
 }
+
+export type MapDifficulty = "Tutorial" | "Beginner" | "Advanced" | "Expert" | "Hidden"
 
 export type Store = StoreState & StoreActions
 

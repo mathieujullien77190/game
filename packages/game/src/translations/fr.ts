@@ -26,9 +26,11 @@ export const fr = {
     cardLabel: "CARTE",
   },
   difficulties: {
-    Tutoriel: "Tutoriel",
-    Avancé: "Avancé",
+    Tutorial: "Tutoriel",
+    Beginner: "Débutant",
+    Advanced: "Avancé",
     Expert: "Expert",
+    Hidden: "Caché",
   } as Record<string, string>,
   jeu: {
     loading: "chargement…",

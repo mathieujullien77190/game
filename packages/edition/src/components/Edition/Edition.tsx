@@ -1,4 +1,4 @@
-﻿import { useCallback, useRef, useState } from "react"
+﻿import { useCallback, useEffect, useRef, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { LineEditor } from "engine/Line/LineEditor"
 import { StartEditor } from "engine/Start/StartEditor"
@@ -10,6 +10,7 @@ import { ScreenGateEditor } from "engine/ScreenGate/ScreenGateEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "engine/constants"
 import type { Point } from "engine/types"
 import { useStore } from "store"
+import { serializeMap } from "engine/mapJson"
 import { SvgEditorCanvas } from "components/svg/editor/SvgEditorCanvas"
 import * as S from "components/LevelEditor/UI"
 
@@ -69,6 +70,45 @@ export const Edition = () => {
   const draggingCP = useRef<{ lineId: string; cp: "cp1" | "cp2" } | null>(null)
   const draggingHelp = useRef<{ id: string; dx: number; dy: number } | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const autoSave = useStore(
+    useShallow((s) => ({
+      editorManager: s.editorManager,
+      tokens: s.tokens,
+      starts: s.starts,
+      switches: s.switches,
+      switchLinks: s.switchLinks,
+      transformers: s.transformers,
+      inverters: s.inverters,
+      arrival: s.arrival,
+      screens: s.screens,
+      screenGates: s.screenGates,
+      screenTimeMultipliers: s.screenTimeMultipliers,
+      helps: s.helps,
+      revision: s.revision,
+      mapList: s.mapList,
+      currentMapId: s.currentMapId,
+      mapDifficulties: s.mapDifficulties,
+      mapStarThresholds: s.mapStarThresholds,
+    }))
+  )
+
+  const autoSaveRef = useRef(autoSave)
+  autoSaveRef.current = autoSave
+
+  useEffect(() => {
+    const s = autoSaveRef.current
+    const timer = setTimeout(async () => {
+      const a = autoSaveRef.current
+      const data = serializeMap(a.editorManager, a.tokens, a.starts, a.switches, a.switchLinks, a.transformers, a.arrival, a.inverters, a.screens, a.screenGates, a.screenTimeMultipliers, a.helps)
+      await fetch("/api/save-map", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: a.currentMapId, data, mapList: a.mapList, mapDifficulties: a.mapDifficulties, mapStarThresholds: a.mapStarThresholds }),
+      })
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [autoSave.revision])
 
   const {
     editorManager, arrival,

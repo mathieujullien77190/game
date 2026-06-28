@@ -151,7 +151,7 @@ export class PreviewManager extends Manager<LinePreview> {
           token.pointIndex = spawnIndex;
           token.remainder = 0;
           token.direction = direction;
-          token.startAt = (i + 1) * start.delay;
+          token.startAt = i === 0 ? 2 : 2 + i * start.delay;
           token.currentSpeed = 0;
           token.baseSpeed = token.speed;
           return token;
@@ -294,12 +294,12 @@ export class PreviewManager extends Manager<LinePreview> {
     );
     for (let i = 0; i < active.length; i++) {
       const lineA = this.data.lines[active[i].lineId];
+      if (!lineA?.tunnel) continue;
       const pa = lineA?.points[active[i].pointIndex];
       if (!pa) continue;
       for (let j = i + 1; j < active.length; j++) {
-        const lineB = this.data.lines[active[j].lineId];
-        if ((lineA?.screenId ?? "main") !== (lineB?.screenId ?? "main")) continue;
-        const pb = lineB?.points[active[j].pointIndex];
+        if (active[j].lineId !== active[i].lineId) continue;
+        const pb = lineA.points[active[j].pointIndex];
         if (!pb) continue;
         const dx = pa.x - pb.x, dy = pa.y - pb.y;
         if (dx * dx + dy * dy < 16 * 16) {

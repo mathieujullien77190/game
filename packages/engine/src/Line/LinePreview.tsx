@@ -35,8 +35,8 @@ export class LinePreview extends Line {
   static readonly SPEED_BOX_W = 26;
   static readonly SPEED_BOX_H = 19;
   static readonly SPEED_BOX_RX = 4;
-  static readonly SPEED_FONT_SIZE = 10;
-  static readonly LIMIT_R = 11;
+  static readonly SPEED_FONT_SIZE = 12;
+  static readonly LIMIT_R = 15;
   static readonly LIMIT_OFFSET_X = 24;
 
   lastSpeed: number | undefined = undefined;
@@ -163,7 +163,7 @@ export class LinePreview extends Line {
             <text
               x={mid.x} y={mid.y}
               textAnchor="middle"
-              dominantBaseline="middle"
+              dominantBaseline="central"
               fontFamily={GAME_FONT}
               fontSize={SPEED_FONT_SIZE}
               fontWeight="bold"

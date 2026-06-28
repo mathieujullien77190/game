@@ -22,10 +22,10 @@ export const buildClockTicks = (): ClockTick[] =>
     }
   })
 
-export const initAngles = () => {
-  const s = 42
-  const m = 50 + s / 60
-  const h = 1 + m / 60
+export const computeAngles = (totalSec: number) => {
+  const s = totalSec % 60
+  const m = (totalSec / 60) % 60
+  const h = (totalSec / 3600) % 12
   return {
     sec: (s / 60) * 360 - DRAWN_SEC,
     min: (m / 60) * 360 - DRAWN_MIN,

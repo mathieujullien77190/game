@@ -1,0 +1,26 @@
+[
+  {
+    "id": "map1",
+    "file": "map1.json",
+    "difficulty": "Advanced",
+    "star1": 180,
+    "star2": 120,
+    "star3": 60
+  },
+  {
+    "id": "map2",
+    "file": "map2.json",
+    "difficulty": "Beginner",
+    "star1": 180,
+    "star2": 120,
+    "star3": 60
+  },
+  {
+    "id": "map3",
+    "file": "map3.json",
+    "difficulty": "Hidden",
+    "star1": 180,
+    "star2": 120,
+    "star3": 60
+  }
+]

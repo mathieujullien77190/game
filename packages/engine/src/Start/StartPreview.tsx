@@ -7,7 +7,7 @@ import type { TokenPreview } from "../Token/TokenPreview";
 export class StartPreview extends Start {
   static readonly RADIUS = 17;
   static readonly STROKE_WIDTH = 4;
-  static readonly RING_IDLE_COLOR = "#ccc";
+  static readonly RING_IDLE_COLOR = "#999";
   static readonly RING_ACTIVE_COLOR = COLOR_BLACK;
 
   render = (

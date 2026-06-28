@@ -28,9 +28,11 @@ export const en: Translation = {
     cardLabel: "MAP",
   },
   difficulties: {
-    Tutoriel: "Tutorial",
-    Avancé: "Advanced",
+    Tutorial: "Tutorial",
+    Beginner: "Beginner",
+    Advanced: "Advanced",
     Expert: "Expert",
+    Hidden: "Hidden",
   },
   jeu: {
     loading: "loading…",
