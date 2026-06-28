@@ -3,6 +3,7 @@ import { EditorManager } from "engine/Manager/EditorManager"
 import { PreviewManager } from "engine/Manager/PreviewManager"
 import { LinePreview } from "engine/Line/LinePreview"
 import { deserializeMap, type MapJson } from "engine/mapJson"
+import type { Help } from "engine/Help/Help"
 
 const EMPTY_MAP: MapJson = { lines: [], links: [], tokens: [], starts: [], switches: {} }
 
@@ -20,6 +21,7 @@ const buildPreviewManager = (json: MapJson): PreviewManager => {
     arrival,
     screenGates,
     screenTimeMultipliers,
+    helps,
   } = deserializeMap(json, editorManager)
 
   previewManager.data.lines = {}
@@ -59,25 +61,28 @@ const buildPreviewManager = (json: MapJson): PreviewManager => {
     screenTimeMultipliers
   )
 
-  return previewManager
+  return { previewManager, helps: Object.values(helps) }
 }
 
 type GameStore = {
   previewManager: PreviewManager | null
   loading: boolean
+  helps: Help[]
 }
 
 export const useGameStore = create<GameStore>(() => ({
   previewManager: null,
   loading: false,
+  helps: [],
 }))
 
 export const loadMap = async (file: string) => {
-  useGameStore.setState({ loading: true, previewManager: null })
+  useGameStore.setState({ loading: true, previewManager: null, helps: [] })
   let json: MapJson = EMPTY_MAP
   try {
     const res = await fetch(`/maps/${file}`)
     if (res.ok) json = await res.json()
   } catch {}
-  useGameStore.setState({ previewManager: buildPreviewManager(json), loading: false })
+  const { previewManager, helps } = buildPreviewManager(json)
+  useGameStore.setState({ previewManager, helps, loading: false })
 }

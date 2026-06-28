@@ -13,14 +13,17 @@ import type { Props } from "./types"
 import * as S from "./UI"
 
 export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) => {
-  const { previewManager, loading } = useGameStore(
-    useShallow((s) => ({ previewManager: s.previewManager, loading: s.loading }))
+  const { previewManager, loading, helps } = useGameStore(
+    useShallow((s) => ({ previewManager: s.previewManager, loading: s.loading, helps: s.helps }))
   )
   const recordResult = useProgressStore((s) => s.recordResult)
   const t = useLang()
   const [paused, setPaused] = useState(false)
   const [displayTime, setDisplayTime] = useState("00:00")
   const [winData, setWinData] = useState<{ time: number; stars: number; noCollision: boolean } | null>(null)
+  const [helpVisible, setHelpVisible] = useState(true)
+  const [helpDismissed, setHelpDismissed] = useState(false)
+  const helpFadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const gameOver = useRef(false)
   const hadCollision = useRef(false)
   const initialTokenCount = useRef<number | null>(null)
@@ -41,6 +44,9 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
     saved.current = false
     setPaused(false)
     setWinData(null)
+    setHelpVisible(true)
+    setHelpDismissed(false)
+    if (helpFadeTimer.current) clearTimeout(helpFadeTimer.current)
     if (map) loadMap(map.file)
   }, [mapId])
 
@@ -80,12 +86,16 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
   const handleClick = useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
       if (!previewManager) return
+      if (!helpDismissed && helpVisible) {
+        setHelpVisible(false)
+        helpFadeTimer.current = setTimeout(() => setHelpDismissed(true), 400)
+      }
       const rect = e.currentTarget.getBoundingClientRect()
       const x = (e.clientX - rect.left) * (CANVAS_W / rect.width)
       const y = (e.clientY - rect.top) * (CANVAS_H / rect.height)
       previewManager.clickAt(x, y)
     },
-    [previewManager]
+    [previewManager, helpDismissed, helpVisible]
   )
 
   const prevBest = useProgressStore((s) => s.results[mapId]?.bestTime)
@@ -116,6 +126,19 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
               onClick={handleClick}
               onTick={handleTick}
             />
+            {!helpDismissed && !winData && (() => {
+              const sid = previewManager.data.previewScreenId
+              const screenHelps = helps.filter((h) => h.screenId === sid)
+              return screenHelps.length > 0 ? (
+                <S.HelpOverlay $visible={helpVisible}>
+                  {screenHelps.map((h) => (
+                    <S.HelpBox key={h.id} $x={(h.x / CANVAS_W) * 100} $y={(h.y / CANVAS_H) * 100} $arrow={h.arrow}>
+                      {h.text}
+                    </S.HelpBox>
+                  ))}
+                </S.HelpOverlay>
+              ) : null
+            })()}
             {paused && !winData && (
               <S.PauseOverlay>
                 <S.PauseTitle>{t.jeu.pause}</S.PauseTitle>

@@ -11,8 +11,9 @@ import type { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import type { Inverter } from "engine/Inverter/Inverter"
 import type { ScreenGate } from "engine/ScreenGate/ScreenGate"
 import type { Point } from "engine/types"
+import type { Help } from "engine/Help/Help"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransformer" | "addArrival" | "addInverter" | "addScreenGate"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransformer" | "addArrival" | "addInverter" | "addScreenGate" | "addHelp"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -38,6 +39,8 @@ export interface StoreState {
   linePreset: "arc" | null
   screenGates: Record<string, ScreenGate>
   hoveredScreenGateId: string | null
+  helps: Record<string, Help>
+  selectedHelpId: string | null
   screens: string[]
   currentScreenId: string
   screenTimeMultipliers: Record<string, number>
@@ -102,6 +105,10 @@ export interface StoreActions {
   setCurrentScreen: (id: string) => void
   removeScreen: (id: string) => void
   setScreenTimeMultiplier: (id: string, mult: number) => void
+  addHelp: (x: number, y: number) => void
+  removeHelp: (id: string) => void
+  updateHelp: (id: string, patch: { text?: string; arrow?: import("engine/Help/Help").HelpArrow; x?: number; y?: number }) => void
+  setSelectedHelpId: (id: string | null) => void
 }
 
 export type Store = StoreState & StoreActions

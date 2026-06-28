@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+﻿import { useCallback, useRef, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { LineEditor } from "engine/Line/LineEditor"
 import { StartEditor } from "engine/Start/StartEditor"
@@ -67,14 +67,16 @@ export const Edition = () => {
 
   const draggingEndpoint = useRef<{ lineId: string; endpoint: "start" | "end" } | null>(null)
   const draggingCP = useRef<{ lineId: string; cp: "cp1" | "cp2" } | null>(null)
+  const draggingHelp = useRef<{ id: string; dx: number; dy: number } | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   const {
     editorManager, arrival,
     mode, pendingPoint, pendingTransformerType,
-    starts, switches, transformers, inverters, screenGates,
+    starts, switches, transformers, inverters, screenGates, helps, selectedHelpId,
     hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredScreenGateId,
     lineType, linePreset, screens, currentScreenId,
-    addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, addScreenGate,
+    addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, addScreenGate, addHelp, setSelectedHelpId, updateHelp,
     setPendingPoint, setMode, updateLineEndpoint, updateLineControlPoint, toggleLineFlip,
     setHoveredLineId, setLinePreset, addScreen, setCurrentScreen, removeScreen,
   } = useStore(
@@ -89,6 +91,8 @@ export const Edition = () => {
       transformers: s.transformers,
       inverters: s.inverters,
       screenGates: s.screenGates,
+      helps: s.helps,
+      selectedHelpId: s.selectedHelpId,
       hoveredLineId: s.hoveredLineId,
       hoveredSwitchId: s.hoveredSwitchId,
       hoveredTransformerId: s.hoveredTransformerId,
@@ -105,6 +109,9 @@ export const Edition = () => {
       addTransformer: s.addTransformer,
       addInverter: s.addInverter,
       addScreenGate: s.addScreenGate,
+      addHelp: s.addHelp,
+      updateHelp: s.updateHelp,
+      setSelectedHelpId: s.setSelectedHelpId,
       setArrival: s.setArrival,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
@@ -264,11 +271,19 @@ export const Edition = () => {
         }
         return
       }
+      if (mode === "addHelp") {
+        const pt = getCanvasPoint(e)
+        addHelp(pt.x, pt.y)
+        setMode("select")
+        return
+      }
       if (mode === "select") {
         const pt = getCanvasPoint(e)
         const lines = Object.values(editorManager.data.lines).filter((l) => l.screenId === currentScreenId)
         const flipId = findElbowFlipAt(lines, pt)
         if (flipId) { toggleLineFlip(flipId); return }
+        // deselect help if clicking away
+        setSelectedHelpId(null)
       }
       if (mode !== "addLine") return
       const point = snapToGrid(getCanvasPoint(e))
@@ -284,11 +299,13 @@ export const Edition = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
+    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, addHelp, setSelectedHelpId, setArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
+    : mode === "addHelp"
+    ? "crosshair"
     : (mode === "addStart" || mode === "addSwitch" || mode === "addTransformer" || mode === "addArrival" || mode === "addInverter" || mode === "addScreenGate")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging ? "grabbing"
@@ -330,12 +347,48 @@ export const Edition = () => {
         onMouseLeave={onMouseLeave}
         onClick={onCanvasClick}
       />
+      <S.HelpLayer ref={containerRef}>
+        {Object.values(helps).filter((h) => h.screenId === currentScreenId).map((h) => (
+          <S.HelpBox
+            key={h.id}
+            $x={(h.x / CANVAS_W) * 100}
+            $y={(h.y / CANVAS_H) * 100}
+            $arrow={h.arrow}
+            $selected={h.id === selectedHelpId}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              setSelectedHelpId(h.id)
+              const rect = containerRef.current?.getBoundingClientRect()
+              if (!rect) return
+              const cx = (e.clientX - rect.left) * (CANVAS_W / rect.width)
+              const cy = (e.clientY - rect.top) * (CANVAS_H / rect.height)
+              draggingHelp.current = { id: h.id, dx: h.x - cx, dy: h.y - cy }
+              const onMove = (ev: MouseEvent) => {
+                if (!draggingHelp.current || !containerRef.current) return
+                const r = containerRef.current.getBoundingClientRect()
+                const nx = (ev.clientX - r.left) * (CANVAS_W / r.width) + draggingHelp.current.dx
+                const ny = (ev.clientY - r.top) * (CANVAS_H / r.height) + draggingHelp.current.dy
+                updateHelp(draggingHelp.current.id, { x: nx, y: ny })
+              }
+              const onUp = () => {
+                draggingHelp.current = null
+                window.removeEventListener("mousemove", onMove)
+                window.removeEventListener("mouseup", onUp)
+              }
+              window.addEventListener("mousemove", onMove)
+              window.addEventListener("mouseup", onUp)
+            }}
+          >
+            {h.text || "(help)"}
+          </S.HelpBox>
+        ))}
+      </S.HelpLayer>
       <S.ScreenBar>
         {screens.map((s) => (
           <S.ScreenBtn key={s} $active={currentScreenId === s} onClick={() => setCurrentScreen(s)}>
             {s === "main" ? "main" : s.replace("screen", "")}
             {s !== "main" && (
-              <S.ScreenClose onClick={(e) => { e.stopPropagation(); removeScreen(s) }}>×</S.ScreenClose>
+              <S.ScreenClose onClick={(e) => { e.stopPropagation(); removeScreen(s) }}>Ã—</S.ScreenClose>
             )}
           </S.ScreenBtn>
         ))}
@@ -345,3 +398,4 @@ export const Edition = () => {
     </>
   )
 }
+

@@ -15,6 +15,7 @@ import { createArrivalActions } from "./actions/arrivalActions"
 import { createInverterActions } from "./actions/inverterActions"
 import { createScreenActions } from "./actions/screenActions"
 import { createScreenGateActions } from "./actions/screenGateActions"
+import { createHelpActions } from "./actions/helpActions"
 import { serializeMap, deserializeMap, type MapJson } from "engine/mapJson"
 
 const EMPTY_MAP: MapJson = { lines: [], links: [], tokens: [], starts: [], switches: {} }
@@ -53,6 +54,8 @@ export const useStore = create<Store>()(
       transformers: {},
       inverters: {},
       screenGates: {},
+      helps: {},
+      selectedHelpId: null,
       arrival: null,
       hoveredLineId: null,
       hoveredSwitchId: null,
@@ -80,16 +83,17 @@ export const useStore = create<Store>()(
       ...createInverterActions(set),
       ...createScreenGateActions(set),
       ...createScreenActions(set),
+      ...createHelpActions(set),
     }),
     {
       name: "game2-map",
       storage: mapStorage as any,
       partialize: (state) =>
-        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers) as any,
+        serializeMap(state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers, state.helps) as any,
       merge: (persisted, current) => {
         const json = persisted as MapJson
-        const { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers } = deserializeMap(json, current.editorManager)
-        return { ...current, tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers, currentScreenId: "main", revision: 1 }
+        const { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers, helps } = deserializeMap(json, current.editorManager)
+        return { ...current, tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers, helps, currentScreenId: "main", revision: 1 }
       },
     }
   )

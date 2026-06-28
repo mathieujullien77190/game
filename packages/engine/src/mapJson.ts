@@ -11,6 +11,7 @@ import { Inverter, syncInverterCounter } from "engine/Inverter/Inverter"
 import { ScreenGate, syncScreenGateCounter } from "engine/ScreenGate/ScreenGate"
 import { ArrivalEditor } from "engine/Arrival/ArrivalEditor"
 import { syncArrivalCounter } from "engine/Arrival/Arrival"
+import { Help, syncHelpCounter, type HelpArrow } from "engine/Help/Help"
 import type { EditorManager } from "engine/Manager/EditorManager"
 import type { Point } from "engine/types"
 import type { StartEditor as StartEditorType } from "engine/Start/StartEditor"
@@ -28,6 +29,7 @@ export type MapJson = {
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
   screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
   screenTimeMultipliers?: Record<string, number>
+  helps?: { id: string; x: number; y: number; text: string; arrow: HelpArrow; screenId?: string }[]
   // legacy fields for backward compat
   tokenEffects?: { id: string; linkId: string; type: "fade" | "rotate"; amount: number }[]
   rotators?: { id: string; linkId: string }[]
@@ -47,6 +49,7 @@ export const serializeMap = (
   screens: string[] = ["main"],
   screenGates: Record<string, ScreenGate> = {},
   screenTimeMultipliers: Record<string, number> = {},
+  helps: Record<string, Help> = {},
 ): MapJson => ({
   screens,
   lines: Object.values(editorManager.data.lines).map((l) => ({
@@ -129,6 +132,7 @@ export const serializeMap = (
     ...(sg.screenId !== "main" ? { screenId: sg.screenId } : {}),
   })),
   ...(Object.keys(screenTimeMultipliers).length > 0 ? { screenTimeMultipliers } : {}),
+  ...(Object.keys(helps).length > 0 ? { helps: Object.values(helps).map((h) => ({ id: h.id, x: h.x, y: h.y, text: h.text, arrow: h.arrow, ...(h.screenId !== "main" ? { screenId: h.screenId } : {}) })) } : {}),
 })
 
 export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
@@ -230,5 +234,11 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   const screenTimeMultipliers: Record<string, number> = json.screenTimeMultipliers ?? {}
 
-  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers }
+  const helps: Record<string, Help> = {}
+  json.helps?.forEach(({ id, x, y, text, arrow, screenId }) => {
+    helps[id] = new Help(x, y, text, arrow, screenId ?? "main", id)
+  })
+  syncHelpCounter(Object.keys(helps))
+
+  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers, helps }
 }

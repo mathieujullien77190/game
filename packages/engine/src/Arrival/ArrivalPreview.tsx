@@ -65,8 +65,6 @@ export class ArrivalPreview extends Arrival {
     const demand = this.demands[this.currentDemandIndex]
     const flashOpacity = this.flashColor ? (1 - this.flashProgress) * 0.55 : 0
     const elems: JSX.Element[] = []
-    let firstA0: number | null = null
-
     elems.push(<circle key="base" cx={pt.x} cy={pt.y} r={r} fill="none" stroke={COLOR_GRAY} strokeWidth={sw}/>)
 
     if (this.arcFill > 0 && n > 0) {
@@ -79,10 +77,8 @@ export class ArrivalPreview extends Arrival {
         const a0 = lineAngle + k * segSpan + gap / 2
         const a1 = lineAngle + (k + 1) * segSpan - gap / 2
         if (k < completedFull) {
-          if (firstA0 === null) firstA0 = a0
           elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
         } else if (k === completedFull && partial > 0) {
-          if (firstA0 === null) firstA0 = a0
           const a1p = a0 + (a1 - a0) * partial
           elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1p)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
         }
@@ -94,9 +90,6 @@ export class ArrivalPreview extends Arrival {
 
     if (demand)
       elems.push(<g key="demand">{ArrivalPreview.demandToken(pt.x, pt.y, demand.color, demand.type, demand.angled)}</g>)
-
-    if (firstA0 !== null)
-      elems.push(<circle key="dot-start" cx={pt.x + r * Math.cos(firstA0)} cy={pt.y + r * Math.sin(firstA0)} r={3} fill={ARC_COLOR}/>)
 
     return <g key={`aa-${this.id}`}>{elems}</g>
   }

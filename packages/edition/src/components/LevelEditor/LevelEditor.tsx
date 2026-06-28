@@ -13,11 +13,12 @@ export const LevelEditor = () => {
 
   const dragging = useRef(false)
 
-  const { viewMode, setViewMode, previewManager } = useStore(
+  const { viewMode, setViewMode, previewManager, helps } = useStore(
     useShallow((s) => ({
       viewMode: s.viewMode,
       setViewMode: s.setViewMode,
       previewManager: s.previewManager,
+      helps: s.helps,
     }))
   )
 
@@ -25,7 +26,7 @@ export const LevelEditor = () => {
 
   const saveMap = useCallback(async () => {
     const s = useStore.getState()
-    const data = serializeMap(s.editorManager, s.tokens, s.starts, s.switches, s.switchLinks, s.transformers, s.arrival, s.inverters, s.screens, s.screenGates, s.screenTimeMultipliers)
+    const data = serializeMap(s.editorManager, s.tokens, s.starts, s.switches, s.switchLinks, s.transformers, s.arrival, s.inverters, s.screens, s.screenGates, s.screenTimeMultipliers, s.helps)
     await fetch("/api/save-map", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -64,7 +65,7 @@ export const LevelEditor = () => {
           <S.CanvasOuter>
             <S.CanvasWrapper $w={CANVAS_W} $h={CANVAS_H}>
               {viewMode === "editor" && <Edition />}
-              {viewMode === "preview" && <Game previewManager={previewManager} onRestart={restartPreview} />}
+              {viewMode === "preview" && <Game previewManager={previewManager} onRestart={restartPreview} helps={Object.values(helps)} />}
             </S.CanvasWrapper>
           </S.CanvasOuter>
         </S.CanvasArea>

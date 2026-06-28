@@ -188,6 +188,7 @@ export const SvgEditorCanvas = ({
       )}
 
       <SvgPendingLine pendingPoint={pendingPoint} snapPoint={snapPoint}/>
+
     </svg>
   )
 }

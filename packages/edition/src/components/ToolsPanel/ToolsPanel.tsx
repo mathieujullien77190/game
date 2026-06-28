@@ -9,8 +9,9 @@ import ArrivalTab from "components/tabs/ArrivalTab"
 import InverterTab from "components/tabs/InverterTab"
 import JsonTab from "components/tabs/JsonTab"
 import { ScreenGateTab } from "components/tabs/ScreenGateTab/ScreenGateTab"
+import { HelpTab } from "components/tabs/HelpTab"
 
-const TABS = ["line", "token", "start", "switch", "transformer", "inverter", "arrival", "gate", "json"] as const
+const TABS = ["line", "token", "start", "switch", "transformer", "inverter", "arrival", "gate", "help", "json"] as const
 type Tab = (typeof TABS)[number]
 
 export const ToolsPanel = () => {
@@ -38,6 +39,7 @@ export const ToolsPanel = () => {
         {activeTab === "inverter" && <InverterTab />}
         {activeTab === "arrival" && <ArrivalTab />}
         {activeTab === "gate" && <ScreenGateTab />}
+        {activeTab === "help" && <HelpTab />}
         {activeTab === "json" && <JsonTab />}
       </S.TabContent>
     </S.Container>
