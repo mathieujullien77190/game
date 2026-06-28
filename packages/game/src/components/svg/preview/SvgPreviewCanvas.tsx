@@ -45,7 +45,7 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick, on
   const visibleLines = Object.values(data.lines).filter((l) => l.screenId === sid)
 
   const filterStr =
-    [data.isInverted ? "invert(1)" : "", data.isGrayscale ? "grayscale(1)" : ""]
+    [data.screenEffects[sid]?.isInverted ? "invert(1)" : "", data.screenEffects[sid]?.isGrayscale ? "grayscale(1)" : ""]
       .filter(Boolean)
       .join(" ") || undefined
 
@@ -116,9 +116,10 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick, on
           return token.render(pt, line)
         })}
 
-        {/* Transformer pulse + start ring on top of tokens */}
+        {/* Transformer pulse + start ring + arrival arcs on top of tokens */}
         {Object.values(data.transformers).map((tr) => tr.renderAfter())}
         {data.start && data.start.renderAfter()}
+        {data.arrival && data.arrival.renderAfter()}
 
         {/* Line overlays: speed badge + limitation */}
         {visibleLines.map((line) => {
@@ -138,7 +139,7 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor, onClick, on
         {Object.values(data.inverters).map((inv) => inv.render(data.links, data.lines, sid))}
       </g>
 
-      {data.isDark && <DarkOverlay data={data} />}
+      {data.screenEffects[sid]?.isDark && <DarkOverlay data={data} />}
       <MiniMap data={data} />
     </svg>
   )

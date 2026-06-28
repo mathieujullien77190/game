@@ -1,12 +1,15 @@
 import type { JSX } from "react"
 import { Inverter } from "./Inverter"
-import { COLOR_BLACK } from "../constants"
 import type { Link } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 
+const DOT_R = 5
+const DOT_GAP = 14
+const COLOR_ON = "#4caf50"
+const COLOR_OFF = "#e53935"
+
 export class InverterPreview extends Inverter {
-  static readonly HALF_LEN = 14
-  static readonly STROKE_WIDTH = 3
+  active: boolean = false
 
   render = (links: Record<string, Link>, lines: Record<string, LinePreview>, sid: string): JSX.Element | null => {
     const link = links[this.linkId]
@@ -18,14 +21,13 @@ export class InverterPreview extends Inverter {
     const ptAngle = isEnd ? line.points[line.points.length - 1] : line.points[0]
     const angle = ptAngle?.angle ?? 0
     const perp = angle + Math.PI / 2
-    const { HALF_LEN, STROKE_WIDTH } = InverterPreview
-    const dx = Math.cos(perp) * HALF_LEN
-    const dy = Math.sin(perp) * HALF_LEN
+    const ox = Math.cos(perp) * DOT_GAP
+    const oy = Math.sin(perp) * DOT_GAP
     return (
-      <line key={this.id}
-        x1={pt.x - dx} y1={pt.y - dy} x2={pt.x + dx} y2={pt.y + dy}
-        stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH} strokeLinecap="round"
-      />
+      <g key={this.id}>
+        <circle cx={pt.x - ox} cy={pt.y - oy} r={DOT_R} fill={COLOR_OFF} opacity={this.active ? 0.1 : 1} />
+        <circle cx={pt.x + ox} cy={pt.y + oy} r={DOT_R} fill={COLOR_ON} opacity={this.active ? 1 : 0.1} />
+      </g>
     )
   }
 }

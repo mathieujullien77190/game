@@ -6,675 +6,65 @@
     {
       "id": "lineA",
       "start": {
-        "x": 320,
-        "y": 540
+        "x": 220,
+        "y": 580
       },
       "end": {
-        "x": 320,
-        "y": 460
+        "x": 220,
+        "y": 100
       },
       "type": "straight",
       "cp1": {
-        "x": 240,
-        "y": 453.3333333333333
+        "x": 220,
+        "y": 420
       },
       "cp2": {
-        "x": 280,
-        "y": 326.66666666666663
-      }
-    },
-    {
-      "id": "lineB",
-      "start": {
-        "x": 320,
-        "y": 200
-      },
-      "end": {
-        "x": 160,
-        "y": 200
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 253.33333333333331,
-        "y": 193.33333333333334
-      },
-      "cp2": {
-        "x": 186.66666666666666,
-        "y": 186.66666666666666
-      },
-      "boost": 30,
-      "showSpeed": "top"
-    },
-    {
-      "id": "lineC",
-      "start": {
-        "x": 120,
-        "y": 240
-      },
-      "end": {
-        "x": 120,
-        "y": 340
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 126.66666666666667,
-        "y": 286.6666666666667
-      },
-      "cp2": {
-        "x": 133.33333333333334,
-        "y": 373.33333333333337
-      }
-    },
-    {
-      "id": "lineD",
-      "start": {
-        "x": 320,
-        "y": 200
-      },
-      "end": {
-        "x": 380,
-        "y": 60
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 340,
-        "y": 153.33333333333334
-      },
-      "cp2": {
-        "x": 360,
-        "y": 106.66666666666667
-      }
-    },
-    {
-      "id": "lineE",
-      "start": {
-        "x": 160,
-        "y": 200
-      },
-      "end": {
-        "x": 120,
-        "y": 240
-      },
-      "type": "elbow",
-      "cp1": {
-        "x": 137.908610008,
-        "y": 200
-      },
-      "cp2": {
-        "x": 120,
-        "y": 217.908610008
-      },
-      "flip": true
-    },
-    {
-      "id": "lineG",
-      "start": {
-        "x": 120,
-        "y": 340
-      },
-      "end": {
-        "x": 120,
-        "y": 460
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 120,
-        "y": 340
-      },
-      "cp2": {
-        "x": 120,
-        "y": 400
-      },
-      "showSpeed": "left"
-    },
-    {
-      "id": "lineH",
-      "start": {
-        "x": 120,
-        "y": 460
-      },
-      "end": {
-        "x": 140,
-        "y": 500
-      },
-      "type": "elbow",
-      "cp1": {
-        "x": 120,
-        "y": 482.091389992
-      },
-      "cp2": {
-        "x": 128.954305004,
-        "y": 500
-      }
-    },
-    {
-      "id": "lineI",
-      "start": {
-        "x": 200,
-        "y": 500
-      },
-      "end": {
-        "x": 240,
-        "y": 500
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 213.33333333333334,
-        "y": 500
-      },
-      "cp2": {
-        "x": 246.66666666666669,
-        "y": 500
-      },
-      "showSpeed": "bottom"
-    },
-    {
-      "id": "lineJ",
-      "start": {
-        "x": 280,
-        "y": 500
-      },
-      "end": {
-        "x": 320,
-        "y": 460
-      },
-      "type": "elbow",
-      "cp1": {
-        "x": 302.091389992,
-        "y": 500
-      },
-      "cp2": {
-        "x": 320,
-        "y": 482.091389992
-      },
-      "flip": true
-    },
-    {
-      "id": "lineL",
-      "start": {
-        "x": 60,
-        "y": 660
-      },
-      "end": {
-        "x": 40,
-        "y": 80
-      },
-      "type": "sine",
-      "cp1": {
-        "x": 53.333333333333336,
-        "y": 466.66666666666663
-      },
-      "cp2": {
-        "x": 46.666666666666664,
-        "y": 273.3333333333333
-      },
-      "boost": 60,
-      "frequency": 7,
-      "amplitude": 20
-    },
-    {
-      "id": "lineM",
-      "start": {
-        "x": 320,
-        "y": 300
-      },
-      "end": {
-        "x": 320,
-        "y": 200
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 320,
-        "y": 373.3333333333333
-      },
-      "cp2": {
-        "x": 320,
-        "y": 286.66666666666663
-      },
-      "showSpeed": "right"
-    },
-    {
-      "id": "lineN",
-      "start": {
-        "x": 240,
-        "y": 500
-      },
-      "end": {
-        "x": 280,
-        "y": 500
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 253.33333333333334,
-        "y": 500
-      },
-      "cp2": {
-        "x": 266.6666666666667,
-        "y": 500
-      }
-    },
-    {
-      "id": "lineO",
-      "start": {
-        "x": 140,
-        "y": 500
-      },
-      "end": {
-        "x": 200,
-        "y": 500
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 160,
-        "y": 500
-      },
-      "cp2": {
-        "x": 180,
-        "y": 500
-      }
-    },
-    {
-      "id": "lineQ",
-      "start": {
-        "x": 320,
-        "y": 460
-      },
-      "end": {
-        "x": 320,
-        "y": 300
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 313.3333333333333,
-        "y": 406.6666666666667
-      },
-      "cp2": {
-        "x": 306.6666666666667,
-        "y": 353.3333333333333
-      }
-    },
-    {
-      "id": "lineS",
-      "start": {
-        "x": 320,
-        "y": 300
-      },
-      "end": {
-        "x": 200,
-        "y": 300
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 280,
-        "y": 300
-      },
-      "cp2": {
-        "x": 240,
-        "y": 300
-      }
-    },
-    {
-      "id": "lineT",
-      "start": {
-        "x": 200,
-        "y": 300
-      },
-      "end": {
-        "x": 160,
-        "y": 300
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 173.33333333333334,
-        "y": 300
-      },
-      "cp2": {
-        "x": 146.66666666666666,
-        "y": 300
-      }
-    },
-    {
-      "id": "lineU",
-      "start": {
-        "x": 160,
-        "y": 300
-      },
-      "end": {
-        "x": 120,
-        "y": 340
-      },
-      "type": "elbow",
-      "cp1": {
-        "x": 137.908610008,
-        "y": 300
-      },
-      "cp2": {
-        "x": 120,
-        "y": 317.908610008
-      },
-      "flip": true
-    },
-    {
-      "id": "lineV",
-      "start": {
-        "x": 120,
-        "y": 460
-      },
-      "end": {
-        "x": 60,
-        "y": 660
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 100,
-        "y": 526.6666666666666
-      },
-      "cp2": {
-        "x": 80,
-        "y": 593.3333333333334
+        "x": 220,
+        "y": 260
       }
     }
   ],
-  "links": [
-    {
-      "id": "lineB::start-lineD::start",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineD",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineB::end-lineE::start",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineE",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::start-lineE::end",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineE",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::end-lineG::start",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineG",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineG::end-lineH::start",
-      "line1": {
-        "lineId": "lineG",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineH",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineA::end-lineJ::end",
-      "line1": {
-        "lineId": "lineA",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineJ",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineB::start-lineM::end",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineM",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineD::start-lineM::end",
-      "line1": {
-        "lineId": "lineD",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineM",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineI::end-lineN::start",
-      "line1": {
-        "lineId": "lineI",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineN",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineJ::start-lineN::end",
-      "line1": {
-        "lineId": "lineJ",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineN",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineH::end-lineO::start",
-      "line1": {
-        "lineId": "lineH",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineO",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineI::start-lineO::end",
-      "line1": {
-        "lineId": "lineI",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineO",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineA::end-lineQ::start",
-      "line1": {
-        "lineId": "lineA",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineQ",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineJ::end-lineQ::start",
-      "line1": {
-        "lineId": "lineJ",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineQ",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineM::start-lineQ::end",
-      "line1": {
-        "lineId": "lineM",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineQ",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineM::start-lineS::start",
-      "line1": {
-        "lineId": "lineM",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineS",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineQ::end-lineS::start",
-      "line1": {
-        "lineId": "lineQ",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineS",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineS::end-lineT::start",
-      "line1": {
-        "lineId": "lineS",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineT",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::end-lineU::end",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineU",
-        "endpoint": "end"
-      },
-      "activated": false
-    },
-    {
-      "id": "lineG::start-lineU::end",
-      "line1": {
-        "lineId": "lineG",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineU",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineT::end-lineU::start",
-      "line1": {
-        "lineId": "lineT",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineU",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineG::end-lineV::start",
-      "line1": {
-        "lineId": "lineG",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineV",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineH::start-lineV::start",
-      "line1": {
-        "lineId": "lineH",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineV",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineL::start-lineV::end",
-      "line1": {
-        "lineId": "lineL",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineV",
-        "endpoint": "end"
-      },
-      "activated": true
-    }
-  ],
+  "links": [],
   "tokens": [
     {
       "id": "token1",
       "color": "#e53935",
       "type": "round",
+      "speed": 80
+    },
+    {
+      "id": "token8",
+      "color": "#f9ab00",
+      "type": "square",
+      "speed": 80
+    },
+    {
+      "id": "token9",
+      "color": "#00acc1",
+      "type": "round",
+      "speed": 80
+    },
+    {
+      "id": "token10",
+      "color": "#1a73e8",
+      "type": "round",
       "speed": 40
     },
     {
-      "id": "token2",
-      "color": "#546e7a",
+      "id": "token11",
+      "color": "#e53935",
+      "type": "round",
+      "speed": 40
+    },
+    {
+      "id": "token12",
+      "color": "#e91e63",
+      "type": "round",
+      "speed": 40
+    },
+    {
+      "id": "token13",
+      "color": "#1a73e8",
       "type": "square",
       "speed": 40
     }
@@ -687,53 +77,33 @@
       "delay": 3
     }
   ],
-  "switches": {
-    "switch1": {
-      "linkIds": [
-        "lineB::start-lineM::end",
-        "lineD::start-lineM::end"
-      ],
-      "activeLinkId": "lineB::start-lineM::end",
-      "linkedSwitchIds": [],
-      "color": "#43a047"
-    },
-    "switch3": {
-      "linkIds": [
-        "lineM::start-lineQ::end",
-        "lineQ::end-lineS::start"
-      ],
-      "activeLinkId": "lineM::start-lineQ::end",
-      "linkedSwitchIds": []
-    },
-    "switch4": {
-      "linkIds": [
-        "lineG::end-lineH::start",
-        "lineG::end-lineV::start"
-      ],
-      "activeLinkId": "lineG::end-lineH::start",
-      "linkedSwitchIds": [],
-      "color": "#8e24aa"
-    }
-  },
-  "transformers": [
-    {
-      "id": "transform1",
-      "linkId": "lineS::end-lineT::start",
-      "type": "color",
-      "amount": 0.3,
-      "color": "#8e24aa",
-      "targetType": "round"
-    },
-    {
-      "id": "transform2",
-      "linkId": "lineI::start-lineO::end",
-      "type": "color",
-      "amount": 1,
-      "color": "#00acc1",
-      "targetType": "square"
-    }
-  ],
+  "switches": {},
+  "transformers": [],
   "inverters": [],
-  "arrival": null,
+  "arrival": {
+    "id": "arrival1",
+    "lineId": "lineA",
+    "endpoint": "end",
+    "demands": [
+      {
+        "id": "demand1",
+        "color": "#e53935",
+        "type": "round",
+        "angled": false
+      },
+      {
+        "id": "demand2",
+        "color": "#f9ab00",
+        "type": "square",
+        "angled": false
+      },
+      {
+        "id": "demand3",
+        "color": "#1a73e8",
+        "type": "round",
+        "angled": false
+      }
+    ]
+  },
   "screenGates": []
 }

@@ -7,7 +7,6 @@ import Accueil from "screens/Accueil"
 import Menu from "screens/Menu"
 import Cartes from "screens/Cartes"
 import Jeu from "screens/Jeu"
-import Victoire from "screens/Victoire"
 import HautsFaits from "screens/HautsFaits"
 import Options from "screens/Options"
 import APropos from "screens/APropos"
@@ -17,7 +16,6 @@ type Screen =
   | { id: "menu" }
   | { id: "cartes" }
   | { id: "jeu"; mapId: string }
-  | { id: "victoire"; mapId: string; time: number; stars: number; noCollision: boolean }
   | { id: "hauts-faits" }
   | { id: "options" }
   | { id: "a-propos" }
@@ -59,19 +57,6 @@ const renderScreen = (
       <Jeu
         mapId={s.mapId}
         onBack={goCartes}
-        onWin={(time, stars, noCollision) =>
-          setScreen({ id: "victoire", mapId: s.mapId, time, stars, noCollision })
-        }
-      />
-    )
-
-  if (s.id === "victoire")
-    return (
-      <Victoire
-        mapId={s.mapId}
-        time={s.time}
-        stars={s.stars}
-        noCollision={s.noCollision}
         onRejouer={() => goJeu(s.mapId)}
         onSuivant={() => {
           const next = getNextMap(s.mapId)

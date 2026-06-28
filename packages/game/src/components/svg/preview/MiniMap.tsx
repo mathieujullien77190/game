@@ -1,4 +1,5 @@
 import { CANVAS_W, CANVAS_H } from "engine/constants"
+import { miniToken } from "engine/miniToken"
 import type { PreviewManager } from "engine/Manager/PreviewManager"
 
 export const MiniMap = ({ data }: { data: PreviewManager["data"] }) => {
@@ -12,7 +13,7 @@ export const MiniMap = ({ data }: { data: PreviewManager["data"] }) => {
 
   return (
     <g>
-      <rect x={mx} y={my} width={MW} height={MH} rx={4} fill="#fff" stroke="#000" strokeWidth={2} />
+      <rect x={mx} y={my} width={MW} height={MH} rx={4} fill="#fff" stroke="#ccc" strokeWidth={4} />
       {data.tokens.map((token) => {
         if (data.elapsedSeconds < token.startAt) return null
         const line = data.lines[token.lineId]
@@ -22,20 +23,7 @@ export const MiniMap = ({ data }: { data: PreviewManager["data"] }) => {
         const dx = mx + pt.x * S,
           dy = my + pt.y * S
         const color = (token.displayColor || token.color) as string
-        return token.type === "square" ? (
-          <rect
-            key={token.id}
-            x={dx - 3}
-            y={dy - 3}
-            width={6}
-            height={6}
-            fill={color}
-            stroke="#000"
-            strokeWidth={1}
-          />
-        ) : (
-          <circle key={token.id} cx={dx} cy={dy} r={3} fill={color} stroke="#000" strokeWidth={1} />
-        )
+        return miniToken(token.id, dx, dy, 3, color, token.type === "square")
       })}
     </g>
   )

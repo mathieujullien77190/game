@@ -17,9 +17,7 @@ export type TransitionCtx = {
   transformers: Record<string, TransformerPreview>;
   transformerByLinkId: Record<string, string>;
   inverterLinkMap: Map<string, "invert" | "grayscale" | "dark">;
-  isInverted: boolean;
-  isGrayscale: boolean;
-  isDark: boolean;
+  screenEffects: Record<string, { isInverted: boolean; isGrayscale: boolean; isDark: boolean }>;
   screenGateByLinkId: Record<string, ScreenGatePreview>;
   screenGateByExitKey: Record<string, ScreenGatePreview>;
 };
@@ -171,8 +169,11 @@ const tokenExplosion = (
     const px = x + Math.cos(angle) * f * speed;
     const py = y + Math.sin(angle) * f * speed;
     if (isSquare) {
+      const rotDir = rng(seed, k + 40) > 0.5 ? 1 : -1;
+      const rotSpeed = 90 + rng(seed, k + 45) * 180;
+      const deg = rotDir * progress * rotSpeed;
       pieces.push(
-        <rect key={`s${k}`} x={px - size} y={py - size} width={size * 2} height={size * 2} fill={color} opacity={alpha}/>,
+        <rect key={`s${k}`} x={px - size} y={py - size} width={size * 2} height={size * 2} fill={color} opacity={alpha} transform={`rotate(${deg.toFixed(1)},${px.toFixed(1)},${py.toFixed(1)})`}/>,
       );
     } else {
       pieces.push(
@@ -254,9 +255,11 @@ export class TokenPreview extends Token {
     excess: number,
     ctx: TransitionCtx,
   ): { isInverted: boolean; isGrayscale: boolean; isDark: boolean } => {
-    let isInverted = ctx.isInverted;
-    let isGrayscale = ctx.isGrayscale;
-    let isDark = ctx.isDark;
+    const screenId = ctx.lines[this.lineId]?.screenId ?? "main";
+    if (!ctx.screenEffects[screenId]) ctx.screenEffects[screenId] = { isInverted: false, isGrayscale: false, isDark: false };
+    let isInverted = ctx.screenEffects[screenId].isInverted;
+    let isGrayscale = ctx.screenEffects[screenId].isGrayscale;
+    let isDark = ctx.screenEffects[screenId].isDark;
 
     if (this.portalContext) {
       const exitGate = ctx.screenGateByExitKey[`${this.lineId}::${arrivedAt}`];
@@ -271,9 +274,18 @@ export class TokenPreview extends Token {
     }
 
     if (ctx.arrivalKey && ctx.arrivalKey === `${this.lineId}::${arrivedAt}`) {
-      if (ctx.arrival) {
-        ctx.arrival.isFading = true;
-        ctx.arrival.fadeAlpha = 1;
+      if (ctx.arrival && this.type !== "cop") {
+        const demand = ctx.arrival.demands[ctx.arrival.currentDemandIndex];
+        const tokenColor = this.displayColor || (this.color as string);
+        const correct = demand ? demand.color === tokenColor && demand.type === this.type : false;
+        const n = ctx.arrival.demands.length;
+        ctx.arrival.flashColor = correct ? "#2E9E6B" : "#FF5630";
+        ctx.arrival.flashProgress = 0;
+        if (correct) {
+          ctx.arrival.currentDemandIndex++;
+          ctx.arrival.correctCount++;
+          ctx.arrival.arcTarget = Math.min(n, ctx.arrival.arcTarget + 1);
+        }
       }
       this.arrived = true;
       this.direction = 0;
@@ -300,6 +312,7 @@ export class TokenPreview extends Token {
     if (inverterEffect === "invert") isInverted = !isInverted;
     else if (inverterEffect === "grayscale") isGrayscale = !isGrayscale;
     else if (inverterEffect === "dark") isDark = !isDark;
+    if (inverterEffect) ctx.screenEffects[screenId] = { isInverted, isGrayscale, isDark };
 
     const screenGate = linkId ? ctx.screenGateByLinkId[linkId] : undefined;
     if (screenGate) {

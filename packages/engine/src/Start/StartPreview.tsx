@@ -17,7 +17,7 @@ export class StartPreview extends Start {
     sid: string,
   ): JSX.Element | null => {
     const line = lines[this.lineId];
-    if (!line || line.screenId !== sid) return null;
+    if (!line || line.screenId !== sid) { this._renderCache = null; return null; }
     const pt =
       this.endpoint === "end"
         ? line.points[line.points.length - 1]

@@ -43,9 +43,7 @@ export class PreviewManager extends Manager<LinePreview> {
     linkByEndpointKey: {} as Record<string, string>,
     inverters: {} as Record<string, InverterPreview>,
     inverterLinkMap: new Map<string, "invert" | "grayscale" | "dark">(),
-    isInverted: false,
-    isGrayscale: false,
-    isDark: false,
+    screenEffects: {} as Record<string, { isInverted: boolean; isGrayscale: boolean; isDark: boolean }>,
     screenGates: {} as Record<string, ScreenGatePreview>,
     screenGateByLinkId: {} as Record<string, ScreenGatePreview>,
     screenGateByExitKey: {} as Record<string, ScreenGatePreview>,
@@ -54,6 +52,7 @@ export class PreviewManager extends Manager<LinePreview> {
     screenTimeMultipliers: {} as Record<string, number>,
     arrival: null as ArrivalPreview | null,
     arrivalKey: "" as string,
+    _wonExploded: false,
     elapsedSeconds: 0,
     lastTimestamp: null as number | null,
   };
@@ -109,11 +108,11 @@ export class PreviewManager extends Manager<LinePreview> {
 
     this.data.inverters = {};
     this.data.inverterLinkMap = new Map();
-    this.data.isInverted = false;
-    this.data.isGrayscale = false;
-    this.data.isDark = false;
+    this.data.screenEffects = {};
     for (const inv of Object.values(inverters)) {
-      this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
+      const ip = new InverterPreview(inv.linkId, inv.id);
+      ip.effect = inv.effect;
+      this.data.inverters[inv.id] = ip;
       this.data.inverterLinkMap.set(inv.linkId, inv.effect);
     }
 
@@ -133,6 +132,7 @@ export class PreviewManager extends Manager<LinePreview> {
 
     this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
     this.data.arrivalKey = arrival ? `${arrival.lineId}::${arrival.endpoint}` : "";
+    this.data._wonExploded = false;
 
     const s = Object.values(starts)[0];
     this.data.start = s ? new StartPreview(s.lineId, s.endpoint, s.delay, s.id) : null;
@@ -160,6 +160,16 @@ export class PreviewManager extends Manager<LinePreview> {
     }
   };
 
+  explodeAll = () => {
+    for (const token of this.data.tokens) {
+      if (!token.exploding && !token.arrived) {
+        token.exploding = true;
+        token.direction = 0;
+        token.explosionSeed = (Math.random() * 999999) | 0;
+      }
+    }
+  };
+
   tickSim = (timestamp: number) => {
     if (this.data.lastTimestamp === null) {
       this.data.lastTimestamp = timestamp;
@@ -172,12 +182,23 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const sw of Object.values(this.data.switches)) sw.tick(deltaSeconds);
 
-    if (this.data.arrival?.isFading) {
-      this.data.arrival.fadeAlpha = Math.max(0, this.data.arrival.fadeAlpha - deltaSeconds / 2);
-      if (this.data.arrival.fadeAlpha <= 0) {
-        this.data.arrival.isFading = false;
-        this.data.arrival.fadeAlpha = 1;
-        this.data.arrival.currentDemandIndex++;
+    if (this.data.arrival) {
+      const arr = this.data.arrival;
+      const n = arr.demands.length;
+      if (n > 0 && arr.correctCount >= n && !this._wonExploded) {
+        this._wonExploded = true;
+        this.explodeAll();
+      }
+      if (arr.flashColor && arr.flashProgress < 1) {
+        arr.flashProgress = Math.min(1, arr.flashProgress + deltaSeconds / 0.45);
+        if (arr.flashProgress >= 1) arr.flashColor = null;
+      }
+      if (arr.arcFill !== arr.arcTarget) {
+        const speed = 3;
+        const dir = arr.arcTarget > arr.arcFill ? 1 : -1;
+        arr.arcFill += dir * deltaSeconds * speed;
+        if (dir > 0 && arr.arcFill > arr.arcTarget) arr.arcFill = arr.arcTarget;
+        if (dir < 0 && arr.arcFill < arr.arcTarget) arr.arcFill = arr.arcTarget;
       }
     }
 
@@ -223,13 +244,14 @@ export class PreviewManager extends Manager<LinePreview> {
           if (token.currentSpeed > line.limitation) {
             if (token.speedingLineId !== line.id) {
               token.speedingLineId = line.id;
-              const cop = new TokenPreview(COLOR_TOKEN_RED, token.currentSpeed * 1.1);
+              const copSpeed = targetSpeed * 1.1;
+              const cop = new TokenPreview(COLOR_TOKEN_RED, copSpeed);
               cop.type = "cop";
               cop.lineId = token.lineId;
               cop.pointIndex = Math.max(0, Math.min(line.points.length - 1, token.pointIndex - token.direction * 20));
               cop.direction = token.direction;
               cop.remainder = token.remainder;
-              cop.currentSpeed = token.currentSpeed * 1.1;
+              cop.currentSpeed = copSpeed;
               cop.startAt = this.data.elapsedSeconds + 1.5;
               this.data.tokens.push(cop);
             }
@@ -241,10 +263,14 @@ export class PreviewManager extends Manager<LinePreview> {
         if (result) {
           token.speedingLineId = "";
           token.speed = token.currentSpeed;
-          const { isInverted, isGrayscale, isDark } = token.transition(result.hit, result.excess, this.data);
-          this.data.isInverted = isInverted;
-          this.data.isGrayscale = isGrayscale;
-          this.data.isDark = isDark;
+          token.transition(result.hit, result.excess, this.data);
+          for (const inv of Object.values(this.data.inverters)) {
+            const fx = this.data.screenEffects[inv.screenId];
+            if (!fx) { inv.active = false; continue; }
+            if (inv.effect === "invert") inv.active = fx.isInverted;
+            else if (inv.effect === "grayscale") inv.active = fx.isGrayscale;
+            else if (inv.effect === "dark") inv.active = fx.isDark;
+          }
         }
 
         if (token.rotationOffset !== token.targetRotationOffset) {

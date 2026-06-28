@@ -36,6 +36,7 @@ export const en: Translation = {
     loading: "loading…",
     pause: "PAUSE",
     resume: "RESUME",
+    won: "WON",
     defaultMap: "Map",
   },
   victoire: {

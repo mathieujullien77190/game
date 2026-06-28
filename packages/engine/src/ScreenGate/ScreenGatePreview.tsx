@@ -1,17 +1,18 @@
 import type { JSX } from "react"
 import { ScreenGate } from "./ScreenGate"
 import { GATE_W, GATE_H } from "./ScreenGateEditor"
-import { CANVAS_W, COLOR_BLACK, COLOR_WHITE, GAME_FONT } from "../constants"
+import { CANVAS_W, COLOR_WHITE, COLOR_GRAY, COLOR_GRAY_ACCENT, GAME_FONT } from "../constants"
+import { miniToken } from "../miniToken"
 import type { Link } from "../Link/Link"
 import type { TokenPreview } from "../Token/TokenPreview"
 import type { LinePreview } from "../Line/LinePreview"
 
 export class ScreenGatePreview extends ScreenGate {
   static readonly CORNER_RX = 5
-  static readonly STROKE_WIDTH = 2
-  static readonly LABEL_FONT_SIZE = 10
+  static readonly STROKE_WIDTH = 4
+  static readonly LABEL_FONT_SIZE = 14
   static readonly ENTRY_MARKER_R = 4
-  static readonly EXIT_OUTER_R = 8
+  static readonly EXIT_OUTER_R = 10
   static readonly EXIT_INNER_R = 4
   static readonly MINI_TOKEN_R = 2
   static readonly MINI_STROKE_WIDTH = 0.5
@@ -50,13 +51,15 @@ export class ScreenGatePreview extends ScreenGate {
     return (
       <g key={this.id}>
         <rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}
-          fill={COLOR_WHITE} stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH}/>
-        <text x={pt.x} y={pt.y - GATE_H / 2 + 3} textAnchor="middle" dominantBaseline="hanging"
-          fontFamily={GAME_FONT} fontSize={LABEL_FONT_SIZE} fontWeight="bold" fill={COLOR_BLACK} opacity={0.5}>
-          {this.timeMultiplier >= 1
-            ? `×${Math.round(this.timeMultiplier * 10) / 10}`
-            : `×${(Math.round(this.timeMultiplier * 10) / 10).toFixed(1)}`}
-        </text>
+          fill={COLOR_WHITE} stroke={COLOR_GRAY} strokeWidth={STROKE_WIDTH}/>
+        {this.timeMultiplier !== 1 && (
+          <text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle"
+            fontFamily={GAME_FONT} fontSize={LABEL_FONT_SIZE} fontWeight="bold" fill={COLOR_GRAY}>
+            {this.timeMultiplier > 1
+              ? `+${Math.round(this.timeMultiplier)}`
+              : `-${Math.round(1 / this.timeMultiplier)}`}
+          </text>
+        )}
         <clipPath id={`sgclip-${this.id}`}>
           <rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}/>
         </clipPath>
@@ -68,9 +71,7 @@ export class ScreenGatePreview extends ScreenGate {
             const dx = pt.x - GATE_W / 2 + tp.x * S
             const dy = pt.y - GATE_H / 2 + tp.y * S
             const color = (t.displayColor || t.color) as string
-            return t.type === "square"
-              ? <rect key={t.id} x={dx - MINI_TOKEN_R} y={dy - MINI_TOKEN_R} width={MINI_TOKEN_R * 2} height={MINI_TOKEN_R * 2} fill={color} stroke={COLOR_BLACK} strokeWidth={MINI_STROKE_WIDTH}/>
-              : <circle key={t.id} cx={dx} cy={dy} r={MINI_TOKEN_R} fill={color} stroke={COLOR_BLACK} strokeWidth={MINI_STROKE_WIDTH}/>
+            return miniToken(t.id, dx, dy, MINI_TOKEN_R, color, t.type === "square")
           })}
         </g>
       </g>
@@ -86,7 +87,7 @@ export class ScreenGatePreview extends ScreenGate {
       const eLine = lines[eLineId]
       if (eLine) {
         const pt = eEp === "end" ? eLine.end : eLine.start
-        nodes.push(<circle key={`en-${this.id}`} cx={pt.x} cy={pt.y} r={ENTRY_MARKER_R} fill={COLOR_BLACK}/>)
+        nodes.push(<circle key={`en-${this.id}`} cx={pt.x} cy={pt.y} r={ENTRY_MARKER_R} fill={COLOR_GRAY_ACCENT}/>)
       }
     }
     if (this.exitKey) {
@@ -96,8 +97,8 @@ export class ScreenGatePreview extends ScreenGate {
         const pt = xEp === "end" ? xLine.end : xLine.start
         nodes.push(
           <g key={`ex-${this.id}`}>
-            <circle cx={pt.x} cy={pt.y} r={EXIT_OUTER_R} fill="none" stroke={COLOR_BLACK} strokeWidth={STROKE_WIDTH}/>
-            <circle cx={pt.x} cy={pt.y} r={EXIT_INNER_R} fill={COLOR_BLACK}/>
+            <circle cx={pt.x} cy={pt.y} r={EXIT_OUTER_R} fill="none" stroke={COLOR_GRAY_ACCENT} strokeWidth={STROKE_WIDTH}/>
+            <circle cx={pt.x} cy={pt.y} r={EXIT_INNER_R} fill={COLOR_GRAY_ACCENT}/>
           </g>
         )
       }

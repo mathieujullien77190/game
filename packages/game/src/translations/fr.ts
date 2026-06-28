@@ -34,6 +34,7 @@ export const fr = {
     loading: "chargement…",
     pause: "PAUSE",
     resume: "REPRENDRE",
+    won: "GAGNÉ",
     defaultMap: "Carte",
   },
   victoire: {

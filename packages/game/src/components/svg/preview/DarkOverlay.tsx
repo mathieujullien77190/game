@@ -8,8 +8,8 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
   for (const token of data.tokens) {
     if (data.elapsedSeconds < token.startAt || token.exploding) continue
     const line = data.lines[token.lineId]
-    if (line?.tunnel) continue
-    const pt = line?.points[token.pointIndex]
+    if (!line || line.screenId !== sid || line.tunnel) continue
+    const pt = line.points[token.pointIndex]
     if (pt) punches.push({ x: pt.x, y: pt.y, r: 50 })
   }
   for (const sw of Object.values(data.switches)) {
@@ -31,6 +31,15 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
         data.arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0]
       if (pt) punches.push({ x: pt.x, y: pt.y, r: 35 })
     }
+  }
+  for (const sg of Object.values(data.screenGates)) {
+    if (sg.screenId !== sid) continue
+    const link = data.links[sg.linkId]
+    if (!link) continue
+    const line = data.lines[link.line1.lineId]
+    if (!line) continue
+    const pt = link.line1.endpoint === "end" ? line.end : line.start
+    punches.push({ x: pt.x, y: pt.y, r: 30 })
   }
   for (const tr of Object.values(data.transformers)) {
     const link = data.links[tr.linkId]

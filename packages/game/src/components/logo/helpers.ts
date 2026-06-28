@@ -23,10 +23,9 @@ export const buildClockTicks = (): ClockTick[] =>
   })
 
 export const initAngles = () => {
-  const now = new Date()
-  const s = now.getSeconds() + now.getMilliseconds() / 1000
-  const m = now.getMinutes() + s / 60
-  const h = (now.getHours() % 12) + m / 60
+  const s = 42
+  const m = 50 + s / 60
+  const h = 1 + m / 60
   return {
     sec: (s / 60) * 360 - DRAWN_SEC,
     min: (m / 60) * 360 - DRAWN_MIN,
