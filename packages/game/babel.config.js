@@ -1,7 +1,8 @@
 module.exports = function (api) {
-  api.cache(true)
+  const platform = api.caller((c) => c && c.platform)
+  api.cache.using(() => platform)
   return {
-    presets: ["babel-preset-expo"],
+    presets: [["babel-preset-expo", { unstable_transformImportMeta: platform === "web" }]],
     plugins: [
       [
         "module-resolver",

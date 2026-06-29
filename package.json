@@ -11,21 +11,25 @@
   "scripts": {
     "dev": "yarn workspace @tickwire/edition dev",
     "engine": "yarn workspace @tickwire/engine typecheck",
-    "game": "yarn workspace @tickwire/game dev",
-    "game:tel": "yarn workspace @tickwire/game dev:network",
+    "game": "yarn workspace @tickwire/game start",
     "edition": "yarn workspace @tickwire/edition dev"
   },
+  "resolutions": {
+    "ws": "^8.18.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
   "dependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-icons": "^5.0.0",
     "styled-components": "^6.1.18",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "@types/styled-components": "^5.1.34",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.3.0",
