@@ -1,33 +1,35 @@
-import { IoLockClosed, IoStar, IoStarOutline } from "react-icons/io5"
+import { Ionicons } from "@expo/vector-icons"
 import { formatTime } from "maps"
 import { T } from "theme"
 import type { Props } from "./types"
 import * as S from "./UI"
 
-const Stars = ({ n }: { n: number }) => (
-  <>
+const Stars = ({ n, color }: { n: number; color: string }) => (
+  <S.Stars $color={color}>
     {Array.from({ length: 3 }, (_, i) => (
-      i < n ? <IoStar key={i} /> : <IoStarOutline key={i} />
+      <Ionicons key={i} name={i < n ? "star" : "star-outline"} size={14} color={color} />
     ))}
-  </>
+  </S.Stars>
 )
 
 export const MapCard = ({ num, locked, accent, label, result, onClick }: Props) => (
-  <S.Card $locked={locked} $accent={accent} onClick={locked ? undefined : onClick}>
+  <S.Card $locked={locked} $accent={accent} onPress={locked ? undefined : onClick} activeOpacity={locked ? 1 : 0.8}>
     {!locked && <S.AccentBar $color={accent} />}
     {locked ? (
-      <S.LockIcon><IoLockClosed /></S.LockIcon>
+      <S.LockIcon>
+        <Ionicons name="lock-closed" size={22} color={T.muted} />
+      </S.LockIcon>
     ) : (
       <>
         <S.Label>{label}</S.Label>
         <S.Number $locked={false}>{String(num).padStart(2, "0")}</S.Number>
         {result ? (
           <>
-            <S.Stars $color={T.gold}><Stars n={result.stars} /></S.Stars>
+            <Stars n={result.stars} color={T.gold} />
             <S.Time $color={accent}>{formatTime(result.bestTime)}</S.Time>
           </>
         ) : (
-          <S.Stars $color={T.border}><Stars n={0} /></S.Stars>
+          <Stars n={0} color={T.border} />
         )}
       </>
     )}

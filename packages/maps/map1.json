@@ -2,125 +2,13 @@
   "screens": [
     "main"
   ],
-  "lines": [
-    {
-      "id": "lineA",
-      "start": {
-        "x": 200,
-        "y": 600
-      },
-      "end": {
-        "x": 200,
-        "y": 200
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 200,
-        "y": 466.66666666666663
-      },
-      "cp2": {
-        "x": 200,
-        "y": 333.3333333333333
-      }
-    },
-    {
-      "id": "lineB",
-      "start": {
-        "x": 100,
-        "y": 460
-      },
-      "end": {
-        "x": 120,
-        "y": 120
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 100,
-        "y": 360
-      },
-      "cp2": {
-        "x": 100,
-        "y": 260
-      }
-    },
-    {
-      "id": "lineC",
-      "start": {
-        "x": 120,
-        "y": 120
-      },
-      "end": {
-        "x": 360,
-        "y": 120
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 200,
-        "y": 120
-      },
-      "cp2": {
-        "x": 280,
-        "y": 120
-      }
-    }
-  ],
-  "links": [
-    {
-      "id": "lineB::end-lineC::start",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "activated": true
-    }
-  ],
-  "tokens": [
-    {
-      "id": "token1",
-      "color": "#43a047",
-      "type": "round",
-      "speed": 40
-    },
-    {
-      "id": "token4",
-      "color": "#1a73e8",
-      "type": "round",
-      "speed": 40
-    }
-  ],
-  "starts": [
-    {
-      "id": "start1",
-      "lineId": "lineA",
-      "endpoint": "start",
-      "delay": 6
-    }
-  ],
+  "lines": [],
+  "links": [],
+  "tokens": [],
+  "starts": [],
   "switches": {},
   "transformers": [],
   "inverters": [],
-  "arrival": {
-    "id": "arrival1",
-    "lineId": "lineA",
-    "endpoint": "end",
-    "demands": [
-      {
-        "id": "demand2",
-        "color": "#43a047",
-        "type": "round",
-        "angled": false
-      },
-      {
-        "id": "demand3",
-        "color": "#1a73e8",
-        "type": "round",
-        "angled": false
-      }
-    ]
-  },
+  "arrival": null,
   "screenGates": []
 }

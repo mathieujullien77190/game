@@ -1,27 +1,23 @@
-import styled from "styled-components"
+import styled from "styled-components/native"
 import { T } from "theme"
 
-export const Wrap = styled.div`
-  display: flex;
+export const Wrap = styled.View`
+  flex-direction: row;
   align-items: center;
   height: 64px;
-  padding: 0 20px;
-  background: ${T.surface};
-  border-bottom: 1px solid ${T.border};
-  flex-shrink: 0;
+  padding-horizontal: 20px;
+  background-color: ${T.surface};
+  border-bottom-width: 1px;
+  border-bottom-color: ${T.border};
 `
 
-export const BackBtn = styled.button`
-  background: none;
-  border: none;
-  display: flex;
+export const BackBtn = styled.TouchableOpacity`
+  padding-right: 12px;
   align-items: center;
-  color: ${T.muted};
-  cursor: pointer;
-  padding: 0 12px 0 0;
+  justify-content: center;
 `
 
-export const Title = styled.div`
+export const Title = styled.Text`
   flex: 1;
   text-align: center;
   font-size: 15px;
@@ -30,6 +26,6 @@ export const Title = styled.div`
   color: ${T.navy};
 `
 
-export const Spacer = styled.div`
+export const Spacer = styled.View`
   width: 40px;
 `

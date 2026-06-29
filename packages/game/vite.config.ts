@@ -21,7 +21,9 @@ export default defineConfig({
     },
   ],
   resolve: {
+    extensions: [".web.tsx", ".web.ts", ".tsx", ".ts", ".jsx", ".js"],
     alias: {
+      "engine/svgElements": path.resolve(__dirname, "../../packages/engine/src/svgElements.web.ts"),
       "engine/": path.resolve(__dirname, "../../packages/engine/src") + "/",
       "components/": path.resolve(__dirname, "src/components") + "/",
       "store": path.resolve(__dirname, "src/store.ts"),

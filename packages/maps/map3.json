@@ -703,6 +703,18 @@
       "activated": true
     },
     {
+      "id": "lineU::end-lineV::end",
+      "line1": {
+        "lineId": "lineU",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineV",
+        "endpoint": "end"
+      },
+      "activated": true
+    },
+    {
       "id": "lineB::end-lineX::start",
       "line1": {
         "lineId": "lineB",
@@ -747,18 +759,6 @@
       "line2": {
         "lineId": "lineY",
         "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineU::end-lineV::end",
-      "line1": {
-        "lineId": "lineU",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineV",
-        "endpoint": "end"
       },
       "activated": true
     },
@@ -816,49 +816,49 @@
       "id": "token5",
       "color": "#e53935",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token18",
       "color": "#fb8c00",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token19",
       "color": "#f9ab00",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token20",
       "color": "#43a047",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token21",
       "color": "#00acc1",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token22",
       "color": "#1a73e8",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token23",
       "color": "#8e24aa",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     },
     {
       "id": "token24",
       "color": "#e91e63",
       "type": "round",
-      "speed": 40
+      "speed": 1000
     }
   ],
   "starts": [
@@ -866,7 +866,7 @@
       "id": "start2",
       "lineId": "lineE",
       "endpoint": "start",
-      "delay": 10
+      "delay": 2
     }
   ],
   "switches": {

@@ -2,7 +2,7 @@
   {
     "id": "map1",
     "file": "map1.json",
-    "difficulty": "Advanced",
+    "difficulty": "Tutorial",
     "star1": 180,
     "star2": 120,
     "star3": 60
@@ -18,7 +18,15 @@
   {
     "id": "map3",
     "file": "map3.json",
-    "difficulty": "Hidden",
+    "difficulty": "Beginner",
+    "star1": 180,
+    "star2": 120,
+    "star3": 60
+  },
+  {
+    "id": "map4",
+    "file": "map4.json",
+    "difficulty": "Tutorial",
     "star1": 180,
     "star2": 120,
     "star3": 60

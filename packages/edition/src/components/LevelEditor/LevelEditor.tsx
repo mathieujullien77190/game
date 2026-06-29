@@ -1,4 +1,4 @@
-﻿import { useCallback, useRef, useState } from "react"
+﻿import { useCallback, useEffect, useRef, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { CANVAS_H, CANVAS_W } from "engine/constants"
 import { useStore } from "store"
@@ -9,6 +9,9 @@ import ToolsPanel from "components/ToolsPanel"
 
 export const LevelEditor = () => {
   const [leftWidth, setLeftWidth] = useState(() => Math.round(window.innerWidth * 0.3))
+
+  const initialized = useStore((s) => s.initialized)
+  useEffect(() => { useStore.getState().init() }, [])
 
   const dragging = useRef(false)
 
@@ -37,6 +40,8 @@ export const LevelEditor = () => {
     window.addEventListener("mousemove", onMove)
     window.addEventListener("mouseup", onUp)
   }, [])
+
+  if (!initialized) return <S.Container style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Loading…</S.Container>
 
   return (
     <S.Container>

@@ -1,59 +1,42 @@
-﻿import styled, { keyframes } from "styled-components"
+import styled from "styled-components/native"
 import { T } from "theme"
 
-const fadeUp = keyframes`
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-`
-
-export const Screen = styled.div`
-  width: 100%;
-  height: 100%;
-  background: ${T.bg};
-  display: flex;
-  flex-direction: column;
+export const Screen = styled.View`
+  flex: 1;
+  background-color: ${T.bg};
   align-items: center;
   justify-content: center;
   padding: 24px;
-  animation: ${fadeUp} 0.4s ease;
 `
 
-export const Card = styled.div`
+export const Card = styled.View`
   width: 100%;
   max-width: 360px;
-  background: ${T.surface};
-  border: 1px solid ${T.border};
+  background-color: ${T.surface};
+  border-width: 1px;
+  border-color: ${T.border};
   border-radius: 24px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   padding: 32px 24px 28px;
-  gap: 0;
 `
 
-export const AccentBar = styled.div<{ $color: string }>`
+export const AccentBar = styled.View<{ $color: string }>`
   width: 100%;
   height: 5px;
-  background: ${({ $color }) => $color};
-  margin: -32px -24px 24px;
+  background-color: ${({ $color }) => $color};
+  margin-top: -32px;
+  margin-bottom: 24px;
   align-self: stretch;
 `
 
-export const Sparkles = styled.div`
-  display: flex;
+export const Sparkles = styled.View`
+  flex-direction: row;
   gap: 16px;
   margin-bottom: 8px;
 `
 
-export const Spark = styled.span<{ $color: string }>`
-  font-size: 20px;
-  color: ${({ $color }) => $color};
-  display: flex;
-  align-items: center;
-`
-
-export const Heading = styled.div`
+export const Heading = styled.Text`
   font-size: 22px;
   font-weight: 300;
   color: ${T.navy};
@@ -61,30 +44,23 @@ export const Heading = styled.div`
   margin-bottom: 20px;
 `
 
-export const Stars = styled.div`
-  display: flex;
+export const Stars = styled.View`
+  flex-direction: row;
   align-items: center;
   gap: 4px;
   margin-bottom: 20px;
 `
 
-export const Star = styled.span<{ $filled: boolean; $big?: boolean }>`
-  font-size: ${({ $big }) => ($big ? "48px" : "36px")};
-  color: ${({ $filled }) => ($filled ? T.gold : T.border)};
-  display: inline-flex;
-  align-items: center;
-`
-
-export const StatsBox = styled.div`
+export const StatsBox = styled.View`
   width: 100%;
-  background: ${T.bg};
+  background-color: ${T.bg};
   border-radius: 12px;
   padding: 12px 20px 14px;
-  text-align: center;
+  align-items: center;
   margin-bottom: 10px;
 `
 
-export const StatsLabel = styled.div`
+export const StatsLabel = styled.Text`
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 2px;
@@ -92,80 +68,66 @@ export const StatsLabel = styled.div`
   margin-bottom: 6px;
 `
 
-export const StatsTime = styled.div<{ $color: string }>`
+export const StatsTime = styled.Text<{ $color: string }>`
   font-size: 26px;
   font-weight: 300;
-  font-family: inherit;
   color: ${({ $color }) => $color};
 `
 
-export const Record = styled.div`
+export const Record = styled.Text`
   font-size: 12px;
   color: ${T.muted};
   margin-bottom: 20px;
 `
 
-export const Buttons = styled.div`
-  display: flex;
+export const Buttons = styled.View`
+  flex-direction: row;
   gap: 12px;
   width: 100%;
 `
 
-export const BtnSecondary = styled.button`
+export const BtnSecondary = styled.TouchableOpacity`
   flex: 1;
   height: 52px;
   border-radius: 12px;
-  background: ${T.bg};
-  border: 1px solid ${T.border};
-  display: flex;
-  flex-direction: column;
+  background-color: ${T.bg};
+  border-width: 1px;
+  border-color: ${T.border};
   align-items: center;
   justify-content: center;
   gap: 2px;
-  cursor: pointer;
-  &:active {
-    opacity: 0.7;
-  }
 `
 
-export const BtnPrimary = styled.button`
+export const BtnPrimary = styled.TouchableOpacity`
   flex: 1;
   height: 52px;
   border-radius: 12px;
-  background: ${T.red};
-  border: none;
-  display: flex;
-  flex-direction: column;
+  background-color: ${T.red};
   align-items: center;
   justify-content: center;
   gap: 2px;
-  cursor: pointer;
-  &:active {
-    opacity: 0.85;
-  }
 `
 
-export const BtnIcon = styled.div<{ $light?: boolean }>`
-  font-size: 18px;
-  color: ${({ $light }) => ($light ? "#fff" : T.navy)};
-  opacity: ${({ $light }) => ($light ? 1 : 0.6)};
-`
-
-export const BtnLabel = styled.div<{ $light?: boolean }>`
+export const BtnLabel = styled.Text<{ $light?: boolean }>`
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 1px;
   color: ${({ $light }) => ($light ? "#fff" : T.muted)};
 `
 
-export const AchievementBanner = styled.div`
+export const AchievementBanner = styled.View`
   margin-top: 14px;
   width: 100%;
   max-width: 360px;
   padding: 10px 16px;
-  background: #eef4ff;
-  border: 1px solid rgba(58, 111, 216, 0.25);
+  background-color: #eef4ff;
+  border-width: 1px;
+  border-color: rgba(58, 111, 216, 0.25);
   border-radius: 10px;
+  align-items: center;
+`
+
+export const AchievementText = styled.Text`
   font-size: 12px;
   color: ${T.blue};
   text-align: center;

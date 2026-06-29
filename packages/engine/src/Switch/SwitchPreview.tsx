@@ -1,9 +1,10 @@
 import type { JSX } from "react";
+import * as SVG from "../svgElements"
 import type { Link, LinkEndpoint } from "../Link/Link";
 import type { LinePoint } from "../types";
 import { Switch } from "./Switch";
 import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils";
-import { COLOR_BLACK, COLOR_WHITE } from "../constants";
+import { COLOR_WHITE } from "../constants";
 import { svgDot } from "../svgDot";
 
 const animateAngle = (
@@ -77,23 +78,14 @@ export class SwitchPreview extends Switch {
   prepareFrame = (lines: LinesRef, links: LinksRef, linkMap: LinkMapRef) => {
     const { RADIUS } = SwitchPreview;
     const ep = getSwitchEnterPoint(this.linkIds, links);
-    if (!ep) {
-      this._pt = null;
-      return;
-    }
+    if (!ep) { this._pt = null; return; }
     const line = lines[ep.lineId];
-    if (!line) {
-      this._pt = null;
-      return;
-    }
+    if (!line) { this._pt = null; return; }
     const pt =
       ep.endpoint === "end"
         ? line.points[line.points.length - 1]
         : line.points[0];
-    if (!pt) {
-      this._pt = null;
-      return;
-    }
+    if (!pt) { this._pt = null; return; }
     this._pt = pt;
 
     this._enterAngle =
@@ -116,13 +108,7 @@ export class SwitchPreview extends Switch {
       const destLine = lines[activeDest.lineId];
       if (destLine && destLine.points.length > 0) {
         const activeAngle =
-          curveIntersectAngle(
-            destLine.points,
-            activeDest.endpoint,
-            pt.x,
-            pt.y,
-            RADIUS,
-          ) ??
+          curveIntersectAngle(destLine.points, activeDest.endpoint, pt.x, pt.y, RADIUS) ??
           (activeDest.endpoint === "end"
             ? destLine.points[destLine.points.length - 1].angle + Math.PI
             : destLine.points[0].angle);
@@ -168,63 +154,53 @@ export class SwitchPreview extends Switch {
       PULSE_DURATION,
       PULSE_EXPAND_R,
       ARM_STROKE_WIDTH,
-      ARM_DOT_R,
       STROKE_WIDTH,
     } = SwitchPreview;
     const enterAngle = this._enterAngle;
     const displayAngle = this.displayAngle;
 
     return (
-      <g key={this.id}>
-        {this.pulseTimer > 0 &&
-          (() => {
-            const t = 1 - this.pulseTimer / PULSE_DURATION;
-            return (
-              <circle
-                cx={pt.x}
-                cy={pt.y}
-                r={r + t * PULSE_EXPAND_R}
-                fill="none"
-                stroke="#ccc"
-                strokeWidth={STROKE_WIDTH}
-                opacity={1 - t}
-              />
-            );
-          })()}
-        <circle cx={pt.x} cy={pt.y} r={r} fill="#f5f5f7" />
+      <SVG.g key={this.id}>
+        {this.pulseTimer > 0 && (() => {
+          const t = 1 - this.pulseTimer / PULSE_DURATION;
+          return (
+            <SVG.circle
+              cx={pt.x} cy={pt.y}
+              r={r + t * PULSE_EXPAND_R}
+              fill="none" stroke="#ccc"
+              strokeWidth={STROKE_WIDTH}
+              opacity={1 - t}
+            />
+          );
+        })()}
+        <SVG.circle cx={pt.x} cy={pt.y} r={r} fill="#f5f5f7" />
         {this._allExitAngles.map((angle, i) => (
-          <g key={i}>{svgDot(pt.x + Math.cos(angle) * r, pt.y + Math.sin(angle) * r, "small")}</g>
+          <SVG.g key={i}>{svgDot(pt.x + Math.cos(angle) * r, pt.y + Math.sin(angle) * r, "small")}</SVG.g>
         ))}
         {enterAngle !== undefined && (
           <>
-            <line
-              x1={pt.x}
-              y1={pt.y}
+            <SVG.line
+              x1={pt.x} y1={pt.y}
               x2={pt.x + Math.cos(enterAngle) * r}
               y2={pt.y + Math.sin(enterAngle) * r}
-              stroke="#ccc"
-              strokeWidth={ARM_STROKE_WIDTH}
-              strokeLinecap="round"
+              stroke="#ccc" strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
             />
             {svgDot(pt.x + Math.cos(enterAngle) * r, pt.y + Math.sin(enterAngle) * r, "big", this.color)}
           </>
         )}
         {displayAngle !== undefined && (
           <>
-            <line
-              x1={pt.x}
-              y1={pt.y}
+            <SVG.line
+              x1={pt.x} y1={pt.y}
               x2={pt.x + Math.cos(displayAngle) * r}
               y2={pt.y + Math.sin(displayAngle) * r}
-              stroke="#ccc"
-              strokeWidth={ARM_STROKE_WIDTH}
-              strokeLinecap="round"
+              stroke="#ccc" strokeWidth={ARM_STROKE_WIDTH} strokeLinecap="round"
             />
             {svgDot(pt.x + Math.cos(displayAngle) * r, pt.y + Math.sin(displayAngle) * r, "big", this.color)}
           </>
         )}
-        <circle cx={pt.x} cy={pt.y} r={5} fill={this.color} />
-      </g>
+        <SVG.circle cx={pt.x} cy={pt.y} r={5} fill={this.color} />
+      </SVG.g>
     );
   };
 }

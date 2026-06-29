@@ -1,4 +1,4 @@
-import { IoApps, IoStar, IoSettings, IoInformationCircle } from "react-icons/io5"
+import { Ionicons } from "@expo/vector-icons"
 import { useProgressStore, ACHIEVEMENTS } from "progressStore"
 import { useLang } from "hooks/useLang"
 import { T } from "theme"
@@ -17,10 +17,9 @@ export const Menu = ({ onBack, onCartes, onHautsFaits, onOptions, onAPropos }: P
   return (
     <S.Screen>
       <Header title={t.menu.title} onBack={onBack} />
-
       <S.List>
         <MenuItem
-          icon={<IoApps />}
+          icon={<Ionicons name="apps" size={22} color={T.red} />}
           iconColor={T.red}
           iconBg="#FEF0EC"
           title={t.menu.cartes}
@@ -28,7 +27,7 @@ export const Menu = ({ onBack, onCartes, onHautsFaits, onOptions, onAPropos }: P
           onClick={onCartes}
         />
         <MenuItem
-          icon={<IoStar />}
+          icon={<Ionicons name="star" size={22} color={T.gold} />}
           iconColor={T.gold}
           iconBg="#FFF8EC"
           title={t.menu.hautsFaits}
@@ -39,7 +38,7 @@ export const Menu = ({ onBack, onCartes, onHautsFaits, onOptions, onAPropos }: P
           onClick={onHautsFaits}
         />
         <MenuItem
-          icon={<IoSettings />}
+          icon={<Ionicons name="settings" size={22} color={T.blue} />}
           iconColor={T.blue}
           iconBg="#EEF4FF"
           title={t.menu.options}
@@ -47,7 +46,7 @@ export const Menu = ({ onBack, onCartes, onHautsFaits, onOptions, onAPropos }: P
           onClick={onOptions}
         />
         <MenuItem
-          icon={<IoInformationCircle />}
+          icon={<Ionicons name="information-circle" size={22} color={T.green} />}
           iconColor={T.green}
           iconBg="#F0FBF6"
           title={t.menu.aPropos}
@@ -55,7 +54,6 @@ export const Menu = ({ onBack, onCartes, onHautsFaits, onOptions, onAPropos }: P
           onClick={onAPropos}
         />
       </S.List>
-
       <S.Footer>
         <S.FooterLogo>{t.menu.footer}</S.FooterLogo>
       </S.Footer>

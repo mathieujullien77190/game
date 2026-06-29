@@ -1,4 +1,5 @@
 import type { JSX } from "react"
+import * as SVG from "../svgElements"
 import { Inverter } from "./Inverter"
 import type { Link } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
@@ -24,10 +25,10 @@ export class InverterPreview extends Inverter {
     const ox = Math.cos(perp) * DOT_GAP
     const oy = Math.sin(perp) * DOT_GAP
     return (
-      <g key={this.id}>
-        <circle cx={pt.x - ox} cy={pt.y - oy} r={DOT_R} fill={COLOR_OFF} opacity={this.active ? 0.1 : 1} />
-        <circle cx={pt.x + ox} cy={pt.y + oy} r={DOT_R} fill={COLOR_ON} opacity={this.active ? 1 : 0.1} />
-      </g>
+      <SVG.g key={this.id}>
+        <SVG.circle cx={pt.x - ox} cy={pt.y - oy} r={DOT_R} fill={COLOR_OFF} opacity={this.active ? 0.1 : 1} />
+        <SVG.circle cx={pt.x + ox} cy={pt.y + oy} r={DOT_R} fill={COLOR_ON} opacity={this.active ? 1 : 0.1} />
+      </SVG.g>
     )
   }
 }

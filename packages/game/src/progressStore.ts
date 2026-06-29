@@ -1,5 +1,6 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { persist, createJSONStorage } from "zustand/middleware"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export type MapResult = { stars: number; bestTime: number }
 
@@ -62,14 +63,7 @@ export const useProgressStore = create<ProgressStore>()(
               }
             : state.results
 
-          const entry: HistoryEntry = {
-            mapId,
-            mapName,
-            time,
-            stars,
-            won,
-            date: new Date().toISOString(),
-          }
+          const entry: HistoryEntry = { mapId, mapName, time, stars, won, date: new Date().toISOString() }
 
           const now = new Date().toISOString()
           const newAchievements = { ...state.achievements }
@@ -78,24 +72,24 @@ export const useProgressStore = create<ProgressStore>()(
 
           if (won && !newAchievements["premiers-pas"]) newAchievements["premiers-pas"] = now
           if (won && time < 60 && !newAchievements["speedrun"]) newAchievements["speedrun"] = now
-          if (won && noCollision && !newAchievements["sans-faute"])
-            newAchievements["sans-faute"] = now
-          if (won && stars === 3 && !newAchievements["perfection"])
-            newAchievements["perfection"] = now
-          if (completedMaps.length >= 3 && !newAchievements["collection"])
-            newAchievements["collection"] = now
+          if (won && noCollision && !newAchievements["sans-faute"]) newAchievements["sans-faute"] = now
+          if (won && stars === 3 && !newAchievements["perfection"]) newAchievements["perfection"] = now
+          if (completedMaps.length >= 3 && !newAchievements["collection"]) newAchievements["collection"] = now
           if (threeStarMaps >= 5 && !newAchievements["maitrise"]) newAchievements["maitrise"] = now
 
+          void isNewRecord
           return {
             results: newResults,
             history: [entry, ...state.history].slice(0, 100),
             achievements: newAchievements,
             lastPlayedMapId: mapId,
-            ...(isNewRecord ? {} : {}),
           }
         })
       },
     }),
-    { name: "tickwire-progress" }
+    {
+      name: "tickwire-progress",
+      storage: createJSONStorage(() => AsyncStorage),
+    }
   )
 )

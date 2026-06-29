@@ -294,8 +294,8 @@ export class PreviewManager extends Manager<LinePreview> {
     );
     for (let i = 0; i < active.length; i++) {
       const lineA = this.data.lines[active[i].lineId];
-      if (!lineA?.tunnel) continue;
-      const pa = lineA?.points[active[i].pointIndex];
+      if (!lineA) continue;
+      const pa = lineA.points[active[i].pointIndex];
       if (!pa) continue;
       for (let j = i + 1; j < active.length; j++) {
         if (active[j].lineId !== active[i].lineId) continue;

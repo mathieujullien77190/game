@@ -1,5 +1,6 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { persist, createJSONStorage } from "zustand/middleware"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { fr, en } from "./translations"
 import type { Translation } from "./translations"
 
@@ -22,6 +23,7 @@ export const useLangStore = create<LangStore>()(
     }),
     {
       name: "tickwire-lang",
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ lang: state.lang }),
       onRehydrateStorage: () => (state) => {
         if (state) state.t = TRANSLATIONS[state.lang]

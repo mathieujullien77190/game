@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Tickwire",
+    "slug": "tickwire",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#f5f5f7"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tickwire.game"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#f5f5f7"
+      },
+      "package": "com.tickwire.game"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

@@ -17,6 +17,7 @@ export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransfo
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
+  initialized: boolean
   editorManager: EditorManager
   previewManager: PreviewManager
   tokens: Record<string, Token>
@@ -113,6 +114,7 @@ export interface StoreActions {
   currentMapId: string
   mapDifficulties: Record<string, MapDifficulty>
   mapStarThresholds: Record<string, { star1: number; star2: number; star3: number }>
+  init: () => Promise<void>
   addMap: () => void
   selectMap: (id: string) => void
   clearCurrentMap: () => void

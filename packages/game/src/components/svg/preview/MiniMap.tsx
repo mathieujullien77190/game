@@ -1,3 +1,4 @@
+import * as SVG from "engine/svgElements"
 import { CANVAS_W, CANVAS_H } from "engine/constants"
 import { miniToken } from "engine/miniToken"
 import type { PreviewManager } from "engine/Manager/PreviewManager"
@@ -12,8 +13,8 @@ export const MiniMap = ({ data }: { data: PreviewManager["data"] }) => {
     my = CANVAS_H - MH - 8
 
   return (
-    <g>
-      <rect x={mx} y={my} width={MW} height={MH} rx={4} fill="#fff" stroke="#ccc" strokeWidth={4} />
+    <SVG.g>
+      <SVG.rect x={mx} y={my} width={MW} height={MH} rx={4} fill="#fff" stroke="#ccc" strokeWidth={4} />
       {data.tokens.map((token) => {
         if (data.elapsedSeconds < token.startAt) return null
         const line = data.lines[token.lineId]
@@ -25,6 +26,6 @@ export const MiniMap = ({ data }: { data: PreviewManager["data"] }) => {
         const color = (token.displayColor || token.color) as string
         return miniToken(token.id, dx, dy, 3, color, token.type === "square")
       })}
-    </g>
+    </SVG.g>
   )
 }

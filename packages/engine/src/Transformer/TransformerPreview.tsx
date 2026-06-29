@@ -1,4 +1,5 @@
 import type { JSX, ReactNode } from "react";
+import * as SVG from "../svgElements"
 import { Transformer } from "./Transformer";
 import { COLOR_WHITE } from "../constants";
 
@@ -33,9 +34,8 @@ export class TransformerPreview extends Transformer {
       : DOT_INITIAL_ANGLE + elapsed * IDLE_DOT_SPEED;
 
   private bgCircle = (pt: { x: number; y: number }) => (
-    <circle
-      cx={pt.x}
-      cy={pt.y}
+    <SVG.circle
+      cx={pt.x} cy={pt.y}
       r={ORBIT_R}
       fill={COLOR_WHITE}
       stroke="#ccc"
@@ -44,7 +44,7 @@ export class TransformerPreview extends Transformer {
   );
 
   private orbitDot = (pt: { x: number; y: number }, angle: number) => (
-    <circle
+    <SVG.circle
       cx={pt.x + Math.cos(angle) * ORBIT_R}
       cy={pt.y + Math.sin(angle) * ORBIT_R}
       r={ORBIT_DOT_R}
@@ -62,7 +62,7 @@ export class TransformerPreview extends Transformer {
           const a0 = angle - TRAIL_SPAN * (1 - i / TRAIL_SEGS);
           const a1 = angle - TRAIL_SPAN * (1 - (i + 1) / TRAIL_SEGS);
           return (
-            <path
+            <SVG.path
               key={i}
               d={`M${pt.x + ORBIT_R * Math.cos(a0)},${pt.y + ORBIT_R * Math.sin(a0)}A${ORBIT_R},${ORBIT_R},0,0,1,${pt.x + ORBIT_R * Math.cos(a1)},${pt.y + ORBIT_R * Math.sin(a1)}`}
               fill="none"
@@ -75,10 +75,7 @@ export class TransformerPreview extends Transformer {
         })
       : [];
 
-  renderRotate = (
-    pt: { x: number; y: number },
-    elapsed: number,
-  ): JSX.Element => {
+  renderRotate = (pt: { x: number; y: number }, elapsed: number): JSX.Element => {
     const {
       ROTATE_ARC_R: r,
       ROTATE_ARC_SPAN,
@@ -97,89 +94,68 @@ export class TransformerPreview extends Transformer {
       const ay = r * Math.sin(end) + pt.y;
       const backDir = end - Math.PI / 2;
       arcs.push(
-        <g key={i}>
-          <path
+        <SVG.g key={i}>
+          <SVG.path
             d={`M${pt.x + r * Math.cos(start)},${pt.y + r * Math.sin(start)}A${r},${r},0,0,1,${ax},${ay}`}
-            fill="none"
-            stroke="#ccc"
-            strokeWidth={ROTATE_STROKE_WIDTH}
-            strokeLinecap="round"
+            fill="none" stroke="#ccc" strokeWidth={ROTATE_STROKE_WIDTH} strokeLinecap="round"
           />
-          <path
+          <SVG.path
             d={`M${ax + ROTATE_ARROW_LEN * Math.cos(backDir + ROTATE_ARROW_SPREAD)},${ay + ROTATE_ARROW_LEN * Math.sin(backDir + ROTATE_ARROW_SPREAD)}L${ax},${ay}L${ax + ROTATE_ARROW_LEN * Math.cos(backDir - ROTATE_ARROW_SPREAD)},${ay + ROTATE_ARROW_LEN * Math.sin(backDir - ROTATE_ARROW_SPREAD)}`}
-            fill="none"
-            stroke="#ccc"
-            strokeWidth={ROTATE_STROKE_WIDTH}
-            strokeLinecap="round"
+            fill="none" stroke="#ccc" strokeWidth={ROTATE_STROKE_WIDTH} strokeLinecap="round"
           />
-        </g>,
+        </SVG.g>,
       );
     }
     return (
-      <g key={this.id}>
-        <circle cx={pt.x} cy={pt.y} r={r + 6} fill={COLOR_WHITE} />
+      <SVG.g key={this.id}>
+        <SVG.circle cx={pt.x} cy={pt.y} r={r + 6} fill={COLOR_WHITE} />
         {arcs}
-      </g>
+      </SVG.g>
     );
   };
 
   renderFade = (pt: { x: number; y: number }, elapsed: number): JSX.Element => {
     const angle = this.dotAngle(elapsed);
     return (
-      <g key={this.id}>
+      <SVG.g key={this.id}>
         {this.bgCircle(pt)}
         {this.trailArcs(pt, angle, "#999")}
         {this.orbitDot(pt, angle)}
-        <circle
-          cx={pt.x}
-          cy={pt.y}
-          r={CENTER_R}
-          fill="#999"
-          opacity={this.amount}
-        />
-      </g>
+        <SVG.circle cx={pt.x} cy={pt.y} r={CENTER_R} fill="#999" opacity={this.amount} />
+      </SVG.g>
     );
   };
 
-  renderColor = (
-    pt: { x: number; y: number },
-    elapsed: number,
-  ): JSX.Element => {
+  renderColor = (pt: { x: number; y: number }, elapsed: number): JSX.Element => {
     const { color, currentTokenColor } = this;
     const angle = this.dotAngle(elapsed);
     return (
-      <g key={this.id}>
+      <SVG.g key={this.id}>
         {this.bgCircle(pt)}
         {this.trailArcs(pt, angle, currentTokenColor || color)}
         {this.orbitDot(pt, angle)}
-        <circle cx={pt.x} cy={pt.y} r={CENTER_COLOR_R} fill={color} />
-      </g>
+        <SVG.circle cx={pt.x} cy={pt.y} r={CENTER_COLOR_R} fill={color} />
+      </SVG.g>
     );
   };
 
-  renderShape = (
-    pt: { x: number; y: number },
-    elapsed: number,
-  ): JSX.Element => {
+  renderShape = (pt: { x: number; y: number }, elapsed: number): JSX.Element => {
     const angle = this.dotAngle(elapsed);
     return (
-      <g key={this.id}>
+      <SVG.g key={this.id}>
         {this.bgCircle(pt)}
         {this.trailArcs(pt, angle, "#999")}
         {this.orbitDot(pt, angle)}
         {this.targetType === "square" ? (
-          <rect
-            x={pt.x - CENTER_SQUARE_HALF}
-            y={pt.y - CENTER_SQUARE_HALF}
-            width={CENTER_SQUARE_HALF * 2}
-            height={CENTER_SQUARE_HALF * 2}
-            rx={CENTER_SQUARE_RX}
-            fill="#999"
+          <SVG.rect
+            x={pt.x - CENTER_SQUARE_HALF} y={pt.y - CENTER_SQUARE_HALF}
+            width={CENTER_SQUARE_HALF * 2} height={CENTER_SQUARE_HALF * 2}
+            rx={CENTER_SQUARE_RX} fill="#999"
           />
         ) : (
-          <circle cx={pt.x} cy={pt.y} r={CENTER_R} fill="#999" />
+          <SVG.circle cx={pt.x} cy={pt.y} r={CENTER_R} fill="#999" />
         )}
-      </g>
+      </SVG.g>
     );
   };
 
@@ -187,14 +163,10 @@ export class TransformerPreview extends Transformer {
 
   render = (pt: { x: number; y: number }, elapsed: number): JSX.Element => {
     switch (this.type) {
-      case "rotate":
-        return this.renderRotate(pt, elapsed);
-      case "fade":
-        return this.renderFade(pt, elapsed);
-      case "color":
-        return this.renderColor(pt, elapsed);
-      case "shape":
-        return this.renderShape(pt, elapsed);
+      case "rotate": return this.renderRotate(pt, elapsed);
+      case "fade":   return this.renderFade(pt, elapsed);
+      case "color":  return this.renderColor(pt, elapsed);
+      case "shape":  return this.renderShape(pt, elapsed);
     }
   };
 }

@@ -1,4 +1,5 @@
 import type { JSX } from "react"
+import * as SVG from "../svgElements"
 import { ScreenGate } from "./ScreenGate"
 import { GATE_W, GATE_H } from "./ScreenGateEditor"
 import { CANVAS_W, COLOR_WHITE, COLOR_GRAY, COLOR_GRAY_ACCENT, GAME_FONT } from "../constants"
@@ -41,7 +42,7 @@ export class ScreenGatePreview extends ScreenGate {
     if (!line) return null
     const pt = link.line1.endpoint === "end" ? line.end : line.start
 
-    const { CORNER_RX, STROKE_WIDTH, LABEL_FONT_SIZE, MINI_TOKEN_R, MINI_STROKE_WIDTH } = ScreenGatePreview
+    const { CORNER_RX, STROKE_WIDTH, LABEL_FONT_SIZE, MINI_TOKEN_R } = ScreenGatePreview
     const S = GATE_W / CANVAS_W
     const tokensInside = tokens.filter((t) => {
       const tLine = lines[t.lineId]
@@ -49,21 +50,21 @@ export class ScreenGatePreview extends ScreenGate {
     })
 
     return (
-      <g key={this.id}>
-        <rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}
+      <SVG.g key={this.id}>
+        <SVG.rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}
           fill={COLOR_WHITE} stroke={COLOR_GRAY} strokeWidth={STROKE_WIDTH}/>
         {this.timeMultiplier !== 1 && (
-          <text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle"
+          <SVG.text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle"
             fontFamily={GAME_FONT} fontSize={LABEL_FONT_SIZE} fontWeight="bold" fill={COLOR_GRAY}>
             {this.timeMultiplier > 1
               ? `+${Math.round(this.timeMultiplier)}`
               : `-${Math.round(1 / this.timeMultiplier)}`}
-          </text>
+          </SVG.text>
         )}
-        <clipPath id={`sgclip-${this.id}`}>
-          <rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}/>
-        </clipPath>
-        <g clipPath={`url(#sgclip-${this.id})`}>
+        <SVG.clipPath id={`sgclip-${this.id}`}>
+          <SVG.rect x={pt.x - GATE_W / 2} y={pt.y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={CORNER_RX}/>
+        </SVG.clipPath>
+        <SVG.g clipPath={`url(#sgclip-${this.id})`}>
           {tokensInside.map((t) => {
             const tLine = lines[t.lineId]
             const tp = tLine?.points[t.pointIndex]
@@ -73,8 +74,8 @@ export class ScreenGatePreview extends ScreenGate {
             const color = (t.displayColor || t.color) as string
             return miniToken(t.id, dx, dy, MINI_TOKEN_R, color, t.type === "square")
           })}
-        </g>
-      </g>
+        </SVG.g>
+      </SVG.g>
     )
   }
 
@@ -87,7 +88,7 @@ export class ScreenGatePreview extends ScreenGate {
       const eLine = lines[eLineId]
       if (eLine) {
         const pt = eEp === "end" ? eLine.end : eLine.start
-        nodes.push(<circle key={`en-${this.id}`} cx={pt.x} cy={pt.y} r={ENTRY_MARKER_R} fill={COLOR_GRAY_ACCENT}/>)
+        nodes.push(<SVG.circle key={`en-${this.id}`} cx={pt.x} cy={pt.y} r={ENTRY_MARKER_R} fill={COLOR_GRAY_ACCENT}/>)
       }
     }
     if (this.exitKey) {
@@ -96,14 +97,14 @@ export class ScreenGatePreview extends ScreenGate {
       if (xLine) {
         const pt = xEp === "end" ? xLine.end : xLine.start
         nodes.push(
-          <g key={`ex-${this.id}`}>
-            <circle cx={pt.x} cy={pt.y} r={EXIT_OUTER_R} fill="none" stroke={COLOR_GRAY_ACCENT} strokeWidth={STROKE_WIDTH}/>
-            <circle cx={pt.x} cy={pt.y} r={EXIT_INNER_R} fill={COLOR_GRAY_ACCENT}/>
-          </g>
+          <SVG.g key={`ex-${this.id}`}>
+            <SVG.circle cx={pt.x} cy={pt.y} r={EXIT_OUTER_R} fill="none" stroke={COLOR_GRAY_ACCENT} strokeWidth={STROKE_WIDTH}/>
+            <SVG.circle cx={pt.x} cy={pt.y} r={EXIT_INNER_R} fill={COLOR_GRAY_ACCENT}/>
+          </SVG.g>
         )
       }
     }
     if (nodes.length === 0) return null
-    return <g key={`marker-${this.id}`}>{nodes}</g>
+    return <SVG.g key={`marker-${this.id}`}>{nodes}</SVG.g>
   }
 }

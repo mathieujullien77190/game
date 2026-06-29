@@ -1,4 +1,5 @@
 import type { JSX } from "react"
+import * as SVG from "../svgElements"
 import { Arrival } from "./Arrival"
 import { COLOR_GRAY } from "../constants"
 import type { LinePreview } from "../Line/LinePreview"
@@ -35,13 +36,13 @@ export class ArrivalPreview extends Arrival {
     const { DEMAND_SQUARE_HALF: dsh, DEMAND_SQUARE_RX: drx, DEMAND_R } = ArrivalPreview
     if (type === "square") {
       return (
-        <rect x={x - dsh} y={y - dsh} width={dsh * 2} height={dsh * 2} rx={drx}
+        <SVG.rect x={x - dsh} y={y - dsh} width={dsh * 2} height={dsh * 2} rx={drx}
           fill={color}
           transform={angled ? `rotate(45,${x},${y})` : undefined}
         />
       )
     }
-    return <circle cx={x} cy={y} r={DEMAND_R} fill={color}/>
+    return <SVG.circle cx={x} cy={y} r={DEMAND_R} fill={color}/>
   }
 
   render = (lines: Record<string, LinePreview>, sid: string): JSX.Element | null => {
@@ -65,7 +66,7 @@ export class ArrivalPreview extends Arrival {
     const demand = this.demands[this.currentDemandIndex]
     const flashOpacity = this.flashColor ? (1 - this.flashProgress) * 0.55 : 0
     const elems: JSX.Element[] = []
-    elems.push(<circle key="base" cx={pt.x} cy={pt.y} r={r} fill="none" stroke={COLOR_GRAY} strokeWidth={sw}/>)
+    elems.push(<SVG.circle key="base" cx={pt.x} cy={pt.y} r={r} fill="none" stroke={COLOR_GRAY} strokeWidth={sw}/>)
 
     if (this.arcFill > 0 && n > 0) {
       const segSpan = (Math.PI * 2) / n
@@ -77,20 +78,20 @@ export class ArrivalPreview extends Arrival {
         const a0 = lineAngle + k * segSpan + gap / 2
         const a1 = lineAngle + (k + 1) * segSpan - gap / 2
         if (k < completedFull) {
-          elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
+          elems.push(<SVG.path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
         } else if (k === completedFull && partial > 0) {
           const a1p = a0 + (a1 - a0) * partial
-          elems.push(<path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1p)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
+          elems.push(<SVG.path key={`arc-${k}`} d={arcPath(pt.x, pt.y, r, a0, a1p)} fill="none" stroke={ARC_COLOR} strokeWidth={sw} strokeLinecap="round"/>)
         }
       }
     }
 
     if (this.flashColor)
-      elems.push(<circle key="flash" cx={pt.x} cy={pt.y} r={r + sw / 2} fill="none" stroke={this.flashColor} strokeWidth={sw * 2} opacity={flashOpacity}/>)
+      elems.push(<SVG.circle key="flash" cx={pt.x} cy={pt.y} r={r + sw / 2} fill="none" stroke={this.flashColor} strokeWidth={sw * 2} opacity={flashOpacity}/>)
 
     if (demand)
-      elems.push(<g key="demand">{ArrivalPreview.demandToken(pt.x, pt.y, demand.color, demand.type, demand.angled)}</g>)
+      elems.push(<SVG.g key="demand">{ArrivalPreview.demandToken(pt.x, pt.y, demand.color, demand.type, demand.angled)}</SVG.g>)
 
-    return <g key={`aa-${this.id}`}>{elems}</g>
+    return <SVG.g key={`aa-${this.id}`}>{elems}</SVG.g>
   }
 }

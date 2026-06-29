@@ -1,32 +1,20 @@
-import styled from "styled-components"
+import styled from "styled-components/native"
 import { T } from "theme"
 
-export const Screen = styled.div`
-  width: 100%;
-  height: 100%;
-  background: ${T.bg};
-  display: flex;
-  flex-direction: column;
-`
-
-export const List = styled.div`
+export const Screen = styled.View`
   flex: 1;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
+  background-color: ${T.bg};
 `
 
-export const Footer = styled.div`
+export const List = styled.ScrollView.attrs({ contentContainerStyle: { padding: 16, gap: 10 } })``
+
+export const Footer = styled.View`
   padding: 24px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 6px;
 `
 
-export const FooterLogo = styled.div`
+export const FooterLogo = styled.Text`
   font-size: 11px;
   color: ${T.muted};
   letter-spacing: 1px;

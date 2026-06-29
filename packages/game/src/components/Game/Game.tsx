@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { IoPause, IoPlay } from "react-icons/io5"
 import { CANVAS_W, CANVAS_H } from "engine/constants"
 import type { PreviewManager } from "engine/Manager/PreviewManager"
 import type { Help } from "engine/Help/Help"
@@ -36,11 +35,16 @@ export const Game = ({ previewManager, onRestart, helps = [] }: Props) => {
         paused={paused}
         visible={true}
         cursor={Object.keys(previewManager.data.switches).length > 0 ? "pointer" : "default"}
-        onClick={(e) => {
+        onClick={(e: any) => {
           dismissHelp()
-          const rect = e.currentTarget.getBoundingClientRect()
-          const x = (e.clientX - rect.left) * (CANVAS_W / rect.width)
-          const y = (e.clientY - rect.top) * (CANVAS_H / rect.height)
+          const rect = e.currentTarget?.getBoundingClientRect()
+          if (!rect) return
+          // uniform scale + centering offset (xMidYMid meet letterboxing)
+          const scale = Math.min(rect.width / CANVAS_W, rect.height / CANVAS_H) || 1
+          const offsetX = (rect.width - CANVAS_W * scale) / 2
+          const offsetY = (rect.height - CANVAS_H * scale) / 2
+          const x = (e.clientX - rect.left - offsetX) / scale
+          const y = (e.clientY - rect.top - offsetY) / scale
           previewManager.clickAt(x, y)
         }}
       />
@@ -54,7 +58,7 @@ export const Game = ({ previewManager, onRestart, helps = [] }: Props) => {
         </S.HelpOverlay>
       )}
       <S.PauseButton $active={paused} onClick={() => setPaused((v) => !v)}>
-        {paused ? <IoPlay /> : <IoPause />}
+        {paused ? "▶" : "⏸"}
       </S.PauseButton>
       {onRestart && <S.RestartButton onClick={onRestart}>↺</S.RestartButton>}
     </>

@@ -1,18 +1,10 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "target": "es2023",
-    "lib": ["ES2023", "DOM"],
-    "module": "esnext",
-    "skipLibCheck": true,
+    "strict": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "jsx": "react-native",
     "paths": {
       "engine/*": ["../../packages/engine/src/*"],
       "components/*": ["./src/components/*"],
@@ -24,8 +16,10 @@
       "langStore": ["./src/langStore"],
       "theme": ["./src/theme"],
       "maps": ["./src/maps"],
+      "maps-data": ["../../packages/maps/index"],
+      "maps-data/*": ["../../packages/maps/*"],
       "devStore": ["./src/devStore"]
     }
   },
-  "include": ["src", "../../packages/engine/src"]
+  "include": ["src", "App.tsx", "../../packages/engine/src"]
 }

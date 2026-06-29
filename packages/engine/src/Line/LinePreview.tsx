@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import * as SVG from "../svgElements"
 import { Line } from "./Line";
 import { linePath } from "./lineUtils";
 import { POINT_SPACING } from "../constants";
@@ -73,7 +74,7 @@ export class LinePreview extends Line {
           .map((p) => `L${p.x},${p.y}`)
           .join("");
       return (
-        <path
+        <SVG.path
           d={d}
           fill="none"
           stroke="orange"
@@ -85,9 +86,9 @@ export class LinePreview extends Line {
     })();
 
     return (
-      <g key={this.id}>
+      <SVG.g key={this.id}>
         {!this.tunnel && (
-          <path
+          <SVG.path
             d={linePath(this)}
             fill="none"
             stroke={LINE_STROKE}
@@ -96,17 +97,17 @@ export class LinePreview extends Line {
           />
         )}
         {boostGlow}
-      </g>
+      </SVG.g>
     );
   };
 
   renderTunnelDots = (): JSX.Element | null => {
     if (!this.tunnel) return null;
     return (
-      <g key={`td-${this.id}`}>
+      <SVG.g key={`td-${this.id}`}>
         {svgDot(this.start.x, this.start.y, "small")}
         {svgDot(this.end.x, this.end.y, "small")}
-      </g>
+      </SVG.g>
     );
   };
 
@@ -132,7 +133,7 @@ export class LinePreview extends Line {
     const flashOn = elapsed - this.limitFlashStart < 0.35;
 
     return (
-      <g key={`ov-${this.id}`}>
+      <SVG.g key={`ov-${this.id}`}>
         {this.showSpeed && tokens.filter((t) => t.type !== "cop").map((token) => {
           const pt = this.points[token.pointIndex];
           if (!pt) return null;
@@ -140,10 +141,10 @@ export class LinePreview extends Line {
           const cx = pt.x + ox;
           const cy = pt.y + oy;
           return (
-            <g key={token.id}>
-              <rect x={cx - W/2} y={cy - H/2} width={W} height={H} rx={RX} fill={COLOR_WHITE} />
-              <polygon points={arrowPoints(this.showSpeed, cx, cy)} fill={COLOR_WHITE} />
-              <text
+            <SVG.g key={token.id}>
+              <SVG.rect x={cx - W/2} y={cy - H/2} width={W} height={H} rx={RX} fill={COLOR_WHITE} />
+              <SVG.polygon points={arrowPoints(this.showSpeed, cx, cy)} fill={COLOR_WHITE} />
+              <SVG.text
                 x={cx} y={cy}
                 textAnchor="middle"
                 dominantBaseline="middle"
@@ -153,14 +154,14 @@ export class LinePreview extends Line {
                 fill={COLOR_DARK_GRAY}
               >
                 {Math.round(token.currentSpeed)}
-              </text>
-            </g>
+              </SVG.text>
+            </SVG.g>
           );
         })}
         {this.limitation !== 0 && (
-          <g>
-            <circle cx={mid.x} cy={mid.y} r={LIMIT_R} fill={COLOR_WHITE} stroke={flashOn ? COLOR_RED : "#ccc"} strokeWidth={3} />
-            <text
+          <SVG.g>
+            <SVG.circle cx={mid.x} cy={mid.y} r={LIMIT_R} fill={COLOR_WHITE} stroke={flashOn ? COLOR_RED : "#ccc"} strokeWidth={3} />
+            <SVG.text
               x={mid.x} y={mid.y}
               textAnchor="middle"
               dominantBaseline="central"
@@ -170,10 +171,10 @@ export class LinePreview extends Line {
               fill={COLOR_DARK_GRAY}
             >
               {this.limitation}
-            </text>
-          </g>
+            </SVG.text>
+          </SVG.g>
         )}
-      </g>
+      </SVG.g>
     );
   };
 }

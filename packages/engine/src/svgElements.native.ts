@@ -1,0 +1,15 @@
+export {
+  Circle as circle,
+  ClipPath as clipPath,
+  Defs as defs,
+  FeColorMatrix as feColorMatrix,
+  FeGaussianBlur as feGaussianBlur,
+  Filter as filter,
+  G as g,
+  Line as line,
+  Mask as mask,
+  Path as path,
+  Polygon as polygon,
+  Rect as rect,
+  Text as text,
+} from 'react-native-svg'

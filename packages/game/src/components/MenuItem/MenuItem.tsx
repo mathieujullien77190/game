@@ -1,4 +1,5 @@
-import { IoChevronForward } from "react-icons/io5"
+import { Ionicons } from "@expo/vector-icons"
+import { T } from "theme"
 import type { Props } from "./types"
 import * as S from "./UI"
 
@@ -14,22 +15,26 @@ export const MenuItem = ({
   right,
   onClick,
 }: Props) => (
-  <S.Row $clickable={!!onClick} onClick={onClick}>
-    <S.IconBox $color={iconColor} $bg={iconBg}>
+  <S.Row $clickable={!!onClick} onPress={onClick ?? undefined} activeOpacity={onClick ? 0.8 : 1}>
+    <S.IconBox $color={iconColor ?? T.muted} $bg={iconBg ?? T.surfaceAlt}>
       {icon}
     </S.IconBox>
-    <S.Text>
+    <S.TextWrap>
       <S.Title>{title}</S.Title>
       {subtitle && <S.Sub>{subtitle}</S.Sub>}
-    </S.Text>
+    </S.TextWrap>
     {right ?? (
       <>
         {pill && pillColor && pillBg && (
           <S.Pill $color={pillColor} $bg={pillBg}>
-            {pill}
+            <S.PillText $color={pillColor}>{pill}</S.PillText>
           </S.Pill>
         )}
-        {onClick && <S.Arrow><IoChevronForward /></S.Arrow>}
+        {onClick && (
+          <S.Arrow>
+            <Ionicons name="chevron-forward" size={20} color={T.subtle} />
+          </S.Arrow>
+        )}
       </>
     )}
   </S.Row>

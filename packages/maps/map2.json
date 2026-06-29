@@ -411,6 +411,30 @@
   ],
   "links": [
     {
+      "id": "lineA::end-lineB::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineA::end-lineC::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
       "id": "lineB::start-lineC::start",
       "line1": {
         "lineId": "lineB",
@@ -418,6 +442,18 @@
       },
       "line2": {
         "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineA::end-lineD::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineD",
         "endpoint": "start"
       },
       "activated": true
@@ -483,14 +519,14 @@
       "activated": true
     },
     {
-      "id": "lineH::start-lineE::end",
+      "id": "lineE::end-lineH::start",
       "line1": {
-        "lineId": "lineH",
-        "endpoint": "start"
-      },
-      "line2": {
         "lineId": "lineE",
         "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineH",
+        "endpoint": "start"
       },
       "activated": true
     },
@@ -695,42 +731,6 @@
       "line2": {
         "lineId": "lineV",
         "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineA::end-lineB::start",
-      "line1": {
-        "lineId": "lineA",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineB",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineA::end-lineC::start",
-      "line1": {
-        "lineId": "lineA",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineA::end-lineD::start",
-      "line1": {
-        "lineId": "lineA",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineD",
-        "endpoint": "start"
       },
       "activated": true
     }

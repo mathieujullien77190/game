@@ -1,42 +1,37 @@
-import styled from "styled-components"
+import styled from "styled-components/native"
 import { T } from "theme"
 
-export const Screen = styled.div`
-  width: 100%;
-  height: 100%;
-  background: ${T.bg};
-  display: flex;
-  flex-direction: column;
+export const Screen = styled.View`
+  flex: 1;
+  background-color: ${T.bg};
 `
 
-export const Body = styled.div`
+export const Body = styled.View`
   flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 32px;
 `
 
-export const AppName = styled.div`
+export const AppName = styled.Text`
   font-size: 26px;
   font-weight: 300;
   letter-spacing: 6px;
   color: ${T.navy};
 `
 
-export const Sub = styled.div`
+export const Sub = styled.Text`
   font-size: 12px;
   color: ${T.muted};
   text-align: center;
-  line-height: 1.8;
+  line-height: 22px;
 `
 
-export const Line = styled.div`
+export const Line = styled.View`
   width: 60px;
   height: 2px;
-  background: ${T.red};
+  background-color: ${T.red};
   border-radius: 1px;
-  margin: 6px 0;
+  margin-vertical: 6px;
 `

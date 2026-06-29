@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { IoRefresh, IoChevronForward, IoApps, IoStar, IoSparkles } from "react-icons/io5"
+import { Ionicons } from "@expo/vector-icons"
 import { useShallow } from "zustand/react/shallow"
 import { useProgressStore, ACHIEVEMENTS } from "progressStore"
 import { getMapById, getNextMap, formatTime } from "maps"
@@ -20,11 +20,7 @@ export const Victoire = ({
 }: Props) => {
   const t = useLang()
   const { results, recordResult, achievements } = useProgressStore(
-    useShallow((s) => ({
-      results: s.results,
-      recordResult: s.recordResult,
-      achievements: s.achievements,
-    }))
+    useShallow((s) => ({ results: s.results, recordResult: s.recordResult, achievements: s.achievements }))
   )
   const map = getMapById(mapId)
   const nextMap = getNextMap(mapId)
@@ -49,27 +45,27 @@ export const Victoire = ({
   const won = stars > 0
   const accent = map ? DIFF_COLOR[map.difficulty] : T.green
 
+  const starColor = (n: number) => (stars >= n ? T.gold : T.border)
+
   return (
     <S.Screen>
       <S.Card>
         <S.AccentBar $color={won ? accent : "#ccc"} />
         <S.Sparkles>
-          <S.Spark $color={T.red}><IoSparkles /></S.Spark>
-          <S.Spark $color={T.gold}><IoSparkles /></S.Spark>
-          <S.Spark $color={T.blue}><IoSparkles /></S.Spark>
+          <Ionicons name="sparkles" size={20} color={T.red} />
+          <Ionicons name="sparkles" size={20} color={T.gold} />
+          <Ionicons name="sparkles" size={20} color={T.blue} />
         </S.Sparkles>
         <S.Heading>{won ? t.victoire.complete : t.victoire.fail}</S.Heading>
 
         <S.Stars>
-          <S.Star $filled={stars >= 1} $big><IoStar /></S.Star>
-          <S.Star $filled={stars >= 2} $big><IoStar /></S.Star>
-          <S.Star $filled={stars >= 3} $big><IoStar /></S.Star>
+          <Ionicons name="star" size={48} color={starColor(1)} />
+          <Ionicons name="star" size={48} color={starColor(2)} />
+          <Ionicons name="star" size={48} color={starColor(3)} />
         </S.Stars>
 
         <S.StatsBox>
-          <S.StatsLabel>
-            {mapName} · {t.victoire.timeLabel}
-          </S.StatsLabel>
+          <S.StatsLabel>{mapName} · {t.victoire.timeLabel}</S.StatsLabel>
           <S.StatsTime $color={won ? accent : T.muted}>{formatTime(time)}</S.StatsTime>
         </S.StatsBox>
 
@@ -82,18 +78,18 @@ export const Victoire = ({
         </S.Record>
 
         <S.Buttons>
-          <S.BtnSecondary onClick={onRejouer}>
-            <S.BtnIcon><IoRefresh /></S.BtnIcon>
+          <S.BtnSecondary onPress={onRejouer} activeOpacity={0.7}>
+            <Ionicons name="refresh" size={18} color={T.navy} />
             <S.BtnLabel>{t.victoire.rejouer}</S.BtnLabel>
           </S.BtnSecondary>
           {nextMap ? (
-            <S.BtnPrimary onClick={onSuivant}>
-              <S.BtnIcon $light><IoChevronForward /></S.BtnIcon>
+            <S.BtnPrimary onPress={onSuivant} activeOpacity={0.85}>
+              <Ionicons name="chevron-forward" size={18} color="#fff" />
               <S.BtnLabel $light>{t.victoire.suivant}</S.BtnLabel>
             </S.BtnPrimary>
           ) : (
-            <S.BtnPrimary onClick={onCartes}>
-              <S.BtnIcon $light><IoApps /></S.BtnIcon>
+            <S.BtnPrimary onPress={onCartes} activeOpacity={0.85}>
+              <Ionicons name="apps" size={18} color="#fff" />
               <S.BtnLabel $light>{t.victoire.cartes}</S.BtnLabel>
             </S.BtnPrimary>
           )}
@@ -102,7 +98,9 @@ export const Victoire = ({
 
       {newlyUnlocked.map((a) => (
         <S.AchievementBanner key={a.id}>
-          {a.icon} {t.hautsFaits.achievementBanner} : {t.achievements[a.id].name} !
+          <S.AchievementText>
+            {a.icon} {t.hautsFaits.achievementBanner} : {t.achievements[a.id].name} !
+          </S.AchievementText>
         </S.AchievementBanner>
       ))}
     </S.Screen>

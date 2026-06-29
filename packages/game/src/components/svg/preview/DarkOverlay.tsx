@@ -1,3 +1,4 @@
+import * as SVG from "engine/svgElements"
 import { CANVAS_W, CANVAS_H } from "engine/constants"
 import type { PreviewManager } from "engine/Manager/PreviewManager"
 
@@ -52,9 +53,8 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
 
   return (
     <>
-      <defs>
-        {/* blur + threshold → metaball: overlapping holes merge into one smooth shape */}
-        <filter
+      <SVG.defs>
+        <SVG.filter
           id="pv-dark-holes"
           filterUnits="userSpaceOnUse"
           x={0}
@@ -62,19 +62,19 @@ export const DarkOverlay = ({ data }: { data: PreviewManager["data"] }) => {
           width={CANVAS_W}
           height={CANVAS_H}
         >
-          <feGaussianBlur stdDeviation="20" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 20 -7" />
-        </filter>
-        <mask id="pv-dark-mask">
-          <rect width={CANVAS_W} height={CANVAS_H} fill="white" />
-          <g filter="url(#pv-dark-holes)">
+          <SVG.feGaussianBlur stdDeviation={20} />
+          <SVG.feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 20 -7" />
+        </SVG.filter>
+        <SVG.mask id="pv-dark-mask">
+          <SVG.rect width={CANVAS_W} height={CANVAS_H} fill="white" />
+          <SVG.g filter="url(#pv-dark-holes)">
             {punches.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="black" />
+              <SVG.circle key={i} cx={p.x} cy={p.y} r={p.r} fill="black" />
             ))}
-          </g>
-        </mask>
-      </defs>
-      <rect width={CANVAS_W} height={CANVAS_H} fill="black" mask="url(#pv-dark-mask)" />
+          </SVG.g>
+        </SVG.mask>
+      </SVG.defs>
+      <SVG.rect width={CANVAS_W} height={CANVAS_H} fill="black" mask="url(#pv-dark-mask)" />
     </>
   )
 }

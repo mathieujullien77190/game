@@ -1,3 +1,6 @@
+import type { MapJson } from "engine/mapJson"
+import { MAP_DATA, MAP_INDEX } from "maps-data"
+
 export type Difficulty = "Tutorial" | "Beginner" | "Advanced" | "Expert" | "Hidden"
 
 export type MapDef = {
@@ -8,35 +11,18 @@ export type MapDef = {
   starThresholds: [number, number, number] // [3★ max secs, 2★ max secs, 1★ max secs]
 }
 
-export const MAP_LIST: MapDef[] = [
-  {
-    id: "carte-01",
-    num: 1,
-    file: "default.json",
-    difficulty: "Tutoriel",
-    starThresholds: [60, 120, 180],
-  },
-  {
-    id: "carte-02",
-    num: 2,
-    file: "default.json",
-    difficulty: "Tutoriel",
-    starThresholds: [60, 120, 180],
-  },
-  {
-    id: "carte-03",
-    num: 3,
-    file: "default.json",
-    difficulty: "Tutoriel",
-    starThresholds: [60, 120, 180],
-  },
-  { id: "carte-04", num: 4, file: "default.json", difficulty: "Avancé", starThresholds: [45, 90, 150] },
-  { id: "carte-05", num: 5, file: "default.json", difficulty: "Avancé", starThresholds: [45, 90, 150] },
-  { id: "carte-06", num: 6, file: "default.json", difficulty: "Avancé", starThresholds: [45, 90, 150] },
-  { id: "carte-07", num: 7, file: "default.json", difficulty: "Expert", starThresholds: [30, 60, 120] },
-  { id: "carte-08", num: 8, file: "default.json", difficulty: "Expert", starThresholds: [30, 60, 120] },
-  { id: "carte-09", num: 9, file: "default.json", difficulty: "Expert", starThresholds: [30, 60, 120] },
-]
+// Map JSON data + index are bundled dynamically from packages/maps via its
+// index.js (Metro require.context). Add a map in the editor → it lands in
+// packages/maps + _index.json → picked up on the next bundle.
+export const getMapData = (file: string): MapJson | undefined => MAP_DATA[file]
+
+export const MAP_LIST: MapDef[] = MAP_INDEX.map((e, i) => ({
+  id: e.id,
+  num: i + 1,
+  file: e.file,
+  difficulty: (e.difficulty as Difficulty) ?? "Tutorial",
+  starThresholds: [e.star3 ?? 60, e.star2 ?? 120, e.star1 ?? 180],
+}))
 
 export const getMapById = (id: string): MapDef | undefined => MAP_LIST.find((m) => m.id === id)
 

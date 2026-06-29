@@ -1,4 +1,5 @@
 import type { JSX, ReactNode } from "react";
+import * as SVG from "../svgElements"
 import { POINT_SPACING, COLOR_BLACK, COLOR_RED, COLOR_BLUE } from "../constants";
 import type { LinkEndpoint } from "../Link/Link";
 import type { LinePreview } from "../Line/LinePreview";
@@ -61,10 +62,10 @@ const tokenShape = (
     const copColor = flash ? COP_COLOR_A : COP_COLOR_B;
     const r = BASE_R / 1.6;
     return (
-      <g>
-        <circle cx={x} cy={y} r={r * 1.8} fill={copColor} opacity={0.1} />
-        <circle cx={x} cy={y} r={r} fill={copColor} />
-      </g>
+      <SVG.g>
+        <SVG.circle cx={x} cy={y} r={r * 1.8} fill={copColor} opacity={0.1} />
+        <SVG.circle cx={x} cy={y} r={r} fill={copColor} />
+      </SVG.g>
     );
   }
   if (data.type === "square") {
@@ -72,29 +73,29 @@ const tokenShape = (
     const hwBig = SQUARE_HALF_BASE * 1.8;
     const tf = `rotate(${(rot * 180) / Math.PI},${x},${y})`;
     return (
-      <g>
-        {moving && <rect
+      <SVG.g>
+        {moving && <SVG.rect
           x={x - hwBig} y={y - hwBig}
           width={hwBig * 2} height={hwBig * 2}
           rx={SQUARE_RX * 1.8}
           fill={color} opacity={0.1}
           transform={tf}
         />}
-        <rect
+        <SVG.rect
           x={x - hw} y={y - hw}
           width={hw * 2} height={hw * 2}
           rx={SQUARE_RX}
           fill={color}
           transform={tf}
         />
-      </g>
+      </SVG.g>
     );
   }
   return (
-    <g>
-      {moving && <circle cx={x} cy={y} r={BASE_R * 1.8} fill={color} opacity={0.1} />}
-      <circle cx={x} cy={y} r={BASE_R * pulse} fill={color} />
-    </g>
+    <SVG.g>
+      {moving && <SVG.circle cx={x} cy={y} r={BASE_R * 1.8} fill={color} opacity={0.1} />}
+      <SVG.circle cx={x} cy={y} r={BASE_R * pulse} fill={color} />
+    </SVG.g>
   );
 };
 
@@ -127,7 +128,7 @@ const tokenTrail = (
     const tpt = line.points[idx];
     const frac = 1 - i / (trailLen + 1);
     pieces.push(
-      <circle
+      <SVG.circle
         key={i}
         cx={tpt.x}
         cy={tpt.y}
@@ -173,11 +174,11 @@ const tokenExplosion = (
       const rotSpeed = 90 + rng(seed, k + 45) * 180;
       const deg = rotDir * progress * rotSpeed;
       pieces.push(
-        <rect key={`s${k}`} x={px - size} y={py - size} width={size * 2} height={size * 2} fill={color} opacity={alpha} transform={`rotate(${deg.toFixed(1)},${px.toFixed(1)},${py.toFixed(1)})`}/>,
+        <SVG.rect key={`s${k}`} x={px - size} y={py - size} width={size * 2} height={size * 2} fill={color} opacity={alpha} transform={`rotate(${deg.toFixed(1)},${px.toFixed(1)},${py.toFixed(1)})`}/>,
       );
     } else {
       pieces.push(
-        <circle key={`c${k}`} cx={px} cy={py} r={size} fill={color} opacity={alpha}/>,
+        <SVG.circle key={`c${k}`} cx={px} cy={py} r={size} fill={color} opacity={alpha}/>,
       );
     }
   }
@@ -429,33 +430,33 @@ export class TokenPreview extends Token {
     line: LinePreview,
   ): JSX.Element => {
     if (this.exploding) {
-      return <g key={this.id}>{tokenExplosion(this, pt.x, pt.y)}</g>;
+      return <SVG.g key={this.id}>{tokenExplosion(this, pt.x, pt.y)}</SVG.g>;
     }
     const isShapeTransforming =
       this.isTransforming &&
       this.transformProgress > 0 &&
       this.transformMode === "shape";
     return (
-      <g key={this.id} opacity={this.opacity}>
+      <SVG.g key={this.id} opacity={this.opacity}>
         {tokenTrail(this, line)}
         {isShapeTransforming ? (
           <>
-            <g opacity={1 - this.transformProgress}>
+            <SVG.g opacity={1 - this.transformProgress}>
               {tokenShape(this, pt.x, pt.y, pt.angle)}
-            </g>
-            <g opacity={this.transformProgress}>
+            </SVG.g>
+            <SVG.g opacity={this.transformProgress}>
               {tokenShape(
                 { ...this, type: this.pendingType },
                 pt.x,
                 pt.y,
                 pt.angle,
               )}
-            </g>
+            </SVG.g>
           </>
         ) : (
           tokenShape(this, pt.x, pt.y, pt.angle)
         )}
-      </g>
+      </SVG.g>
     );
   };
 }

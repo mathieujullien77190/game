@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { View, StyleSheet } from "react-native"
 import { useProgressStore } from "progressStore"
 import { getNextMap } from "maps"
 import { useDevStore } from "devStore"
@@ -27,17 +28,11 @@ const renderScreen = (
   goMenu: () => void,
   goJeu: (mapId: string) => void,
   setScreen: (s: Screen) => void,
-  lastPlayedMapId: string | null,
 ) => {
   const s = screen
 
   if (s.id === "accueil")
-    return (
-      <Accueil
-        onJouer={goCartes}
-        onMenu={goMenu}
-      />
-    )
+    return <Accueil onJouer={goCartes} onMenu={goMenu} />
 
   if (s.id === "menu")
     return (
@@ -78,7 +73,6 @@ const renderScreen = (
 
 export const GameApp = () => {
   const [screen, setScreen] = useState<Screen>({ id: "accueil" })
-  const lastPlayedMapId = useProgressStore((s) => s.lastPlayedMapId)
   const devMode = useDevStore((s) => s.devMode)
 
   const goAccueil = () => setScreen({ id: "accueil" })
@@ -87,9 +81,13 @@ export const GameApp = () => {
   const goJeu = (mapId: string) => setScreen({ id: "jeu", mapId })
 
   return (
-    <>
-      {renderScreen(screen, goAccueil, goCartes, goMenu, goJeu, setScreen, lastPlayedMapId)}
+    <View style={styles.root}>
+      {renderScreen(screen, goAccueil, goCartes, goMenu, goJeu, setScreen)}
       {devMode && <DebugOverlay />}
-    </>
+    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: "#f5f5f7" },
+})

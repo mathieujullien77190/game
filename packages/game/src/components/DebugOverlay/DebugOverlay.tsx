@@ -6,17 +6,15 @@ const ALPHA = 0.9
 
 export const DebugOverlay = () => {
   const [fps, setFps] = useState(0)
-  const [ms, setMs] = useState(0)
+  const [tokens, setTokens] = useState(0)
   const smoothFps = useRef(0)
-  const smoothMs = useRef(0)
   const rafRef = useRef<number>(0)
 
   useEffect(() => {
     const loop = () => {
       smoothFps.current = smoothFps.current * ALPHA + perf.fps * (1 - ALPHA)
-      smoothMs.current = smoothMs.current * ALPHA + perf.ms * (1 - ALPHA)
       setFps(Math.round(smoothFps.current))
-      setMs(parseFloat(smoothMs.current.toFixed(2)))
+      setTokens(perf.tokens)
       rafRef.current = requestAnimationFrame(loop)
     }
     rafRef.current = requestAnimationFrame(loop)
@@ -25,7 +23,7 @@ export const DebugOverlay = () => {
 
   return (
     <S.Wrap>
-      {fps} fps · {ms} ms
+      <S.WrapText>{fps} fps · {tokens} tokens</S.WrapText>
     </S.Wrap>
   )
 }

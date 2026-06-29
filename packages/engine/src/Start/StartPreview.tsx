@@ -1,6 +1,7 @@
 import type { JSX } from "react";
+import * as SVG from "../svgElements"
 import { Start } from "./Start";
-import { COLOR_BLACK, COLOR_LIGHT_GRAY } from "../constants";
+import { COLOR_BLACK } from "../constants";
 import type { LinePreview } from "../Line/LinePreview";
 import type { TokenPreview } from "../Token/TokenPreview";
 
@@ -44,9 +45,9 @@ export class StartPreview extends Start {
     this._renderCache = { pt, r, sw, idleColor, activeColor, angle, arcEnd, largeArc, progress, remaining, nextWaiting, tokenColor };
 
     return (
-      <g key={this.id}>
+      <SVG.g key={this.id}>
         {nextWaiting && nextWaiting.renderShape(pt.x, pt.y, pt.angle)}
-      </g>
+      </SVG.g>
     );
   };
 
@@ -65,12 +66,12 @@ export class StartPreview extends Start {
     if (!c) return null;
     const { pt, r, sw, idleColor, activeColor, angle, arcEnd, largeArc, progress, remaining, nextWaiting, tokenColor } = c;
     return (
-      <g key={`sa-${this.id}`}>
+      <SVG.g key={`sa-${this.id}`}>
         {remaining > 0 && this.delay > 0 ? (
           <>
-            <circle cx={pt.x} cy={pt.y} r={r} fill="none" stroke={idleColor} strokeWidth={sw} />
+            <SVG.circle cx={pt.x} cy={pt.y} r={r} fill="none" stroke={idleColor} strokeWidth={sw} />
             {progress > 0 && (
-              <path
+              <SVG.path
                 d={`M${pt.x + r * Math.cos(angle)},${pt.y + r * Math.sin(angle)}A${r},${r},0,${largeArc},1,${pt.x + r * Math.cos(arcEnd)},${pt.y + r * Math.sin(arcEnd)}`}
                 fill="none"
                 stroke={tokenColor}
@@ -80,9 +81,9 @@ export class StartPreview extends Start {
             )}
           </>
         ) : (
-          <circle cx={pt.x} cy={pt.y} r={r} fill="none" stroke={nextWaiting ? activeColor : idleColor} strokeWidth={sw} />
+          <SVG.circle cx={pt.x} cy={pt.y} r={r} fill="none" stroke={nextWaiting ? activeColor : idleColor} strokeWidth={sw} />
         )}
-      </g>
+      </SVG.g>
     );
   };
 }

@@ -1,10 +1,10 @@
-import { IoLockClosed } from "react-icons/io5"
+import { Ionicons } from "@expo/vector-icons"
 import { useProgressStore, ACHIEVEMENTS } from "progressStore"
 import { useLang } from "hooks/useLang"
 import { useLangStore } from "langStore"
 import Header from "components/Header"
-import type { Props } from "./types"
 import { ICON_COLORS, ICON_BGS } from "./constants"
+import type { Props } from "./types"
 import * as S from "./UI"
 
 export const HautsFaits = ({ onBack }: Props) => {
@@ -36,21 +36,16 @@ export const HautsFaits = ({ onBack }: Props) => {
         {ACHIEVEMENTS.filter((a) => achievements[a.id]).map((a, i) => (
           <S.Item key={a.id} $unlocked>
             <S.ItemAccent $color={ICON_COLORS[i % ICON_COLORS.length]} />
-            <S.IconCircle
-              $color={ICON_COLORS[i % ICON_COLORS.length]}
-              $bg={ICON_BGS[i % ICON_BGS.length]}
-              $unlocked
-            >
-              {a.icon}
+            <S.IconCircle $color={ICON_COLORS[i % ICON_COLORS.length]} $bg={ICON_BGS[i % ICON_BGS.length]} $unlocked>
+              <S.IconText $color={ICON_COLORS[i % ICON_COLORS.length]} $unlocked>{a.icon}</S.IconText>
             </S.IconCircle>
-            <S.ItemText>
+            <S.ItemTextWrap>
               <S.ItemTitle $unlocked>{t.achievements[a.id].name}</S.ItemTitle>
               <S.ItemDesc>{t.achievements[a.id].desc}</S.ItemDesc>
               <S.ItemDate $color={ICON_COLORS[i % ICON_COLORS.length]}>
-                {t.hautsFaits.unlockedLabel} ·{" "}
-                {new Date(achievements[a.id]).toLocaleDateString(dateLocale)}
+                {t.hautsFaits.unlockedLabel} · {new Date(achievements[a.id]).toLocaleDateString(dateLocale)}
               </S.ItemDate>
-            </S.ItemText>
+            </S.ItemTextWrap>
           </S.Item>
         ))}
 
@@ -60,13 +55,15 @@ export const HautsFaits = ({ onBack }: Props) => {
         {ACHIEVEMENTS.filter((a) => !achievements[a.id]).map((a) => (
           <S.Item key={a.id} $unlocked={false}>
             <S.IconCircle $color="" $bg="" $unlocked={false}>
-              <IoLockClosed />
+              <Ionicons name="lock-closed" size={18} color="#bbb" />
             </S.IconCircle>
-            <S.ItemText>
+            <S.ItemTextWrap>
               <S.ItemTitle $unlocked={false}>{t.achievements[a.id].name}</S.ItemTitle>
               <S.ItemDesc>{t.achievements[a.id].desc}</S.ItemDesc>
-            </S.ItemText>
-            <S.LockBadge><IoLockClosed /></S.LockBadge>
+            </S.ItemTextWrap>
+            <S.LockBadge>
+              <Ionicons name="lock-closed" size={14} color="#999" />
+            </S.LockBadge>
           </S.Item>
         ))}
       </S.List>
