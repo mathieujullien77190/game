@@ -4,10 +4,10 @@ import { CANVAS_H } from "./constants"
 export const smoothFps = (currentFps: number, deltaMs: number): number =>
   currentFps * 0.9 + (1000 / deltaMs) * 0.1
 
-export const drawStats = (ctx: Renderer, fps: number, frameMs: number): void => {
+export const drawStats = (ctx: Renderer, fps: number, tokens: number): void => {
   ctx.font = "bold 11px monospace"
   ctx.fillStyle = "#333"
   ctx.textAlign = "left"
   ctx.textBaseline = "bottom"
-  ctx.fillText(`${Math.round(fps)} fps  ${Math.ceil(frameMs)}ms`, 8, CANVAS_H - 8)
+  ctx.fillText(`${Math.round(fps)} fps  ${tokens} tok`, 8, CANVAS_H - 8)
 }

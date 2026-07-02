@@ -111,7 +111,6 @@ export class EditorManager extends Manager<LineEditor> {
     previewStartPt: Point | null = null,
     previewSwitchPt: Point | null = null,
     fps = 0,
-    frameMs = 0,
     hoveredSwitchId: string | null = null,
     transformers: TransformerEditor[] = [],
     hoveredTransformerId: string | null = null,
@@ -329,6 +328,6 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.fill()
     }
 
-    drawStats(ctx, fps, frameMs)
+    drawStats(ctx, fps, 0)
   }
 }

@@ -4,10 +4,12 @@ import {
   StrokeCap,
   ClipOp,
   BlendMode,
+  FontStyle,
   type SkCanvas,
   type SkPaint,
   type SkPath,
   type SkFont,
+  type SkTypeface,
 } from "@shopify/react-native-skia"
 import type { Renderer } from "@drift/engine/render/Renderer"
 
@@ -66,6 +68,10 @@ export class SkiaRenderer implements Renderer {
 
   private sk: SkCanvas
   private path: SkPath = Skia.Path.Make()
+  // Paints réutilisés (mutés à chaque fill/stroke) au lieu d'allouer un Skia.Paint()
+  // par draw call — l'engine dessine des dizaines de paths par frame.
+  private readonly _fill: SkPaint = Skia.Paint()
+  private readonly _stroke: SkPaint = Skia.Paint()
   private lineDash: number[] = []
   private m: Affine = [...IDENT]
   private mStack: Affine[] = []
@@ -79,34 +85,51 @@ export class SkiaRenderer implements Renderer {
 
   // --- paints ---
   private fillPaint(): SkPaint {
-    const p = Skia.Paint()
+    const p = this._fill
     p.setAntiAlias(true)
     p.setStyle(PaintStyle.Fill)
     p.setColor(Skia.Color(this.fillStyle))
-    if (this.globalAlpha < 1) p.setAlphaf(this.globalAlpha)
+    p.setAlphaf(this.globalAlpha) // toujours reset (paint réutilisé)
     return p
   }
 
   private strokePaint(): SkPaint {
-    const p = Skia.Paint()
+    const p = this._stroke
     p.setAntiAlias(true)
     p.setStyle(PaintStyle.Stroke)
     p.setColor(Skia.Color(this.strokeStyle))
-    if (this.globalAlpha < 1) p.setAlphaf(this.globalAlpha)
+    p.setAlphaf(this.globalAlpha)
     p.setStrokeWidth(this.lineWidth)
     p.setStrokeCap(CAP[this.lineCap])
-    if (this.lineDash.length) p.setPathEffect(Skia.PathEffect.MakeDash(this.lineDash))
+    p.setPathEffect(this.lineDash.length ? Skia.PathEffect.MakeDash(this.lineDash) : null)
     return p
+  }
+
+  // Typeface système résolue une seule fois (partagée : l'app recrée un SkiaRenderer
+  // par frame). `Skia.Font()` sans typeface ne dessine AUCUN glyphe → il faut une vraie
+  // typeface du FontMgr système, sinon fillText est invisible.
+  private static typeface: SkTypeface | null | undefined
+  private static getTypeface(): SkTypeface | null {
+    if (SkiaRenderer.typeface !== undefined) return SkiaRenderer.typeface
+    try {
+      const mgr = Skia.FontMgr.System()
+      let tf: SkTypeface | null = mgr.matchFamilyStyle("monospace", FontStyle.Normal)
+      if (!tf && mgr.countFamilies() > 0) tf = mgr.matchFamilyStyle(mgr.getFamilyName(0), FontStyle.Normal)
+      SkiaRenderer.typeface = tf ?? null
+    } catch {
+      SkiaRenderer.typeface = null
+    }
+    return SkiaRenderer.typeface
   }
 
   private getFont(): SkFont {
     const size = parseInt(/(\d+)px/.exec(this.font)?.[1] ?? "10", 10)
     let f = this.fontCache.get(size)
     if (!f) {
-      // Skia 2.x : ne pas passer `undefined` comme typeface (le binding JSI attend
-      // un objet SkTypeface → "Value is undefined, expected an Object"). Font() sans
-      // arg prend la typeface système par défaut, puis on fixe la taille.
-      f = Skia.Font()
+      const tf = SkiaRenderer.getTypeface()
+      // Ne pas passer `undefined` comme typeface (le binding JSI Skia 2.x lève
+      // "Value is undefined, expected an Object").
+      f = tf ? Skia.Font(tf, size) : Skia.Font()
       f.setSize(size)
       this.fontCache.set(size, f)
     }

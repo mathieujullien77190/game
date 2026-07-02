@@ -427,7 +427,10 @@ export class PreviewManager extends Manager<LinePreview> {
 
     this.drawMiniMap(ctx);
 
-    drawStats(ctx, this.data.fps, this.data.frameMs);
+    const tokensInNetwork = this.data.tokens.filter(
+      (t) => this.data.elapsedSeconds >= t.startAt && !t.exploding
+    ).length;
+    drawStats(ctx, this.data.fps, tokensInNetwork);
   };
 
   drawSwitchLinks = (ctx: Renderer) => {

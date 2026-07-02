@@ -42,7 +42,6 @@ export const useCanvasDraw = (
 ) => {
   const lastTimestampRef = useRef<number | null>(null)
   const fpsRef = useRef(0)
-  const frameMsRef = useRef(0)
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d")
@@ -57,7 +56,7 @@ export const useCanvasDraw = (
     manager.drawAll(
       new Canvas2DRenderer(ctx), hoveredLineId, snapPoint, pendingPoint, showIds,
       starts, switches, previewStartPt, previewSwitchPt,
-      fpsRef.current, frameMsRef.current, hoveredSwitchId,
+      fpsRef.current, hoveredSwitchId,
       transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType,
       inverters, hoveredInverterId, previewInverterPt,
       arrival, previewArrivalPt,
@@ -65,6 +64,5 @@ export const useCanvasDraw = (
       screenGateMarkers,
       visibleLineIds
     )
-    frameMsRef.current = performance.now() - t0
   }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds])
 }
