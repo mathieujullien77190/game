@@ -11,7 +11,7 @@ import { CANVAS_H, CANVAS_W, GRID_SIZE } from "@drift/engine/constants"
 import type { Point } from "@drift/engine/types"
 import { useStore } from "store"
 import { useCanvasDraw } from "hooks/useCanvasDraw"
-import { PreviewCanvas } from "@drift/game"
+import { PreviewCanvas } from "components/PreviewCanvas"
 import * as S from "./UI"
 import ToolsPanel from "components/ToolsPanel"
 

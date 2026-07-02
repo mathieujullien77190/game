@@ -13,10 +13,11 @@
     "@drift/engine": "*",
     "@drift/maps": "*",
     "@drift/skia-render": "*",
-    "@shopify/react-native-skia": "2.6.9",
+    "@shopify/react-native-skia": "2.0.0-next.4",
     "expo": "~53.0.0",
-    "expo-dev-client": "~5.0.0",
-    "react": "19.2.6",
-    "react-native": "0.79.5"
+    "expo-dev-client": "~5.2.4",
+    "react": "19.0.0",
+    "react-native": "0.79.5",
+    "react-native-reanimated": "~3.17.4"
   }
 }

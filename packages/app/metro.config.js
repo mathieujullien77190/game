@@ -15,6 +15,9 @@ config.resolver.nodeModulesPaths = [
 ]
 // Nécessaire pour résoudre les subpaths "exports" des packages @drift/* (./src/*.ts).
 config.resolver.unstable_enablePackageExports = true
-config.resolver.unstable_conditionNames = ["react-native", "import", "require", "default"]
+// PAS de "import" : forcerait @babel/runtime vers ses helpers ESM (namespace = Object)
+// → `_interopRequireDefault is not a function (it is Object)` → crash runtime au boot.
+// Les exports @drift/* sont des cibles string sans condition → résolvent quand même.
+config.resolver.unstable_conditionNames = ["react-native", "require", "default"]
 
 module.exports = config

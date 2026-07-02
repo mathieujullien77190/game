@@ -103,7 +103,11 @@ export class SkiaRenderer implements Renderer {
     const size = parseInt(/(\d+)px/.exec(this.font)?.[1] ?? "10", 10)
     let f = this.fontCache.get(size)
     if (!f) {
-      f = Skia.Font(undefined, size)
+      // Skia 2.x : ne pas passer `undefined` comme typeface (le binding JSI attend
+      // un objet SkTypeface → "Value is undefined, expected an Object"). Font() sans
+      // arg prend la typeface système par défaut, puis on fixe la taille.
+      f = Skia.Font()
+      f.setSize(size)
       this.fontCache.set(size, f)
     }
     return f

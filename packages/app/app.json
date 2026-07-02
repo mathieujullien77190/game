@@ -3,7 +3,7 @@
     "name": "Drift",
     "slug": "drift",
     "version": "0.0.0",
-    "orientation": "landscape",
+    "orientation": "portrait",
     "plugins": [
       "expo-dev-client"
     ],

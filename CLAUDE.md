@@ -14,32 +14,31 @@ Vite + React + TypeScript + Zustand + styled-components. Canvas 2D pur, pas de l
 
 ## Packages
 
-Deux **libs** partagées (engine, game) + un package **data** (maps) + les adaptateurs de rendu + deux **frontends** : `edition` (web) et `app` (mobile). `edition` = éditeur web, `app` = jeu React Native. Aucun lien edition↔app.
+Une **lib** partagée (engine) + un package **data** (maps) + les adaptateurs de rendu + deux **frontends** : `edition` (web) et `app` (mobile). `edition` = éditeur web, `app` = jeu React Native. Aucun lien edition↔app.
 
 ```
 packages/
   engine/   → moteur : précalcul + draw preview ET editor (base + *Editor + *Preview + les 2 Managers) + Map/ (mapJson, loadPreview) + render/Renderer. Zéro React, **zéro DOM** (portable RN). [lib]
-  game/     → helpers web preview (canvas) : PreviewCanvas + useCanvasDrawPreview + screenEffects. Utilisé par edition. Dépend de engine + canvas-render. [lib web]
   maps/     → données : map.json (une seule map pour l'instant, plusieurs à terme). [data]
-  canvas-render/ → Canvas2DRenderer : implémente Renderer en enveloppant un CanvasRenderingContext2D. Utilisé par edition + game. [lib web]
+  canvas-render/ → Canvas2DRenderer : implémente Renderer en enveloppant un CanvasRenderingContext2D. Utilisé par edition. [lib web]
   skia-render/ → SkiaRenderer : implémente Renderer au-dessus d'un SkCanvas (react-native-skia). Utilisé par app. [lib RN]
-  edition/  → **frontend ÉDITEUR (web)** : store/, components/, hooks/useCanvasDraw, App/GlobalStyle + host Vite. Édite map.json + preview intégrée. Dépend de engine + game + canvas-render + maps.
+  edition/  → **frontend ÉDITEUR (web)** : store/, components/ (dont PreviewCanvas), hooks/ (useCanvasDraw + useCanvasDrawPreview), screenEffects, App/GlobalStyle + host Vite. Édite map.json + preview intégrée. Dépend de engine + canvas-render + maps.
   app/      → **frontend JEU (React Native, Expo + Skia)** : charge map.json, tick la sim, dessine via SkiaRenderer. Même rendu que la preview de edition. Dépend de engine + skia-render + maps. [run sur device/émulateur]
 ```
 
-- `edition` = web (Vite), `app` = mobile (Expo/Metro). Aucune version web du jeu (supprimée) : le jeu, c'est `app` (mobile).
-- Le `previewManager` est instancié dans le store (edition) et passé en prop à `<PreviewCanvas>` de game → game n'importe jamais le store (pas de cycle).
+- `edition` = web (Vite), `app` = mobile (Expo/Metro). Aucune version web du jeu (supprimée) : le jeu, c'est `app` (mobile). L'ancien package `game` (helpers web preview) était partagé edition↔web game ; web game supprimé → `game` fusionné dans `edition` (`components/PreviewCanvas`, `hooks/useCanvasDrawPreview`, `screenEffects.ts`).
+- Le `previewManager` est instancié dans le store (edition) et passé en prop à `<PreviewCanvas>` → PreviewCanvas n'importe jamais le store (pas de cycle).
 - Les boutons Restart/Pause de la preview restent dans edition (Restart appelle `setViewMode` du store, qui reconstruit la simulation).
 
 ## Rendering — abstraction Renderer (multi-backend)
 
 - Tout le draw de l'engine cible l'interface **`Renderer`** (`engine/src/render/Renderer.ts`) — un sous-ensemble de l'API canvas 2D avec des types propres, **zéro type DOM**. `engine/tsconfig.json` force `lib: ["ES2023"]` (sans DOM) → l'engine est portable (React Native possible).
 - **2 adaptateurs explicites** implémentent `Renderer` (symétriques), **zéro draw dupliqué** :
-  - `@drift/canvas-render` → **`Canvas2DRenderer`** (web) : enveloppe un `CanvasRenderingContext2D`, délégation directe. Utilisé par `edition/hooks/useCanvasDraw` (`drawAll`) et `game/hooks/useCanvasDrawPreview` (`drawAllPreview`).
+  - `@drift/canvas-render` → **`Canvas2DRenderer`** (web) : enveloppe un `CanvasRenderingContext2D`, délégation directe. Utilisé par `edition/hooks/useCanvasDraw` (`drawAll`) et `edition/hooks/useCanvasDrawPreview` (`drawAllPreview`).
   - `@drift/skia-render` → **`SkiaRenderer`** (RN) : enveloppe un `SkCanvas` (react-native-skia), émule le Canvas 2D stateful (path courant, pile de styles, matrice trackée pour `setTransform`). Utilisé par `app` (mobile).
 - L'implémentation d'un renderer **ne peut pas** vivre dans engine (elle référence un type de plateforme : `CanvasRenderingContext2D` / `SkCanvas`) → package séparé par plateforme. Seul le contrat est dans engine. Ajouter une plateforme = 1 nouvel adaptateur.
 - Le root `tsconfig` **exclut** `skia-render` et `app` (types RN/Skia/Expo). Typecheck : `tsc -p packages/skia-render/tsconfig.json`. `canvas-render` est inclus dans le typecheck web.
-- Les **effets plein écran** (inverter / grayscale / dark) restent **web-only** dans `game/src/screenEffects.ts` (offscreen canvas, compositing, `document`). L'engine ne fournit que l'état sim (`data.isInverted/isGrayscale/isDark`). `applyScreenEffects(ctx, pm)` est appelé après `drawAllPreview`. Un backend Skia refera son propre effet (déféré).
+- Les **effets plein écran** (inverter / grayscale / dark) restent **web-only** dans `edition/src/screenEffects.ts` (offscreen canvas, compositing, `document`). L'engine ne fournit que l'état sim (`data.isInverted/isGrayscale/isDark`). `applyScreenEffects(ctx, pm)` est appelé après `drawAllPreview`. Un backend Skia refera son propre effet (déféré).
 
 ## map.json — source de vérité unique
 
@@ -63,6 +62,7 @@ packages/
 
 ## Règles globales
 
+- **Répondre en français** — toujours (le code, commits, PRs suivent la convention du repo)
 - Tout en **arrow functions** — jamais de `function` declarations
 - Zéro React dans `engine/` — code pur (calculs, canvas uniquement)
 - Pas de styles inline ni fichiers `.css` — tout dans `UI.tsx` via styled-components

@@ -6,6 +6,10 @@
   "workspaces": [
     "packages/*"
   ],
+  "resolutions": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
   "scripts": {
     "edition": "yarn workspace @drift/edition dev",
     "app": "yarn workspace @drift/app android",
