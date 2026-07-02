@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePoint } from "../types"
 import { Switch } from "./Switch"
@@ -98,7 +99,7 @@ export class SwitchPreview extends Switch {
     return dx * dx + dy * dy <= SWITCH_R * SWITCH_R
   }
 
-  draw = (ctx: CanvasRenderingContext2D) => {
+  draw = (ctx: Renderer) => {
     const pt = this._pt
     if (!pt) return
     const r = SWITCH_R

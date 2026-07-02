@@ -1,7 +1,8 @@
+import type { Renderer } from "../render/Renderer"
 import { Line } from "./Line"
 
 export class LineEditor extends Line {
-  drawId = (ctx: CanvasRenderingContext2D) => {
+  drawId = (ctx: Renderer) => {
     let mx: number, my: number
     if (this.type === "curve") {
       mx = 0.125*this.start.x + 0.375*this.cp1.x + 0.375*this.cp2.x + 0.125*this.end.x
@@ -21,7 +22,7 @@ export class LineEditor extends Line {
     ctx.fillText(this.id, mx, my - 10)
   }
 
-  draw = (ctx: CanvasRenderingContext2D, hovered = false, showId = false) => {
+  draw = (ctx: Renderer, hovered = false, showId = false) => {
     ctx.lineCap = "round"
     ctx.strokeStyle = hovered ? "#000" : "#999"
     ctx.lineWidth = hovered ? 3 : 2

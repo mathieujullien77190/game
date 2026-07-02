@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR } from "../constants"
 import { LineEditor } from "../Line/LineEditor"
@@ -77,7 +78,7 @@ export class EditorManager extends Manager<LineEditor> {
     }
   }
 
-  drawGrid = (ctx: CanvasRenderingContext2D) => {
+  drawGrid = (ctx: Renderer) => {
     ctx.setLineDash([])
 
     ctx.strokeStyle = "#f0f0f0"
@@ -100,7 +101,7 @@ export class EditorManager extends Manager<LineEditor> {
   }
 
   drawAll = (
-    ctx: CanvasRenderingContext2D,
+    ctx: Renderer,
     hoveredLineId: string | null = null,
     snapPoint: Point | null = null,
     pendingPoint: Point | null = null,

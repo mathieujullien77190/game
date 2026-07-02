@@ -1,8 +1,9 @@
+import type { Renderer } from "../render/Renderer"
 import type { LinePoint } from "../types"
 import { Start } from "./Start"
 
 export class StartPreview extends Start {
-  draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, remaining: number = 0) => {
+  draw = (ctx: Renderer, pt: LinePoint, remaining: number = 0) => {
     ctx.setLineDash([])
     ctx.lineWidth = 3
     const s = 14

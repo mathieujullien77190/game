@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H } from "../constants";
 
 const EXPLOSION_DURATION = 2;
@@ -47,7 +48,6 @@ export class PreviewManager extends Manager<LinePreview> {
     isInverted: false,
     isGrayscale: false,
     isDark: false,
-    darkCanvas: null as HTMLCanvasElement | null,
     screenGates: {} as Record<string, ScreenGatePreview>,
     screenGateByLinkId: {} as Record<string, ScreenGatePreview>,
     screenGateByExitKey: {} as Record<string, ScreenGatePreview>,
@@ -295,7 +295,7 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.tokens = this.data.tokens.filter(t => !t.exploding || t.explosionFadeProgress < 1);
   };
 
-  drawAllPreview = (ctx: CanvasRenderingContext2D) => {
+  drawAllPreview = (ctx: Renderer) => {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -421,119 +421,16 @@ export class PreviewManager extends Manager<LinePreview> {
       inv.draw(ctx, pt, ptAngle?.angle ?? 0);
     }
 
-    if (this.data.isInverted) {
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.globalCompositeOperation = "difference";
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.restore();
-    }
-
-    if (this.data.isGrayscale) {
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.globalCompositeOperation = "color";
-      ctx.fillStyle = "#808080";
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.restore();
-    }
-
-    if (this.data.isDark) {
-      const w = ctx.canvas.width, h = ctx.canvas.height;
-      if (!this.data.darkCanvas || this.data.darkCanvas.width !== w || this.data.darkCanvas.height !== h) {
-        this.data.darkCanvas = document.createElement("canvas");
-        this.data.darkCanvas.width = w;
-        this.data.darkCanvas.height = h;
-      }
-      const dc = this.data.darkCanvas;
-      const dctx = dc.getContext("2d")!;
-      dctx.clearRect(0, 0, w, h);
-      dctx.fillStyle = "rgba(0,0,0,0.96)";
-      dctx.fillRect(0, 0, w, h);
-      dctx.globalCompositeOperation = "destination-out";
-      const m = ctx.getTransform();
-      dctx.setTransform(m);
-
-      const punch = (x: number, y: number, r: number) => {
-        const px = m.a * x + m.c * y + m.e;
-        const py = m.b * x + m.d * y + m.f;
-        const pr = r * m.a;
-        const g = dctx.createRadialGradient(px, py, 0, px, py, pr);
-        g.addColorStop(0, "rgba(0,0,0,1)");
-        g.addColorStop(0.6, "rgba(0,0,0,0.85)");
-        g.addColorStop(1, "rgba(0,0,0,0)");
-        dctx.fillStyle = g;
-        dctx.resetTransform();
-        dctx.beginPath();
-        dctx.arc(px, py, pr, 0, Math.PI * 2);
-        dctx.fill();
-        dctx.setTransform(m);
-      };
-
-      for (const token of this.data.tokens) {
-        if (this.data.elapsedSeconds < token.startAt || token.exploding) continue;
-        const tLine = this.data.lines[token.lineId];
-        const tPt = tLine?.points[token.pointIndex];
-        if (tPt) punch(tPt.x, tPt.y, 50);
-      }
-
-      for (const sw of Object.values(this.data.switches)) {
-        const pt = sw.getPoint();
-        if (pt) punch(pt.x, pt.y, 40);
-      }
-
-      if (this.data.start) {
-        const sLine = this.data.lines[this.data.start.lineId];
-        if (sLine && sLine.screenId === sid) {
-          const sPt = this.data.start.endpoint === "end"
-            ? sLine.points[sLine.points.length - 1]
-            : sLine.points[0];
-          if (sPt) punch(sPt.x, sPt.y, 35);
-        }
-      }
-
-      if (this.data.arrival) {
-        const aLine = this.data.lines[this.data.arrival.lineId];
-        if (aLine && aLine.screenId === sid) {
-          const aPt = this.data.arrival.endpoint === "end"
-            ? aLine.points[aLine.points.length - 1]
-            : aLine.points[0];
-          if (aPt) punch(aPt.x, aPt.y, 35);
-        }
-      }
-
-      for (const tr of Object.values(this.data.transformers)) {
-        const link = this.data.links[tr.linkId];
-        if (!link) continue;
-        const tLine = this.data.lines[link.line1.lineId];
-        if (!tLine || tLine.screenId !== sid) continue;
-        const pt = link.line1.endpoint === "end" ? tLine.end : tLine.start;
-        punch(pt.x, pt.y, 25);
-      }
-
-      for (const inv of Object.values(this.data.inverters)) {
-        const link = this.data.links[inv.linkId];
-        if (!link) continue;
-        const iLine = this.data.lines[link.line1.lineId];
-        if (!iLine || iLine.screenId !== sid) continue;
-        const pt = link.line1.endpoint === "end" ? iLine.end : iLine.start;
-        punch(pt.x, pt.y, 25);
-      }
-
-      dctx.globalCompositeOperation = "source-over";
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.drawImage(dc, 0, 0);
-      ctx.restore();
-    }
+    // Les effets plein écran (inverter / grayscale / dark) sont un rendu web
+    // (offscreen canvas, compositing) → appliqués côté game : applyScreenEffects().
+    // L'engine n'expose que l'état (isInverted / isGrayscale / isDark).
 
     this.drawMiniMap(ctx);
 
     drawStats(ctx, this.data.fps, this.data.frameMs);
   };
 
-  drawSwitchLinks = (ctx: CanvasRenderingContext2D) => {
+  drawSwitchLinks = (ctx: Renderer) => {
     if (Object.keys(this.data.switchLinks).length === 0) return;
     ctx.save();
     ctx.setLineDash([6, 22]);
@@ -558,7 +455,7 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.restore();
   };
 
-  drawMiniMap = (ctx: CanvasRenderingContext2D) => {
+  drawMiniMap = (ctx: Renderer) => {
     const prevSid = this.data.previewScreenHistory.at(-1)
     if (!prevSid) return
 

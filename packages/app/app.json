@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Drift",
+    "slug": "drift",
+    "version": "0.0.0",
+    "orientation": "landscape",
+    "plugins": [
+      "expo-dev-client"
+    ],
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.anonymous.drift"
+    }
+  }
+}

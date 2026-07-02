@@ -14,32 +14,44 @@ Vite + React + TypeScript + Zustand + styled-components. Canvas 2D pur, pas de l
 
 ## Packages
 
-Deux **libs** partagées (engine, game) + un package **data** (maps) + deux **frontends autonomes** lançables (edition, app). Aucun cycle, aucun lien edition↔app.
+Deux **libs** partagées (engine, game) + un package **data** (maps) + les adaptateurs de rendu + deux **frontends** : `edition` (web) et `app` (mobile). `edition` = éditeur web, `app` = jeu React Native. Aucun lien edition↔app.
 
 ```
 packages/
-  engine/   → moteur : précalcul + draw preview ET editor (base + *Editor + *Preview + les 2 Managers) + Map/ (mapJson, loadPreview). Zéro React, zéro dépendance. [lib]
-  game/     → instancie engine en mode preview (canvas) : PreviewCanvas + useCanvasDrawPreview. Dépend de engine. [lib]
+  engine/   → moteur : précalcul + draw preview ET editor (base + *Editor + *Preview + les 2 Managers) + Map/ (mapJson, loadPreview) + render/Renderer. Zéro React, **zéro DOM** (portable RN). [lib]
+  game/     → helpers web preview (canvas) : PreviewCanvas + useCanvasDrawPreview + screenEffects. Utilisé par edition. Dépend de engine + canvas-render. [lib web]
   maps/     → données : map.json (une seule map pour l'instant, plusieurs à terme). [data]
-  edition/  → frontend éditeur AUTONOME : store/, components/, hooks/useCanvasDraw, mapFile, App/GlobalStyle + host Vite. Édite map.json. Dépend de engine + game + maps.
-  app/      → frontend JEU AUTONOME (WIP) + host Vite. Charge map.json et la fait tourner. Dépend de game + engine + maps. NE dépend PAS de edition.
+  canvas-render/ → Canvas2DRenderer : implémente Renderer en enveloppant un CanvasRenderingContext2D. Utilisé par edition + game. [lib web]
+  skia-render/ → SkiaRenderer : implémente Renderer au-dessus d'un SkCanvas (react-native-skia). Utilisé par app. [lib RN]
+  edition/  → **frontend ÉDITEUR (web)** : store/, components/, hooks/useCanvasDraw, App/GlobalStyle + host Vite. Édite map.json + preview intégrée. Dépend de engine + game + canvas-render + maps.
+  app/      → **frontend JEU (React Native, Expo + Skia)** : charge map.json, tick la sim, dessine via SkiaRenderer. Même rendu que la preview de edition. Dépend de engine + skia-render + maps. [run sur device/émulateur]
 ```
 
-- `edition` et `app` ont chacun leur `index.html` + `src/main.tsx` + `vite.config.ts` → lancés indépendamment (`yarn edition`, `yarn app`). `edition` ne passe pas par `app`.
+- `edition` = web (Vite), `app` = mobile (Expo/Metro). Aucune version web du jeu (supprimée) : le jeu, c'est `app` (mobile).
 - Le `previewManager` est instancié dans le store (edition) et passé en prop à `<PreviewCanvas>` de game → game n'importe jamais le store (pas de cycle).
 - Les boutons Restart/Pause de la preview restent dans edition (Restart appelle `setViewMode` du store, qui reconstruit la simulation).
+
+## Rendering — abstraction Renderer (multi-backend)
+
+- Tout le draw de l'engine cible l'interface **`Renderer`** (`engine/src/render/Renderer.ts`) — un sous-ensemble de l'API canvas 2D avec des types propres, **zéro type DOM**. `engine/tsconfig.json` force `lib: ["ES2023"]` (sans DOM) → l'engine est portable (React Native possible).
+- **2 adaptateurs explicites** implémentent `Renderer` (symétriques), **zéro draw dupliqué** :
+  - `@drift/canvas-render` → **`Canvas2DRenderer`** (web) : enveloppe un `CanvasRenderingContext2D`, délégation directe. Utilisé par `edition/hooks/useCanvasDraw` (`drawAll`) et `game/hooks/useCanvasDrawPreview` (`drawAllPreview`).
+  - `@drift/skia-render` → **`SkiaRenderer`** (RN) : enveloppe un `SkCanvas` (react-native-skia), émule le Canvas 2D stateful (path courant, pile de styles, matrice trackée pour `setTransform`). Utilisé par `app` (mobile).
+- L'implémentation d'un renderer **ne peut pas** vivre dans engine (elle référence un type de plateforme : `CanvasRenderingContext2D` / `SkCanvas`) → package séparé par plateforme. Seul le contrat est dans engine. Ajouter une plateforme = 1 nouvel adaptateur.
+- Le root `tsconfig` **exclut** `skia-render` et `app` (types RN/Skia/Expo). Typecheck : `tsc -p packages/skia-render/tsconfig.json`. `canvas-render` est inclus dans le typecheck web.
+- Les **effets plein écran** (inverter / grayscale / dark) restent **web-only** dans `game/src/screenEffects.ts` (offscreen canvas, compositing, `document`). L'engine ne fournit que l'état sim (`data.isInverted/isGrayscale/isDark`). `applyScreenEffects(ctx, pm)` est appelé après `drawAllPreview`. Un backend Skia refera son propre effet (déféré).
 
 ## map.json — source de vérité unique
 
 - **Format + (dé)sérialisation** : `@drift/engine/Map/mapJson` (`MapJson`, `serializeMap`, `deserializeMap`). `@drift/engine/Map/loadPreview` (`buildPreviewManager(json)` → PreviewManager prêt à simuler ; `populatePreviewLines` partagé avec l'aperçu éditeur).
 - **edition** : charge `map.json` au démarrage (seed bundlé), puis **réécrit `packages/maps/map.json` à chaque changement**, 100% auto. Le store `subscribe` → autosave debounced (400ms, skip si contenu identique) → `POST /__save-map` (`edition/src/saveMap.ts`). Le plugin Vite dev `drift-save-map` (`edition/vite.config.ts`) écrit le fichier côté serveur. **Dev only** (le write passe par le serveur dev). **Plus de localStorage, plus de geste utilisateur.**
-- **app** : `import map from "@drift/maps/map.json"` → `buildPreviewManager(map)` → `<PreviewCanvas>` tourne la simulation.
-- Boucle : éditer dans edition → `map.json` réécrit → app (autre dev server) HMR et recharge la map.
+- **app** (mobile) : `import map from "@drift/maps/map.json"` (Metro) → `buildPreviewManager(map)` → boucle rAF `tickSim` + `pm.drawAllPreview(new SkiaRenderer(cv, W, H))`.
+- Boucle : éditer dans edition → `map.json` réécrit → app (Metro) recharge la map au reload.
 
 ## Scripts (racine)
 
-- `yarn edition` → frontend éditeur (dev)
-- `yarn app` → frontend jeu (dev, stub)
+- `yarn edition` → frontend éditeur web (Vite dev)
+- `yarn app` → jeu mobile (Expo start, dev-client) — run sur device/émulateur, voir `packages/app/README.md`
 - `yarn lint` → eslint monorepo
 
 ## Imports

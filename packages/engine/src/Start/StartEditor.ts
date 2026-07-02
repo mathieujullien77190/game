@@ -1,8 +1,9 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { Start } from "./Start"
 
 export class StartEditor extends Start {
-  draw = (ctx: CanvasRenderingContext2D, pt: Point) => {
+  draw = (ctx: Renderer, pt: Point) => {
     ctx.fillStyle = "#000"
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 14, 0, Math.PI * 2)

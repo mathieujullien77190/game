@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { Transformer } from "./Transformer"
 
@@ -5,13 +6,13 @@ export class TransformerPreview extends Transformer {
   transformProgress: number = -1
   currentTokenColor: string = ""
 
-  draw = (ctx: CanvasRenderingContext2D, pt: Point, elapsedSeconds: number) => {
+  draw = (ctx: Renderer, pt: Point, elapsedSeconds: number) => {
     if (this.type === "rotate") this.drawRotate(ctx, pt, elapsedSeconds)
     else if (this.type === "fade") this.drawFade(ctx, pt)
     else this.drawTransform(ctx, pt, elapsedSeconds)
   }
 
-  private drawRotate = (ctx: CanvasRenderingContext2D, pt: Point, elapsedSeconds: number) => {
+  private drawRotate = (ctx: Renderer, pt: Point, elapsedSeconds: number) => {
     const r = 10
     const arcSpan = Math.PI * 0.5
     const rotation = elapsedSeconds * Math.PI * 1.4
@@ -47,7 +48,7 @@ export class TransformerPreview extends Transformer {
     ctx.restore()
   }
 
-  private drawFade = (ctx: CanvasRenderingContext2D, pt: Point) => {
+  private drawFade = (ctx: Renderer, pt: Point) => {
     ctx.save()
     ctx.translate(pt.x, pt.y)
 
@@ -67,7 +68,7 @@ export class TransformerPreview extends Transformer {
     ctx.restore()
   }
 
-  private drawTransform = (ctx: CanvasRenderingContext2D, pt: Point, elapsedSeconds: number) => {
+  private drawTransform = (ctx: Renderer, pt: Point, elapsedSeconds: number) => {
     ctx.save()
     ctx.translate(pt.x, pt.y)
 

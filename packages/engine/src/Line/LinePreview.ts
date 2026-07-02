@@ -1,8 +1,9 @@
+import type { Renderer } from "../render/Renderer"
 import { Line } from "./Line"
 
 export class LinePreview extends Line {
   lastSpeed: number | undefined = undefined
-  private tracePath = (ctx: CanvasRenderingContext2D) => {
+  private tracePath = (ctx: Renderer) => {
     ctx.beginPath()
     ctx.moveTo(this.start.x, this.start.y)
     if (this.type === "curve") {
@@ -16,12 +17,12 @@ export class LinePreview extends Line {
     }
   }
 
-  drawBefore = (ctx: CanvasRenderingContext2D, elapsedSeconds = 0) => {
+  drawBefore = (ctx: Renderer, elapsedSeconds = 0) => {
     this.drawGlow(ctx, elapsedSeconds)
     this.draw(ctx)
   }
 
-  drawAfter = (ctx: CanvasRenderingContext2D, speed?: number, tokenColor?: string) => {
+  drawAfter = (ctx: Renderer, speed?: number, tokenColor?: string) => {
     const mid = this.points[Math.floor(this.points.length / 2)]
     if (!mid) return
     ctx.font = "bold 9px monospace"
@@ -64,7 +65,7 @@ export class LinePreview extends Line {
     }
   }
 
-  drawGlow = (ctx: CanvasRenderingContext2D, elapsedSeconds = 0) => {
+  drawGlow = (ctx: Renderer, elapsedSeconds = 0) => {
     if (this.boost === 0) return
     const pts = this.points
     if (pts.length < 2) return
@@ -89,7 +90,7 @@ export class LinePreview extends Line {
     ctx.restore()
   }
 
-  draw = (ctx: CanvasRenderingContext2D) => {
+  draw = (ctx: Renderer) => {
     if (this.tunnel) {
       ctx.fillStyle = "#000"
       ctx.beginPath()

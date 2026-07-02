@@ -8,6 +8,7 @@ import type { TransformerType } from "@drift/engine/Transformer/Transformer"
 import { ArrivalEditor } from "@drift/engine/Arrival/ArrivalEditor"
 import { ScreenGateEditor } from "@drift/engine/ScreenGate/ScreenGateEditor"
 import { smoothFps } from "@drift/engine/stats"
+import { Canvas2DRenderer } from "@drift/canvas-render"
 import type { Point } from "@drift/engine/types"
 
 export const useCanvasDraw = (
@@ -54,7 +55,7 @@ export const useCanvasDraw = (
     lastTimestampRef.current = t0
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     manager.drawAll(
-      ctx, hoveredLineId, snapPoint, pendingPoint, showIds,
+      new Canvas2DRenderer(ctx), hoveredLineId, snapPoint, pendingPoint, showIds,
       starts, switches, previewStartPt, previewSwitchPt,
       fpsRef.current, frameMsRef.current, hoveredSwitchId,
       transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType,

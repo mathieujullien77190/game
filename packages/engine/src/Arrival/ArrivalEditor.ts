@@ -1,7 +1,8 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { Arrival } from "./Arrival"
 
-const drawDemandToken = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string, type: string, angled: boolean) => {
+const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean) => {
   ctx.fillStyle = color
   ctx.strokeStyle = "#000"
   ctx.lineWidth = 2
@@ -23,7 +24,7 @@ const drawDemandToken = (ctx: CanvasRenderingContext2D, x: number, y: number, co
 }
 
 export class ArrivalEditor extends Arrival {
-  draw = (ctx: CanvasRenderingContext2D, pt: Point) => {
+  draw = (ctx: Renderer, pt: Point) => {
     ctx.fillStyle = "#000"
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 14, 0, Math.PI * 2)

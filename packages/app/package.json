@@ -2,17 +2,21 @@
   "name": "@drift/app",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
+  "main": "index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p ../../tsconfig.json && vite build",
-    "preview": "vite preview"
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild"
   },
   "dependencies": {
     "@drift/engine": "*",
-    "@drift/game": "*",
     "@drift/maps": "*",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "@drift/skia-render": "*",
+    "@shopify/react-native-skia": "2.6.9",
+    "expo": "~53.0.0",
+    "expo-dev-client": "~5.0.0",
+    "react": "19.2.6",
+    "react-native": "0.79.5"
   }
 }

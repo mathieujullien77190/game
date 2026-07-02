@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import { POINT_SPACING } from "../constants"
 import type { LinePoint } from "../types"
 import type { LinkEndpoint } from "../Link/Link"
@@ -181,7 +182,7 @@ export class TokenPreview extends Token {
     return { isInverted, isGrayscale, isDark }
   }
 
-  drawBoostTrail = (ctx: CanvasRenderingContext2D, speedDelta: number, points: LinePoint[], eff: number) => {
+  drawBoostTrail = (ctx: Renderer, speedDelta: number, points: LinePoint[], eff: number) => {
     if (speedDelta <= 0.5 || this.direction === 0) return
     const intensity = Math.min(speedDelta / 100, 1)
     const trailLen = Math.round(10 + 30 * intensity)
@@ -199,7 +200,7 @@ export class TokenPreview extends Token {
     ctx.globalAlpha = 1
   }
 
-  private drawShape = (ctx: CanvasRenderingContext2D, pt: LinePoint, type: string) => {
+  private drawShape = (ctx: Renderer, pt: LinePoint, type: string) => {
     ctx.strokeStyle = "#000"
     ctx.lineWidth = 2
     if (type === "cop") {
@@ -237,7 +238,7 @@ export class TokenPreview extends Token {
     }
   }
 
-  drawExplosion = (ctx: CanvasRenderingContext2D, pt: LinePoint) => {
+  drawExplosion = (ctx: Renderer, pt: LinePoint) => {
     const progress = this.explosionProgress
     const fade = 1 - this.explosionFadeProgress
     const color = this.displayColor || (this.color as string)
@@ -301,7 +302,7 @@ export class TokenPreview extends Token {
     ctx.restore()
   }
 
-  draw = (ctx: CanvasRenderingContext2D, pt: LinePoint, speedDelta = 0, points?: LinePoint[], opacityOverride?: number) => {
+  draw = (ctx: Renderer, pt: LinePoint, speedDelta = 0, points?: LinePoint[], opacityOverride?: number) => {
     const eff = opacityOverride !== undefined ? Math.min(this.opacity, opacityOverride) : this.opacity
     if (points) this.drawBoostTrail(ctx, speedDelta, points, eff)
     if (this.isTransforming && this.transformProgress > 0 && this.transformMode === "shape") {

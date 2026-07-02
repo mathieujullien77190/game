@@ -3,7 +3,8 @@
 ## Règles
 
 - Tout en arrow functions — pas de `function` declarations
-- Zéro React dans l'engine — code pur (calculs, canvas)
+- Zéro React dans l'engine — code pur (calculs, dessin)
+- **Zéro DOM** : les `draw(ctx, …)` ciblent l'interface `Renderer` (`render/Renderer.ts`), jamais `CanvasRenderingContext2D`. `tsconfig` sans lib DOM. Pas de `document`/`window`. → engine portable (Skia/RN plus tard)
 
 ## Pattern classes : Base → Editor / Preview
 

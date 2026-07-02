@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { ScreenGate } from "./ScreenGate"
 
@@ -5,7 +6,7 @@ export const GATE_W = 36
 export const GATE_H = 64
 
 export class ScreenGateEditor extends ScreenGate {
-  draw = (ctx: CanvasRenderingContext2D, pt: Point) => {
+  draw = (ctx: Renderer, pt: Point) => {
     ctx.save()
     ctx.translate(pt.x, pt.y)
 

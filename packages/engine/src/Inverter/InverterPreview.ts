@@ -1,8 +1,9 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { Inverter } from "./Inverter"
 
 export class InverterPreview extends Inverter {
-  draw = (ctx: CanvasRenderingContext2D, pt: Point, angle: number) => {
+  draw = (ctx: Renderer, pt: Point, angle: number) => {
     const perp = angle + Math.PI / 2
     const len = 14
     ctx.save()

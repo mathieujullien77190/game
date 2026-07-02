@@ -1,5 +1,7 @@
 import { type RefObject, useEffect } from "react";
 import { PreviewManager } from "@drift/engine/Manager/PreviewManager";
+import { Canvas2DRenderer } from "@drift/canvas-render";
+import { applyScreenEffects } from "../screenEffects";
 
 export const useCanvasDrawPreview = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
@@ -19,7 +21,8 @@ export const useCanvasDrawPreview = (
       const t0 = performance.now();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (!paused) manager.tickSim(timestamp);
-      manager.drawAllPreview(ctx);
+      manager.drawAllPreview(new Canvas2DRenderer(ctx));
+      applyScreenEffects(ctx, manager);
       manager.data.frameMs = performance.now() - t0;
       rafId = requestAnimationFrame(tick);
     };

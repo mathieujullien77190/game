@@ -50,6 +50,7 @@ export default defineConfig({
     alias: [
       { find: /^@drift\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") },
       { find: /^@drift\/maps\/(.*)$/, replacement: r("packages/maps/$1") },
+      { find: /^@drift\/canvas-render$/, replacement: r("packages/canvas-render/src/index.ts") },
       { find: /^@drift\/game$/, replacement: r("packages/game/src/index.ts") },
       { find: /^@drift\/edition$/, replacement: r("packages/edition/src/index.ts") },
       { find: /^store$/, replacement: r("packages/edition/src/store/index.ts") },

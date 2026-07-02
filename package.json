@@ -8,7 +8,10 @@
   ],
   "scripts": {
     "edition": "yarn workspace @drift/edition dev",
-    "app": "yarn workspace @drift/app dev",
+    "app": "yarn workspace @drift/app android",
+    "app:ios": "yarn workspace @drift/app ios",
+    "app:start": "yarn workspace @drift/app start",
+    "app:prebuild": "yarn workspace @drift/app prebuild",
     "lint": "eslint ."
   },
   "devDependencies": {

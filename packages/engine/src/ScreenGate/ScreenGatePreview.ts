@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { ScreenGate } from "./ScreenGate"
 import { GATE_W, GATE_H } from "./ScreenGateEditor"
@@ -21,7 +22,7 @@ export class ScreenGatePreview extends ScreenGate {
     if (screenId) this.screenId = screenId
   }
 
-  draw = (ctx: CanvasRenderingContext2D, pt: Point, tokens?: TokenPreview[], lines?: Record<string, LinePreview>, elapsed?: number) => {
+  draw = (ctx: Renderer, pt: Point, tokens?: TokenPreview[], lines?: Record<string, LinePreview>, elapsed?: number) => {
     ctx.save()
     ctx.translate(pt.x, pt.y)
 

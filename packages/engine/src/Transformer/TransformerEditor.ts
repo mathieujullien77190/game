@@ -1,3 +1,4 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { Transformer } from "./Transformer"
 
@@ -9,7 +10,7 @@ const TYPE_COLOR: Record<string, string> = {
 }
 
 export class TransformerEditor extends Transformer {
-  draw = (ctx: CanvasRenderingContext2D, pt: Point) => {
+  draw = (ctx: Renderer, pt: Point) => {
     ctx.fillStyle = TYPE_COLOR[this.type] ?? "#888"
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 18, 0, Math.PI * 2)

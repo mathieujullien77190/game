@@ -1,7 +1,8 @@
+import type { Renderer } from "../render/Renderer"
 import type { Point } from "../types"
 import { Arrival } from "./Arrival"
 
-const drawDemandToken = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string, type: string, angled: boolean) => {
+const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean) => {
   ctx.fillStyle = color
   ctx.strokeStyle = "#000"
   ctx.lineWidth = 2
@@ -27,7 +28,7 @@ export class ArrivalPreview extends Arrival {
   fadeAlpha: number = 1
   isFading: boolean = false
 
-  draw = (ctx: CanvasRenderingContext2D, pt: Point) => {
+  draw = (ctx: Renderer, pt: Point) => {
     ctx.save()
     ctx.translate(pt.x, pt.y)
 
