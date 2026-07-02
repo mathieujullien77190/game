@@ -35,16 +35,8 @@ export const Game = ({ previewManager, onRestart, helps = [] }: Props) => {
         paused={paused}
         visible={true}
         cursor={Object.keys(previewManager.data.switches).length > 0 ? "pointer" : "default"}
-        onClick={(e: any) => {
+        onClick={(x: number, y: number) => {
           dismissHelp()
-          const rect = e.currentTarget?.getBoundingClientRect()
-          if (!rect) return
-          // uniform scale + centering offset (xMidYMid meet letterboxing)
-          const scale = Math.min(rect.width / CANVAS_W, rect.height / CANVAS_H) || 1
-          const offsetX = (rect.width - CANVAS_W * scale) / 2
-          const offsetY = (rect.height - CANVAS_H * scale) / 2
-          const x = (e.clientX - rect.left - offsetX) / scale
-          const y = (e.clientY - rect.top - offsetY) / scale
           previewManager.clickAt(x, y)
         }}
       />

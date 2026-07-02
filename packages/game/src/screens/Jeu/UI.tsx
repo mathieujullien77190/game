@@ -189,6 +189,36 @@ export const WinBtnLabel = styled.Text<{ $light?: boolean }>`
   color: ${({ $light }) => ($light ? "#fff" : T.muted)};
 `
 
+export const HelpOverlay = styled.View<{ $visible: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+`
+
+export const HelpBox = styled.View<{ $x: number; $y: number }>`
+  position: absolute;
+  left: ${({ $x }) => $x}%;
+  top: ${({ $y }) => $y}%;
+  margin-left: -90px;
+  margin-top: -22px;
+  max-width: 180px;
+  min-width: 80px;
+  background-color: #fff;
+  border-width: 2px;
+  border-color: ${T.border};
+  border-radius: 5px;
+  padding: 10px 14px;
+`
+
+export const HelpText = styled.Text`
+  font-size: 13px;
+  color: ${T.navy};
+`
+
 export const LoadingWrap = styled.View`
   flex: 1;
   align-items: center;

@@ -30,5 +30,13 @@
     "star1": 180,
     "star2": 120,
     "star3": 60
+  },
+  {
+    "id": "map5",
+    "file": "map5.json",
+    "difficulty": "Tutorial",
+    "star1": 180,
+    "star2": 120,
+    "star3": 60
   }
 ]

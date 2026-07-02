@@ -11,7 +11,7 @@
       },
       "end": {
         "x": 200,
-        "y": 140
+        "y": 400
       },
       "type": "straight",
       "cp1": {
@@ -22,21 +22,98 @@
         "x": 200,
         "y": 293.3333333333333
       }
+    },
+    {
+      "id": "lineB",
+      "start": {
+        "x": 200,
+        "y": 400
+      },
+      "end": {
+        "x": 300,
+        "y": 200
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 233.33333333333334,
+        "y": 333.3333333333333
+      },
+      "cp2": {
+        "x": 266.6666666666667,
+        "y": 266.66666666666663
+      }
+    },
+    {
+      "id": "lineC",
+      "start": {
+        "x": 200,
+        "y": 400
+      },
+      "end": {
+        "x": 100,
+        "y": 200
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 166.66666666666666,
+        "y": 333.3333333333333
+      },
+      "cp2": {
+        "x": 133.33333333333331,
+        "y": 266.66666666666663
+      }
     }
   ],
-  "links": [],
+  "links": [
+    {
+      "id": "lineA::end-lineB::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineA::end-lineC::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineB::start-lineC::start",
+      "line1": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "activated": true
+    }
+  ],
   "tokens": [
     {
-      "id": "token466",
+      "id": "token554",
       "color": "#e53935",
       "type": "round",
       "speed": 40
     },
     {
-      "id": "token467",
+      "id": "token555",
       "color": "#43a047",
-      "type": "square",
-      "speed": 100
+      "type": "round",
+      "speed": 40
     }
   ],
   "starts": [
@@ -44,12 +121,49 @@
       "id": "start5",
       "lineId": "lineA",
       "endpoint": "start",
-      "delay": 2
+      "delay": 6
     }
   ],
-  "switches": {},
+  "switches": {
+    "switch8": {
+      "linkIds": [
+        "lineA::end-lineB::start",
+        "lineA::end-lineC::start"
+      ],
+      "activeLinkId": "lineA::end-lineC::start",
+      "linkedSwitchIds": [],
+      "color": "#546e7a"
+    }
+  },
   "transformers": [],
   "inverters": [],
-  "arrival": null,
-  "screenGates": []
+  "arrival": {
+    "id": "arrival4",
+    "lineId": "lineB",
+    "endpoint": "end",
+    "demands": [
+      {
+        "id": "demand1",
+        "color": "#e53935",
+        "type": "round",
+        "angled": false
+      },
+      {
+        "id": "demand2",
+        "color": "#43a047",
+        "type": "round",
+        "angled": false
+      }
+    ]
+  },
+  "screenGates": [],
+  "helps": [
+    {
+      "id": "h1",
+      "x": 125.5,
+      "y": 400,
+      "text": "Cliquez ici!",
+      "arrow": "right"
+    }
+  ]
 }

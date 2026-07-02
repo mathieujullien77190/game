@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Ionicons } from "@expo/vector-icons"
 import { useShallow } from "zustand/react/shallow"
+import { CANVAS_W, CANVAS_H } from "engine/constants"
 import { useGameStore, loadMap } from "store"
 import { getMapById, getNextMap, calcStars, formatTime } from "maps"
 import { useLang } from "hooks/useLang"
@@ -11,14 +12,17 @@ import type { Props } from "./types"
 import * as S from "./UI"
 
 export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) => {
-  const { previewManager, loading } = useGameStore(
-    useShallow((s) => ({ previewManager: s.previewManager, loading: s.loading }))
+  const { previewManager, loading, helps } = useGameStore(
+    useShallow((s) => ({ previewManager: s.previewManager, loading: s.loading, helps: s.helps }))
   )
   const recordResult = useProgressStore((s) => s.recordResult)
   const t = useLang()
   const [paused, setPaused] = useState(false)
   const [displayTime, setDisplayTime] = useState("00:00")
   const [winData, setWinData] = useState<{ time: number; stars: number } | null>(null)
+  const [helpVisible, setHelpVisible] = useState(true)
+  const [helpDismissed, setHelpDismissed] = useState(false)
+  const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const gameOver = useRef(false)
   const hadCollision = useRef(false)
   const initialTokenCount = useRef<number | null>(null)
@@ -39,8 +43,22 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
     saved.current = false
     setPaused(false)
     setWinData(null)
+    setHelpVisible(true)
+    setHelpDismissed(false)
+    if (fadeTimer.current) clearTimeout(fadeTimer.current)
     loadMap(map ? map.file : `${mapId}.json`)
   }, [mapId])
+
+  const sid = previewManager?.data.previewScreenId ?? "main"
+  const screenHelps = helps.filter((h) => h.screenId === sid)
+
+  const dismissHelp = () => {
+    if (helpDismissed || !helpVisible) return
+    setHelpVisible(false)
+    fadeTimer.current = setTimeout(() => setHelpDismissed(true), 400)
+  }
+
+  useEffect(() => () => { if (fadeTimer.current) clearTimeout(fadeTimer.current) }, [])
 
   const handleTick = useCallback(() => {
     if (!previewManager || gameOver.current || paused) return
@@ -77,10 +95,11 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
 
   const handleClick = useCallback(
     (x: number, y: number) => {
+      dismissHelp()
       if (!previewManager) return
       previewManager.clickAt(x, y)
     },
-    [previewManager]
+    [previewManager, helpVisible, helpDismissed]
   )
 
   const prevBest = useProgressStore((s) => s.results[mapId]?.bestTime)
@@ -115,6 +134,15 @@ export const Jeu = ({ mapId, onBack, onRejouer, onSuivant, onCartes }: Props) =>
               onClick={handleClick}
               onTick={handleTick}
             />
+            {!helpDismissed && screenHelps.length > 0 && (
+              <S.HelpOverlay $visible={helpVisible} pointerEvents="none">
+                {screenHelps.map((h) => (
+                  <S.HelpBox key={h.id} $x={(h.x / CANVAS_W) * 100} $y={(h.y / CANVAS_H) * 100}>
+                    <S.HelpText>{h.text}</S.HelpText>
+                  </S.HelpBox>
+                ))}
+              </S.HelpOverlay>
+            )}
             {paused && !winData && (
               <S.PauseOverlay pointerEvents="box-none">
                 <S.PauseTitle>{t.jeu.pause}</S.PauseTitle>

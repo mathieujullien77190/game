@@ -388,7 +388,7 @@ export const Edition = () => {
           <S.ScreenBtn key={s} $active={currentScreenId === s} onClick={() => setCurrentScreen(s)}>
             {s === "main" ? "main" : s.replace("screen", "")}
             {s !== "main" && (
-              <S.ScreenClose onClick={(e) => { e.stopPropagation(); removeScreen(s) }}>Ã—</S.ScreenClose>
+              <S.ScreenClose onClick={(e) => { e.stopPropagation(); removeScreen(s) }}>×</S.ScreenClose>
             )}
           </S.ScreenBtn>
         ))}

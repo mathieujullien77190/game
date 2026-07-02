@@ -11,7 +11,7 @@ type Props = {
   paused: boolean
   visible: boolean
   cursor?: string
-  onClick: ((e: MouseEvent<SVGSVGElement>) => void) | ((x: number, y: number) => void)
+  onClick: (x: number, y: number) => void
   onTick?: () => void
 }
 
@@ -51,10 +51,14 @@ export const SvgPreviewCanvas = ({ manager, paused, visible, cursor = "default",
       .join(" ") || undefined
 
   const handleClick = (e: MouseEvent<SVGSVGElement>) => {
-    if (typeof onClick === "function") {
-      const fn = onClick as (e: MouseEvent<SVGSVGElement>) => void
-      fn(e)
-    }
+    const rect = e.currentTarget.getBoundingClientRect()
+    // account for xMidYMid meet letterboxing: uniform scale + centering offset
+    const scale = Math.min(rect.width / CANVAS_W, rect.height / CANVAS_H) || 1
+    const offsetX = (rect.width - CANVAS_W * scale) / 2
+    const offsetY = (rect.height - CANVAS_H * scale) / 2
+    const x = (e.clientX - rect.left - offsetX) / scale
+    const y = (e.clientY - rect.top - offsetY) / scale
+    onClick(x, y)
   }
 
   return (
