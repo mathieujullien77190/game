@@ -1,4 +1,3 @@
-import { Text } from "react-native"
 import type { Props } from "./types"
 import * as S from "./UI"
 

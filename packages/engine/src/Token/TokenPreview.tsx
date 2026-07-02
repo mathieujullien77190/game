@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from "react";
 import * as SVG from "../svgElements"
-import { POINT_SPACING, COLOR_BLACK, COLOR_RED, COLOR_BLUE } from "../constants";
+import { POINT_SPACING, COLOR_RED, COLOR_BLUE } from "../constants";
 import type { LinkEndpoint } from "../Link/Link";
 import type { LinePreview } from "../Line/LinePreview";
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview";

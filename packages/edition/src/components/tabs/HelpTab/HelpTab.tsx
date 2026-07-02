@@ -7,14 +7,13 @@ const ARROWS: HelpArrow[] = ["none", "top", "right", "bottom", "left"]
 const ARROW_LABEL: Record<HelpArrow, string> = { none: "—", top: "↑", right: "→", bottom: "↓", left: "←" }
 
 export const HelpTab = () => {
-  const { helps, selectedHelpId, mode, revision: _revision, setMode, addHelp, removeHelp, updateHelp, setSelectedHelpId } = useStore(
+  const { helps, selectedHelpId, mode, revision: _revision, setMode, removeHelp, updateHelp, setSelectedHelpId } = useStore(
     useShallow((s) => ({
       helps: s.helps,
       selectedHelpId: s.selectedHelpId,
       mode: s.mode,
       revision: s.revision,
       setMode: s.setMode,
-      addHelp: s.addHelp,
       removeHelp: s.removeHelp,
       updateHelp: s.updateHelp,
       setSelectedHelpId: s.setSelectedHelpId,

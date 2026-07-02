@@ -3,7 +3,6 @@ import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { NumberInput } from "components/form/NumberInput"
 import { ToggleGroup } from "components/form/ToggleGroup"
-import { MAX_BOOST } from "engine/constants"
 import * as S from "./UI"
 
 export const LineTab = () => {
@@ -16,12 +15,11 @@ export const LineTab = () => {
       return next
     })
 
-  const { editorManager, revision, mode, lineType, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, revision: _revision, mode, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       revision: s.revision,
       mode: s.mode,
-      lineType: s.lineType,
       setMode: s.setMode,
       setLineType: s.setLineType,
       setLinePreset: s.setLinePreset,

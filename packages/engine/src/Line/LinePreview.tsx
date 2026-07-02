@@ -5,12 +5,10 @@ import { linePath } from "./lineUtils";
 import { POINT_SPACING } from "../constants";
 import { svgDot } from "../svgDot";
 import {
-  COLOR_BLACK,
   COLOR_WHITE,
   COLOR_DARK_GRAY,
   COLOR_RED,
   COLOR_ORANGE_GLOW,
-  COLOR_TOKEN_ORANGE,
   GAME_FONT,
 } from "../constants";
 import type { TokenPreview } from "../Token/TokenPreview";
@@ -48,9 +46,7 @@ export class LinePreview extends Line {
     const {
       BOOST_WIN_PX,
       BOOST_ANIM_SPEED,
-      BOOST_GLOW_COLOR,
       BOOST_STROKE_WIDTH,
-      TUNNEL_DOT_R,
       LINE_STROKE,
       LINE_STROKE_WIDTH,
     } = LinePreview;

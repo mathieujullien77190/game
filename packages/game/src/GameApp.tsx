@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { View, StyleSheet } from "react-native"
-import { useProgressStore } from "progressStore"
 import { getNextMap } from "maps"
 import { useDevStore } from "devStore"
 import DebugOverlay from "components/DebugOverlay"

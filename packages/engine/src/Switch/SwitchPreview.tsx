@@ -4,7 +4,6 @@ import type { Link, LinkEndpoint } from "../Link/Link";
 import type { LinePoint } from "../types";
 import { Switch } from "./Switch";
 import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils";
-import { COLOR_WHITE } from "../constants";
 import { svgDot } from "../svgDot";
 
 const animateAngle = (
