@@ -10,22 +10,44 @@ Mode **preview** : simulation en temps réel des tokens sur le canvas.
 ## Stack
 
 Vite + React + TypeScript + Zustand + styled-components. Canvas 2D pur, pas de lib de rendu.
+**Monorepo yarn workspaces** (`packages/*`). Packages consommés en source (pas de build par package) — Vite bundle le TS directement.
+
+## Packages
+
+Deux **libs** partagées (engine, game) + un package **data** (maps) + deux **frontends autonomes** lançables (edition, app). Aucun cycle, aucun lien edition↔app.
+
+```
+packages/
+  engine/   → moteur : précalcul + draw preview ET editor (base + *Editor + *Preview + les 2 Managers) + Map/ (mapJson, loadPreview). Zéro React, zéro dépendance. [lib]
+  game/     → instancie engine en mode preview (canvas) : PreviewCanvas + useCanvasDrawPreview. Dépend de engine. [lib]
+  maps/     → données : map.json (une seule map pour l'instant, plusieurs à terme). [data]
+  edition/  → frontend éditeur AUTONOME : store/, components/, hooks/useCanvasDraw, mapFile, App/GlobalStyle + host Vite. Édite map.json. Dépend de engine + game + maps.
+  app/      → frontend JEU AUTONOME (WIP) + host Vite. Charge map.json et la fait tourner. Dépend de game + engine + maps. NE dépend PAS de edition.
+```
+
+- `edition` et `app` ont chacun leur `index.html` + `src/main.tsx` + `vite.config.ts` → lancés indépendamment (`yarn edition`, `yarn app`). `edition` ne passe pas par `app`.
+- Le `previewManager` est instancié dans le store (edition) et passé en prop à `<PreviewCanvas>` de game → game n'importe jamais le store (pas de cycle).
+- Les boutons Restart/Pause de la preview restent dans edition (Restart appelle `setViewMode` du store, qui reconstruit la simulation).
+
+## map.json — source de vérité unique
+
+- **Format + (dé)sérialisation** : `@drift/engine/Map/mapJson` (`MapJson`, `serializeMap`, `deserializeMap`). `@drift/engine/Map/loadPreview` (`buildPreviewManager(json)` → PreviewManager prêt à simuler ; `populatePreviewLines` partagé avec l'aperçu éditeur).
+- **edition** : charge `map.json` au démarrage (seed bundlé), puis **réécrit `packages/maps/map.json` à chaque changement**, 100% auto. Le store `subscribe` → autosave debounced (400ms, skip si contenu identique) → `POST /__save-map` (`edition/src/saveMap.ts`). Le plugin Vite dev `drift-save-map` (`edition/vite.config.ts`) écrit le fichier côté serveur. **Dev only** (le write passe par le serveur dev). **Plus de localStorage, plus de geste utilisateur.**
+- **app** : `import map from "@drift/maps/map.json"` → `buildPreviewManager(map)` → `<PreviewCanvas>` tourne la simulation.
+- Boucle : éditer dans edition → `map.json` réécrit → app (autre dev server) HMR et recharge la map.
+
+## Scripts (racine)
+
+- `yarn edition` → frontend éditeur (dev)
+- `yarn app` → frontend jeu (dev, stub)
+- `yarn lint` → eslint monorepo
 
 ## Imports
 
-- Alias obligatoires sauf `./` dans le même dossier
-- Alias configurés : `engine/`, `store/`, `hooks/`, `components/`
-- Exemple : `import { EditorManager } from "engine/Manager/EditorManager"`
-
-## Organisation
-
-```
-src/
-  engine/       → logique pure, canvas, classes métier (zéro React)
-  store/        → Zustand, state global, persistence localStorage
-  hooks/        → useCanvasDraw, useCanvasDrawPreview
-  components/   → React UI, LevelEditor, ToolsPanel, tabs/
-```
+- Cross-package : nom du package. Ex : `import { EditorManager } from "@drift/engine/Manager/EditorManager"`, `import { PreviewCanvas } from "@drift/game"`.
+- Intra-package `edition` : alias `store/`, `hooks/`, `components/`.
+- Intra-package : `./` dans le même dossier, sinon alias.
+- Aliases déclarés en double : `tsconfig.base.json` (`paths`, typecheck) **et** le `vite.config.ts` de chaque frontend (`resolve.alias`, bundling). `edition` mappe engine+game+store/hooks/components ; `app` mappe seulement engine+game. Garder synchronisés.
 
 ## Règles globales
 
@@ -67,8 +89,7 @@ L'ordre du tableau `lines` dans le JSON fixe donc les IDs des links — critique
 
 - Toujours `useShallow` pour destructurer plusieurs valeurs — sinon boucle infinie
 - Actions : factory functions `(set: Set) => (...args) => set(state => ({...}))`
-- Persistence localStorage clé `"game2-map"` via `serializeMap` / `deserializeMap` (`store/mapJson.ts`)
-- Si localStorage vide → charge `DEFAULT_MAP` (`store/defaultMap.ts`)
+- Persistence : `map.json` via plugin Vite dev (voir section « map.json »). Chargement initial + `loadMap(json)` action (`store/actions/mapActions.ts`, `EMPTY_MAP`) ; autosave dans `store/useStore.ts` (`saveMap` → POST). **Pas de localStorage.**
 - Le type `Set` est défini dans `store/types.ts`
 
 ## Composants React
@@ -81,7 +102,7 @@ ComponentName/
 ```
 
 - Props transientes préfixées `$` : `<S.Button $active={true}>`
-- `createGlobalStyle` dans `src/GlobalStyle.tsx`, monté dans `App.tsx`
+- `createGlobalStyle` dans `packages/edition/src/GlobalStyle.tsx`, monté dans `App.tsx`
 - Hint utilisateur contextuel : overlay canvas, pas dans le panneau d'outils
 - Composants form réutilisables : `Field`, `NumberInput`, `ColorPicker`, `TagLine`, `TagLink`
 - Composants ui réutilisables : `Tag`, `Button`

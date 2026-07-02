@@ -1,0 +1,54 @@
+{
+  "screens": [
+    "main"
+  ],
+  "lines": [
+    {
+      "id": "lineA",
+      "start": {
+        "x": 180,
+        "y": 560
+      },
+      "end": {
+        "x": 180,
+        "y": 140
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 180,
+        "y": 420
+      },
+      "cp2": {
+        "x": 180,
+        "y": 280
+      }
+    }
+  ],
+  "links": [],
+  "tokens": [
+    {
+      "id": "token1",
+      "color": "#e53935",
+      "type": "round",
+      "speed": 40
+    }
+  ],
+  "starts": [
+    {
+      "id": "start1",
+      "lineId": "lineA",
+      "endpoint": "start",
+      "delay": 6
+    }
+  ],
+  "switches": {},
+  "transformers": [],
+  "inverters": [],
+  "arrival": {
+    "id": "arrival1",
+    "lineId": "lineA",
+    "endpoint": "end",
+    "demands": []
+  },
+  "screenGates": []
+}

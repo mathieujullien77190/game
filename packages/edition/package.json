@@ -1,0 +1,23 @@
+{
+  "name": "@drift/edition",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p ../../tsconfig.json && vite build",
+    "preview": "vite preview"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@drift/engine": "*",
+    "@drift/game": "*",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "styled-components": "^6.1.18",
+    "zustand": "^5.0.0"
+  }
+}

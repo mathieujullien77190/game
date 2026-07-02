@@ -1,0 +1,15 @@
+{
+  "name": "@drift/game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@drift/engine": "*",
+    "react": "^19.2.6",
+    "styled-components": "^6.1.18"
+  }
+}
