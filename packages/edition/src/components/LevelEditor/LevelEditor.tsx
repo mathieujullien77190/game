@@ -60,7 +60,7 @@ const findEndpointAt = (lines: LineEditor[], point: Point) => {
 
 export const LevelEditor = () => {
   const dpr = window.devicePixelRatio || 1
-  const [leftWidth, setLeftWidth] = useState(() => window.innerWidth - 10)
+  const [leftWidth, setLeftWidth] = useState(() => Math.round(window.innerWidth * 0.3))
   const [scale, setScale] = useState(1)
   const [snapPoint, setSnapPoint] = useState<Point | null>(null)
   const [isDragging, setIsDragging] = useState(false)

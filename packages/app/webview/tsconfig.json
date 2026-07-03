@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "paths": {
+      "@drift/engine/*": ["../../engine/src/*"],
+      "@drift/canvas-render": ["../../canvas-render/src/index.ts"]
+    }
+  },
+  "include": ["main.ts", "vite.config.ts"]
+}

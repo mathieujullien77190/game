@@ -14,31 +14,30 @@ Vite + React + TypeScript + Zustand + styled-components. Canvas 2D pur, pas de l
 
 ## Packages
 
-Une **lib** partagée (engine) + un package **data** (maps) + les adaptateurs de rendu + deux **frontends** : `edition` (web) et `app` (mobile). `edition` = éditeur web, `app` = jeu React Native. Aucun lien edition↔app.
+Une **lib** partagée (engine) + un package **data** (maps) + le backend de rendu web (`canvas-render`) + deux **frontends** : `edition` (web) et `app` (mobile). `edition` = éditeur web, `app` = jeu React Native. Aucun lien edition↔app.
 
 ```
 packages/
   engine/   → moteur : précalcul + draw preview ET editor (base + *Editor + *Preview + les 2 Managers) + Map/ (mapJson, loadPreview) + render/Renderer. Zéro React, **zéro DOM** (portable RN). [lib]
   maps/     → données : map.json (une seule map pour l'instant, plusieurs à terme). [data]
-  canvas-render/ → Canvas2DRenderer : implémente Renderer en enveloppant un CanvasRenderingContext2D. Utilisé par edition. [lib web]
-  skia-render/ → SkiaRenderer : implémente Renderer au-dessus d'un SkCanvas (react-native-skia). Utilisé par app. [lib RN]
-  edition/  → **frontend ÉDITEUR (web)** : store/, components/ (dont PreviewCanvas), hooks/ (useCanvasDraw + useCanvasDrawPreview), screenEffects, App/GlobalStyle + host Vite. Édite map.json + preview intégrée. Dépend de engine + canvas-render + maps.
-  app/      → **frontend JEU (React Native, Expo + Skia)** : charge map.json, tick la sim, dessine via SkiaRenderer. Même rendu que la preview de edition. Dépend de engine + skia-render + maps. [run sur device/émulateur]
+  canvas-render/ → Canvas2DRenderer (implémente Renderer sur un CanvasRenderingContext2D) + screenEffects (effets plein écran web). Utilisé par edition ET le bundle webview de app. Point d'extension pour un futur backend (SVG…). [lib web]
+  edition/  → **frontend ÉDITEUR (web)** : store/, components/ (dont PreviewCanvas), hooks/ (useCanvasDraw + useCanvasDrawPreview), App/GlobalStyle + host Vite. Édite map.json + preview intégrée. Dépend de engine + canvas-render + maps.
+  app/      → **frontend JEU (React Native, Expo)** : coquille RN qui héberge une **WebView** faisant tourner la preview de l'engine en **canvas2d** (webview/main.ts, bundlé single-file dans src/previewHtml.ts). Map injectée par RN. Dépend de engine + canvas-render + maps. [run sur device/émulateur]
 ```
 
-- `edition` = web (Vite), `app` = mobile (Expo/Metro). Aucune version web du jeu (supprimée) : le jeu, c'est `app` (mobile). L'ancien package `game` (helpers web preview) était partagé edition↔web game ; web game supprimé → `game` fusionné dans `edition` (`components/PreviewCanvas`, `hooks/useCanvasDrawPreview`, `screenEffects.ts`).
+- `edition` = web (Vite), `app` = mobile (Expo/Metro). Aucune version web du jeu (supprimée) : le jeu, c'est `app` (mobile). L'ancien package `game` (helpers web preview) → fusionné dans `edition`. Un package `skia-render` (backend react-native-skia) a existé puis été **supprimé** : Skia était ~5× plus lent que canvas2d sur device réel (une traversée JS→natif par primitive), donc `app` est repassé sur canvas2d via WebView.
+- Le `previewManager` est instancié dans le store (edition) et passé en prop à `<PreviewCanvas>` → PreviewCanvas n'importe jamais le store (pas de cycle).
 - Le `previewManager` est instancié dans le store (edition) et passé en prop à `<PreviewCanvas>` → PreviewCanvas n'importe jamais le store (pas de cycle).
 - Les boutons Restart/Pause de la preview restent dans edition (Restart appelle `setViewMode` du store, qui reconstruit la simulation).
 
-## Rendering — abstraction Renderer (multi-backend)
+## Rendering — abstraction Renderer + WebView mobile
 
-- Tout le draw de l'engine cible l'interface **`Renderer`** (`engine/src/render/Renderer.ts`) — un sous-ensemble de l'API canvas 2D avec des types propres, **zéro type DOM**. `engine/tsconfig.json` force `lib: ["ES2023"]` (sans DOM) → l'engine est portable (React Native possible).
-- **2 adaptateurs explicites** implémentent `Renderer` (symétriques), **zéro draw dupliqué** :
-  - `@drift/canvas-render` → **`Canvas2DRenderer`** (web) : enveloppe un `CanvasRenderingContext2D`, délégation directe. Utilisé par `edition/hooks/useCanvasDraw` (`drawAll`) et `edition/hooks/useCanvasDrawPreview` (`drawAllPreview`).
-  - `@drift/skia-render` → **`SkiaRenderer`** (RN) : enveloppe un `SkCanvas` (react-native-skia), émule le Canvas 2D stateful (path courant, pile de styles, matrice trackée pour `setTransform`). Utilisé par `app` (mobile).
-- L'implémentation d'un renderer **ne peut pas** vivre dans engine (elle référence un type de plateforme : `CanvasRenderingContext2D` / `SkCanvas`) → package séparé par plateforme. Seul le contrat est dans engine. Ajouter une plateforme = 1 nouvel adaptateur.
-- Le root `tsconfig` **exclut** `skia-render` et `app` (types RN/Skia/Expo). Typecheck : `tsc -p packages/skia-render/tsconfig.json`. `canvas-render` est inclus dans le typecheck web.
-- Les **effets plein écran** (inverter / grayscale / dark) restent **web-only** dans `edition/src/screenEffects.ts` (offscreen canvas, compositing, `document`). L'engine ne fournit que l'état sim (`data.isInverted/isGrayscale/isDark`). `applyScreenEffects(ctx, pm)` est appelé après `drawAllPreview`. Un backend Skia refera son propre effet (déféré).
+- Tout le draw de l'engine cible l'interface **`Renderer`** (`engine/src/render/Renderer.ts`) — un sous-ensemble de l'API canvas 2D avec des types propres, **zéro type DOM**. `engine/tsconfig.json` force `lib: ["ES2023"]` (sans DOM) → l'engine reste portable. L'abstraction permet d'ajouter un backend (SVG…) sans toucher l'engine.
+- **Un seul adaptateur** aujourd'hui : `@drift/canvas-render` → **`Canvas2DRenderer`** : enveloppe un `CanvasRenderingContext2D`, délégation directe. Utilisé par `edition/hooks/useCanvasDraw` (`drawAll`), `edition/hooks/useCanvasDrawPreview` (`drawAllPreview`), **et** `app/webview/main.ts` (même code, dans la WebView).
+- **Mobile (`app`)** : pas de rendu natif. `App.tsx` = une `<WebView>` (`react-native-webview`) qui charge `src/previewHtml.ts` — un HTML single-file (build Vite de `webview/`, cf. `scripts/build-preview.mjs`) contenant engine + Canvas2DRenderer + la boucle rAF. La map est passée via `injectedJavaScriptBeforeContentLoaded` (`window.__DRIFT_MAP__`) → changer la map ne nécessite **pas** de rebuild le bundle web (juste reload l'app). Rebuild `build:preview` seulement quand l'engine / le renderer / `main.ts` changent.
+- Le System WebView Android (Chromium HW-accéléré) rend le canvas2d bien plus vite que Skia ne le faisait sur device (~200 tokens/60fps vs ~15).
+- Les **effets plein écran** (inverter / grayscale / dark) vivent dans `canvas-render/src/screenEffects.ts` (offscreen canvas, compositing, `document`). L'engine ne fournit que l'état sim (`data.isInverted/isGrayscale/isDark`). `applyScreenEffects(ctx, pm)` est appelé après `drawAllPreview` — par edition ET par le bundle webview (parité web/mobile).
+- Le root `tsconfig` **exclut** `app` (types RN/Expo). `app` a son propre typecheck (`packages/app/tsconfig.json` pour App.tsx, `packages/app/webview/tsconfig.json` pour le bundle web). `canvas-render` est inclus dans le typecheck web.
 
 ## map.json — source de vérité unique
 

@@ -22,7 +22,7 @@
         "x": 40,
         "y": 260
       },
-      "boost": 100
+      "boost": 1000
     },
     {
       "id": "lineB",
@@ -53,7 +53,7 @@
       },
       "end": {
         "x": 360,
-        "y": 660
+        "y": 100
       },
       "type": "straight",
       "cp1": {
@@ -125,6 +125,26 @@
         "x": 66.66666666666667,
         "y": 60
       }
+    },
+    {
+      "id": "lineG",
+      "start": {
+        "x": 360,
+        "y": 100
+      },
+      "end": {
+        "x": 360,
+        "y": 660
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 360,
+        "y": 286.66666666666663
+      },
+      "cp2": {
+        "x": 360,
+        "y": 473.3333333333333
+      }
     }
   ],
   "links": [
@@ -136,18 +156,6 @@
       },
       "line2": {
         "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::end-lineD::start",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineD",
         "endpoint": "start"
       },
       "activated": true
@@ -211,6 +219,30 @@
         "endpoint": "end"
       },
       "activated": false
+    },
+    {
+      "id": "lineC::end-lineG::start",
+      "line1": {
+        "lineId": "lineC",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineG",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineD::start-lineG::end",
+      "line1": {
+        "lineId": "lineD",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineG",
+        "endpoint": "end"
+      },
+      "activated": true
     }
   ],
   "tokens": [
@@ -514,7 +546,7 @@
       "id": "start2",
       "lineId": "lineA",
       "endpoint": "start",
-      "delay": 3
+      "delay": 1
     }
   ],
   "switches": {},
@@ -528,8 +560,8 @@
       "targetType": "square"
     },
     {
-      "id": "transform2",
-      "linkId": "lineC::end-lineD::start",
+      "id": "transform3",
+      "linkId": "lineC::end-lineG::start",
       "type": "fade",
       "amount": 0.5,
       "color": "#e53935",

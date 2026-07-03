@@ -10,8 +10,8 @@
     "paths": {
       "@drift/engine/*": ["../engine/src/*"],
       "@drift/maps/*": ["../maps/*"],
-      "@drift/skia-render": ["../skia-render/src/index.ts"]
+      "@drift/canvas-render": ["../canvas-render/src/index.ts"]
     }
   },
-  "include": ["App.tsx", "index.js"]
+  "include": ["App.tsx", "index.js", "src"]
 }
