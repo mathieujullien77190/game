@@ -1,4 +1,5 @@
 import { populatePreviewLines } from "@drift/engine/Map/loadPreview"
+import { Profiler } from "@drift/engine/Profiler"
 import type { Point } from "@drift/engine/types"
 import type { Mode, ViewMode, Set } from "store/types"
 
@@ -9,7 +10,10 @@ export const createModeActions = (set: Set) => ({
     set((state) => {
       if (viewMode === "preview") {
         populatePreviewLines(state.previewManager, state.editorManager)
-        state.previewManager.initSimulation(state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screenGates, state.screenTimeMultipliers)
+        state.previewManager.initSimulation(state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrivals, state.inverters, state.screenGates, state.screenTimeMultipliers)
+        Profiler.setEnabled(true)
+      } else {
+        Profiler.setEnabled(false)
       }
       return { viewMode }
     }),

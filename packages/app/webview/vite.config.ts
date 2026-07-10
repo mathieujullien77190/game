@@ -8,6 +8,8 @@ const r = (p: string) => path.resolve(__dirname, "../../..", p)
 
 export default defineConfig({
   plugins: [viteSingleFile()],
+  // Désactive et élimine le Profiler (dead-code par esbuild) du bundle mobile — voir engine/src/CLAUDE.md.
+  define: { __DRIFT_PROFILING__: JSON.stringify(false) },
   resolve: {
     alias: [
       { find: /^@drift\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") },

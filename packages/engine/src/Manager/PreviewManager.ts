@@ -24,6 +24,17 @@ import { COLORS, STROKE_WIDTHS } from "../theme";
 import { approach, lerpHex } from "../Utils/numeric";
 import { distanceSq } from "../Utils/geometry";
 import { Manager } from "./Manager";
+import { Profiler } from "../Profiler";
+
+// Constante de build : injectée par `define` dans les configs Vite (vraie en dev/edition, fausse
+// dans le build webview mobile). `typeof` évite un ReferenceError si un consommateur ne la définit
+// pas (fallback silencieux, profiling désactivé). Une fois repliée en `false` par le bundler,
+// esbuild élimine chaque `if (PROFILING)` ci-dessous — et donc tout l'import de Profiler — du
+// bundle mobile, cf. `../CLAUDE.md`.
+declare global {
+  const __DRIFT_PROFILING__: boolean | undefined
+}
+const PROFILING = typeof __DRIFT_PROFILING__ !== "undefined" && __DRIFT_PROFILING__;
 
 type LinkMap = Record<string, LinkEndpoint>;
 
@@ -51,8 +62,8 @@ export class PreviewManager extends Manager<LinePreview> {
     previewScreenId: "main" as string,
     previewScreenHistory: [] as string[],
     screenTimeMultipliers: {} as Record<string, number>,
-    arrival: null as ArrivalPreview | null,
-    arrivalKey: "" as string,
+    arrivals: [] as ArrivalPreview[],
+    arrivalByKey: {} as Record<string, ArrivalPreview>,
     elapsedSeconds: 0,
     lastTimestamp: null as number | null,
     fps: 0,
@@ -65,11 +76,12 @@ export class PreviewManager extends Manager<LinePreview> {
     switches: Record<string, Switch> = {},
     switchLinks: Record<string, string[]> = {},
     transformers: Record<string, Transformer> = {},
-    arrival: Arrival | null = null,
+    arrivals: Record<string, Arrival> = {},
     inverters: Record<string, Inverter> = {},
     screenGates: Record<string, ScreenGate> = {},
     screenTimeMultipliers: Record<string, number> = {},
   ) => {
+    if (PROFILING) Profiler.reset();
     this.data.switchLinks = switchLinks;
     this.data.links = links;
     this.data.linkMap = {};
@@ -135,8 +147,13 @@ export class PreviewManager extends Manager<LinePreview> {
       if (sg.exitKey) this.data.screenGateByExitKey[sg.exitKey] = sgp;
     }
 
-    this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands, arrival.screenId, arrival.queueSide) : null;
-    this.data.arrivalKey = arrival ? `${arrival.lineId}::${arrival.endpoint}` : "";
+    this.data.arrivals = [];
+    this.data.arrivalByKey = {};
+    for (const a of Object.values(arrivals)) {
+      const ap = new ArrivalPreview(a.lineId, a.endpoint, a.id, a.demands, a.screenId, a.queueSide);
+      this.data.arrivals.push(ap);
+      this.data.arrivalByKey[`${a.lineId}::${a.endpoint}`] = ap;
+    }
 
     this.data.starts = [];
     this.data.tokens = [];
@@ -156,12 +173,17 @@ export class PreviewManager extends Manager<LinePreview> {
         token.direction = direction;
         token.startAt = i === 0 ? s.firstDelay : s.firstDelay + i * s.delay;
         token.currentSpeed = 0;
+        if (tc.angled) {
+          token.rotationOffset = Math.PI / 4;
+          token.targetRotationOffset = Math.PI / 4;
+        }
         this.data.tokens.push(token);
       });
     }
   };
 
   tickSim = (timestamp: number) => {
+    if (PROFILING) Profiler.start("tickSim");
     if (this.data.lastTimestamp === null) {
       this.data.lastTimestamp = timestamp;
       return;
@@ -181,8 +203,7 @@ export class PreviewManager extends Manager<LinePreview> {
       start.opacity = approach(start.opacity, target, 2, deltaSeconds);
     }
 
-    const arrival = this.data.arrival
-    if (arrival) {
+    for (const arrival of this.data.arrivals) {
       if (arrival.flashProgress < 1) {
         arrival.flashProgress = Math.min(1, arrival.flashProgress + deltaSeconds / 0.35)
       }
@@ -313,29 +334,86 @@ export class PreviewManager extends Manager<LinePreview> {
       }
     }
     this.data.tokens = this.data.tokens.filter(t => !t.exploding || t.explosionFadeProgress < 1);
+    if (PROFILING) Profiler.end("tickSim");
   };
 
   drawAllPreview = (ctx: Renderer) => {
+    if (PROFILING) Profiler.start("clearBackground");
     this.clearBackground(ctx);
+    if (PROFILING) Profiler.end("clearBackground");
+
     const sid = this.data.previewScreenId;
-    const visibleLines = Object.values(this.data.lines).filter((l) => l.screenId === sid);
+    const visibleLines = Object.values(this.data.lines)
+      .filter((l) => l.screenId === sid)
+      .sort((a, b) => (a.color ? 0 : 1) - (b.color ? 0 : 1));
+
+    if (PROFILING) Profiler.start("drawLinesBefore");
     this.drawLinesBefore(ctx, visibleLines);
+    if (PROFILING) Profiler.end("drawLinesBefore");
+
+    if (PROFILING) Profiler.start("drawSwitchesBefore");
     this.drawSwitchesBefore(ctx, sid);
+    if (PROFILING) Profiler.end("drawSwitchesBefore");
+
+    if (PROFILING) Profiler.start("drawSwitchLinks");
     this.drawSwitchLinks(ctx);
+    if (PROFILING) Profiler.end("drawSwitchLinks");
+
+    if (PROFILING) Profiler.start("drawScreenGateMarkers");
     this.drawScreenGateMarkers(ctx, sid);
+    if (PROFILING) Profiler.end("drawScreenGateMarkers");
+
+    if (PROFILING) Profiler.start("drawTransformers");
     this.drawTransformers(ctx, sid);
+    if (PROFILING) Profiler.end("drawTransformers");
+
+    if (PROFILING) Profiler.start("drawArrival");
     this.drawArrival(ctx, sid);
+    if (PROFILING) Profiler.end("drawArrival");
+
+    if (PROFILING) Profiler.start("drawStartNode");
     this.drawStartNode(ctx, sid);
+    if (PROFILING) Profiler.end("drawStartNode");
+
+    if (PROFILING) Profiler.start("drawLinesAfter");
     this.drawLinesAfter(ctx, visibleLines);
+    if (PROFILING) Profiler.end("drawLinesAfter");
+
+    if (PROFILING) Profiler.start("drawSwitchesAfter");
     this.drawSwitchesAfter(ctx, sid);
+    if (PROFILING) Profiler.end("drawSwitchesAfter");
+
+    if (PROFILING) Profiler.start("drawTokens");
     this.drawTokens(ctx, sid);
+    if (PROFILING) Profiler.end("drawTokens");
+
+    if (PROFILING) Profiler.start("drawTransformersAfter");
     this.drawTransformersAfter(ctx, sid);
+    if (PROFILING) Profiler.end("drawTransformersAfter");
+
+    if (PROFILING) Profiler.start("drawStartAfter");
     this.drawStartAfter(ctx);
+    if (PROFILING) Profiler.end("drawStartAfter");
+
+    if (PROFILING) Profiler.start("drawArrivalAfter");
     this.drawArrivalAfter(ctx, sid);
+    if (PROFILING) Profiler.end("drawArrivalAfter");
+
+    if (PROFILING) Profiler.start("drawScreenGates");
     this.drawScreenGates(ctx, sid);
+    if (PROFILING) Profiler.end("drawScreenGates");
+
+    if (PROFILING) Profiler.start("drawInverters");
     this.drawInverters(ctx, sid);
+    if (PROFILING) Profiler.end("drawInverters");
+
+    if (PROFILING) Profiler.start("drawMiniMap");
     this.drawMiniMap(ctx);
+    if (PROFILING) Profiler.end("drawMiniMap");
+
+    if (PROFILING) Profiler.start("drawHudStats");
     this.drawHudStats(ctx);
+    if (PROFILING) Profiler.end("drawHudStats");
   };
 
   clearBackground = (ctx: Renderer) => {
@@ -399,18 +477,20 @@ export class PreviewManager extends Manager<LinePreview> {
   };
 
   drawArrival = (ctx: Renderer, sid: string) => {
-    if (!this.data.arrival) return;
-    const line = this.data.lines[this.data.arrival.lineId];
-    if (!line || line.screenId !== sid) return;
-    const pt = this.data.arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
-    if (pt) this.data.arrival.drawBefore(ctx, pt);
+    for (const arrival of this.data.arrivals) {
+      const line = this.data.lines[arrival.lineId];
+      if (!line || line.screenId !== sid) continue;
+      const pt = arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
+      if (pt) arrival.drawBefore(ctx, pt);
+    }
   };
 
   drawArrivalAfter = (ctx: Renderer, sid: string) => {
-    if (!this.data.arrival) return;
-    const line = this.data.lines[this.data.arrival.lineId];
-    if (!line || line.screenId !== sid) return;
-    this.data.arrival.drawAfter(ctx);
+    for (const arrival of this.data.arrivals) {
+      const line = this.data.lines[arrival.lineId];
+      if (!line || line.screenId !== sid) continue;
+      arrival.drawAfter(ctx);
+    }
   };
 
   drawStartNode = (ctx: Renderer, sid: string) => {

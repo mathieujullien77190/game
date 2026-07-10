@@ -12,8 +12,7 @@ import type { SwitchPreview } from "../Switch/SwitchPreview"
 import { Token } from "./Token"
 
 export type TransitionCtx = {
-  arrivalKey: string
-  arrival: ArrivalPreview | null
+  arrivalByKey: Record<string, ArrivalPreview>
   linkByEndpointKey: Record<string, string>
   linkMap: Record<string, LinkEndpoint>
   lines: Record<string, LinePreview>
@@ -113,28 +112,27 @@ export class TokenPreview extends Token {
       }
     }
 
-    if (ctx.arrivalKey && ctx.arrivalKey === `${this.lineId}::${arrivedAt}`) {
-      if (ctx.arrival) {
-        const demand = ctx.arrival.demands[ctx.arrival.currentDemandIndex]
-        const tokenColor = this.displayColor || (this.color as string)
-        const isSquare = (this.type as string) === "square"
-        const norm = isSquare ? (((this.targetRotationOffset % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2)) : 0
-        const tokenAngled = isSquare && norm > Math.PI / 8
-        const matches = !!demand
-          && demand.color === tokenColor
-          && demand.type === (this.type as string)
-          && (demand.type !== "square" || demand.angled === tokenAngled)
-        if (matches) {
-          const n = ctx.arrival.demands.length
-          ctx.arrival.flashColor = COLORS.arrivalMatch
-          ctx.arrival.flashProgress = 0
-          ctx.arrival.arcTarget = Math.min(n, ctx.arrival.arcTarget + 1)
-          ctx.arrival.isFading = true
-          ctx.arrival.fadeAlpha = 1
-        } else {
-          ctx.arrival.flashColor = COLORS.red
-          ctx.arrival.flashProgress = 0
-        }
+    const arrival = ctx.arrivalByKey[`${this.lineId}::${arrivedAt}`]
+    if (arrival) {
+      const demand = arrival.demands[arrival.currentDemandIndex]
+      const tokenColor = this.displayColor || (this.color as string)
+      const isSquare = (this.type as string) === "square"
+      const norm = isSquare ? (((this.targetRotationOffset % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2)) : 0
+      const tokenAngled = isSquare && norm > Math.PI / 8
+      const matches = !!demand
+        && demand.color === tokenColor
+        && demand.type === (this.type as string)
+        && (demand.type !== "square" || demand.angled === tokenAngled)
+      if (matches) {
+        const n = arrival.demands.length
+        arrival.flashColor = COLORS.arrivalMatch
+        arrival.flashProgress = 0
+        arrival.arcTarget = Math.min(n, arrival.arcTarget + 1)
+        arrival.isFading = true
+        arrival.fadeAlpha = 1
+      } else {
+        arrival.flashColor = COLORS.red
+        arrival.flashProgress = 0
       }
       this.arrived = true
       this.direction = 0

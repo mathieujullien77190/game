@@ -17,3 +17,4 @@
 - `applyToLinkMap(links, linkMap)` : **c'est ici que vit le routage réel** — écrit la destination active dans `linkMap` (utilisé ensuite par `TokenPreview.transition()`). Tout le reste de la classe n'est que feedback visuel.
 - `tick(deltaSeconds)` : avance `pulseTimer`/`displayAngle`, appelé pour **tous** les switches à chaque frame par `PreviewManager.tickSim`, indépendamment de l'écran affiché (seul le dessin est filtré par écran).
 - `hitTest(x, y)` : détection de clic (distance au centre ≤ `SWITCH_R`), utilisée pour déclencher `cycle()` depuis l'UI.
+- Mode `"auto"` : `drawBefore`/`drawAfter`/`hitTest` sont no-op (rien à l'écran, pas de zone cliquable) — le routage ne dépend pas de `activeLinkId` dans ce mode (`TokenPreview.transition` bascule sur `resolveAutoDestination`), donc rien d'utile à afficher ni à cliquer. `prepareFrame` continue de tourner (coût négligeable) mais son résultat n'est jamais dessiné.

@@ -2,12 +2,256 @@
   "screens": [
     "main"
   ],
-  "lines": [],
-  "links": [],
-  "starts": [],
-  "switches": {},
+  "lines": [
+    {
+      "id": "lineA",
+      "start": {
+        "x": 200,
+        "y": 220
+      },
+      "end": {
+        "x": 200,
+        "y": 500
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 200,
+        "y": 500
+      },
+      "cp2": {
+        "x": 200,
+        "y": 500
+      }
+    },
+    {
+      "id": "lineB",
+      "start": {
+        "x": 200,
+        "y": 220
+      },
+      "end": {
+        "x": 80,
+        "y": 120
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 160,
+        "y": 186.66666666666666
+      },
+      "cp2": {
+        "x": 120,
+        "y": 153.33333333333331
+      }
+    },
+    {
+      "id": "lineC",
+      "start": {
+        "x": 280,
+        "y": 120
+      },
+      "end": {
+        "x": 200,
+        "y": 220
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 213.33333333333334,
+        "y": 220
+      },
+      "cp2": {
+        "x": 206.66666666666666,
+        "y": 220
+      }
+    },
+    {
+      "id": "lineD",
+      "start": {
+        "x": 100,
+        "y": 580
+      },
+      "end": {
+        "x": 80,
+        "y": 420
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 93.33333333333333,
+        "y": 526.6666666666666
+      },
+      "cp2": {
+        "x": 86.66666666666667,
+        "y": 473.3333333333333
+      }
+    },
+    {
+      "id": "lineE",
+      "start": {
+        "x": 80,
+        "y": 420
+      },
+      "end": {
+        "x": 40,
+        "y": 260
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 66.66666666666667,
+        "y": 366.6666666666667
+      },
+      "cp2": {
+        "x": 53.33333333333333,
+        "y": 313.3333333333333
+      }
+    },
+    {
+      "id": "lineF",
+      "start": {
+        "x": 80,
+        "y": 420
+      },
+      "end": {
+        "x": 160,
+        "y": 280
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 106.66666666666667,
+        "y": 373.3333333333333
+      },
+      "cp2": {
+        "x": 133.33333333333334,
+        "y": 326.6666666666667
+      },
+      "color": "#e53935"
+    }
+  ],
+  "links": [
+    {
+      "id": "lineA::start-lineB::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineA::start-lineC::end",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineC",
+        "endpoint": "end"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineB::start-lineC::end",
+      "line1": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineC",
+        "endpoint": "end"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineD::end-lineE::start",
+      "line1": {
+        "lineId": "lineD",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineE",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineD::end-lineF::start",
+      "line1": {
+        "lineId": "lineD",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineF",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineE::start-lineF::start",
+      "line1": {
+        "lineId": "lineE",
+        "endpoint": "start"
+      },
+      "line2": {
+        "lineId": "lineF",
+        "endpoint": "start"
+      },
+      "activated": true
+    }
+  ],
+  "starts": [
+    {
+      "id": "start1",
+      "lineId": "lineA",
+      "endpoint": "end",
+      "delay": 6,
+      "tokens": [
+        {
+          "id": "token1",
+          "color": "#e53935",
+          "type": "square",
+          "speed": 40,
+          "angled": true
+        }
+      ]
+    },
+    {
+      "id": "start2",
+      "lineId": "lineD",
+      "endpoint": "start",
+      "delay": 6,
+      "tokens": [
+        {
+          "id": "token2",
+          "color": "#e53935",
+          "type": "round",
+          "speed": 40
+        }
+      ]
+    }
+  ],
+  "switches": {
+    "switch1": {
+      "linkIds": [
+        "lineA::start-lineB::start",
+        "lineA::start-lineC::end"
+      ],
+      "activeLinkId": "lineA::start-lineB::start",
+      "linkedSwitchIds": [],
+      "color": "#546e7a"
+    },
+    "switch2": {
+      "linkIds": [
+        "lineD::end-lineE::start",
+        "lineD::end-lineF::start"
+      ],
+      "activeLinkId": "lineD::end-lineE::start",
+      "linkedSwitchIds": [],
+      "mode": "auto"
+    }
+  },
   "transformers": [],
   "inverters": [],
-  "arrival": null,
+  "arrivals": [],
   "screenGates": []
 }

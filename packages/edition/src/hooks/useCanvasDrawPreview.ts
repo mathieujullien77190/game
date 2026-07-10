@@ -1,6 +1,9 @@
 import { type RefObject, useEffect } from "react";
 import { PreviewManager } from "@drift/engine/Manager/PreviewManager";
+import { Profiler } from "@drift/engine/Profiler";
 import { Canvas2DRenderer, applyScreenEffects } from "@drift/canvas-render";
+
+Profiler.setClock(() => performance.now());
 
 export const useCanvasDrawPreview = (
   canvasRef: RefObject<HTMLCanvasElement | null>,

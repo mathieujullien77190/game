@@ -1,6 +1,6 @@
 import { createIdCounter } from "../idCounter"
 
-export type TokenConfig = { id: string; color: string; type: string; speed: number }
+export type TokenConfig = { id: string; color: string; type: string; speed: number; angled?: boolean }
 
 const startIds = createIdCounter("start")
 

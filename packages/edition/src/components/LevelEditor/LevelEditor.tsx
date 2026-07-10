@@ -76,12 +76,12 @@ export const LevelEditor = () => {
   const draggingCP = useRef<{ lineId: string; cp: "cp1" | "cp2" } | null>(null)
 
   const {
-    editorManager, previewManager, revision, arrival,
+    editorManager, previewManager, revision, arrivals,
     mode, viewMode, pendingPoint, pendingTransformerType,
     starts, switches, transformers, inverters, screenGates,
     hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredScreenGateId,
     lineType, linePreset, screens, currentScreenId,
-    addLine, addStart, addSwitch, addTransformer, addInverter, setArrival, addScreenGate,
+    addLine, addStart, addSwitch, addTransformer, addInverter, addArrival, addScreenGate,
     setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, toggleLineFlip, setHoveredLineId, setLinePreset,
     addScreen, setCurrentScreen, removeScreen,
   } = useStore(
@@ -89,7 +89,7 @@ export const LevelEditor = () => {
       editorManager: s.editorManager,
       previewManager: s.previewManager,
       revision: s.revision,
-      arrival: s.arrival,
+      arrivals: s.arrivals,
       mode: s.mode,
       viewMode: s.viewMode,
       pendingPoint: s.pendingPoint,
@@ -114,7 +114,7 @@ export const LevelEditor = () => {
       addTransformer: s.addTransformer,
       addInverter: s.addInverter,
       addScreenGate: s.addScreenGate,
-      setArrival: s.setArrival,
+      addArrival: s.addArrival,
       setPendingPoint: s.setPendingPoint,
       setMode: s.setMode,
       setViewMode: s.setViewMode,
@@ -142,9 +142,9 @@ export const LevelEditor = () => {
   const invertersArray = Object.values(inverters)
     .filter((inv) => inv.screenId === currentScreenId)
     .map((inv) => new InverterEditor(inv.linkId, inv.id))
-  const arrivalEditor = arrival && arrival.screenId === currentScreenId
-    ? new ArrivalEditor(arrival.lineId, arrival.endpoint, arrival.id)
-    : null
+  const arrivalsArray = Object.values(arrivals)
+    .filter((a) => a.screenId === currentScreenId)
+    .map((a) => new ArrivalEditor(a.lineId, a.endpoint, a.id))
   const screenGatesArray = Object.values(screenGates)
     .filter((sg) => sg.screenId === currentScreenId)
     .map((sg) => new ScreenGateEditor(sg.linkId, sg.id, sg.screenId, sg.targetScreenId, sg.entryKey, sg.exitKey))
@@ -171,7 +171,7 @@ export const LevelEditor = () => {
     invertersArray,
     hoveredInverterId,
     mode === "addInverter" ? (addInverterSnap?.pt ?? null) : null,
-    arrivalEditor,
+    arrivalsArray,
     mode === "addArrival" ? (addArrivalSnap?.pt ?? null) : null,
     screenGatesArray,
     hoveredScreenGateId,
@@ -383,7 +383,7 @@ export const LevelEditor = () => {
       }
       if (mode === "addArrival") {
         if (addArrivalSnap) {
-          setArrival(addArrivalSnap.lineId, addArrivalSnap.endpoint)
+          addArrival(addArrivalSnap.lineId, addArrivalSnap.endpoint)
           setAddArrivalSnap(null)
           setMode("select")
         }
@@ -437,7 +437,7 @@ export const LevelEditor = () => {
         setMode("select")
       }
     },
-    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, setArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
+    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, addArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
   )
 
   const canvasCursor = mode === "addLine"

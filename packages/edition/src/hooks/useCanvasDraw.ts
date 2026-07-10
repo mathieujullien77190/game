@@ -32,7 +32,7 @@ export const useCanvasDraw = (
   inverters: InverterEditor[] = [],
   hoveredInverterId: string | null = null,
   previewInverterPt: Point | null = null,
-  arrival: ArrivalEditor | null = null,
+  arrivals: ArrivalEditor[] = [],
   previewArrivalPt: Point | null = null,
   screenGates: ScreenGateEditor[] = [],
   hoveredScreenGateId: string | null = null,
@@ -59,10 +59,10 @@ export const useCanvasDraw = (
       fpsRef.current, hoveredSwitchId,
       transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType,
       inverters, hoveredInverterId, previewInverterPt,
-      arrival, previewArrivalPt,
+      arrivals, previewArrivalPt,
       screenGates, hoveredScreenGateId, previewScreenGatePt,
       screenGateMarkers,
       visibleLineIds
     )
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrival, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrivals, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds])
 }

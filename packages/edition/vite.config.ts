@@ -75,6 +75,8 @@ const saveMapPlugin = (): Plugin => ({
 
 export default defineConfig({
   plugins: [react(), saveMapPlugin()],
+  // Active les sondes Profiler (onglet perf) — voir engine/src/CLAUDE.md.
+  define: { __DRIFT_PROFILING__: JSON.stringify(true) },
   resolve: {
     alias: [
       { find: /^@drift\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") },

@@ -7,9 +7,10 @@ import TransformerTab from "components/tabs/TransformerTab"
 import ArrivalTab from "components/tabs/ArrivalTab"
 import InverterTab from "components/tabs/InverterTab"
 import JsonTab from "components/tabs/JsonTab"
+import PerfTab from "components/tabs/PerfTab"
 import { ScreenGateTab } from "components/tabs/ScreenGateTab/ScreenGateTab"
 
-const TABS = ["line", "start", "switch", "transformer", "inverter", "arrival", "gate", "json"] as const
+const TABS = ["line", "start", "switch", "transformer", "inverter", "arrival", "gate", "json", "perf"] as const
 type Tab = (typeof TABS)[number]
 
 export const ToolsPanel = () => {
@@ -37,6 +38,7 @@ export const ToolsPanel = () => {
         {activeTab === "arrival" && <ArrivalTab />}
         {activeTab === "gate" && <ScreenGateTab />}
         {activeTab === "json" && <JsonTab />}
+        {activeTab === "perf" && <PerfTab />}
       </S.TabContent>
     </S.Container>
   )

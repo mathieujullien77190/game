@@ -125,7 +125,7 @@ export class SwitchPreview extends Switch {
   getPoint = (): Point | null => this._pt
 
   hitTest = (x: number, y: number): boolean => {
-    if (!this._pt) return false
+    if (!this._pt || this.mode === "auto") return false
     return distanceSq({ x, y }, this._pt) <= SWITCH_R * SWITCH_R
   }
 
@@ -231,12 +231,12 @@ export class SwitchPreview extends Switch {
   ]
 
   drawBefore = (ctx: Renderer) => {
-    if (!this._pt) return
+    if (!this._pt || this.mode === "auto") return
     this.drawStatic(ctx)
   }
 
   drawAfter = (ctx: Renderer) => {
-    if (!this._pt) return
+    if (!this._pt || this.mode === "auto") return
     runAnimations(this.animations, ctx)
   }
 }

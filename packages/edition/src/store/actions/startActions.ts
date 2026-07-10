@@ -53,7 +53,7 @@ export const createStartActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
-  updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType }) =>
+  updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType; angled?: boolean }) =>
     set((state) => {
       const s = state.starts[startId]
       if (!s) return {}
@@ -62,6 +62,7 @@ export const createStartActions = (set: Set) => ({
       if (patch.color !== undefined) tok.color = patch.color as string
       if (patch.speed !== undefined) tok.speed = patch.speed
       if (patch.type !== undefined) tok.type = patch.type as string
+      if (patch.angled !== undefined) tok.angled = patch.angled
       return { revision: state.revision + 1 }
     }),
 })

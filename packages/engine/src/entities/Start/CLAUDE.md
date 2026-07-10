@@ -2,7 +2,7 @@
 
 ## Structure
 
-- `Start.ts` — base : `id` (`createIdCounter("start")`), `lineId`, `endpoint`, `delay` (intervalle entre deux spawns), `firstDelay` (délai avant le premier, défaut 2s), `screenId`, `tokens: TokenConfig[]` (config plate `{id, color, type, speed}`, pas des instances `Token`).
+- `Start.ts` — base : `id` (`createIdCounter("start")`), `lineId`, `endpoint`, `delay` (intervalle entre deux spawns), `firstDelay` (délai avant le premier, défaut 2s), `screenId`, `tokens: TokenConfig[]` (config plate `{id, color, type, speed, angled?}`, pas des instances `Token`). `angled` = orientation de spawn d'un token `square` (0° ou 45°, même convention que `Arrival.Demand.angled`) ; `PreviewManager.initSimulation` l'applique en posant `rotationOffset`/`targetRotationOffset` à `π/4` directement (pas d'anim d'entrée).
 - `StartEditor.ts` — exporte `drawStartShape(ctx, pt)` (disque noir r14 + triangle blanc "play"), réutilisée par `EditorManager` pour le ghost-preview.
 - `StartPreview.ts` — `prepareFrame(pt, remaining, tokenColor?, refDelay?)` appelé chaque frame par `PreviewManager.drawStartNode` avant le dessin (pas de constructeur étendu, l'état transitoire passe par cette méthode comme pour `Switch.prepareFrame`).
 

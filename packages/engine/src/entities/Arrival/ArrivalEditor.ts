@@ -4,11 +4,11 @@ import { COLORS, STROKE_WIDTHS, RADII } from "../../theme"
 import { Arrival } from "./Arrival"
 import { traceDemandShape } from "./demandShape"
 
-const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean) => {
+const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean, lineAngle: number) => {
   ctx.fillStyle = color
   ctx.strokeStyle = COLORS.black
   ctx.lineWidth = STROKE_WIDTHS.base
-  traceDemandShape(ctx, x, y, type, angled)
+  traceDemandShape(ctx, x, y, type, angled, lineAngle)
   ctx.fill()
   ctx.stroke()
 }
@@ -23,7 +23,7 @@ export const drawArrivalEmptyShape = (ctx: Renderer, pt: Point) => {
 }
 
 export class ArrivalEditor extends Arrival {
-  draw = (ctx: Renderer, pt: Point) => {
+  draw = (ctx: Renderer, pt: Point, lineAngle = 0) => {
     if (this.demands.length === 0) {
       drawArrivalEmptyShape(ctx, pt)
       return
@@ -33,6 +33,6 @@ export class ArrivalEditor extends Arrival {
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, RADII.entityDot, 0, Math.PI * 2)
     ctx.fill()
-    drawDemandToken(ctx, pt.x, pt.y, this.demands[0].color, this.demands[0].type, this.demands[0].angled)
+    drawDemandToken(ctx, pt.x, pt.y, this.demands[0].color, this.demands[0].type, this.demands[0].angled, lineAngle)
   }
 }

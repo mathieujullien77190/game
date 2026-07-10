@@ -55,6 +55,14 @@ drawAllPreview(ctx)             ← appelé après tickSim
 - `screenGateByLinkId[linkId]` → `ScreenGatePreview`
 - `screenGateByExitKey["lineId::endpoint"]` → `ScreenGatePreview`
 
+## Profiling (`Profiler`)
+
+`initSimulation` appelle `Profiler.reset()` en tout premier (vide l'historique à chaque (re)lancement de preview, y compris via le bouton Restart). `tickSim` et chacune des méthodes de `drawAllPreview` listées ci-dessus sont encadrées d'un `Profiler.start(label)`/`Profiler.end(label)` (label = nom de la méthode). Voir `../CLAUDE.md` pour le fonctionnement du `Profiler` (coût nul quand désactivé).
+
+## Ordre de dessin des lignes (`visibleLines`)
+
+`drawAllPreview` calcule `visibleLines` une fois par frame (`Object.values(this.data.lines)` filtré sur l'écran courant), réutilisé tel quel par `drawLinesBefore` et `drawLinesAfter`. Il est **trié** (tri stable) pour que les lignes sans `color` (grises) soient dessinées en dernier, donc par-dessus les lignes colorées aux intersections — indépendant de l'ordre du tableau `lines` dans `map.json`.
+
 ## Règles
 
 - Chaque entité gère son propre dessin (`draw`, `drawBefore`, `drawAfter`, `drawEntry`, `drawExit`, `drawMini`…). Le manager résout les positions (point sur la ligne) et délègue.

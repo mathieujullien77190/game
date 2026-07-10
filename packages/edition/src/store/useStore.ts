@@ -30,7 +30,7 @@ export const useStore = create<Store>()((set) => ({
   transformers: {},
   inverters: {},
   screenGates: {},
-  arrival: null,
+  arrivals: {},
   hoveredLineId: null,
   hoveredSwitchId: null,
   hoveredTransformerId: null,
@@ -72,7 +72,7 @@ useStore.subscribe((state) => {
   saveTimer = setTimeout(() => {
     const json: MapJson = serializeMap(
       state.editorManager, state.starts, state.switches, state.switchLinks,
-      state.transformers, state.arrival, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers,
+      state.transformers, state.arrivals, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers,
     )
     const str = JSON.stringify(json)
     if (str === lastSaved && state.mapName === lastSavedMapName) return

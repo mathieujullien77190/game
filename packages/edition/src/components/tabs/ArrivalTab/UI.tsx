@@ -21,6 +21,18 @@ export const AddButton = styled.button<{ $active?: boolean }>`
   &:hover { background: ${(p) => (p.$active ? "#555" : "#e8e8e8")}; }
 `
 
+export const ArrivalList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`
+
+export const ArrivalCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`
+
 export const Header = styled.div`
   display: flex;
   align-items: center;

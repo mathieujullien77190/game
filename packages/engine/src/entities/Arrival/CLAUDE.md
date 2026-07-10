@@ -3,7 +3,7 @@
 ## Structure (4 fichiers, pas 3)
 
 - `Arrival.ts` — base : `id`, `lineId`, `endpoint`, `demands: Demand[]`, `screenId`, `queueSide`. Deux compteurs d'ID distincts via `createIdCounter` : `arrival` (id de l'entité) et `demand` (id de chaque `Demand`, créée par `makeDemand()`). `queueSide: "top" | "bottom" | "left" | "right" | "hidden"` contrôle où s'affiche la file des prochaines demandes en preview.
-- `demandShape.ts` — helper partagé `traceDemandShape(ctx, x, y, type, angled, r=8)` : construit le path (cercle ou carré arrondi, pivoté de 45° si `angled`) sans fill/stroke. Éditeur et Preview l'utilisent puis appliquent leur propre style (l'éditeur ajoute un contour noir, le preview non).
+- `demandShape.ts` — helper partagé `traceDemandShape(ctx, x, y, type, angled, lineAngle=0, r=8)` : construit le path (cercle ou carré arrondi, orienté sur `lineAngle`, +45° si `angled`) sans fill/stroke. `lineAngle` = angle de la ligne au point d'arrivée (cohérent avec la rotation réelle d'un token carré, cf. `Token/CLAUDE.md`), pas l'angle écran. Éditeur et Preview l'utilisent puis appliquent leur propre style (l'éditeur ajoute un contour noir, le preview non).
 - `ArrivalEditor.ts` — dessine un disque noir (r14) + soit un carré blanc (aucune demand), soit le premier `Demand` par-dessus. Exporte aussi `drawArrivalEmptyShape(ctx, pt)` (disque + carré blanc), réutilisé tel quel par `EditorManager` pour le ghost-preview au moment de placer une arrivée.
 - `ArrivalPreview.ts` — toute la logique visuelle de simulation.
 
@@ -20,3 +20,7 @@
 ## Matching couleur/forme/orientation
 
 La vérification (couleur ET type ET, pour un carré, orientation) ne vit **pas** dans cette classe mais dans `TokenPreview.transition()` (voir `Token/CLAUDE.md`). L'orientation attendue (`Demand.angled`) est comparée à l'orientation réelle du token, dérivée de `targetRotationOffset % (π/2)` (chaque passage dans un transformer `rotate` ajoute `2.25π`, soit `+45°` net). En cas de mismatch : flash rouge, mais `arcTarget`/`currentDemandIndex` ne bougent pas — la demande reste ouverte pour le prochain token.
+
+## Plusieurs arrivées
+
+Contrairement à `Start` (un seul actif par convention), **toutes** les arrivées sont actives simultanément — chacune a sa propre file de `demands` et progresse indépendamment. `PreviewManager.data.arrivals: ArrivalPreview[]` + `data.arrivalByKey: Record<"lineId::endpoint", ArrivalPreview>` (peuplé dans `initSimulation`, une entrée par arrivée). `TokenPreview.transition()` résout l'arrivée via `ctx.arrivalByKey[\`${lineId}::${arrivedAt}\`]` — un token n'affecte que l'arrivée sur le lien où il termine sa course. `EditorManager.drawAll` prend `arrivals: ArrivalEditor[]` (au lieu d'un `ArrivalEditor | null`), même pattern que `starts`. `map.json` sérialise `arrivals: [...]` (tableau) ; l'ancien champ singulier `arrival` est encore lu par `deserializeMap` pour compat ascendante (migré en tableau à un seul élément si `arrivals` est absent).

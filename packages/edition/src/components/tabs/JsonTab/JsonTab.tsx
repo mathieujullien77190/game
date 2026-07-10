@@ -20,11 +20,11 @@ export const JsonTab = () => {
     }))
   )
 
-  const { transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers } = useStore(
-    useShallow((s) => ({ transformers: s.transformers, inverters: s.inverters, arrival: s.arrival, screens: s.screens, screenGates: s.screenGates, screenTimeMultipliers: s.screenTimeMultipliers }))
+  const { transformers, inverters, arrivals, screens, screenGates, screenTimeMultipliers } = useStore(
+    useShallow((s) => ({ transformers: s.transformers, inverters: s.inverters, arrivals: s.arrivals, screens: s.screens, screenGates: s.screenGates, screenTimeMultipliers: s.screenTimeMultipliers }))
   )
 
-  const json = JSON.stringify(serializeMap(editorManager, starts, switches, switchLinks, transformers, arrival, inverters, screens, screenGates, screenTimeMultipliers), null, 2)
+  const json = JSON.stringify(serializeMap(editorManager, starts, switches, switchLinks, transformers, arrivals, inverters, screens, screenGates, screenTimeMultipliers), null, 2)
 
   return (
     <S.Container>

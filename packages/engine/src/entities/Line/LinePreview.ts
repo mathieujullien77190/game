@@ -31,22 +31,12 @@ export class LinePreview extends Line {
       ctx.fill()
       return
     }
-    ctx.strokeStyle = COLORS.grayLight
+    ctx.strokeStyle = this.color ?? COLORS.grayLight
     ctx.lineWidth = STROKE_WIDTHS.lineGlow
     ctx.lineCap = "round"
     ctx.setLineDash([])
     this.tracePath(ctx)
     ctx.stroke()
-
-    if (this.color) {
-      ctx.save()
-      ctx.strokeStyle = this.color
-      ctx.lineWidth = 1
-      ctx.translate(0, -STROKE_WIDTHS.lineGlow / 2 - 1)
-      this.tracePath(ctx)
-      ctx.stroke()
-      ctx.restore()
-    }
   }
 
   drawGlow = (ctx: Renderer, elapsedSeconds = 0) => {

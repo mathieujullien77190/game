@@ -4,42 +4,50 @@ import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
 import type { Set } from "store/types"
 
 export const createArrivalActions = (set: Set) => ({
-  setArrival: (lineId: string, endpoint: "start" | "end") =>
-    set((state) => ({
-      arrival: new ArrivalEditor(lineId, endpoint, undefined, [], state.currentScreenId),
-      revision: state.revision + 1,
-    })),
-
-  removeArrival: () =>
-    set((state) => ({ arrival: null, revision: state.revision + 1 })),
-
-  addArrivalDemand: () =>
+  addArrival: (lineId: string, endpoint: "start" | "end") =>
     set((state) => {
-      if (!state.arrival) return {}
-      state.arrival.demands = [...state.arrival.demands, makeDemand()]
+      const a = new ArrivalEditor(lineId, endpoint, undefined, [], state.currentScreenId)
+      return { arrivals: { ...state.arrivals, [a.id]: a }, revision: state.revision + 1 }
+    }),
+
+  removeArrival: (id: string) =>
+    set((state) => {
+      const arrivals = { ...state.arrivals }
+      delete arrivals[id]
+      return { arrivals, revision: state.revision + 1 }
+    }),
+
+  addArrivalDemand: (arrivalId: string) =>
+    set((state) => {
+      const a = state.arrivals[arrivalId]
+      if (!a) return {}
+      a.demands = [...a.demands, makeDemand()]
       return { revision: state.revision + 1 }
     }),
 
-  removeArrivalDemand: (id: string) =>
+  removeArrivalDemand: (arrivalId: string, id: string) =>
     set((state) => {
-      if (!state.arrival) return {}
-      state.arrival.demands = state.arrival.demands.filter((d) => d.id !== id)
+      const a = state.arrivals[arrivalId]
+      if (!a) return {}
+      a.demands = a.demands.filter((d) => d.id !== id)
       return { revision: state.revision + 1 }
     }),
 
-  updateArrivalDemand: (id: string, patch: { color?: TokenColor; type?: TokenType; angled?: boolean }) =>
+  updateArrivalDemand: (arrivalId: string, id: string, patch: { color?: TokenColor; type?: TokenType; angled?: boolean }) =>
     set((state) => {
-      if (!state.arrival) return {}
-      state.arrival.demands = state.arrival.demands.map((d) =>
+      const a = state.arrivals[arrivalId]
+      if (!a) return {}
+      a.demands = a.demands.map((d) =>
         d.id === id ? { ...d, ...patch } : d
       )
       return { revision: state.revision + 1 }
     }),
 
-  setArrivalQueueSide: (queueSide: QueueSide) =>
+  setArrivalQueueSide: (arrivalId: string, queueSide: QueueSide) =>
     set((state) => {
-      if (!state.arrival) return {}
-      state.arrival.queueSide = queueSide
+      const a = state.arrivals[arrivalId]
+      if (!a) return {}
+      a.queueSide = queueSide
       return { revision: state.revision + 1 }
     }),
 })

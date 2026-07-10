@@ -15,7 +15,7 @@ import type { Point } from "../types"
 import type { StartEditor as StartEditorType } from "../entities/Start/StartEditor"
 import type { SwitchEditor as SwitchEditorType } from "../entities/Switch/SwitchEditor"
 
-type MapToken = { id: string; color: string; type: string; speed: number }
+type MapToken = { id: string; color: string; type: string; speed: number; angled?: boolean }
 type MapStart = { id: string; lineId: string; endpoint: "start" | "end"; delay: number; firstDelay?: number; screenId?: string; tokens?: MapToken[] }
 
 export type MapJson = {
@@ -27,6 +27,8 @@ export type MapJson = {
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string; color?: string; mode?: "manual" | "auto" }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
   inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" | "dark" }[]
+  arrivals?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string; queueSide?: "top" | "bottom" | "left" | "right" | "hidden" }[]
+  // legacy: ancien format à arrivée unique
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string; queueSide?: "top" | "bottom" | "left" | "right" | "hidden" } | null
   screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
   screenTimeMultipliers?: Record<string, number>
@@ -43,7 +45,7 @@ export const serializeMap = (
   switches: Record<string, SwitchEditorType>,
   switchLinks: Record<string, string[]>,
   transformers: Record<string, Transformer> = {},
-  arrival: ArrivalEditor | null = null,
+  arrivals: Record<string, ArrivalEditor> = {},
   inverters: Record<string, Inverter> = {},
   screens: string[] = ["main"],
   screenGates: Record<string, ScreenGate> = {},
@@ -110,16 +112,14 @@ export const serializeMap = (
     ...(inv.screenId !== "main" ? { screenId: inv.screenId } : {}),
     ...(inv.effect !== "invert" ? { effect: inv.effect } : {}),
   })),
-  arrival: arrival
-    ? {
-        id: arrival.id,
-        lineId: arrival.lineId,
-        endpoint: arrival.endpoint,
-        demands: arrival.demands,
-        ...(arrival.screenId !== "main" ? { screenId: arrival.screenId } : {}),
-        ...(arrival.queueSide !== "right" ? { queueSide: arrival.queueSide } : {}),
-      }
-    : null,
+  arrivals: Object.values(arrivals).map((a) => ({
+    id: a.id,
+    lineId: a.lineId,
+    endpoint: a.endpoint,
+    demands: a.demands,
+    ...(a.screenId !== "main" ? { screenId: a.screenId } : {}),
+    ...(a.queueSide !== "right" ? { queueSide: a.queueSide } : {}),
+  })),
   screenGates: Object.values(screenGates).map((sg) => ({
     id: sg.id,
     linkId: sg.linkId,
@@ -171,7 +171,7 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   if (json.tokens?.length && Object.keys(starts).length > 0) {
     const first = Object.values(starts)[0]
     if (first.tokens.length === 0) {
-      first.tokens = json.tokens.map((t) => ({ id: t.id, color: t.color, type: t.type, speed: t.speed }))
+      first.tokens = json.tokens.map((t) => ({ id: t.id, color: t.color, type: t.type, speed: t.speed, angled: t.angled }))
     }
   }
 
@@ -217,11 +217,16 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
   syncInverterCounter(Object.keys(inverters))
 
-  let arrival: ArrivalEditor | null = null
-  if (json.arrival) {
-    arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any, json.arrival.screenId, json.arrival.queueSide)
-    syncArrivalCounter([json.arrival.id])
+  const arrivals: Record<string, ArrivalEditor> = {}
+  json.arrivals?.forEach(({ id, lineId, endpoint, demands, screenId, queueSide }) => {
+    arrivals[id] = new ArrivalEditor(lineId, endpoint, id, (demands ?? []) as any, screenId, queueSide)
+  })
+  // Backward compat : map.json avec une arrivée unique (ancien format) → migrée dans arrivals
+  if (json.arrival && Object.keys(arrivals).length === 0) {
+    const a = json.arrival
+    arrivals[a.id] = new ArrivalEditor(a.lineId, a.endpoint, a.id, (a.demands ?? []) as any, a.screenId, a.queueSide)
   }
+  syncArrivalCounter(Object.keys(arrivals))
 
   const screens = json.screens ?? ["main"]
 
@@ -233,5 +238,5 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   const screenTimeMultipliers: Record<string, number> = json.screenTimeMultipliers ?? {}
 
-  return { starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers }
+  return { starts, switches, switchLinks, transformers, inverters, arrivals, screens, screenGates, screenTimeMultipliers }
 }

@@ -119,7 +119,7 @@ export class EditorManager extends Manager<LineEditor> {
     inverters: InverterEditor[] = [],
     hoveredInverterId: string | null = null,
     previewInverterPt: Point | null = null,
-    arrival: ArrivalEditor | null = null,
+    arrivals: ArrivalEditor[] = [],
     previewArrivalPt: Point | null = null,
     screenGates: ScreenGateEditor[] = [],
     hoveredScreenGateId: string | null = null,
@@ -233,12 +233,12 @@ export class EditorManager extends Manager<LineEditor> {
       start.draw(ctx, pt)
     }
 
-    if (arrival) {
+    for (const arrival of arrivals) {
       const line = this.data.lines[arrival.lineId]
-      if (line) {
-        const pt = arrival.endpoint === "end" ? line.end : line.start
-        arrival.draw(ctx, pt)
-      }
+      if (!line) continue
+      const pt = arrival.endpoint === "end" ? line.end : line.start
+      const lineAngle = (arrival.endpoint === "end" ? line.points[line.points.length - 1]?.angle : line.points[0]?.angle) ?? 0
+      arrival.draw(ctx, pt, lineAngle)
     }
 
     if (previewArrivalPt) {

@@ -26,7 +26,7 @@ export interface StoreState {
   switchLinks: Record<string, string[]>
   transformers: Record<string, Transformer>
   inverters: Record<string, Inverter>
-  arrival: ArrivalEditor | null
+  arrivals: Record<string, ArrivalEditor>
   hoveredLineId: string | null
   hoveredSwitchId: string | null
   hoveredTransformerId: string | null
@@ -67,7 +67,7 @@ export interface StoreActions {
   updateStartFirstDelay: (id: string, firstDelay: number) => void
   addTokenToStart: (startId: string) => void
   removeTokenFromStart: (startId: string, tokenId: string) => void
-  updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType }) => void
+  updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType; angled?: boolean }) => void
   addSwitch: (sw: SwitchEditor) => void
   removeSwitch: (id: string) => void
   updateSwitchActiveLink: (id: string, activeLinkId: string) => void
@@ -87,12 +87,12 @@ export interface StoreActions {
   removeInverter: (id: string) => void
   updateInverterEffect: (id: string, effect: "invert" | "grayscale" | "dark") => void
   setHoveredInverterId: (id: string | null) => void
-  setArrival: (lineId: string, endpoint: "start" | "end") => void
-  removeArrival: () => void
-  addArrivalDemand: () => void
-  removeArrivalDemand: (id: string) => void
-  updateArrivalDemand: (id: string, patch: { color?: TokenColor; type?: TokenType; angled?: boolean }) => void
-  setArrivalQueueSide: (queueSide: QueueSide) => void
+  addArrival: (lineId: string, endpoint: "start" | "end") => void
+  removeArrival: (id: string) => void
+  addArrivalDemand: (arrivalId: string) => void
+  removeArrivalDemand: (arrivalId: string, id: string) => void
+  updateArrivalDemand: (arrivalId: string, id: string, patch: { color?: TokenColor; type?: TokenType; angled?: boolean }) => void
+  setArrivalQueueSide: (arrivalId: string, queueSide: QueueSide) => void
   setHoveredSwitchId: (id: string | null) => void
   setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void

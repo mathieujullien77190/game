@@ -19,9 +19,9 @@ const QUEUE_VECTORS: Record<string, { x: number; y: number }> = {
   right: { x: 1, y: 0 },
 }
 
-const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean, r = 8) => {
+const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean, lineAngle: number, r = 8) => {
   ctx.fillStyle = color
-  traceDemandShape(ctx, x, y, type, angled, r)
+  traceDemandShape(ctx, x, y, type, angled, lineAngle, r)
   ctx.fill()
 }
 
@@ -106,7 +106,7 @@ export class ArrivalPreview extends Arrival {
     ctx.save()
     ctx.translate(pt.x, pt.y)
     ctx.globalAlpha = this.fadeAlpha * this.opacity
-    drawDemandToken(ctx, 0, 0, demand.color, demand.type, demand.angled)
+    drawDemandToken(ctx, 0, 0, demand.color, demand.type, demand.angled, pt.angle ?? 0)
     ctx.restore()
   }
 
@@ -121,7 +121,7 @@ export class ArrivalPreview extends Arrival {
     upcoming.forEach((demand, i) => {
       const dist = QUEUE_START_OFFSET + i * QUEUE_SPACING
       ctx.globalAlpha = (0.85 - i * 0.2) * this.opacity
-      drawDemandToken(ctx, v.x * dist, v.y * dist, demand.color, demand.type, demand.angled, 6)
+      drawDemandToken(ctx, v.x * dist, v.y * dist, demand.color, demand.type, demand.angled, pt.angle ?? 0, 6)
     })
     ctx.restore()
   }

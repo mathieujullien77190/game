@@ -81,6 +81,12 @@ export const StartTab = () => {
                   value={token.speed}
                   onChange={(v) => updateStartToken(start.id, token.id, { speed: v })}
                 />
+                {token.type === "square" && (
+                  <S.TypeToggle>
+                    <S.TypeButton $active={!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: false })}>0°</S.TypeButton>
+                    <S.TypeButton $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>45°</S.TypeButton>
+                  </S.TypeToggle>
+                )}
               </S.TokenCard>
             ))}
           </S.StartCard>

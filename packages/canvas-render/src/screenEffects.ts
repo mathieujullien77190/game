@@ -81,10 +81,10 @@ export const applyScreenEffects = (ctx: CanvasRenderingContext2D, pm: PreviewMan
       }
     }
 
-    if (d.arrival) {
-      const aLine = d.lines[d.arrival.lineId]
+    for (const a of d.arrivals) {
+      const aLine = d.lines[a.lineId]
       if (aLine && aLine.screenId === sid) {
-        const aPt = d.arrival.endpoint === "end" ? aLine.points[aLine.points.length - 1] : aLine.points[0]
+        const aPt = a.endpoint === "end" ? aLine.points[aLine.points.length - 1] : aLine.points[0]
         if (aPt) punch(aPt.x, aPt.y, 35)
       }
     }
