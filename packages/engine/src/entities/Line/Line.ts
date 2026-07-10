@@ -39,6 +39,7 @@ export class Line {
   amplitude: number = 20
   turns: number = 2
   screenId: string = "main"
+  color: string | null = null
 
   constructor(start: Point, end: Point, type: LineType = "straight", id?: string, cp1?: Point, cp2?: Point, screenId?: string) {
     this.id = id ?? generateLineId()

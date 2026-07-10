@@ -3,11 +3,12 @@ import { POINT_SPACING } from "../../constants"
 import type { Point } from "../../types"
 import { runAnimations, type Animation } from "../Animation"
 import { COLORS, STROKE_WIDTHS } from "../../theme"
-import type { LinkEndpoint } from "../Link/Link"
+import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
 import type { TransformerPreview } from "../Transformer/TransformerPreview"
 import type { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview"
+import type { SwitchPreview } from "../Switch/SwitchPreview"
 import { Token } from "./Token"
 
 export type TransitionCtx = {
@@ -16,6 +17,8 @@ export type TransitionCtx = {
   linkByEndpointKey: Record<string, string>
   linkMap: Record<string, LinkEndpoint>
   lines: Record<string, LinePreview>
+  links: Record<string, Link>
+  switchByEnterKey: Record<string, SwitchPreview>
   transformers: Record<string, TransformerPreview>
   transformerByLinkId: Record<string, string>
   inverterLinkMap: Map<string, "invert" | "grayscale" | "dark">
@@ -81,6 +84,16 @@ export class TokenPreview extends Token {
     }
     this.remainder = budget
     return null
+  }
+
+  // Un switch en mode "auto" ignore son activeLinkId : la destination dépend de la couleur du token.
+  private resolveNext = (key: string, ctx: TransitionCtx): LinkEndpoint | undefined => {
+    const sw = ctx.switchByEnterKey[key]
+    if (sw?.mode === "auto") {
+      const tokenColor = this.displayColor || (this.color as string)
+      return sw.resolveAutoDestination(tokenColor, ctx.links, ctx.lines) ?? ctx.linkMap[key]
+    }
+    return ctx.linkMap[key]
   }
 
   transition = (arrivedAt: "start" | "end", excess: number, ctx: TransitionCtx): { isInverted: boolean; isGrayscale: boolean; isDark: boolean } => {
@@ -183,7 +196,7 @@ export class TokenPreview extends Token {
         if (needsFade) {
           this.opacityFrom = this.opacity
         }
-        const other = ctx.linkMap[`${this.lineId}::${arrivedAt}`]
+        const other = this.resolveNext(`${this.lineId}::${arrivedAt}`, ctx)
         if (other) {
           const newLine = ctx.lines[other.lineId]
           this.pendingLineId = other.lineId
@@ -200,7 +213,7 @@ export class TokenPreview extends Token {
       }
     }
 
-    const other = ctx.linkMap[`${this.lineId}::${arrivedAt}`]
+    const other = this.resolveNext(`${this.lineId}::${arrivedAt}`, ctx)
     if (other) {
       this.lineId = other.lineId
       const newLine = ctx.lines[this.lineId]

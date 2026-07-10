@@ -6,6 +6,7 @@ import type { LineType } from "@drift/engine/entities/Line/Line"
 import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
 import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
+import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
 import type { Transformer, TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 import type { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
 import type { QueueSide } from "@drift/engine/entities/Arrival/Arrival"
@@ -56,6 +57,7 @@ export interface StoreActions {
   updateLineTunnel: (id: string, tunnel: boolean) => void
   updateLineShowSpeed: (id: string, showSpeed: boolean) => void
   updateLineLimitation: (id: string, limitation: number) => void
+  updateLineColor: (id: string, color: string | null) => void
   updateLineSine: (id: string, frequency: number, amplitude: number) => void
   updateLineSpiral: (id: string, turns: number) => void
   toggleLinkActivated: (linkId: string) => void
@@ -71,6 +73,7 @@ export interface StoreActions {
   updateSwitchActiveLink: (id: string, activeLinkId: string) => void
   updateSwitchLinks: (id: string, linkIds: string[], activeLinkId: string | null) => void
   updateSwitchColor: (id: string, color: string) => void
+  updateSwitchMode: (id: string, mode: SwitchMode) => void
   toggleSwitchLink: (id1: string, id2: string) => void
   addTransformer: (linkId: string, type: TransformerType) => void
   removeTransformer: (id: string) => void

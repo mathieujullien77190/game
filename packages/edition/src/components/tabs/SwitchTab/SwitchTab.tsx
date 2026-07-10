@@ -1,16 +1,18 @@
 import { useShallow } from "zustand/react/shallow"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
+import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
 import { ColorPicker } from "components/form/ColorPicker"
 import { useStore } from "store"
 import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
 import * as S from "./UI"
 
 const SWITCH_COLORS = ["#ccc", ...TOKEN_COLORS] as const
+const SWITCH_MODES: SwitchMode[] = ["manual", "auto"]
 
 export const SwitchTab = () => {
   const {
     switches, switchLinks, editorManager, revision: _revision,
-    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, updateSwitchColor, toggleSwitchLink, setHoveredSwitchId,
+    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, updateSwitchColor, updateSwitchMode, toggleSwitchLink, setHoveredSwitchId,
   } = useStore(
     useShallow((s) => ({
       switches: s.switches,
@@ -23,6 +25,7 @@ export const SwitchTab = () => {
       updateSwitchActiveLink: s.updateSwitchActiveLink,
       updateSwitchLinks: s.updateSwitchLinks,
       updateSwitchColor: s.updateSwitchColor,
+      updateSwitchMode: s.updateSwitchMode,
       toggleSwitchLink: s.toggleSwitchLink,
       setHoveredSwitchId: s.setHoveredSwitchId,
     }))
@@ -76,6 +79,23 @@ export const SwitchTab = () => {
               />
 
               <S.Divider />
+              <S.Label>mode</S.Label>
+              <S.OutputList>
+                {SWITCH_MODES.map((m) => (
+                  <S.OutputOption
+                    key={m}
+                    $active={sw.mode === m}
+                    onClick={() => updateSwitchMode(sw.id, m)}
+                  >
+                    {m}
+                  </S.OutputOption>
+                ))}
+              </S.OutputList>
+              {sw.mode === "auto" && (
+                <S.NoLinks>auto : couleur du token en priorité, sinon ligne grise</S.NoLinks>
+              )}
+
+              <S.Divider />
               <S.Label>enter</S.Label>
               <S.OutputList>
                 {junctionEndpoints.map(({ lineId, endpoint }) => {
@@ -102,7 +122,7 @@ export const SwitchTab = () => {
                 })}
               </S.OutputList>
 
-              {ep && (
+              {ep && sw.mode !== "auto" && (
                 <>
                   <S.Divider />
                   <S.Label>active output</S.Label>

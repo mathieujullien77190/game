@@ -22,3 +22,21 @@ export const Swatch = styled.button<{ $color: string; $selected: boolean }>`
     transform: scale(1.2);
   }
 `
+
+export const NoneSwatch = styled.button<{ $selected: boolean }>`
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  background-image: linear-gradient(45deg, transparent 46%, #e53935 46%, #e53935 54%, transparent 54%);
+  border: 2px solid ${({ $selected }) => ($selected ? "#333" : "#ccc")};
+  outline: 2px solid ${({ $selected }) => ($selected ? "#333" : "transparent")};
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+`

@@ -10,7 +10,7 @@ import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils"
 
 const SWITCH_R = RADII.node
 
-type LinesRef = Record<string, { points: Point[] }>
+type LinesRef = Record<string, { points: Point[]; color: string | null }>
 type LinksRef = Record<string, Link>
 type LinkMapRef = Record<string, LinkEndpoint>
 
@@ -101,6 +101,25 @@ export class SwitchPreview extends Switch {
     linkMap[key] = link.line1.lineId === ep.lineId && link.line1.endpoint === ep.endpoint
       ? link.line2
       : link.line1
+  }
+
+  // Mode "auto" : ignore l'activeLinkId, choisit la destination selon la couleur du token
+  // (priorité : ligne de sa couleur, sinon ligne grise/sans couleur, sinon la 1ère sortie).
+  resolveAutoDestination = (tokenColor: string, links: LinksRef, lines: LinesRef): LinkEndpoint | undefined => {
+    const ep = getSwitchEnterPoint(this.linkIds, links)
+    if (!ep) return undefined
+    const destinations: LinkEndpoint[] = []
+    for (const lid of this.linkIds) {
+      const link = links[lid]
+      if (!link || !link.activated) continue
+      const dest = link.line1.lineId === ep.lineId && link.line1.endpoint === ep.endpoint
+        ? link.line2
+        : link.line1
+      destinations.push(dest)
+    }
+    return destinations.find((d) => lines[d.lineId]?.color === tokenColor)
+      ?? destinations.find((d) => !lines[d.lineId]?.color)
+      ?? destinations[0]
   }
 
   getPoint = (): Point | null => this._pt

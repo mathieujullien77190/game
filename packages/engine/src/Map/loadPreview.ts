@@ -13,6 +13,7 @@ export const populatePreviewLines = (pm: PreviewManager, em: EditorManager) => {
     lp.tunnel = l.tunnel
     lp.showSpeed = l.showSpeed
     lp.limitation = l.limitation
+    lp.color = l.color
     if (l.type === "sine") {
       lp.frequency = l.frequency
       lp.amplitude = l.amplitude

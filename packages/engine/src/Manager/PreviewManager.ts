@@ -9,6 +9,7 @@ import type { Start } from "../entities/Start/Start";
 import { StartPreview } from "../entities/Start/StartPreview";
 import type { Switch } from "../entities/Switch/Switch";
 import { SwitchPreview } from "../entities/Switch/SwitchPreview";
+import { getSwitchEnterPoint } from "../entities/Switch/switchUtils";
 import { drawStats, smoothFps } from "../stats";
 import { TokenPreview } from "../entities/Token/TokenPreview";
 import type { Inverter } from "../entities/Inverter/Inverter";
@@ -32,6 +33,7 @@ export class PreviewManager extends Manager<LinePreview> {
     tokens: [] as TokenPreview[],
     starts: [] as StartPreview[],
     switches: {} as Record<string, SwitchPreview>,
+    switchByEnterKey: {} as Record<string, SwitchPreview>,
     switchLinks: {} as Record<string, string[]>,
     links: {} as Record<string, Link>,
     linkMap: {} as LinkMap,
@@ -94,14 +96,17 @@ export class PreviewManager extends Manager<LinePreview> {
     }
 
     this.data.switches = {};
+    this.data.switchByEnterKey = {};
     for (const s of Object.values(switches)) {
-      const sw = new SwitchPreview(s.id, s.linkIds, s.activeLinkId, s.screenId, s.color);
+      const sw = new SwitchPreview(s.id, s.linkIds, s.activeLinkId, s.screenId, s.color, s.mode);
       if (s.activeLinkId) {
         const idx = s.linkIds.indexOf(s.activeLinkId);
         if (idx !== -1) sw.activeIndex = idx;
       }
       sw.applyToLinkMap(links, this.data.linkMap);
       this.data.switches[s.id] = sw;
+      const ep = getSwitchEnterPoint(s.linkIds, links);
+      if (ep) this.data.switchByEnterKey[`${ep.lineId}::${ep.endpoint}`] = sw;
     }
 
     this.data.inverters = {};

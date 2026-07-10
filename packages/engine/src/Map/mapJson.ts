@@ -20,11 +20,11 @@ type MapStart = { id: string; lineId: string; endpoint: "start" | "end"; delay: 
 
 export type MapJson = {
   screens?: string[]
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; turns?: number; screenId?: string }[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; turns?: number; screenId?: string; color?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens?: MapToken[]
   starts: MapStart[]
-  switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string; color?: string }>
+  switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string; color?: string; mode?: "manual" | "auto" }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
   inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" | "dark" }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string; queueSide?: "top" | "bottom" | "left" | "right" | "hidden" } | null
@@ -65,6 +65,7 @@ export const serializeMap = (
     ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
     ...(l.type === "spiral" ? { turns: l.turns } : {}),
     ...(l.screenId !== "main" ? { screenId: l.screenId } : {}),
+    ...(l.color ? { color: l.color } : {}),
   })),
   links: Object.values(editorManager.data.links).map((lk) => ({
     id: lk.id,
@@ -90,6 +91,7 @@ export const serializeMap = (
         linkedSwitchIds: switchLinks[sw.id] ?? [],
         ...(sw.screenId !== "main" ? { screenId: sw.screenId } : {}),
         ...(sw.color !== "#ccc" ? { color: sw.color } : {}),
+        ...(sw.mode !== "manual" ? { mode: sw.mode } : {}),
       },
     ])
   ),
@@ -133,13 +135,14 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, flip, tunnel, showSpeed, limitation, frequency, amplitude, turns, screenId }) => {
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, flip, tunnel, showSpeed, limitation, frequency, amplitude, turns, screenId, color }) => {
     const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2, screenId)
     if (boost) line.boost = boost
     if (flip) { line.flip = true; line.computePoints() }
     if (tunnel) line.tunnel = true
     if (showSpeed) line.showSpeed = true
     if (limitation) line.limitation = limitation
+    if (color) line.color = color
     if (type === "sine") {
       if (frequency !== undefined) line.frequency = frequency
       if (amplitude !== undefined) line.amplitude = amplitude
@@ -177,8 +180,8 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   const switches: Record<string, SwitchEditorType> = {}
   const switchLinks: Record<string, string[]> = {}
-  Object.entries(json.switches ?? {}).forEach(([id, { linkIds, activeLinkId, linkedSwitchIds, screenId, color }]) => {
-    const sw = new SwitchEditor(id, linkIds ?? [], activeLinkId ?? null, screenId, color)
+  Object.entries(json.switches ?? {}).forEach(([id, { linkIds, activeLinkId, linkedSwitchIds, screenId, color, mode }]) => {
+    const sw = new SwitchEditor(id, linkIds ?? [], activeLinkId ?? null, screenId, color, mode)
     switches[sw.id] = sw
     switchLinks[id] = linkedSwitchIds ?? []
   })

@@ -142,6 +142,14 @@ export const createLineActions = (set: Set) => ({
       return { revision: state.revision + 1 }
     }),
 
+  updateLineColor: (id: string, color: string | null) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.color = color
+      return { revision: state.revision + 1 }
+    }),
+
   setHoveredLineId: (id: string | null) => set(() => ({ hoveredLineId: id })),
 
   setLineType: (lineType: LineType) => set(() => ({ lineType })),

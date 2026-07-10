@@ -2,6 +2,8 @@ import { useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { NumberInput } from "components/form/NumberInput"
+import { ColorPicker } from "components/form/ColorPicker"
+import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import * as S from "./UI"
 
 export const LineTab = () => {
@@ -14,7 +16,7 @@ export const LineTab = () => {
       return next
     })
 
-  const { editorManager, mode, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, mode, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineColor, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       mode: s.mode,
@@ -26,6 +28,7 @@ export const LineTab = () => {
       updateLineTunnel: s.updateLineTunnel,
       updateLineShowSpeed: s.updateLineShowSpeed,
       updateLineLimitation: s.updateLineLimitation,
+      updateLineColor: s.updateLineColor,
       updateLineSine: s.updateLineSine,
       updateLineSpiral: s.updateLineSpiral,
       toggleLinkActivated: s.toggleLinkActivated,
@@ -120,6 +123,15 @@ export const LineTab = () => {
               <S.BoostRow>
                 <S.BoostLabel>limitation</S.BoostLabel>
                 <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
+              </S.BoostRow>
+              <S.BoostRow>
+                <S.BoostLabel>color</S.BoostLabel>
+                <ColorPicker
+                  palette={TOKEN_COLORS}
+                  value={line.color ?? ""}
+                  onChange={(color) => updateLineColor(line.id, color)}
+                  onClear={() => updateLineColor(line.id, null)}
+                />
               </S.BoostRow>
               {line.type === "spiral" && (
                 <S.BoostRow>
