@@ -1,5 +1,5 @@
-import type { Renderer } from "../render/Renderer"
-import type { Point } from "../types"
+import type { Renderer } from "../../render/Renderer"
+import type { Point } from "../../types"
 import { Start } from "./Start"
 
 export class StartEditor extends Start {

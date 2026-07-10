@@ -1,4 +1,4 @@
-import { SwitchEditor } from "@drift/engine/Switch/SwitchEditor"
+import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
 import type { Set } from "store/types"
 
 export const createSwitchActions = (set: Set) => ({
@@ -25,7 +25,7 @@ export const createSwitchActions = (set: Set) => ({
       const sw = state.switches[id]
       if (!sw) return {}
       return {
-        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, sw.linkIds, activeLinkId) },
+        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, sw.linkIds, activeLinkId, sw.screenId, sw.color) },
         revision: state.revision + 1,
       }
     }),
@@ -35,7 +35,17 @@ export const createSwitchActions = (set: Set) => ({
       const sw = state.switches[id]
       if (!sw) return {}
       return {
-        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, linkIds, activeLinkId) },
+        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, linkIds, activeLinkId, sw.screenId, sw.color) },
+        revision: state.revision + 1,
+      }
+    }),
+
+  updateSwitchColor: (id: string, color: string) =>
+    set((state) => {
+      const sw = state.switches[id]
+      if (!sw) return {}
+      return {
+        switches: { ...state.switches, [id]: new SwitchEditor(sw.id, sw.linkIds, sw.activeLinkId, sw.screenId, color) },
         revision: state.revision + 1,
       }
     }),

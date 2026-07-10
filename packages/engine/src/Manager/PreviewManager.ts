@@ -3,23 +3,22 @@ import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H } from "
 
 const EXPLOSION_DURATION = 2;
 
-import { LinePreview } from "../Line/LinePreview";
-import type { Link, LinkEndpoint } from "../Link/Link";
-import type { Start } from "../Start/Start";
-import { StartPreview } from "../Start/StartPreview";
-import type { Switch } from "../Switch/Switch";
-import { SwitchPreview } from "../Switch/SwitchPreview";
+import { LinePreview } from "../entities/Line/LinePreview";
+import type { Link, LinkEndpoint } from "../entities/Link/Link";
+import type { Start } from "../entities/Start/Start";
+import { StartPreview } from "../entities/Start/StartPreview";
+import type { Switch } from "../entities/Switch/Switch";
+import { SwitchPreview } from "../entities/Switch/SwitchPreview";
 import { drawStats, smoothFps } from "../stats";
-import type { Token } from "../Token/Token";
-import { TokenPreview } from "../Token/TokenPreview";
-import type { Inverter } from "../Inverter/Inverter";
-import { InverterPreview } from "../Inverter/InverterPreview";
-import type { Transformer } from "../Transformer/Transformer";
-import { TransformerPreview } from "../Transformer/TransformerPreview";
-import type { ScreenGate } from "../ScreenGate/ScreenGate";
-import { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview";
-import type { Arrival } from "../Arrival/Arrival";
-import { ArrivalPreview } from "../Arrival/ArrivalPreview";
+import { TokenPreview } from "../entities/Token/TokenPreview";
+import type { Inverter } from "../entities/Inverter/Inverter";
+import { InverterPreview } from "../entities/Inverter/InverterPreview";
+import type { Transformer } from "../entities/Transformer/Transformer";
+import { TransformerPreview } from "../entities/Transformer/TransformerPreview";
+import type { ScreenGate } from "../entities/ScreenGate/ScreenGate";
+import { ScreenGatePreview } from "../entities/ScreenGate/ScreenGatePreview";
+import type { Arrival } from "../entities/Arrival/Arrival";
+import { ArrivalPreview } from "../entities/Arrival/ArrivalPreview";
 import { Manager } from "./Manager";
 
 const lerpHex = (a: string, b: string, t: number): string => {
@@ -35,7 +34,7 @@ export class PreviewManager extends Manager<LinePreview> {
   data = {
     lines: {} as Record<string, LinePreview>,
     tokens: [] as TokenPreview[],
-    start: null as StartPreview | null,
+    starts: [] as StartPreview[],
     switches: {} as Record<string, SwitchPreview>,
     switchLinks: {} as Record<string, string[]>,
     links: {} as Record<string, Link>,
@@ -63,7 +62,6 @@ export class PreviewManager extends Manager<LinePreview> {
   };
 
   initSimulation = (
-    tokens: Record<string, Token>,
     links: Record<string, Link>,
     starts: Record<string, Start>,
     switches: Record<string, Switch> = {},
@@ -101,7 +99,7 @@ export class PreviewManager extends Manager<LinePreview> {
 
     this.data.switches = {};
     for (const s of Object.values(switches)) {
-      const sw = new SwitchPreview(s.id, s.linkIds, s.activeLinkId);
+      const sw = new SwitchPreview(s.id, s.linkIds, s.activeLinkId, s.screenId, s.color);
       if (s.activeLinkId) {
         const idx = s.linkIds.indexOf(s.activeLinkId);
         if (idx !== -1) sw.activeIndex = idx;
@@ -116,7 +114,9 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.isGrayscale = false;
     this.data.isDark = false;
     for (const inv of Object.values(inverters)) {
-      this.data.inverters[inv.id] = new InverterPreview(inv.linkId, inv.id);
+      const invPreview = new InverterPreview(inv.linkId, inv.id);
+      invPreview.effect = inv.effect;
+      this.data.inverters[inv.id] = invPreview;
       this.data.inverterLinkMap.set(inv.linkId, inv.effect);
     }
 
@@ -137,28 +137,26 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
     this.data.arrivalKey = arrival ? `${arrival.lineId}::${arrival.endpoint}` : "";
 
-    const s = Object.values(starts)[0];
-    this.data.start = s ? new StartPreview(s.lineId, s.endpoint, s.delay, s.id) : null;
-
+    this.data.starts = [];
     this.data.tokens = [];
-    if (this.data.start) {
-      const start = this.data.start;
-      const line = this.data.lines[start.lineId];
-      if (line) {
-        const spawnIndex = start.endpoint === "end" ? line.points.length - 1 : 0;
-        const direction: 1 | -1 = start.endpoint === "end" ? -1 : 1;
-        this.data.tokens = Object.values(tokens).map((t, i) => {
-          const token = new TokenPreview(t.color, t.speed, t.id, t.type);
-          token.startId = start.id;
-          token.lineId = start.lineId;
-          token.pointIndex = spawnIndex;
-          token.remainder = 0;
-          token.direction = direction;
-          token.startAt = (i + 1) * start.delay;
-          token.currentSpeed = 0;
-          return token;
-        });
-      }
+    for (const s of Object.values(starts)) {
+      const sp = new StartPreview(s.lineId, s.endpoint, s.delay, s.id, s.screenId, s.firstDelay);
+      this.data.starts.push(sp);
+      const line = this.data.lines[s.lineId];
+      if (!line) continue;
+      const spawnIndex = s.endpoint === "end" ? line.points.length - 1 : 0;
+      const direction: 1 | -1 = s.endpoint === "end" ? -1 : 1;
+      s.tokens.forEach((tc, i) => {
+        const token = new TokenPreview(tc.color as any, tc.speed, tc.id, tc.type as any);
+        token.startId = s.id;
+        token.lineId = s.lineId;
+        token.pointIndex = spawnIndex;
+        token.remainder = 0;
+        token.direction = direction;
+        token.startAt = i === 0 ? s.firstDelay : s.firstDelay + i * s.delay;
+        token.currentSpeed = 0;
+        this.data.tokens.push(token);
+      });
     }
   };
 
@@ -176,12 +174,21 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const sw of Object.values(this.data.switches)) sw.tick(deltaSeconds);
 
-    if (this.data.arrival?.isFading) {
-      this.data.arrival.fadeAlpha = Math.max(0, this.data.arrival.fadeAlpha - deltaSeconds / 2);
-      if (this.data.arrival.fadeAlpha <= 0) {
-        this.data.arrival.isFading = false;
-        this.data.arrival.fadeAlpha = 1;
-        this.data.arrival.currentDemandIndex++;
+    const arrival = this.data.arrival
+    if (arrival) {
+      if (arrival.flashProgress < 1) {
+        arrival.flashProgress = Math.min(1, arrival.flashProgress + deltaSeconds / 0.35)
+      }
+      if (arrival.arcFill < arrival.arcTarget) {
+        arrival.arcFill = Math.min(arrival.arcTarget, arrival.arcFill + deltaSeconds * 3)
+      }
+      if (arrival.isFading) {
+        arrival.fadeAlpha = Math.max(0, arrival.fadeAlpha - deltaSeconds / 2)
+        if (arrival.fadeAlpha <= 0) {
+          arrival.isFading = false
+          arrival.fadeAlpha = 1
+          arrival.currentDemandIndex++
+        }
       }
     }
 
@@ -196,10 +203,14 @@ export class PreviewManager extends Manager<LinePreview> {
           if (token.transformMode === "color") {
             activeTransformer.currentTokenColor = token.displayColor || (token.color as string);
           }
+          if (token.transformMode === "fade") {
+            token.opacity = token.opacityFrom + (activeTransformer.amount - token.opacityFrom) * token.transformProgress;
+          }
         }
         if (token.transformProgress >= 1) {
           token.isTransforming = false;
           if (token.transformMode === "shape") token.type = token.pendingType as any;
+          if (token.transformMode === "fade" && activeTransformer) token.opacity = activeTransformer.amount;
           if (activeTransformer) { activeTransformer.transformProgress = -1; activeTransformer.currentTokenColor = ""; }
           if (token.pendingLineId) {
             token.lineId = token.pendingLineId;
@@ -296,93 +307,129 @@ export class PreviewManager extends Manager<LinePreview> {
   };
 
   drawAllPreview = (ctx: Renderer) => {
+    this.clearBackground(ctx);
+    const sid = this.data.previewScreenId;
+    const visibleLines = Object.values(this.data.lines).filter((l) => l.screenId === sid);
+    this.drawLinesBefore(ctx, visibleLines);
+    this.drawSwitchesBefore(ctx, sid);
+    this.drawSwitchLinks(ctx);
+    this.drawScreenGateMarkers(ctx, sid);
+    this.drawTransformers(ctx, sid);
+    this.drawArrival(ctx, sid);
+    this.drawStartNode(ctx, sid);
+    this.drawLinesAfter(ctx, visibleLines);
+    this.drawSwitchesAfter(ctx, sid);
+    this.drawTokens(ctx, sid);
+    this.drawTransformersAfter(ctx, sid);
+    this.drawStartAfter(ctx);
+    this.drawScreenGates(ctx, sid);
+    this.drawInverters(ctx, sid);
+    this.drawMiniMap(ctx);
+    this.drawHudStats(ctx);
+  };
+
+  clearBackground = (ctx: Renderer) => {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
+  };
 
-    const sid = this.data.previewScreenId;
-    const visibleLines = Object.values(this.data.lines).filter((l) => l.screenId === sid);
-
-    this.drawSwitchLinks(ctx);
+  drawLinesBefore = (ctx: Renderer, visibleLines: LinePreview[]) => {
     for (const line of visibleLines) line.drawBefore(ctx, this.data.elapsedSeconds);
+  };
 
-    for (const sg of Object.values(this.data.screenGates)) {
-      if (sg.targetScreenId !== sid) continue;
-      if (sg.entryKey) {
-        const [eLineId, eEp] = sg.entryKey.split("::");
-        const eLine = this.data.lines[eLineId];
-        if (eLine) {
-          const pt = eEp === "end" ? eLine.end : eLine.start;
-          ctx.fillStyle = "#000";
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      if (sg.exitKey) {
-        const [xLineId, xEp] = sg.exitKey.split("::");
-        const xLine = this.data.lines[xLineId];
-        if (xLine) {
-          const pt = xEp === "end" ? xLine.end : xLine.start;
-          ctx.strokeStyle = "#000";
-          ctx.lineWidth = 2;
-          ctx.setLineDash([]);
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.fillStyle = "#000";
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-
+  drawSwitchesBefore = (ctx: Renderer, sid: string) => {
     for (const sw of Object.values(this.data.switches)) {
       sw.prepareFrame(this.data.lines, this.data.links, this.data.linkMap);
       const link = this.data.links[sw.linkIds[0]];
       if (!link) continue;
       if (this.data.lines[link.line1.lineId]?.screenId !== sid) continue;
-      sw.draw(ctx);
+      sw.drawBefore(ctx);
     }
+  };
 
+  drawScreenGateMarkers = (ctx: Renderer, sid: string) => {
+    for (const sg of Object.values(this.data.screenGates)) {
+      if (sg.targetScreenId !== sid) continue;
+      if (sg.entryKey) {
+        const [eLineId, eEp] = sg.entryKey.split("::");
+        const eLine = this.data.lines[eLineId];
+        if (eLine) sg.drawEntry(ctx, eEp === "end" ? eLine.end : eLine.start);
+      }
+      if (sg.exitKey) {
+        const [xLineId, xEp] = sg.exitKey.split("::");
+        const xLine = this.data.lines[xLineId];
+        if (xLine) sg.drawExit(ctx, xEp === "end" ? xLine.end : xLine.start);
+      }
+    }
+  };
+
+  drawTransformers = (ctx: Renderer, sid: string) => {
     for (const tr of Object.values(this.data.transformers)) {
       const link = this.data.links[tr.linkId];
       if (!link) continue;
       const line = this.data.lines[link.line1.lineId];
       if (!line || line.screenId !== sid) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      tr.draw(ctx, pt, this.data.elapsedSeconds);
+      tr.drawBefore(ctx, pt, this.data.elapsedSeconds);
     }
+  };
 
-    if (this.data.arrival) {
-      const arrival = this.data.arrival;
-      const line = this.data.lines[arrival.lineId];
-      if (line && line.screenId === sid) {
-        const pt = arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
-        if (pt) arrival.draw(ctx, pt);
-      }
+  drawTransformersAfter = (ctx: Renderer, sid: string) => {
+    for (const tr of Object.values(this.data.transformers)) {
+      const link = this.data.links[tr.linkId];
+      if (!link) continue;
+      const line = this.data.lines[link.line1.lineId];
+      if (!line || line.screenId !== sid) continue;
+      tr.drawAfter(ctx);
     }
+  };
 
-    if (this.data.start) {
-      const start = this.data.start;
+  drawArrival = (ctx: Renderer, sid: string) => {
+    if (!this.data.arrival) return;
+    const line = this.data.lines[this.data.arrival.lineId];
+    if (!line || line.screenId !== sid) return;
+    const pt = this.data.arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
+    if (pt) this.data.arrival.drawBefore(ctx, pt);
+  };
+
+  drawStartNode = (ctx: Renderer, sid: string) => {
+    for (const start of this.data.starts) {
       const line = this.data.lines[start.lineId];
-      if (line && line.screenId === sid) {
-        const pt = start.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
-        if (pt) {
-          const nextWaiting = this.data.tokens
-            .filter((t) => t.startId === start.id && this.data.elapsedSeconds < t.startAt)
-            .sort((a, b) => a.startAt - b.startAt)[0];
-          if (nextWaiting) nextWaiting.draw(ctx, pt);
-          start.draw(ctx, pt, nextWaiting ? nextWaiting.startAt - this.data.elapsedSeconds : 0);
-        }
-      }
+      if (!line || line.screenId !== sid) continue;
+      const pt = start.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
+      if (!pt) continue;
+      const startTokens = this.data.tokens.filter((t) => t.startId === start.id);
+      const nextWaiting = startTokens
+        .filter((t) => this.data.elapsedSeconds < t.startAt)
+        .sort((a, b) => a.startAt - b.startAt)[0];
+      const tokenColor = nextWaiting ? (nextWaiting.displayColor || nextWaiting.color as string) : undefined;
+      const isFirst = nextWaiting && startTokens.indexOf(nextWaiting) === 0;
+      start.prepareFrame(pt, nextWaiting ? nextWaiting.startAt - this.data.elapsedSeconds : 0, tokenColor, isFirst ? start.firstDelay : start.delay);
+      if (nextWaiting) nextWaiting.drawBefore(ctx, pt);
     }
+  };
 
+  drawLinesAfter = (ctx: Renderer, visibleLines: LinePreview[]) => {
+    for (const line of visibleLines) {
+      const token = this.data.tokens.find(t => t.lineId === line.id && !t.exploding);
+      line.drawAfter(ctx, token?.currentSpeed, token ? (token.displayColor || token.color as string) : undefined);
+    }
+  };
+
+  drawSwitchesAfter = (ctx: Renderer, sid: string) => {
+    for (const sw of Object.values(this.data.switches)) {
+      const link = this.data.links[sw.linkIds[0]];
+      if (!link) continue;
+      if (this.data.lines[link.line1.lineId]?.screenId !== sid) continue;
+      sw.drawAfter(ctx);
+    }
+  };
+
+  drawTokens = (ctx: Renderer, sid: string) => {
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
       const tokenScreenId = this.data.lines[token.lineId]?.screenId ?? "main";
@@ -392,14 +439,15 @@ export class PreviewManager extends Manager<LinePreview> {
       const pt = line.points[token.pointIndex];
       if (!pt) continue;
       if (token.exploding) token.drawExplosion(ctx, pt);
-      else token.draw(ctx, pt, line.boost !== 0 ? line.boost : 0, line.points, line.tunnel ? 0 : undefined);
+      else token.drawBefore(ctx, pt, line.boost !== 0 ? line.boost : 0, line.points, line.tunnel ? 0 : undefined);
     }
+  };
 
-    for (const line of visibleLines) {
-      const token = this.data.tokens.find(t => t.lineId === line.id && !t.exploding);
-      line.drawAfter(ctx, token?.currentSpeed, token ? (token.displayColor || token.color as string) : undefined);
-    }
+  drawStartAfter = (ctx: Renderer) => {
+    for (const start of this.data.starts) start.drawAfter(ctx);
+  };
 
+  drawScreenGates = (ctx: Renderer, sid: string) => {
     for (const sg of Object.values(this.data.screenGates)) {
       if (sg.screenId !== sid) continue;
       const link = this.data.links[sg.linkId];
@@ -407,9 +455,11 @@ export class PreviewManager extends Manager<LinePreview> {
       const line = this.data.lines[link.line1.lineId];
       if (!line) continue;
       const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      sg.draw(ctx, pt, this.data.tokens, this.data.lines, this.data.elapsedSeconds);
+      sg.drawAfter(ctx, pt, this.data.tokens, this.data.lines, this.data.elapsedSeconds);
     }
+  };
 
+  drawInverters = (ctx: Renderer, sid: string) => {
     for (const inv of Object.values(this.data.inverters)) {
       const link = this.data.links[inv.linkId];
       if (!link) continue;
@@ -418,15 +468,14 @@ export class PreviewManager extends Manager<LinePreview> {
       const isEnd = link.line1.endpoint === "end";
       const pt = isEnd ? line.end : line.start;
       const ptAngle = isEnd ? line.points[line.points.length - 1] : line.points[0];
-      inv.draw(ctx, pt, ptAngle?.angle ?? 0);
+      if (inv.effect === "invert") inv.active = this.data.isInverted;
+      else if (inv.effect === "grayscale") inv.active = this.data.isGrayscale;
+      else if (inv.effect === "dark") inv.active = this.data.isDark;
+      inv.drawAfter(ctx, pt, ptAngle?.angle ?? 0);
     }
+  };
 
-    // Les effets plein écran (inverter / grayscale / dark) sont un rendu web
-    // (offscreen canvas, compositing) → appliqués côté game : applyScreenEffects().
-    // L'engine n'expose que l'état (isInverted / isGrayscale / isDark).
-
-    this.drawMiniMap(ctx);
-
+  drawHudStats = (ctx: Renderer) => {
     const tokensInNetwork = this.data.tokens.filter(
       (t) => this.data.elapsedSeconds >= t.startAt && !t.exploding
     ).length;
@@ -483,23 +532,7 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!line || line.screenId !== prevSid) continue
       const pt = line.points[token.pointIndex]
       if (!pt) continue
-      const dx = mx + pt.x * S
-      const dy = my + pt.y * S
-      const color = (token.displayColor || token.color) as string
-      ctx.fillStyle = color
-      ctx.strokeStyle = "#000"
-      ctx.lineWidth = 1
-      if (token.type === "square") {
-        ctx.beginPath()
-        ctx.rect(dx - 3, dy - 3, 6, 6)
-        ctx.fill()
-        ctx.stroke()
-      } else {
-        ctx.beginPath()
-        ctx.arc(dx, dy, 3, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.stroke()
-      }
+      token.drawMini(ctx, mx + pt.x * S, my + pt.y * S)
     }
   };
 

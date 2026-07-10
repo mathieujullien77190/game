@@ -9,7 +9,7 @@ export const createModeActions = (set: Set) => ({
     set((state) => {
       if (viewMode === "preview") {
         populatePreviewLines(state.previewManager, state.editorManager)
-        state.previewManager.initSimulation(state.tokens, state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screenGates, state.screenTimeMultipliers)
+        state.previewManager.initSimulation(state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrival, state.inverters, state.screenGates, state.screenTimeMultipliers)
       }
       return { viewMode }
     }),

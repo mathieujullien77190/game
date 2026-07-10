@@ -1,15 +1,15 @@
 import type { StoreApi } from "zustand"
 import { EditorManager } from "@drift/engine/Manager/EditorManager"
 import { PreviewManager } from "@drift/engine/Manager/PreviewManager"
-import { LineEditor } from "@drift/engine/Line/LineEditor"
-import type { LineType } from "@drift/engine/Line/Line"
-import { Token, type TokenColor, type TokenType } from "@drift/engine/Token/Token"
-import { StartEditor } from "@drift/engine/Start/StartEditor"
-import { SwitchEditor } from "@drift/engine/Switch/SwitchEditor"
-import type { Transformer, TransformerType } from "@drift/engine/Transformer/Transformer"
-import type { ArrivalEditor } from "@drift/engine/Arrival/ArrivalEditor"
-import type { Inverter } from "@drift/engine/Inverter/Inverter"
-import type { ScreenGate } from "@drift/engine/ScreenGate/ScreenGate"
+import { LineEditor } from "@drift/engine/entities/Line/LineEditor"
+import type { LineType } from "@drift/engine/entities/Line/Line"
+import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
+import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
+import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
+import type { Transformer, TransformerType } from "@drift/engine/entities/Transformer/Transformer"
+import type { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
+import type { Inverter } from "@drift/engine/entities/Inverter/Inverter"
+import type { ScreenGate } from "@drift/engine/entities/ScreenGate/ScreenGate"
 import type { Point } from "@drift/engine/types"
 import type { MapJson } from "@drift/engine/Map/mapJson"
 
@@ -19,7 +19,6 @@ export type ViewMode = "editor" | "preview"
 export interface StoreState {
   editorManager: EditorManager
   previewManager: PreviewManager
-  tokens: Record<string, Token>
   starts: Record<string, StartEditor>
   switches: Record<string, SwitchEditor>
   switchLinks: Record<string, string[]>
@@ -57,16 +56,18 @@ export interface StoreActions {
   updateLineSine: (id: string, frequency: number, amplitude: number) => void
   updateLineSpiral: (id: string, turns: number) => void
   toggleLinkActivated: (linkId: string) => void
-  addToken: (token: Token) => void
-  removeToken: (id: string) => void
-  updateToken: (id: string, patch: { color?: TokenColor; speed?: number; type?: TokenType }) => void
   addStart: (start: StartEditor) => void
   removeStart: (id: string) => void
   updateStartDelay: (id: string, delay: number) => void
+  updateStartFirstDelay: (id: string, firstDelay: number) => void
+  addTokenToStart: (startId: string) => void
+  removeTokenFromStart: (startId: string, tokenId: string) => void
+  updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType }) => void
   addSwitch: (sw: SwitchEditor) => void
   removeSwitch: (id: string) => void
   updateSwitchActiveLink: (id: string, activeLinkId: string) => void
   updateSwitchLinks: (id: string, linkIds: string[], activeLinkId: string | null) => void
+  updateSwitchColor: (id: string, color: string) => void
   toggleSwitchLink: (id1: string, id2: string) => void
   addTransformer: (linkId: string, type: TransformerType) => void
   removeTransformer: (id: string) => void

@@ -1,4 +1,4 @@
-import { Transformer, syncTransformerCounter, type TransformerType } from "@drift/engine/Transformer/Transformer"
+import { Transformer, syncTransformerCounter, type TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 import type { Set } from "store/types"
 
 export const createTransformerActions = (set: Set) => ({

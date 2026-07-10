@@ -1,7 +1,6 @@
 import { useState } from "react"
 import * as S from "./UI"
 import LineTab from "components/tabs/LineTab"
-import TokenTab from "components/tabs/TokenTab"
 import StartTab from "components/tabs/StartTab"
 import SwitchTab from "components/tabs/SwitchTab"
 import TransformerTab from "components/tabs/TransformerTab"
@@ -10,7 +9,7 @@ import InverterTab from "components/tabs/InverterTab"
 import JsonTab from "components/tabs/JsonTab"
 import { ScreenGateTab } from "components/tabs/ScreenGateTab/ScreenGateTab"
 
-const TABS = ["line", "token", "start", "switch", "transformer", "inverter", "arrival", "gate", "json"] as const
+const TABS = ["line", "start", "switch", "transformer", "inverter", "arrival", "gate", "json"] as const
 type Tab = (typeof TABS)[number]
 
 export const ToolsPanel = () => {
@@ -31,7 +30,6 @@ export const ToolsPanel = () => {
       </S.TabBar>
       <S.TabContent>
         {activeTab === "line" && <LineTab />}
-        {activeTab === "token" && <TokenTab />}
         {activeTab === "start" && <StartTab />}
         {activeTab === "switch" && <SwitchTab />}
         {activeTab === "transformer" && <TransformerTab />}

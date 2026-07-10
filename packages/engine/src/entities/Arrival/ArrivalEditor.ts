@@ -1,5 +1,5 @@
-import type { Renderer } from "../render/Renderer"
-import type { Point } from "../types"
+import type { Renderer } from "../../render/Renderer"
+import type { Point } from "../../types"
 import { Arrival } from "./Arrival"
 
 const drawDemandToken = (ctx: Renderer, x: number, y: number, color: string, type: string, angled: boolean) => {

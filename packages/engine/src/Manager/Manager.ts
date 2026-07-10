@@ -1,4 +1,4 @@
-import { Line } from "../Line/Line"
+import { Line } from "../entities/Line/Line"
 
 export class Manager<T extends Line = Line> {
   data: { lines: Record<string, T> } = { lines: {} as Record<string, T> }

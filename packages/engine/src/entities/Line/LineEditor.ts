@@ -1,4 +1,4 @@
-import type { Renderer } from "../render/Renderer"
+import type { Renderer } from "../../render/Renderer"
 import { Line } from "./Line"
 
 export class LineEditor extends Line {

@@ -1,8 +1,8 @@
-import { LineEditor } from "@drift/engine/Line/LineEditor"
-import type { LineType } from "@drift/engine/Line/Line"
-import { SwitchEditor } from "@drift/engine/Switch/SwitchEditor"
-import { getSwitchEnterPoint } from "@drift/engine/Switch/switchUtils"
-import type { Link } from "@drift/engine/Link/Link"
+import { LineEditor } from "@drift/engine/entities/Line/LineEditor"
+import type { LineType } from "@drift/engine/entities/Line/Line"
+import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
+import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
+import type { Link } from "@drift/engine/entities/Link/Link"
 import type { Point } from "@drift/engine/types"
 import type { Set } from "store/types"
 
@@ -38,7 +38,7 @@ const syncSwitches = (
         sw.activeLinkId && linksAtEnter.includes(sw.activeLinkId)
           ? sw.activeLinkId
           : linksAtEnter[0] ?? null
-      updated[swId] = new SwitchEditor(sw.id, linksAtEnter, newActive)
+      updated[swId] = new SwitchEditor(sw.id, linksAtEnter, newActive, sw.screenId, sw.color)
       changed = true
     }
   }

@@ -1,9 +1,9 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
-import { TOKEN_COLORS } from "@drift/engine/Token/Token"
+import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import * as S from "./UI"
-import type { TransformerType } from "@drift/engine/Transformer/Transformer"
+import type { TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 
 const ALL_TYPES: TransformerType[] = ["fade", "rotate", "color", "shape"]
 

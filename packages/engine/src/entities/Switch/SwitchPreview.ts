@@ -1,6 +1,7 @@
-import type { Renderer } from "../render/Renderer"
+import type { Renderer } from "../../render/Renderer"
 import type { Link, LinkEndpoint } from "../Link/Link"
-import type { LinePoint } from "../types"
+import type { LinePoint } from "../../types"
+import type { Animation, AnimTime } from "../Animation"
 import { Switch } from "./Switch"
 import { getSwitchEnterPoint, curveIntersectAngle } from "./switchUtils"
 
@@ -25,6 +26,7 @@ export class SwitchPreview extends Switch {
   targetAngle: number | undefined = undefined
   private _pt: LinePoint | null = null
   private _enterAngle: number | undefined = undefined
+  private _allDestAngles: number[] = []
 
   getActiveLinkId = () => this.linkIds[this.activeIndex] ?? null
 
@@ -75,6 +77,22 @@ export class SwitchPreview extends Switch {
         this.setTargetAngle(activeAngle)
       }
     }
+
+    this._allDestAngles = []
+    for (const lid of this.linkIds) {
+      const link = links[lid]
+      if (!link) continue
+      const dest = link.line1.lineId === ep.lineId && link.line1.endpoint === ep.endpoint
+        ? link.line2
+        : link.line1
+      const destLine = lines[dest.lineId]
+      if (!destLine || destLine.points.length === 0) continue
+      const angle = curveIntersectAngle(destLine.points, dest.endpoint, pt.x, pt.y, SWITCH_R)
+        ?? (dest.endpoint === "end"
+          ? destLine.points[destLine.points.length - 1].angle + Math.PI
+          : destLine.points[0].angle)
+      this._allDestAngles.push(angle)
+    }
   }
 
   applyToLinkMap = (links: LinksRef, linkMap: LinkMapRef) => {
@@ -99,59 +117,115 @@ export class SwitchPreview extends Switch {
     return dx * dx + dy * dy <= SWITCH_R * SWITCH_R
   }
 
-  draw = (ctx: Renderer) => {
+  private drawStatic = (ctx: Renderer) => {
+    const pt = this._pt
+    if (!pt) return
+    ctx.save()
+    ctx.fillStyle = "#fff"
+    ctx.beginPath()
+    ctx.arc(pt.x, pt.y, SWITCH_R, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.restore()
+  }
+
+  private animPulseRing = (ctx: Renderer) => {
+    const pt = this._pt
+    if (!pt || this.pulseTimer <= 0) return
+    const t = 1 - this.pulseTimer / 0.3
+    ctx.save()
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1 - t
+    ctx.strokeStyle = this.color
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(pt.x, pt.y, SWITCH_R + t * 12, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.globalAlpha = 1
+    ctx.restore()
+  }
+
+  private animArrows = (ctx: Renderer) => {
     const pt = this._pt
     if (!pt) return
     const r = SWITCH_R
-
     ctx.save()
     ctx.setLineDash([])
-
-    if (this.pulseTimer > 0) {
-      const t = 1 - this.pulseTimer / 0.3
-      ctx.globalAlpha = 1 - t
-      ctx.strokeStyle = "#000"
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.arc(pt.x, pt.y, r + t * 12, 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.globalAlpha = 1
-    }
-
-    ctx.fillStyle = "#fff"
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2.5
     ctx.lineCap = "round"
 
     if (this._enterAngle !== undefined) {
+      ctx.strokeStyle = this.color
+      ctx.lineWidth = 5
       ctx.beginPath()
       ctx.moveTo(pt.x, pt.y)
       ctx.lineTo(pt.x + Math.cos(this._enterAngle) * r, pt.y + Math.sin(this._enterAngle) * r)
       ctx.stroke()
-      ctx.fillStyle = "#000"
+      const ex = pt.x + Math.cos(this._enterAngle) * r
+      const ey = pt.y + Math.sin(this._enterAngle) * r
+      ctx.fillStyle = this.color
       ctx.beginPath()
-      ctx.arc(pt.x + Math.cos(this._enterAngle) * r, pt.y + Math.sin(this._enterAngle) * r, 4, 0, Math.PI * 2)
+      ctx.arc(ex, ey, 6.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      ctx.arc(ex, ey, 3.5, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    for (const angle of this._allDestAngles) {
+      const isActive = this.displayAngle !== undefined && Math.abs(angle - this.displayAngle) < 0.05
+      if (isActive) continue
+      const tx = pt.x + Math.cos(angle) * r
+      const ty = pt.y + Math.sin(angle) * r
+      ctx.fillStyle = this.color
+      ctx.beginPath()
+      ctx.arc(tx, ty, 4.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      ctx.arc(tx, ty, 2.5, 0, Math.PI * 2)
       ctx.fill()
     }
 
     if (this.displayAngle !== undefined) {
+      ctx.strokeStyle = this.color
+      ctx.lineWidth = 5
       ctx.beginPath()
       ctx.moveTo(pt.x, pt.y)
       ctx.lineTo(pt.x + Math.cos(this.displayAngle) * r, pt.y + Math.sin(this.displayAngle) * r)
       ctx.stroke()
-      ctx.fillStyle = "#000"
+      const dx = pt.x + Math.cos(this.displayAngle) * r
+      const dy = pt.y + Math.sin(this.displayAngle) * r
+      ctx.fillStyle = this.color
       ctx.beginPath()
-      ctx.arc(pt.x + Math.cos(this.displayAngle) * r, pt.y + Math.sin(this.displayAngle) * r, 4, 0, Math.PI * 2)
+      ctx.arc(dx, dy, 6.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      ctx.arc(dx, dy, 3.5, 0, Math.PI * 2)
       ctx.fill()
     }
 
+    ctx.fillStyle = this.color
+    ctx.beginPath()
+    ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2)
+    ctx.fill()
+
     ctx.restore()
+  }
+
+  readonly animations: Animation[] = [
+    { draw: (ctx, _t) => this.animPulseRing(ctx) },
+    { draw: (ctx, _t) => this.animArrows(ctx) },
+  ]
+
+  drawBefore = (ctx: Renderer) => {
+    if (!this._pt) return
+    this.drawStatic(ctx)
+  }
+
+  drawAfter = (ctx: Renderer) => {
+    if (!this._pt) return
+    const t: AnimTime = { elapsed: 0, now: Date.now() }
+    for (const anim of this.animations) anim.draw(ctx, t)
   }
 }

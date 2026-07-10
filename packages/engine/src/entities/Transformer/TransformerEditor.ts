@@ -1,5 +1,5 @@
-import type { Renderer } from "../render/Renderer"
-import type { Point } from "../types"
+import type { Renderer } from "../../render/Renderer"
+import type { Point } from "../../types"
 import { Transformer } from "./Transformer"
 
 const TYPE_COLOR: Record<string, string> = {

@@ -1,12 +1,16 @@
 import { useShallow } from "zustand/react/shallow"
+import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
+import { ColorPicker } from "components/form/ColorPicker"
 import { useStore } from "store"
-import { getSwitchEnterPoint } from "@drift/engine/Switch/switchUtils"
+import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
 import * as S from "./UI"
+
+const SWITCH_COLORS = ["#ccc", ...TOKEN_COLORS] as const
 
 export const SwitchTab = () => {
   const {
     switches, switchLinks, editorManager, revision: _revision,
-    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, toggleSwitchLink, setHoveredSwitchId,
+    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, updateSwitchColor, toggleSwitchLink, setHoveredSwitchId,
   } = useStore(
     useShallow((s) => ({
       switches: s.switches,
@@ -18,6 +22,7 @@ export const SwitchTab = () => {
       removeSwitch: s.removeSwitch,
       updateSwitchActiveLink: s.updateSwitchActiveLink,
       updateSwitchLinks: s.updateSwitchLinks,
+      updateSwitchColor: s.updateSwitchColor,
       toggleSwitchLink: s.toggleSwitchLink,
       setHoveredSwitchId: s.setHoveredSwitchId,
     }))
@@ -61,6 +66,14 @@ export const SwitchTab = () => {
                 <S.SwitchId>{sw.id}</S.SwitchId>
                 <S.DeleteButton onClick={() => removeSwitch(sw.id)}>✕</S.DeleteButton>
               </S.Row>
+
+              <S.Divider />
+              <S.Label>color</S.Label>
+              <ColorPicker
+                palette={SWITCH_COLORS}
+                value={sw.color}
+                onChange={(color) => updateSwitchColor(sw.id, color)}
+              />
 
               <S.Divider />
               <S.Label>enter</S.Label>

@@ -1,5 +1,5 @@
-import { POINT_SPACING } from "../constants"
-import type { Point, LinePoint } from "../types"
+import { POINT_SPACING } from "../../constants"
+import type { Point, LinePoint } from "../../types"
 
 export type LineType = "straight" | "curve" | "sine" | "elbow" | "spiral"
 

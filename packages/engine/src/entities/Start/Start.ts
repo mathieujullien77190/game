@@ -1,3 +1,5 @@
+export type TokenConfig = { id: string; color: string; type: string; speed: number }
+
 let startCounter = 1
 
 export const syncStartCounter = (ids: string[]) => {
@@ -13,13 +15,17 @@ export class Start {
   lineId: string
   endpoint: "start" | "end"
   delay: number
+  firstDelay: number
   screenId: string = "main"
+  tokens: TokenConfig[] = []
 
-  constructor(lineId: string, endpoint: "start" | "end", delay: number = 6, id?: string, screenId?: string) {
+  constructor(lineId: string, endpoint: "start" | "end", delay: number = 6, id?: string, screenId?: string, firstDelay?: number, tokens: TokenConfig[] = []) {
     this.id = id ?? `start${startCounter++}`
     this.lineId = lineId
     this.endpoint = endpoint
     this.delay = delay
+    this.firstDelay = firstDelay ?? 2
     if (screenId) this.screenId = screenId
+    this.tokens = tokens
   }
 }

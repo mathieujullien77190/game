@@ -1,5 +1,5 @@
-import type { Renderer } from "../render/Renderer"
-import type { Point } from "../types"
+import type { Renderer } from "../../render/Renderer"
+import type { Point } from "../../types"
 import { ScreenGate } from "./ScreenGate"
 
 export const GATE_W = 36

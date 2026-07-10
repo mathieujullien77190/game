@@ -1,27 +1,30 @@
-import { LineEditor } from "../Line/LineEditor"
-import { syncLineCounter, type LineType } from "../Line/Line"
-import { Token, syncTokenCounter, type TokenColor, type TokenType } from "../Token/Token"
-import { StartEditor } from "../Start/StartEditor"
-import { syncStartCounter } from "../Start/Start"
-import { SwitchEditor } from "../Switch/SwitchEditor"
-import { syncSwitchCounter } from "../Switch/Switch"
-import { Transformer, syncTransformerCounter, type TransformerType } from "../Transformer/Transformer"
-import { Inverter, syncInverterCounter } from "../Inverter/Inverter"
-import { ScreenGate, syncScreenGateCounter } from "../ScreenGate/ScreenGate"
-import { ArrivalEditor } from "../Arrival/ArrivalEditor"
-import { syncArrivalCounter } from "../Arrival/Arrival"
+import { LineEditor } from "../entities/Line/LineEditor"
+import { syncLineCounter, type LineType } from "../entities/Line/Line"
+import { syncTokenCounter } from "../entities/Token/Token"
+import { StartEditor } from "../entities/Start/StartEditor"
+import { syncStartCounter } from "../entities/Start/Start"
+import { SwitchEditor } from "../entities/Switch/SwitchEditor"
+import { syncSwitchCounter } from "../entities/Switch/Switch"
+import { Transformer, syncTransformerCounter, type TransformerType } from "../entities/Transformer/Transformer"
+import { Inverter, syncInverterCounter } from "../entities/Inverter/Inverter"
+import { ScreenGate, syncScreenGateCounter } from "../entities/ScreenGate/ScreenGate"
+import { ArrivalEditor } from "../entities/Arrival/ArrivalEditor"
+import { syncArrivalCounter } from "../entities/Arrival/Arrival"
 import type { EditorManager } from "../Manager/EditorManager"
 import type { Point } from "../types"
-import type { StartEditor as StartEditorType } from "../Start/StartEditor"
-import type { SwitchEditor as SwitchEditorType } from "../Switch/SwitchEditor"
+import type { StartEditor as StartEditorType } from "../entities/Start/StartEditor"
+import type { SwitchEditor as SwitchEditorType } from "../entities/Switch/SwitchEditor"
+
+type MapToken = { id: string; color: string; type: string; speed: number }
+type MapStart = { id: string; lineId: string; endpoint: "start" | "end"; delay: number; firstDelay?: number; screenId?: string; tokens?: MapToken[] }
 
 export type MapJson = {
   screens?: string[]
   lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; turns?: number; screenId?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
-  tokens: { id: string; color: TokenColor; type: TokenType; speed: number }[]
-  starts: { id: string; lineId: string; endpoint: "start" | "end"; delay: number; screenId?: string }[]
-  switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string }>
+  tokens?: MapToken[]
+  starts: MapStart[]
+  switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string; color?: string }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
   inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" | "dark" }[]
   arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
@@ -36,7 +39,6 @@ export type MapJson = {
 
 export const serializeMap = (
   editorManager: EditorManager,
-  tokens: Record<string, Token>,
   starts: Record<string, StartEditorType>,
   switches: Record<string, SwitchEditorType>,
   switchLinks: Record<string, string[]>,
@@ -70,17 +72,13 @@ export const serializeMap = (
     line2: lk.line2,
     activated: lk.activated,
   })),
-  tokens: Object.values(tokens).map((t) => ({
-    id: t.id,
-    color: t.color,
-    type: t.type as TokenType,
-    speed: t.speed,
-  })),
   starts: Object.values(starts).map((s) => ({
     id: s.id,
     lineId: s.lineId,
     endpoint: s.endpoint,
     delay: s.delay,
+    tokens: s.tokens,
+    ...(s.firstDelay !== 2 ? { firstDelay: s.firstDelay } : {}),
     ...(s.screenId !== "main" ? { screenId: s.screenId } : {}),
   })),
   switches: Object.fromEntries(
@@ -91,6 +89,7 @@ export const serializeMap = (
         activeLinkId: sw.activeLinkId,
         linkedSwitchIds: switchLinks[sw.id] ?? [],
         ...(sw.screenId !== "main" ? { screenId: sw.screenId } : {}),
+        ...(sw.color !== "#ccc" ? { color: sw.color } : {}),
       },
     ])
   ),
@@ -158,24 +157,27 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
     if (link) link.activated = activated
   })
 
-  const tokens: Record<string, Token> = {}
-  json.tokens?.forEach(({ id, color, type, speed }) => {
-    const t = new Token(color, speed, id, type ?? "round")
-    tokens[t.id] = t
-  })
-  syncTokenCounter(Object.keys(tokens))
-
   const starts: Record<string, StartEditorType> = {}
-  json.starts?.forEach(({ id, lineId, endpoint, delay, screenId }) => {
-    const s = new StartEditor(lineId, endpoint, delay, id, screenId)
+  json.starts?.forEach(({ id, lineId, endpoint, delay, firstDelay, screenId, tokens }) => {
+    const s = new StartEditor(lineId, endpoint, delay, id, screenId, firstDelay, tokens ?? [])
     starts[s.id] = s
   })
+
+  // Backward compat: map.json files with top-level tokens → assign to first start
+  if (json.tokens?.length && Object.keys(starts).length > 0) {
+    const first = Object.values(starts)[0]
+    if (first.tokens.length === 0) {
+      first.tokens = json.tokens.map((t) => ({ id: t.id, color: t.color, type: t.type, speed: t.speed }))
+    }
+  }
+
   syncStartCounter(Object.keys(starts))
+  syncTokenCounter(Object.values(starts).flatMap((s) => s.tokens.map((t) => t.id)))
 
   const switches: Record<string, SwitchEditorType> = {}
   const switchLinks: Record<string, string[]> = {}
-  Object.entries(json.switches ?? {}).forEach(([id, { linkIds, activeLinkId, linkedSwitchIds, screenId }]) => {
-    const sw = new SwitchEditor(id, linkIds ?? [], activeLinkId ?? null, screenId)
+  Object.entries(json.switches ?? {}).forEach(([id, { linkIds, activeLinkId, linkedSwitchIds, screenId, color }]) => {
+    const sw = new SwitchEditor(id, linkIds ?? [], activeLinkId ?? null, screenId, color)
     switches[sw.id] = sw
     switchLinks[id] = linkedSwitchIds ?? []
   })
@@ -227,5 +229,5 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   const screenTimeMultipliers: Record<string, number> = json.screenTimeMultipliers ?? {}
 
-  return { tokens, starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers }
+  return { starts, switches, switchLinks, transformers, inverters, arrival, screens, screenGates, screenTimeMultipliers }
 }

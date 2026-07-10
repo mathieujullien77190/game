@@ -1,12 +1,11 @@
 import { create } from "zustand"
 import { EditorManager } from "@drift/engine/Manager/EditorManager"
 import { PreviewManager } from "@drift/engine/Manager/PreviewManager"
-import type { LineType } from "@drift/engine/Line/Line"
+import type { LineType } from "@drift/engine/entities/Line/Line"
 import { serializeMap, type MapJson } from "@drift/engine/Map/mapJson"
 import type { Store } from "./types"
 import { createLineActions } from "./actions/lineActions"
 import { createLinkActions } from "./actions/linkActions"
-import { createTokenActions } from "./actions/tokenActions"
 import { createModeActions } from "./actions/modeActions"
 import { createStartActions } from "./actions/startActions"
 import { createSwitchActions } from "./actions/switchActions"
@@ -25,7 +24,6 @@ const previewManager = new PreviewManager()
 export const useStore = create<Store>()((set) => ({
   editorManager,
   previewManager,
-  tokens: {},
   starts: {},
   switches: {},
   switchLinks: {},
@@ -50,7 +48,6 @@ export const useStore = create<Store>()((set) => ({
   screenTimeMultipliers: {},
   ...createLineActions(set),
   ...createLinkActions(set),
-  ...createTokenActions(set),
   ...createModeActions(set),
   ...createStartActions(set),
   ...createSwitchActions(set),
@@ -69,7 +66,7 @@ useStore.subscribe((state) => {
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
     const json: MapJson = serializeMap(
-      state.editorManager, state.tokens, state.starts, state.switches, state.switchLinks,
+      state.editorManager, state.starts, state.switches, state.switchLinks,
       state.transformers, state.arrival, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers,
     )
     const str = JSON.stringify(json)

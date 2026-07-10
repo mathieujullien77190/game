@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
-import { TOKEN_COLORS, type TokenColor } from "@drift/engine/Token/Token"
+import { TOKEN_COLORS, type TokenColor } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import * as S from "./UI"
 

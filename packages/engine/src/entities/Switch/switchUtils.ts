@@ -1,5 +1,5 @@
 import type { Link, LinkEndpoint } from "../Link/Link"
-import type { LinePoint } from "../types"
+import type { LinePoint } from "../../types"
 
 export const getSwitchEnterPoint = (
   linkIds: string[],

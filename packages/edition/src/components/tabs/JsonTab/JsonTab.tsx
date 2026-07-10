@@ -5,10 +5,9 @@ import { EMPTY_MAP } from "store/actions/mapActions"
 import * as S from "./UI"
 
 export const JsonTab = () => {
-  const { editorManager, tokens, starts, switches, switchLinks, revision, loadMap } = useStore(
+  const { editorManager, starts, switches, switchLinks, revision, loadMap } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
-      tokens: s.tokens,
       starts: s.starts,
       switches: s.switches,
       switchLinks: s.switchLinks,
@@ -21,7 +20,7 @@ export const JsonTab = () => {
     useShallow((s) => ({ transformers: s.transformers, inverters: s.inverters, arrival: s.arrival, screens: s.screens, screenGates: s.screenGates, screenTimeMultipliers: s.screenTimeMultipliers }))
   )
 
-  const json = JSON.stringify(serializeMap(editorManager, tokens, starts, switches, switchLinks, transformers, arrival, inverters, screens, screenGates, screenTimeMultipliers), null, 2)
+  const json = JSON.stringify(serializeMap(editorManager, starts, switches, switchLinks, transformers, arrival, inverters, screens, screenGates, screenTimeMultipliers), null, 2)
 
   return (
     <S.Container>

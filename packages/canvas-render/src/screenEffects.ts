@@ -73,10 +73,10 @@ export const applyScreenEffects = (ctx: CanvasRenderingContext2D, pm: PreviewMan
       if (pt) punch(pt.x, pt.y, 40)
     }
 
-    if (d.start) {
-      const sLine = d.lines[d.start.lineId]
+    for (const s of d.starts) {
+      const sLine = d.lines[s.lineId]
       if (sLine && sLine.screenId === sid) {
-        const sPt = d.start.endpoint === "end" ? sLine.points[sLine.points.length - 1] : sLine.points[0]
+        const sPt = s.endpoint === "end" ? sLine.points[sLine.points.length - 1] : sLine.points[0]
         if (sPt) punch(sPt.x, sPt.y, 35)
       }
     }

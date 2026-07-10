@@ -1,6 +1,6 @@
 import { EditorManager } from "../Manager/EditorManager"
 import { PreviewManager } from "../Manager/PreviewManager"
-import { LinePreview } from "../Line/LinePreview"
+import { LinePreview } from "../entities/Line/LinePreview"
 import { deserializeMap, type MapJson } from "./mapJson"
 
 // Reconstruit les LinePreview de la simulation à partir des LineEditor d'un EditorManager.
@@ -34,13 +34,13 @@ export const populatePreviewLines = (pm: PreviewManager, em: EditorManager) => {
 // Charge une MapJson dans un PreviewManager prêt à simuler (game/app).
 export const buildPreviewManager = (json: MapJson): PreviewManager => {
   const em = new EditorManager()
-  const { tokens, starts, switches, switchLinks, transformers, arrival, inverters, screenGates, screenTimeMultipliers } =
+  const { starts, switches, switchLinks, transformers, arrival, inverters, screenGates, screenTimeMultipliers } =
     deserializeMap(json, em)
 
   const pm = new PreviewManager()
   populatePreviewLines(pm, em)
   pm.initSimulation(
-    tokens, em.data.links, starts, switches, switchLinks,
+    em.data.links, starts, switches, switchLinks,
     transformers, arrival, inverters, screenGates, screenTimeMultipliers,
   )
   return pm

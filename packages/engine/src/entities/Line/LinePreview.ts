@@ -1,8 +1,10 @@
-import type { Renderer } from "../render/Renderer"
+import type { Renderer } from "../../render/Renderer"
+import type { Animation, AnimTime } from "../Animation"
 import { Line } from "./Line"
 
 export class LinePreview extends Line {
   lastSpeed: number | undefined = undefined
+
   private tracePath = (ctx: Renderer) => {
     ctx.beginPath()
     ctx.moveTo(this.start.x, this.start.y)
@@ -17,9 +19,63 @@ export class LinePreview extends Line {
     }
   }
 
+  private drawStatic = (ctx: Renderer) => {
+    if (this.tunnel) {
+      ctx.fillStyle = "#000"
+      ctx.beginPath()
+      ctx.arc(this.start.x, this.start.y, 7, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(this.end.x, this.end.y, 7, 0, Math.PI * 2)
+      ctx.fill()
+      return
+    }
+    ctx.strokeStyle = "#ccc"
+    ctx.lineWidth = 6
+    ctx.lineCap = "round"
+    ctx.setLineDash([])
+    this.tracePath(ctx)
+    ctx.stroke()
+  }
+
+  drawGlow = (ctx: Renderer, elapsedSeconds = 0) => {
+    if (this.boost === 0) return
+    const pts = this.points
+    if (pts.length < 2) return
+    const total = pts.length
+    const winSize = Math.max(2, Math.floor(total * 0.25))
+    const cycle = total + winSize
+    const rawOffset = Math.floor((elapsedSeconds * Math.abs(this.boost) * 4) % cycle) - winSize
+    let tail: number, head: number
+    if (this.boost > 0) {
+      tail = Math.max(rawOffset, 0)
+      head = Math.min(rawOffset + winSize, total - 1)
+    } else {
+      const rev = total - rawOffset - winSize
+      tail = Math.max(rev, 0)
+      head = Math.min(rev + winSize, total - 1)
+    }
+    if (tail >= head) return
+    ctx.save()
+    ctx.strokeStyle = "#ffcc00"
+    ctx.lineWidth = 2
+    ctx.lineCap = "round"
+    ctx.setLineDash([])
+    ctx.beginPath()
+    ctx.moveTo(pts[tail].x, pts[tail].y)
+    for (let i = tail + 1; i <= head; i++) ctx.lineTo(pts[i].x, pts[i].y)
+    ctx.stroke()
+    ctx.restore()
+  }
+
+  readonly animations: Animation[] = [
+    { draw: (ctx, t) => this.drawGlow(ctx, t.elapsed) },
+  ]
+
   drawBefore = (ctx: Renderer, elapsedSeconds = 0) => {
-    this.drawGlow(ctx, elapsedSeconds)
-    this.draw(ctx)
+    this.drawStatic(ctx)
+    const t: AnimTime = { elapsed: elapsedSeconds, now: Date.now() }
+    for (const anim of this.animations) anim.draw(ctx, t)
   }
 
   drawAfter = (ctx: Renderer, speed?: number, tokenColor?: string) => {
@@ -63,49 +119,5 @@ export class LinePreview extends Line {
       ctx.fillText(this.limitation.toString(), mid.x + ox, mid.y)
       ctx.restore()
     }
-  }
-
-  drawGlow = (ctx: Renderer, elapsedSeconds = 0) => {
-    if (this.boost === 0) return
-    const pts = this.points
-    if (pts.length < 2) return
-    const total = pts.length
-    const winSize = Math.max(2, Math.floor(total * 0.3))
-    const cycle = total + winSize
-    const rawOffset = Math.floor((elapsedSeconds * Math.abs(this.boost) * 4) % cycle) - winSize
-    const tail = Math.max(rawOffset, 0)
-    const head = Math.min(rawOffset + winSize, total - 1)
-    if (tail >= head) return
-    ctx.save()
-    ctx.shadowColor = "rgba(255, 140, 0, 0.9)"
-    ctx.shadowBlur = 12
-    ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"
-    ctx.lineWidth = 2
-    ctx.lineCap = "round"
-    ctx.setLineDash([])
-    ctx.beginPath()
-    ctx.moveTo(pts[tail].x, pts[tail].y)
-    for (let i = tail + 1; i <= head; i++) ctx.lineTo(pts[i].x, pts[i].y)
-    ctx.stroke()
-    ctx.restore()
-  }
-
-  draw = (ctx: Renderer) => {
-    if (this.tunnel) {
-      ctx.fillStyle = "#000"
-      ctx.beginPath()
-      ctx.arc(this.start.x, this.start.y, 4, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.beginPath()
-      ctx.arc(this.end.x, this.end.y, 4, 0, Math.PI * 2)
-      ctx.fill()
-      return
-    }
-    ctx.strokeStyle = "#333"
-    ctx.lineWidth = 2
-    ctx.lineCap = "round"
-    ctx.setLineDash([])
-    this.tracePath(ctx)
-    ctx.stroke()
   }
 }
