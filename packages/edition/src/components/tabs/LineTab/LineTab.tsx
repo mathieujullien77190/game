@@ -3,6 +3,10 @@ import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { NumberInput } from "components/form/NumberInput"
 import { ColorPicker } from "components/form/ColorPicker"
+import { Checkbox } from "components/form/Checkbox"
+import { Button } from "components/ui/Button"
+import { ToggleGroup } from "components/ui/ToggleGroup"
+import { DeleteButton } from "components/ui/DeleteButton"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import * as S from "./UI"
 
@@ -41,46 +45,28 @@ export const LineTab = () => {
   return (
     <S.Container>
       {mode === "addLine" ? (
-        <S.AddButton $active onClick={() => setMode("select")}>Cancel</S.AddButton>
+        <Button $active $accent="#1a73e8" $full onClick={() => setMode("select")}>Cancel</Button>
       ) : (
-        <S.TypeRow>
-          <S.TypeButton
-            $active={false}
-            onClick={() => { setLineType("straight"); setMode("addLine") }}
-          >
+        <ToggleGroup $equal>
+          <Button $accent="#333" $size="sm" onClick={() => { setLineType("straight"); setMode("addLine") }}>
             + Straight
-          </S.TypeButton>
-          <S.TypeButton
-            $active={false}
-            onClick={() => { setLineType("curve"); setMode("addLine") }}
-          >
+          </Button>
+          <Button $accent="#333" $size="sm" onClick={() => { setLineType("curve"); setMode("addLine") }}>
             + Curve
-          </S.TypeButton>
-          <S.TypeButton
-            $active={false}
-            onClick={() => { setLineType("sine"); setMode("addLine") }}
-          >
+          </Button>
+          <Button $accent="#333" $size="sm" onClick={() => { setLineType("sine"); setMode("addLine") }}>
             + Sine
-          </S.TypeButton>
-          <S.TypeButton
-            $active={false}
-            onClick={() => { setLineType("curve"); setLinePreset("arc"); setMode("addLine") }}
-          >
+          </Button>
+          <Button $accent="#333" $size="sm" onClick={() => { setLineType("curve"); setLinePreset("arc"); setMode("addLine") }}>
             + Arc
-          </S.TypeButton>
-          <S.TypeButton
-            $active={false}
-            onClick={() => { setLineType("elbow"); setMode("addLine") }}
-          >
+          </Button>
+          <Button $accent="#333" $size="sm" onClick={() => { setLineType("elbow"); setMode("addLine") }}>
             + Elbow
-          </S.TypeButton>
-          <S.TypeButton
-            $active={false}
-            onClick={() => { setLineType("spiral"); setMode("addLine") }}
-          >
+          </Button>
+          <Button $accent="#333" $size="sm" onClick={() => { setLineType("spiral"); setMode("addLine") }}>
             + Spiral
-          </S.TypeButton>
-        </S.TypeRow>
+          </Button>
+        </ToggleGroup>
       )}
 
       <S.LineList>
@@ -101,7 +87,7 @@ export const LineTab = () => {
                     <S.LinkCount>{lineLinks.length}</S.LinkCount>
                   )}
                 </S.LineLabel>
-                <S.DeleteButton onClick={() => removeLine(line.id)}>✕</S.DeleteButton>
+                <DeleteButton onClick={() => removeLine(line.id)} />
               </S.LineItem>
               <S.BoostRow>
                 <S.BoostLabel>boost</S.BoostLabel>
@@ -114,11 +100,11 @@ export const LineTab = () => {
               </S.BoostRow>
               <S.BoostRow>
                 <S.BoostLabel>tunnel</S.BoostLabel>
-                <input type="checkbox" checked={line.tunnel} onChange={(e) => updateLineTunnel(line.id, e.target.checked)} />
+                <Checkbox checked={line.tunnel} onChange={(checked) => updateLineTunnel(line.id, checked)} />
               </S.BoostRow>
               <S.BoostRow>
                 <S.BoostLabel>show speed</S.BoostLabel>
-                <input type="checkbox" checked={line.showSpeed} onChange={(e) => updateLineShowSpeed(line.id, e.target.checked)} />
+                <Checkbox checked={line.showSpeed} onChange={(checked) => updateLineShowSpeed(line.id, checked)} />
               </S.BoostRow>
               <S.BoostRow>
                 <S.BoostLabel>limitation</S.BoostLabel>

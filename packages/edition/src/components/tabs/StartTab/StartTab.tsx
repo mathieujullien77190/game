@@ -1,6 +1,12 @@
 import { useShallow } from "zustand/react/shallow"
 import { NumberInput } from "components/form/NumberInput"
 import { ColorPicker } from "components/form/ColorPicker"
+import { Button } from "components/ui/Button"
+import { ToggleGroup } from "components/ui/ToggleGroup"
+import { DeleteButton } from "components/ui/DeleteButton"
+import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
+import { TokenShape } from "components/ui/TokenShape"
 import { TOKEN_COLORS, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
 import { useStore } from "store"
 import * as S from "./UI"
@@ -28,18 +34,18 @@ export const StartTab = () => {
 
   return (
     <S.Container>
-      <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addStart")}>
+      <Button $active={isPlacing} $accent="#333" $full onClick={() => setMode(isPlacing ? "select" : "addStart")}>
         {isPlacing ? "Cancel" : "+ Add Start"}
-      </S.AddButton>
+      </Button>
 
       <S.StartList>
         {Object.values(starts).map((start) => (
-          <S.StartCard key={start.id}>
+          <Card key={start.id}>
             <S.StartHeader>
               <S.StartInfo>{start.lineId} [{start.endpoint}]</S.StartInfo>
-              <S.DeleteButton onClick={() => removeStart(start.id)}>✕</S.DeleteButton>
+              <DeleteButton onClick={() => removeStart(start.id)} />
             </S.StartHeader>
-            <S.Divider />
+            <Divider />
             <NumberInput
               label="First delay (s)"
               value={start.firstDelay}
@@ -52,25 +58,25 @@ export const StartTab = () => {
               min={1}
               onChange={(v) => updateStartDelay(start.id, v)}
             />
-            <S.Divider />
+            <Divider />
             <S.TokenSectionHeader>
               <S.TokenSectionLabel>Tokens</S.TokenSectionLabel>
               <S.AddTokenButton onClick={() => addTokenToStart(start.id)}>+</S.AddTokenButton>
             </S.TokenSectionHeader>
             {start.tokens.map((token) => (
-              <S.TokenCard key={token.id}>
+              <Card key={token.id} $nested>
                 <S.TokenHeader>
-                  <S.TokenShape $color={token.color} $round={token.type === "round"} />
+                  <TokenShape $color={token.color} $round={token.type === "round"} />
                   <S.TokenId>{token.id}</S.TokenId>
-                  <S.DeleteButton onClick={() => removeTokenFromStart(start.id, token.id)}>✕</S.DeleteButton>
+                  <DeleteButton onClick={() => removeTokenFromStart(start.id, token.id)} />
                 </S.TokenHeader>
-                <S.TypeToggle>
+                <ToggleGroup>
                   {(["round", "square"] as TokenType[]).map((t) => (
-                    <S.TypeButton key={t} $active={token.type === t} onClick={() => updateStartToken(start.id, token.id, { type: t })}>
+                    <Button key={t} $size="sm" $accent="#333" $active={token.type === t} onClick={() => updateStartToken(start.id, token.id, { type: t })}>
                       {t}
-                    </S.TypeButton>
+                    </Button>
                   ))}
-                </S.TypeToggle>
+                </ToggleGroup>
                 <ColorPicker
                   palette={TOKEN_COLORS}
                   value={token.color as TokenColor}
@@ -82,14 +88,14 @@ export const StartTab = () => {
                   onChange={(v) => updateStartToken(start.id, token.id, { speed: v })}
                 />
                 {token.type === "square" && (
-                  <S.TypeToggle>
-                    <S.TypeButton $active={!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: false })}>0°</S.TypeButton>
-                    <S.TypeButton $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>45°</S.TypeButton>
-                  </S.TypeToggle>
+                  <ToggleGroup>
+                    <Button $size="sm" $accent="#333" $active={!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: false })}>0°</Button>
+                    <Button $size="sm" $accent="#333" $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>45°</Button>
+                  </ToggleGroup>
                 )}
-              </S.TokenCard>
+              </Card>
             ))}
-          </S.StartCard>
+          </Card>
         ))}
       </S.StartList>
     </S.Container>

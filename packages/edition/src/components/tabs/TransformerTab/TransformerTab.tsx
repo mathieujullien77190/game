@@ -2,10 +2,16 @@ import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
+import { NumberInput } from "components/form/NumberInput"
+import { Button } from "components/ui/Button"
+import { ToggleGroup } from "components/ui/ToggleGroup"
+import { DeleteButton } from "components/ui/DeleteButton"
+import { Card } from "components/ui/Card"
 import * as S from "./UI"
 import type { TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 
 const ALL_TYPES: TransformerType[] = ["fade", "rotate", "color", "shape"]
+const TRANSFORMER_ACCENT = "#2e7d32"
 
 export const TransformerTab = () => {
   const {
@@ -34,50 +40,47 @@ export const TransformerTab = () => {
 
   return (
     <S.Container>
-      <S.TypeRow>
+      <ToggleGroup $equal>
         {ALL_TYPES.map((t) => (
-          <S.TypeButton key={t} $active={pendingTransformerType === t} onClick={() => setPendingTransformerType(t)}>
+          <Button key={t} $size="sm" $accent={TRANSFORMER_ACCENT} $active={pendingTransformerType === t} onClick={() => setPendingTransformerType(t)}>
             {t}
-          </S.TypeButton>
+          </Button>
         ))}
-      </S.TypeRow>
-      <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addTransformer")}>
+      </ToggleGroup>
+      <Button $active={isPlacing} $accent={TRANSFORMER_ACCENT} $full onClick={() => setMode(isPlacing ? "select" : "addTransformer")}>
         {isPlacing ? "Cancel" : `+ Add ${pendingTransformerType}`}
-      </S.AddButton>
+      </Button>
       <S.TransformerList>
         {Object.values(transformers).map((tr) => (
-          <S.TransformerCard
+          <Card
             key={tr.id}
             onMouseEnter={() => setHoveredTransformerId(tr.id)}
             onMouseLeave={() => setHoveredTransformerId(null)}
           >
             <S.Row>
               <S.TransformerId>{tr.id}</S.TransformerId>
-              <S.DeleteButton onClick={() => removeTransformer(tr.id)}>✕</S.DeleteButton>
+              <DeleteButton onClick={() => removeTransformer(tr.id)} />
             </S.Row>
             <S.Row>
               <S.Label>type</S.Label>
-              <S.TypeButtons>
+              <ToggleGroup $wrap>
                 {ALL_TYPES.map((t) => (
-                  <S.TypeBtn key={t} $active={tr.type === t} onClick={() => updateTransformerType(tr.id, t)}>
+                  <Button key={t} $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.type === t} onClick={() => updateTransformerType(tr.id, t)}>
                     {t}
-                  </S.TypeBtn>
+                  </Button>
                 ))}
-              </S.TypeButtons>
+              </ToggleGroup>
             </S.Row>
             {tr.type === "fade" && (
               <S.Row>
                 <S.Label>opacity</S.Label>
-                <S.AmountInput
-                  type="number"
+                <NumberInput
+                  value={tr.amount}
                   min={0.05}
                   max={1}
                   step={0.05}
-                  value={tr.amount}
-                  onChange={(ev) => {
-                    const v = parseFloat(ev.target.value)
-                    if (!isNaN(v)) updateTransformerAmount(tr.id, Math.min(1, Math.max(0.05, v)))
-                  }}
+                  commitOn="blur"
+                  onChange={(v) => updateTransformerAmount(tr.id, v)}
                 />
               </S.Row>
             )}
@@ -87,17 +90,17 @@ export const TransformerTab = () => {
             {tr.type === "shape" && (
               <S.Row>
                 <S.Label>target</S.Label>
-                <S.TypeButtons>
-                  <S.TypeBtn $active={tr.targetType === "round"} onClick={() => updateTransformerTargetType(tr.id, "round")}>
+                <ToggleGroup $wrap>
+                  <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "round"} onClick={() => updateTransformerTargetType(tr.id, "round")}>
                     ○ round
-                  </S.TypeBtn>
-                  <S.TypeBtn $active={tr.targetType === "square"} onClick={() => updateTransformerTargetType(tr.id, "square")}>
+                  </Button>
+                  <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "square"} onClick={() => updateTransformerTargetType(tr.id, "square")}>
                     □ square
-                  </S.TypeBtn>
-                </S.TypeButtons>
+                  </Button>
+                </ToggleGroup>
               </S.Row>
             )}
-          </S.TransformerCard>
+          </Card>
         ))}
       </S.TransformerList>
     </S.Container>

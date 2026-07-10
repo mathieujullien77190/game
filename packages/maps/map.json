@@ -104,25 +104,24 @@
       }
     },
     {
-      "id": "lineF",
+      "id": "lineG",
       "start": {
-        "x": 80,
-        "y": 420
+        "x": 40,
+        "y": 260
       },
       "end": {
-        "x": 160,
-        "y": 280
+        "x": 40,
+        "y": 140
       },
       "type": "straight",
       "cp1": {
-        "x": 106.66666666666667,
-        "y": 373.3333333333333
+        "x": 40,
+        "y": 220
       },
       "cp2": {
-        "x": 133.33333333333334,
-        "y": 326.6666666666667
-      },
-      "color": "#e53935"
+        "x": 40,
+        "y": 180
+      }
     }
   ],
   "links": [
@@ -175,25 +174,13 @@
       "activated": true
     },
     {
-      "id": "lineD::end-lineF::start",
+      "id": "lineE::end-lineG::start",
       "line1": {
-        "lineId": "lineD",
+        "lineId": "lineE",
         "endpoint": "end"
       },
       "line2": {
-        "lineId": "lineF",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineE::start-lineF::start",
-      "line1": {
-        "lineId": "lineE",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineF",
+        "lineId": "lineG",
         "endpoint": "start"
       },
       "activated": true
@@ -239,18 +226,18 @@
       "activeLinkId": "lineA::start-lineB::start",
       "linkedSwitchIds": [],
       "color": "#546e7a"
-    },
-    "switch2": {
-      "linkIds": [
-        "lineD::end-lineE::start",
-        "lineD::end-lineF::start"
-      ],
-      "activeLinkId": "lineD::end-lineE::start",
-      "linkedSwitchIds": [],
-      "mode": "auto"
     }
   },
-  "transformers": [],
+  "transformers": [
+    {
+      "id": "transform2",
+      "linkId": "lineE::end-lineG::start",
+      "type": "color",
+      "amount": 0.5,
+      "color": "#8e24aa",
+      "targetType": "square"
+    }
+  ],
   "inverters": [],
   "arrivals": [],
   "screenGates": []

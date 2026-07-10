@@ -2,9 +2,16 @@ import { useShallow } from "zustand/react/shallow"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
 import { ColorPicker } from "components/form/ColorPicker"
+import { Button } from "components/ui/Button"
+import { ToggleGroup } from "components/ui/ToggleGroup"
+import { DeleteButton } from "components/ui/DeleteButton"
+import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
 import { useStore } from "store"
 import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
 import * as S from "./UI"
+
+const SWITCH_ACCENT = "#7c3aed"
 
 const SWITCH_COLORS = ["#ccc", ...TOKEN_COLORS] as const
 const SWITCH_MODES: SwitchMode[] = ["manual", "auto"]
@@ -35,9 +42,9 @@ export const SwitchTab = () => {
 
   return (
     <S.Container>
-      <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addSwitch")}>
+      <Button $active={isPlacing} $accent={SWITCH_ACCENT} $full onClick={() => setMode(isPlacing ? "select" : "addSwitch")}>
         {isPlacing ? "Cancel" : "+ Add Switch"}
-      </S.AddButton>
+      </Button>
 
       <S.SwitchList>
         {Object.values(switches).map((sw) => {
@@ -60,17 +67,18 @@ export const SwitchTab = () => {
           const linkedIds = new Set(switchLinks[sw.id] ?? [])
 
           return (
-            <S.SwitchCard
+            <Card
               key={sw.id}
+              $accent={SWITCH_ACCENT}
               onMouseEnter={() => setHoveredSwitchId(sw.id)}
               onMouseLeave={() => setHoveredSwitchId(null)}
             >
               <S.Row>
                 <S.SwitchId>{sw.id}</S.SwitchId>
-                <S.DeleteButton onClick={() => removeSwitch(sw.id)}>✕</S.DeleteButton>
+                <DeleteButton onClick={() => removeSwitch(sw.id)} />
               </S.Row>
 
-              <S.Divider />
+              <Divider />
               <S.Label>color</S.Label>
               <ColorPicker
                 palette={SWITCH_COLORS}
@@ -78,32 +86,36 @@ export const SwitchTab = () => {
                 onChange={(color) => updateSwitchColor(sw.id, color)}
               />
 
-              <S.Divider />
+              <Divider />
               <S.Label>mode</S.Label>
-              <S.OutputList>
+              <ToggleGroup $wrap>
                 {SWITCH_MODES.map((m) => (
-                  <S.OutputOption
+                  <Button
                     key={m}
+                    $size="sm"
+                    $accent={SWITCH_ACCENT}
                     $active={sw.mode === m}
                     onClick={() => updateSwitchMode(sw.id, m)}
                   >
                     {m}
-                  </S.OutputOption>
+                  </Button>
                 ))}
-              </S.OutputList>
+              </ToggleGroup>
               {sw.mode === "auto" && (
                 <S.NoLinks>auto : couleur du token en priorité, sinon ligne grise</S.NoLinks>
               )}
 
-              <S.Divider />
+              <Divider />
               <S.Label>enter</S.Label>
-              <S.OutputList>
+              <ToggleGroup $wrap>
                 {junctionEndpoints.map(({ lineId, endpoint }) => {
                   const key = `${lineId}::${endpoint}`
                   const isActive = ep?.lineId === lineId && ep?.endpoint === endpoint
                   return (
-                    <S.OutputOption
+                    <Button
                       key={key}
+                      $size="sm"
+                      $accent={SWITCH_ACCENT}
                       $active={isActive}
                       onClick={() => {
                         if (isActive) return
@@ -117,19 +129,19 @@ export const SwitchTab = () => {
                       }}
                     >
                       {lineId} [{endpoint}]
-                    </S.OutputOption>
+                    </Button>
                   )
                 })}
-              </S.OutputList>
+              </ToggleGroup>
 
               {ep && sw.mode !== "auto" && (
                 <>
-                  <S.Divider />
+                  <Divider />
                   <S.Label>active output</S.Label>
                   {sw.linkIds.length === 0 ? (
                     <S.NoLinks>no links at enter endpoint</S.NoLinks>
                   ) : (
-                    <S.OutputList>
+                    <ToggleGroup $wrap>
                       {sw.linkIds.map((lkId) => {
                         const lk = links[lkId]
                         if (!lk) return null
@@ -138,38 +150,42 @@ export const SwitchTab = () => {
                             ? lk.line2
                             : lk.line1
                         return (
-                          <S.OutputOption
+                          <Button
                             key={lkId}
+                            $size="sm"
+                            $accent={SWITCH_ACCENT}
                             $active={sw.activeLinkId === lkId}
                             onClick={() => updateSwitchActiveLink(sw.id, lkId)}
                           >
                             {other.lineId} [{other.endpoint}]
-                          </S.OutputOption>
+                          </Button>
                         )
                       })}
-                    </S.OutputList>
+                    </ToggleGroup>
                   )}
                 </>
               )}
 
               {otherSwitches.length > 0 && (
                 <>
-                  <S.Divider />
+                  <Divider />
                   <S.Label>linked switches</S.Label>
-                  <S.OutputList>
+                  <ToggleGroup $wrap>
                     {otherSwitches.map((other) => (
-                      <S.OutputOption
+                      <Button
                         key={other.id}
+                        $size="sm"
+                        $accent={SWITCH_ACCENT}
                         $active={linkedIds.has(other.id)}
                         onClick={() => toggleSwitchLink(sw.id, other.id)}
                       >
                         {other.id}
-                      </S.OutputOption>
+                      </Button>
                     ))}
-                  </S.OutputList>
+                  </ToggleGroup>
                 </>
               )}
-            </S.SwitchCard>
+            </Card>
           )
         })}
       </S.SwitchList>

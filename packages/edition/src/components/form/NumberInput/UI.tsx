@@ -1,20 +1,5 @@
 import styled from "styled-components"
 
-export const Row = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`
-
-export const Label = styled.span`
-  font-family: monospace;
-  font-size: 10px;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  min-width: 50px;
-`
-
 export const Input = styled.input`
   width: 70px;
   padding: 3px 6px;

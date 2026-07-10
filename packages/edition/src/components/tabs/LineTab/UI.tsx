@@ -6,24 +6,6 @@ export const Container = styled.div`
   gap: 8px;
 `
 
-export const AddButton = styled.button<{ $active: boolean }>`
-  width: 100%;
-  padding: 8px 12px;
-  background: ${({ $active }) => ($active ? "#1a73e8" : "#f0f0f0")};
-  color: ${({ $active }) => ($active ? "#fff" : "#333")};
-  border: 1px solid ${({ $active }) => ($active ? "#1a73e8" : "#ddd")};
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &:hover {
-    background: ${({ $active }) => ($active ? "#1557b0" : "#e8e8e8")};
-  }
-`
-
 export const LineList = styled.div`
   display: flex;
   flex-direction: column;
@@ -68,20 +50,6 @@ export const LinkCount = styled.span`
   font-size: 9px;
 `
 
-export const DeleteButton = styled.button`
-  background: transparent;
-  border: none;
-  color: #aaa;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 0 2px;
-  line-height: 1;
-
-  &:hover {
-    color: #e53935;
-  }
-`
-
 export const LineBlock = styled.div`
   display: flex;
   flex-direction: column;
@@ -114,29 +82,6 @@ export const LinkId = styled.span`
 export const LinkDetail = styled.span`
   color: #555;
   flex: 1;
-`
-
-export const TypeRow = styled.div`
-  display: flex;
-  gap: 6px;
-`
-
-export const TypeButton = styled.button<{ $active: boolean }>`
-  flex: 1;
-  padding: 5px 8px;
-  background: ${({ $active }) => ($active ? "#333" : "#f0f0f0")};
-  color: ${({ $active }) => ($active ? "#fff" : "#666")};
-  border: 1px solid ${({ $active }) => ($active ? "#333" : "#ddd")};
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &:hover {
-    background: ${({ $active }) => ($active ? "#444" : "#e0e0e0")};
-  }
 `
 
 export const TypeBadge = styled.span<{ $type: string }>`

@@ -2,8 +2,14 @@ import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { TOKEN_COLORS, type TokenColor } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
+import { Field } from "components/form/Field"
+import { Button } from "components/ui/Button"
+import { ToggleGroup } from "components/ui/ToggleGroup"
+import { DeleteButton } from "components/ui/DeleteButton"
+import { Card } from "components/ui/Card"
 import * as S from "./UI"
 
+const ARRIVAL_ACCENT = "#333"
 
 export const ArrivalTab = () => {
   const {
@@ -27,28 +33,27 @@ export const ArrivalTab = () => {
 
   return (
     <S.Container>
-      <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addArrival")}>
+      <Button $active={isPlacing} $accent={ARRIVAL_ACCENT} $full onClick={() => setMode(isPlacing ? "select" : "addArrival")}>
         {isPlacing ? "Cancel" : "+ Add Arrival"}
-      </S.AddButton>
+      </Button>
 
       <S.ArrivalList>
         {Object.values(arrivals).map((arrival) => (
           <S.ArrivalCard key={arrival.id}>
             <S.Header>
               <S.Info>{arrival.lineId} [{arrival.endpoint}]</S.Info>
-              <S.DeleteButton onClick={() => removeArrival(arrival.id)}>✕</S.DeleteButton>
+              <DeleteButton onClick={() => removeArrival(arrival.id)} />
             </S.Header>
 
-            <S.Field>
-              <S.FieldLabel>Queue side</S.FieldLabel>
-              <S.QueueSideRow>
-                <S.TypeToggle $active={arrival.queueSide === "top"} onClick={() => setArrivalQueueSide(arrival.id, "top")}>Haut</S.TypeToggle>
-                <S.TypeToggle $active={arrival.queueSide === "bottom"} onClick={() => setArrivalQueueSide(arrival.id, "bottom")}>Bas</S.TypeToggle>
-                <S.TypeToggle $active={arrival.queueSide === "left"} onClick={() => setArrivalQueueSide(arrival.id, "left")}>Gauche</S.TypeToggle>
-                <S.TypeToggle $active={arrival.queueSide === "right"} onClick={() => setArrivalQueueSide(arrival.id, "right")}>Droite</S.TypeToggle>
-                <S.TypeToggle $active={arrival.queueSide === "hidden"} onClick={() => setArrivalQueueSide(arrival.id, "hidden")}>Masqué</S.TypeToggle>
-              </S.QueueSideRow>
-            </S.Field>
+            <Field label="Queue side">
+              <ToggleGroup $wrap>
+                <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "top"} onClick={() => setArrivalQueueSide(arrival.id, "top")}>Haut</Button>
+                <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "bottom"} onClick={() => setArrivalQueueSide(arrival.id, "bottom")}>Bas</Button>
+                <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "left"} onClick={() => setArrivalQueueSide(arrival.id, "left")}>Gauche</Button>
+                <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "right"} onClick={() => setArrivalQueueSide(arrival.id, "right")}>Droite</Button>
+                <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "hidden"} onClick={() => setArrivalQueueSide(arrival.id, "hidden")}>Masqué</Button>
+              </ToggleGroup>
+            </Field>
 
             <S.AddDemandButton onClick={() => addArrivalDemand(arrival.id)}>
               + Add Demand
@@ -56,20 +61,22 @@ export const ArrivalTab = () => {
 
             <S.DemandList>
               {arrival.demands.map((d) => (
-                <S.DemandCard key={d.id}>
+                <Card key={d.id} $nested>
                   <S.DemandRow>
-                    <S.TypeToggle $active={d.type === "round"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "round" })}>●</S.TypeToggle>
-                    <S.TypeToggle $active={d.type === "square"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "square" })}>■</S.TypeToggle>
-                    <S.DeleteButton onClick={() => removeArrivalDemand(arrival.id, d.id)}>✕</S.DeleteButton>
+                    <ToggleGroup>
+                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "round"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "round" })}>●</Button>
+                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "square"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "square" })}>■</Button>
+                    </ToggleGroup>
+                    <DeleteButton onClick={() => removeArrivalDemand(arrival.id, d.id)} />
                   </S.DemandRow>
                   <ColorPicker palette={TOKEN_COLORS} value={d.color as any} onChange={(c) => updateArrivalDemand(arrival.id, d.id, { color: c as TokenColor })} />
                   {d.type === "square" && (
-                    <S.DemandRow>
-                      <S.TypeToggle $active={!d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: false })}>0°</S.TypeToggle>
-                      <S.TypeToggle $active={d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: true })}>45°</S.TypeToggle>
-                    </S.DemandRow>
+                    <ToggleGroup>
+                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={!d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: false })}>0°</Button>
+                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: true })}>45°</Button>
+                    </ToggleGroup>
                   )}
-                </S.DemandCard>
+                </Card>
               ))}
             </S.DemandList>
           </S.ArrivalCard>

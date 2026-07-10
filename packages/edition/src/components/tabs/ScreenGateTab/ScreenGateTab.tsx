@@ -1,28 +1,13 @@
-import { useState, useEffect } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
+import { NumberInput } from "components/form/NumberInput"
+import { Select } from "components/form/Select"
+import { Button } from "components/ui/Button"
+import { DeleteButton } from "components/ui/DeleteButton"
+import { Card } from "components/ui/Card"
 import * as S from "./UI"
 
-const MultiplierField = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
-  const [local, setLocal] = useState(String(value))
-
-  useEffect(() => { setLocal(String(value)) }, [value])
-
-  return (
-    <S.MultiplierInput
-      type="number"
-      min={0.01}
-      step={0.1}
-      value={local}
-      onChange={(e) => setLocal(e.target.value)}
-      onBlur={() => {
-        const v = parseFloat(local)
-        if (!isNaN(v) && v > 0) onChange(v)
-        else setLocal(String(value))
-      }}
-    />
-  )
-}
+const GATE_ACCENT = "#1a237e"
 
 export const ScreenGateTab = () => {
   const {
@@ -66,72 +51,61 @@ export const ScreenGateTab = () => {
 
   return (
     <S.Container>
-      <S.AddButton $active={isPlacing} onClick={() => setMode(isPlacing ? "select" : "addScreenGate")}>
+      <Button $active={isPlacing} $accent={GATE_ACCENT} $full onClick={() => setMode(isPlacing ? "select" : "addScreenGate")}>
         {isPlacing ? "Cancel" : "+ Add Gate"}
-      </S.AddButton>
+      </Button>
       <S.GateList>
         {gatesForScreen.map((sg) => {
           const lineOpts = getLineOptions(sg.targetScreenId)
           return (
-            <S.GateCard
+            <Card
               key={sg.id}
+              $accent={GATE_ACCENT}
               onMouseEnter={() => setHoveredScreenGateId(sg.id)}
               onMouseLeave={() => setHoveredScreenGateId(null)}
             >
               <S.Row>
                 <S.GateId>{sg.id}</S.GateId>
-                <S.DeleteButton onClick={() => removeScreenGate(sg.id)}>✕</S.DeleteButton>
+                <DeleteButton onClick={() => removeScreenGate(sg.id)} />
               </S.Row>
-              <div>
-                <S.Label>Target Screen</S.Label>
-                <S.Select
-                  value={sg.targetScreenId}
-                  onChange={(e) => updateScreenGateTargetScreen(sg.id, e.target.value)}
-                >
-                  <option value="">— select —</option>
-                  {targetScreenOptions.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </S.Select>
-              </div>
+              <Select
+                label="Target Screen"
+                placeholder="— select —"
+                value={sg.targetScreenId}
+                options={targetScreenOptions.map((s) => ({ value: s, label: s }))}
+                onChange={(v) => updateScreenGateTargetScreen(sg.id, v)}
+              />
               {sg.targetScreenId && (
                 <S.ScreenTimeRow>
                   <S.Label>Time ×</S.Label>
-                  <MultiplierField
+                  <NumberInput
                     value={screenTimeMultipliers[sg.targetScreenId] ?? 1}
+                    min={0.01}
+                    step={0.1}
+                    commitOn="blur"
                     onChange={(v) => setScreenTimeMultiplier(sg.targetScreenId, v)}
                   />
                 </S.ScreenTimeRow>
               )}
               {sg.targetScreenId && (
                 <>
-                  <div>
-                    <S.Label>Entry Line</S.Label>
-                    <S.Select
-                      value={sg.entryKey}
-                      onChange={(e) => updateScreenGateEntryKey(sg.id, e.target.value)}
-                    >
-                      <option value="">— select —</option>
-                      {lineOpts.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </S.Select>
-                  </div>
-                  <div>
-                    <S.Label>Exit Line</S.Label>
-                    <S.Select
-                      value={sg.exitKey}
-                      onChange={(e) => updateScreenGateExitKey(sg.id, e.target.value)}
-                    >
-                      <option value="">— select —</option>
-                      {lineOpts.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </S.Select>
-                  </div>
+                  <Select
+                    label="Entry Line"
+                    placeholder="— select —"
+                    value={sg.entryKey}
+                    options={lineOpts}
+                    onChange={(v) => updateScreenGateEntryKey(sg.id, v)}
+                  />
+                  <Select
+                    label="Exit Line"
+                    placeholder="— select —"
+                    value={sg.exitKey}
+                    options={lineOpts}
+                    onChange={(v) => updateScreenGateExitKey(sg.id, v)}
+                  />
                 </>
               )}
-            </S.GateCard>
+            </Card>
           )
         })}
       </S.GateList>
