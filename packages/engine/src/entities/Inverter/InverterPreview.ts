@@ -1,6 +1,7 @@
 import type { Renderer } from "../../render/Renderer"
 import type { Point } from "../../types"
-import type { Animation, AnimTime } from "../Animation"
+import { runAnimations, type Animation } from "../Animation"
+import { COLORS } from "../../theme"
 import { Inverter } from "./Inverter"
 
 const DOT_R = 5
@@ -22,12 +23,12 @@ export class InverterPreview extends Inverter {
     ctx.save()
     ctx.translate(this._pt.x, this._pt.y)
     ctx.setLineDash([])
-    ctx.fillStyle = "#e53935"
+    ctx.fillStyle = COLORS.red
     ctx.globalAlpha = this.active ? 0.1 : 1
     ctx.beginPath()
     ctx.arc(-ox, -oy, DOT_R, 0, Math.PI * 2)
     ctx.fill()
-    ctx.fillStyle = "#4caf50"
+    ctx.fillStyle = COLORS.green
     ctx.globalAlpha = this.active ? 1 : 0.1
     ctx.beginPath()
     ctx.arc(ox, oy, DOT_R, 0, Math.PI * 2)
@@ -45,8 +46,7 @@ export class InverterPreview extends Inverter {
   drawAfter = (ctx: Renderer, pt: Point, angle: number) => {
     this._pt = pt
     this._angle = angle
-    const t: AnimTime = { elapsed: 0, now: Date.now() }
     this.drawStatic(ctx)
-    for (const anim of this.animations) anim.draw(ctx, t)
+    runAnimations(this.animations, ctx)
   }
 }

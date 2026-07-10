@@ -1,5 +1,5 @@
 import { POINT_SPACING } from "../../constants"
-import type { Point, LinePoint } from "../../types"
+import type { Point } from "../../types"
 
 export type LineType = "straight" | "curve" | "sine" | "elbow" | "spiral"
 
@@ -29,7 +29,7 @@ export class Line {
   end: Point
   cp1: Point
   cp2: Point
-  points: LinePoint[] = []
+  points: Point[] = []
   boost: number = 0
   flip: boolean = false
   tunnel: boolean = false

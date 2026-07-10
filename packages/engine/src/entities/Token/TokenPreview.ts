@@ -1,7 +1,8 @@
 import type { Renderer } from "../../render/Renderer"
 import { POINT_SPACING } from "../../constants"
-import type { LinePoint } from "../../types"
-import type { Animation, AnimTime } from "../Animation"
+import type { Point } from "../../types"
+import { runAnimations, type Animation } from "../Animation"
+import { COLORS, STROKE_WIDTHS } from "../../theme"
 import type { LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
@@ -57,9 +58,9 @@ export class TokenPreview extends Token {
   explosionFadeProgress: number = 0
   explosionSeed: number = 0
 
-  private _pt: LinePoint | null = null
+  private _pt: Point | null = null
   private _speedDelta: number = 0
-  private _points: LinePoint[] = []
+  private _points: Point[] = []
   private _opacityOverride: number | undefined = undefined
 
   private get _eff() {
@@ -101,12 +102,26 @@ export class TokenPreview extends Token {
 
     if (ctx.arrivalKey && ctx.arrivalKey === `${this.lineId}::${arrivedAt}`) {
       if (ctx.arrival) {
-        const n = ctx.arrival.demands.length
-        ctx.arrival.flashColor = "#2E9E6B"
-        ctx.arrival.flashProgress = 0
-        ctx.arrival.arcTarget = Math.min(n, ctx.arrival.arcTarget + 1)
-        ctx.arrival.isFading = true
-        ctx.arrival.fadeAlpha = 1
+        const demand = ctx.arrival.demands[ctx.arrival.currentDemandIndex]
+        const tokenColor = this.displayColor || (this.color as string)
+        const isSquare = (this.type as string) === "square"
+        const norm = isSquare ? (((this.targetRotationOffset % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2)) : 0
+        const tokenAngled = isSquare && norm > Math.PI / 8
+        const matches = !!demand
+          && demand.color === tokenColor
+          && demand.type === (this.type as string)
+          && (demand.type !== "square" || demand.angled === tokenAngled)
+        if (matches) {
+          const n = ctx.arrival.demands.length
+          ctx.arrival.flashColor = COLORS.arrivalMatch
+          ctx.arrival.flashProgress = 0
+          ctx.arrival.arcTarget = Math.min(n, ctx.arrival.arcTarget + 1)
+          ctx.arrival.isFading = true
+          ctx.arrival.fadeAlpha = 1
+        } else {
+          ctx.arrival.flashColor = COLORS.red
+          ctx.arrival.flashProgress = 0
+        }
       }
       this.arrived = true
       this.direction = 0
@@ -202,7 +217,7 @@ export class TokenPreview extends Token {
     return { isInverted, isGrayscale, isDark }
   }
 
-  drawBoostTrail = (ctx: Renderer, speedDelta: number, points: LinePoint[], eff: number) => {
+  drawBoostTrail = (ctx: Renderer, speedDelta: number, points: Point[], eff: number) => {
     if (speedDelta <= 0.5 || this.direction === 0) return
     const intensity = Math.min(speedDelta / 100, 1)
     const trailLen = Math.round(10 + 30 * intensity)
@@ -220,13 +235,13 @@ export class TokenPreview extends Token {
     ctx.globalAlpha = 1
   }
 
-  private drawShape = (ctx: Renderer, pt: LinePoint, type: string, eff = 1) => {
+  private drawShape = (ctx: Renderer, pt: Point, type: string, eff = 1) => {
     const color = this.displayColor || (this.color as string)
     const moving = this.direction !== 0 && this.currentSpeed > 0
 
     if (type === "cop") {
       const flash = Math.sin(Date.now() / 1000 * Math.PI * 4) > 0
-      const copColor = flash ? "#e53935" : "#1a73e8"
+      const copColor = flash ? COLORS.red : COLORS.blue
       const r = 9 / 1.6
       ctx.fillStyle = copColor
       ctx.globalAlpha = 0.1 * eff
@@ -246,7 +261,7 @@ export class TokenPreview extends Token {
     ctx.fillStyle = color
 
     if (type === "square") {
-      const angle = (this.direction === -1 ? pt.angle + Math.PI : pt.angle) + this.rotationOffset
+      const angle = (this.direction === -1 ? (pt.angle ?? 0) + Math.PI : (pt.angle ?? 0)) + this.rotationOffset
       ctx.save()
       ctx.translate(pt.x, pt.y)
       ctx.rotate(angle)
@@ -282,7 +297,7 @@ export class TokenPreview extends Token {
     ctx.globalAlpha = 1
   }
 
-  drawExplosion = (ctx: Renderer, pt: LinePoint) => {
+  drawExplosion = (ctx: Renderer, pt: Point) => {
     const progress = this.explosionProgress
     const fade = 1 - this.explosionFadeProgress
     const color = this.displayColor || (this.color as string)
@@ -314,43 +329,14 @@ export class TokenPreview extends Token {
       drawPiece(px, py, size, alpha)
     }
 
-    for (let k = 0; k < 4; k++) {
-      const angle = rng(k) * Math.PI * 2
-      const speed = 30 + rng(k + 10) * 70
-      const target = 0.2 + rng(k + 35) * 0.8
-      const alpha = 1 - progress * (1 - target)
-      const f = 1 - Math.pow(1 - progress, 4)
-      const px = x + Math.cos(angle) * f * speed
-      const py = y + Math.sin(angle) * f * speed
-      const rotDir = rng(k + 30) > 0.5 ? 1 : -1
-      const rot = angle + rotDir * progress * Math.PI * 0.5
-      ctx.globalAlpha = alpha * fade
-      ctx.strokeStyle = "#000"
-      ctx.lineWidth = 2
-      ctx.save()
-      ctx.translate(px, py)
-      if (isSquare) {
-        ctx.rotate(rot)
-        ctx.beginPath()
-        ctx.moveTo(-8, 0)
-        ctx.lineTo(8, 0)
-        ctx.stroke()
-      } else {
-        ctx.beginPath()
-        ctx.arc(0, 0, 8, rot, rot + Math.PI / 2)
-        ctx.stroke()
-      }
-      ctx.restore()
-    }
-
     ctx.restore()
   }
 
   drawMini = (ctx: Renderer, x: number, y: number) => {
     const color = (this.displayColor || this.color) as string
     ctx.fillStyle = color
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 1
+    ctx.strokeStyle = COLORS.black
+    ctx.lineWidth = STROKE_WIDTHS.hairline
     ctx.beginPath()
     if (this.type === "square") ctx.rect(x - 3, y - 3, 6, 6)
     else ctx.arc(x, y, 3, 0, Math.PI * 2)
@@ -382,15 +368,12 @@ export class TokenPreview extends Token {
     { draw: (ctx, _t) => this.animShape(ctx) },
   ]
 
-  drawAfter = (_ctx: Renderer, _pt: LinePoint, _speedDelta?: number, _points?: LinePoint[], _opacityOverride?: number) => {}
-
-  drawBefore = (ctx: Renderer, pt: LinePoint, speedDelta = 0, points?: LinePoint[], opacityOverride?: number) => {
+  drawBefore = (ctx: Renderer, pt: Point, speedDelta = 0, points?: Point[], opacityOverride?: number) => {
     this._pt = pt
     this._speedDelta = speedDelta
     this._points = points ?? []
     this._opacityOverride = opacityOverride
-    const t: AnimTime = { elapsed: 0, now: Date.now() }
     this.drawStatic(ctx)
-    for (const anim of this.animations) anim.draw(ctx, t)
+    runAnimations(this.animations, ctx)
   }
 }

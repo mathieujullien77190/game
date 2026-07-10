@@ -19,14 +19,10 @@ import type { ScreenGate } from "../entities/ScreenGate/ScreenGate";
 import { ScreenGatePreview } from "../entities/ScreenGate/ScreenGatePreview";
 import type { Arrival } from "../entities/Arrival/Arrival";
 import { ArrivalPreview } from "../entities/Arrival/ArrivalPreview";
+import { COLORS, STROKE_WIDTHS } from "../theme";
+import { approach, lerpHex } from "../Utils/numeric";
+import { distanceSq } from "../Utils/geometry";
 import { Manager } from "./Manager";
-
-const lerpHex = (a: string, b: string, t: number): string => {
-  const ar = parseInt(a.slice(1, 3), 16), ag = parseInt(a.slice(3, 5), 16), ab2 = parseInt(a.slice(5, 7), 16)
-  const br = parseInt(b.slice(1, 3), 16), bg = parseInt(b.slice(3, 5), 16), bb2 = parseInt(b.slice(5, 7), 16)
-  const r = Math.round(ar + (br - ar) * t), g = Math.round(ag + (bg - ag) * t), b3 = Math.round(ab2 + (bb2 - ab2) * t)
-  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b3.toString(16).padStart(2, "0")}`
-}
 
 type LinkMap = Record<string, LinkEndpoint>;
 
@@ -134,7 +130,7 @@ export class PreviewManager extends Manager<LinePreview> {
       if (sg.exitKey) this.data.screenGateByExitKey[sg.exitKey] = sgp;
     }
 
-    this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands) : null;
+    this.data.arrival = arrival ? new ArrivalPreview(arrival.lineId, arrival.endpoint, arrival.id, arrival.demands, arrival.screenId, arrival.queueSide) : null;
     this.data.arrivalKey = arrival ? `${arrival.lineId}::${arrival.endpoint}` : "";
 
     this.data.starts = [];
@@ -174,13 +170,19 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const sw of Object.values(this.data.switches)) sw.tick(deltaSeconds);
 
+    for (const start of this.data.starts) {
+      const hasWaitingTokens = this.data.tokens.some((t) => t.startId === start.id && this.data.elapsedSeconds < t.startAt);
+      const target = hasWaitingTokens ? 1 : 0;
+      start.opacity = approach(start.opacity, target, 2, deltaSeconds);
+    }
+
     const arrival = this.data.arrival
     if (arrival) {
       if (arrival.flashProgress < 1) {
         arrival.flashProgress = Math.min(1, arrival.flashProgress + deltaSeconds / 0.35)
       }
       if (arrival.arcFill < arrival.arcTarget) {
-        arrival.arcFill = Math.min(arrival.arcTarget, arrival.arcFill + deltaSeconds * 3)
+        arrival.arcFill = approach(arrival.arcFill, arrival.arcTarget, 3, deltaSeconds)
       }
       if (arrival.isFading) {
         arrival.fadeAlpha = Math.max(0, arrival.fadeAlpha - deltaSeconds / 2)
@@ -190,6 +192,9 @@ export class PreviewManager extends Manager<LinePreview> {
           arrival.currentDemandIndex++
         }
       }
+      const arrivalDone = arrival.demands.length > 0 && arrival.currentDemandIndex >= arrival.demands.length
+      const arrivalTarget = arrivalDone ? 0 : 1
+      arrival.opacity = approach(arrival.opacity, arrivalTarget, 2, deltaSeconds)
     }
 
     for (const token of this.data.tokens) {
@@ -287,8 +292,7 @@ export class PreviewManager extends Manager<LinePreview> {
         if ((lineA?.screenId ?? "main") !== (lineB?.screenId ?? "main")) continue;
         const pb = lineB?.points[active[j].pointIndex];
         if (!pb) continue;
-        const dx = pa.x - pb.x, dy = pa.y - pb.y;
-        if (dx * dx + dy * dy < 16 * 16) {
+        if (distanceSq(pa, pb) < 16 * 16) {
           active[i].exploding = true; active[i].direction = 0; active[i].explosionSeed = (Math.random() * 999999) | 0;
           active[j].exploding = true; active[j].direction = 0; active[j].explosionSeed = (Math.random() * 999999) | 0;
         }
@@ -322,6 +326,7 @@ export class PreviewManager extends Manager<LinePreview> {
     this.drawTokens(ctx, sid);
     this.drawTransformersAfter(ctx, sid);
     this.drawStartAfter(ctx);
+    this.drawArrivalAfter(ctx, sid);
     this.drawScreenGates(ctx, sid);
     this.drawInverters(ctx, sid);
     this.drawMiniMap(ctx);
@@ -332,7 +337,7 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = COLORS.white;
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
   };
@@ -394,6 +399,13 @@ export class PreviewManager extends Manager<LinePreview> {
     if (!line || line.screenId !== sid) return;
     const pt = this.data.arrival.endpoint === "end" ? line.points[line.points.length - 1] : line.points[0];
     if (pt) this.data.arrival.drawBefore(ctx, pt);
+  };
+
+  drawArrivalAfter = (ctx: Renderer, sid: string) => {
+    if (!this.data.arrival) return;
+    const line = this.data.lines[this.data.arrival.lineId];
+    if (!line || line.screenId !== sid) return;
+    this.data.arrival.drawAfter(ctx);
   };
 
   drawStartNode = (ctx: Renderer, sid: string) => {
@@ -486,8 +498,8 @@ export class PreviewManager extends Manager<LinePreview> {
     if (Object.keys(this.data.switchLinks).length === 0) return;
     ctx.save();
     ctx.setLineDash([6, 22]);
-    ctx.strokeStyle = "#ccc";
-    ctx.lineWidth = 7;
+    ctx.strokeStyle = COLORS.grayLight;
+    ctx.lineWidth = STROKE_WIDTHS.switchLinkDash;
     ctx.lineCap = "square";
     const drawn = new Set<string>();
     for (const [swId, linked] of Object.entries(this.data.switchLinks)) {
@@ -507,22 +519,27 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.restore();
   };
 
-  drawMiniMap = (ctx: Renderer) => {
-    const prevSid = this.data.previewScreenHistory.at(-1)
-    if (!prevSid) return
-
+  private getMiniMapRect = () => {
     const S = 0.1
     const MW = CANVAS_W * S
     const MH = CANVAS_H * S
     const mx = CANVAS_W - MW - 8
     const my = CANVAS_H - MH - 8
+    return { S, MW, MH, mx, my }
+  }
+
+  drawMiniMap = (ctx: Renderer) => {
+    const prevSid = this.data.previewScreenHistory.at(-1)
+    if (!prevSid) return
+
+    const { S, MW, MH, mx, my } = this.getMiniMapRect()
 
     ctx.beginPath()
     ctx.roundRect(mx, my, MW, MH, 4)
-    ctx.fillStyle = "#fff"
+    ctx.fillStyle = COLORS.white
     ctx.fill()
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2
+    ctx.strokeStyle = COLORS.black
+    ctx.lineWidth = STROKE_WIDTHS.base
     ctx.setLineDash([])
     ctx.stroke()
 
@@ -538,11 +555,7 @@ export class PreviewManager extends Manager<LinePreview> {
 
   clickAt = (x: number, y: number) => {
     if (this.data.previewScreenHistory.length > 0) {
-      const S = 0.1;
-      const MW = CANVAS_W * S;
-      const MH = CANVAS_H * S;
-      const mx = CANVAS_W - MW - 8;
-      const my = CANVAS_H - MH - 8;
+      const { MW, MH, mx, my } = this.getMiniMapRect();
       if (x >= mx && x <= mx + MW && y >= my && y <= my + MH) {
         this.data.previewScreenId = this.data.previewScreenHistory.pop() ?? "main";
         return;

@@ -1,15 +1,8 @@
-let transformerCounter = 0
+import { createIdCounter } from "../idCounter"
 
-export const syncTransformerCounter = (ids: string[]) => {
-  let max = 0
-  for (const id of ids) {
-    const m = id.match(/^transform(\d+)$/)
-    if (m) max = Math.max(max, parseInt(m[1]))
-  }
-  transformerCounter = max
-}
+const transformerIds = createIdCounter("transform")
 
-const generateTransformerId = () => `transform${++transformerCounter}`
+export const syncTransformerCounter = (ids: string[]) => transformerIds.sync(ids)
 
 export type TransformerType = "fade" | "rotate" | "color" | "shape"
 
@@ -22,7 +15,7 @@ export class Transformer {
   targetType: string
   screenId: string = "main"
   constructor(linkId: string, type: TransformerType = "color", id?: string, amount = 0.5, color = "#e53935", targetType = "square", screenId?: string) {
-    this.id = id ?? generateTransformerId()
+    this.id = id ?? transformerIds.next()
     this.linkId = linkId
     this.type = type
     this.amount = amount

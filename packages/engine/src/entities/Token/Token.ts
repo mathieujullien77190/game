@@ -1,12 +1,8 @@
-let tokenCounter = 1
+import { createIdCounter } from "../idCounter"
 
-export const syncTokenCounter = (ids: string[]) => {
-  const max = ids.reduce((m, id) => {
-    const n = parseInt(id.replace("token", ""))
-    return isNaN(n) ? m : Math.max(m, n)
-  }, 0)
-  if (max >= tokenCounter) tokenCounter = max + 1
-}
+const tokenIds = createIdCounter("token")
+
+export const syncTokenCounter = (ids: string[]) => tokenIds.sync(ids)
 
 export type TokenType = "round" | "square" | "cop"
 
@@ -32,7 +28,7 @@ export class Token {
   speed: number
 
   constructor(color: TokenColor, speed: number, id?: string, type: TokenType = "round") {
-    this.id = id ?? `token${tokenCounter++}`
+    this.id = id ?? tokenIds.next()
     this.color = color
     this.type = type
     this.speed = speed

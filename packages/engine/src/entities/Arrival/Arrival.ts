@@ -1,15 +1,10 @@
 import type { TokenColor, TokenType } from "../Token/Token"
+import { createIdCounter } from "../idCounter"
 
-let arrivalCounter = 1
-let demandCounter = 1
+const arrivalIds = createIdCounter("arrival")
+const demandIds = createIdCounter("demand")
 
-export const syncArrivalCounter = (ids: string[]) => {
-  const max = ids.reduce((m, id) => {
-    const n = parseInt(id.replace("arrival", ""))
-    return isNaN(n) ? m : Math.max(m, n)
-  }, 0)
-  if (max >= arrivalCounter) arrivalCounter = max + 1
-}
+export const syncArrivalCounter = (ids: string[]) => arrivalIds.sync(ids)
 
 export type Demand = {
   id: string
@@ -19,11 +14,13 @@ export type Demand = {
 }
 
 export const makeDemand = (color: TokenColor = "#e53935", type: TokenType = "round", angled = false): Demand => ({
-  id: `demand${demandCounter++}`,
+  id: demandIds.next(),
   color,
   type,
   angled,
 })
+
+export type QueueSide = "top" | "bottom" | "left" | "right" | "hidden"
 
 export class Arrival {
   id: string
@@ -31,12 +28,14 @@ export class Arrival {
   endpoint: "start" | "end"
   demands: Demand[]
   screenId: string = "main"
+  queueSide: QueueSide = "right"
 
-  constructor(lineId: string, endpoint: "start" | "end", id?: string, demands: Demand[] = [], screenId?: string) {
-    this.id = id ?? `arrival${arrivalCounter++}`
+  constructor(lineId: string, endpoint: "start" | "end", id?: string, demands: Demand[] = [], screenId?: string, queueSide?: QueueSide) {
+    this.id = id ?? arrivalIds.next()
     this.lineId = lineId
     this.endpoint = endpoint
     this.demands = demands
     if (screenId) this.screenId = screenId
+    if (queueSide) this.queueSide = queueSide
   }
 }

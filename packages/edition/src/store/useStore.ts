@@ -46,6 +46,8 @@ export const useStore = create<Store>()((set) => ({
   screens: ["main"],
   currentScreenId: "main",
   screenTimeMultipliers: {},
+  mapName: "map.json",
+  availableMaps: ["map.json"],
   ...createLineActions(set),
   ...createLinkActions(set),
   ...createModeActions(set),
@@ -59,9 +61,12 @@ export const useStore = create<Store>()((set) => ({
   ...createMapActions(set),
 }))
 
-// Autosave : réécrit packages/maps/map.json à chaque changement de la map (dev only).
+// Autosave : réécrit packages/maps/<mapName> à chaque changement de la map (dev only).
+// Une map différente de la dernière sauvegardée force l'écriture même si le contenu
+// coïncide (cas d'une map vide fraîchement créée qui doit quand même toucher le disque).
 let saveTimer: ReturnType<typeof setTimeout> | undefined
 let lastSaved = ""
+let lastSavedMapName = ""
 useStore.subscribe((state) => {
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
@@ -70,19 +75,27 @@ useStore.subscribe((state) => {
       state.transformers, state.arrival, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers,
     )
     const str = JSON.stringify(json)
-    if (str === lastSaved) return
+    if (str === lastSaved && state.mapName === lastSavedMapName) return
     lastSaved = str
-    saveMap(json)
+    lastSavedMapName = state.mapName
+    saveMap(state.mapName, json)
   }, 400)
 })
 
-// Chargement initial : GET map.json via le plugin dev (pas d'import statique → écrire
+// Chargement initial : liste des maps dispo (GET /__list-maps) puis la map courante
+// (GET /__load-map?name=...) via le plugin dev (pas d'import statique → écrire
 // le fichier ne déclenche pas de HMR/reload qui réinitialiserait le store).
-void fetch("/__load-map")
-  .then((r) => (r.ok ? r.json() : null))
-  .then((json: MapJson | null) => {
-    if (!json) return
+void fetch("/__list-maps")
+  .then((r) => (r.ok ? r.json() : ["map.json"]))
+  .then(async (names: string[]) => {
+    useStore.getState().setAvailableMaps(names)
+    const name = names.includes("map.json") ? "map.json" : (names[0] ?? "map.json")
+    const res = await fetch(`/__load-map?name=${encodeURIComponent(name)}`)
+    if (!res.ok) return
+    const json: MapJson = await res.json()
     lastSaved = JSON.stringify(json)
+    lastSavedMapName = name
+    useStore.setState({ mapName: name })
     useStore.getState().loadMap(json)
   })
   .catch(() => {})

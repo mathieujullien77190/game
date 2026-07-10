@@ -1,5 +1,6 @@
 import type { Renderer } from "../../render/Renderer"
-import type { Animation, AnimTime } from "../Animation"
+import { runAnimations, type Animation } from "../Animation"
+import { COLORS, STROKE_WIDTHS } from "../../theme"
 import { Line } from "./Line"
 
 export class LinePreview extends Line {
@@ -21,7 +22,7 @@ export class LinePreview extends Line {
 
   private drawStatic = (ctx: Renderer) => {
     if (this.tunnel) {
-      ctx.fillStyle = "#000"
+      ctx.fillStyle = COLORS.black
       ctx.beginPath()
       ctx.arc(this.start.x, this.start.y, 7, 0, Math.PI * 2)
       ctx.fill()
@@ -30,8 +31,8 @@ export class LinePreview extends Line {
       ctx.fill()
       return
     }
-    ctx.strokeStyle = "#ccc"
-    ctx.lineWidth = 6
+    ctx.strokeStyle = COLORS.grayLight
+    ctx.lineWidth = STROKE_WIDTHS.lineGlow
     ctx.lineCap = "round"
     ctx.setLineDash([])
     this.tracePath(ctx)
@@ -57,8 +58,8 @@ export class LinePreview extends Line {
     }
     if (tail >= head) return
     ctx.save()
-    ctx.strokeStyle = "#ffcc00"
-    ctx.lineWidth = 2
+    ctx.strokeStyle = COLORS.glow
+    ctx.lineWidth = STROKE_WIDTHS.base
     ctx.lineCap = "round"
     ctx.setLineDash([])
     ctx.beginPath()
@@ -74,8 +75,7 @@ export class LinePreview extends Line {
 
   drawBefore = (ctx: Renderer, elapsedSeconds = 0) => {
     this.drawStatic(ctx)
-    const t: AnimTime = { elapsed: elapsedSeconds, now: Date.now() }
-    for (const anim of this.animations) anim.draw(ctx, t)
+    runAnimations(this.animations, ctx, elapsedSeconds)
   }
 
   drawAfter = (ctx: Renderer, speed?: number, tokenColor?: string) => {
@@ -89,16 +89,16 @@ export class LinePreview extends Line {
       const rw = 26, rh = 19
       const rx = mid.x - rw / 2, ry = mid.y - rh / 2
       ctx.save()
-      ctx.fillStyle = tokenColor ?? "#fff"
-      ctx.strokeStyle = "#000"
-      ctx.lineWidth = 1.5
+      ctx.fillStyle = tokenColor ?? COLORS.white
+      ctx.strokeStyle = COLORS.black
+      ctx.lineWidth = STROKE_WIDTHS.thin
       ctx.beginPath()
       ctx.roundRect(rx, ry, rw, rh, 4)
       ctx.fill()
       ctx.stroke()
       if (speed !== undefined) this.lastSpeed = speed
       if (this.lastSpeed !== undefined) {
-        ctx.fillStyle = "#000"
+        ctx.fillStyle = COLORS.black
         ctx.fillText(Math.round(this.lastSpeed).toString(), mid.x, mid.y)
       }
       ctx.restore()
@@ -108,14 +108,14 @@ export class LinePreview extends Line {
       const r = 11
       const ox = this.showSpeed ? r * 2 + 4 : 0
       ctx.save()
-      ctx.fillStyle = "#fff"
-      ctx.strokeStyle = "#e00"
-      ctx.lineWidth = 2
+      ctx.fillStyle = COLORS.white
+      ctx.strokeStyle = COLORS.limitationRed
+      ctx.lineWidth = STROKE_WIDTHS.base
       ctx.beginPath()
       ctx.arc(mid.x + ox, mid.y, r, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
-      ctx.fillStyle = "#000"
+      ctx.fillStyle = COLORS.black
       ctx.fillText(this.limitation.toString(), mid.x + ox, mid.y)
       ctx.restore()
     }

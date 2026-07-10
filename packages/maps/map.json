@@ -4,286 +4,137 @@
   ],
   "lines": [
     {
-      "id": "lineB",
+      "id": "lineA",
       "start": {
         "x": 200,
-        "y": 600
+        "y": 620
       },
       "end": {
         "x": 200,
-        "y": 160
+        "y": 400
       },
       "type": "straight",
       "cp1": {
         "x": 200,
-        "y": 453.33333333333337
+        "y": 460
       },
       "cp2": {
         "x": 200,
-        "y": 306.6666666666667
+        "y": 300
+      }
+    },
+    {
+      "id": "lineB",
+      "start": {
+        "x": 200,
+        "y": 400
+      },
+      "end": {
+        "x": 100,
+        "y": 200
+      },
+      "type": "curve",
+      "cp1": {
+        "x": 121.5,
+        "y": 411.49999809265137
+      },
+      "cp2": {
+        "x": 195,
+        "y": 256.99999809265137
       }
     },
     {
       "id": "lineC",
       "start": {
         "x": 200,
-        "y": 160
-      },
-      "end": {
-        "x": 60,
-        "y": 260
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 153.33333333333334,
-        "y": 193.33333333333334
-      },
-      "cp2": {
-        "x": 106.66666666666667,
-        "y": 226.66666666666669
-      }
-    },
-    {
-      "id": "lineD",
-      "start": {
-        "x": 200,
-        "y": 160
-      },
-      "end": {
-        "x": 320,
-        "y": 280
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 240,
-        "y": 200
-      },
-      "cp2": {
-        "x": 280,
-        "y": 240
-      },
-      "boost": 40
-    },
-    {
-      "id": "lineE",
-      "start": {
-        "x": 200,
-        "y": 160
+        "y": 400
       },
       "end": {
         "x": 300,
-        "y": 40
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 233.33333333333334,
-        "y": 120
-      },
-      "cp2": {
-        "x": 266.6666666666667,
-        "y": 80
-      }
-    },
-    {
-      "id": "lineG",
-      "start": {
-        "x": 360,
-        "y": 540
-      },
-      "end": {
-        "x": 320,
-        "y": 280
+        "y": 200
       },
       "type": "curve",
       "cp1": {
-        "x": 379.5,
-        "y": 333.49999809265137
+        "x": 214.5,
+        "y": 310.99999809265137
       },
       "cp2": {
-        "x": 354,
-        "y": 304.99999809265137
-      }
-    },
-    {
-      "id": "lineI",
-      "start": {
-        "x": 60,
-        "y": 260
-      },
-      "end": {
-        "x": 60,
-        "y": 640
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 60,
-        "y": 386.6666666666667
-      },
-      "cp2": {
-        "x": 60,
-        "y": 513.3333333333334
-      }
-    },
-    {
-      "id": "lineJ",
-      "start": {
-        "x": 340,
-        "y": 640
-      },
-      "end": {
-        "x": 60,
-        "y": 640
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 246.66666666666669,
-        "y": 640
-      },
-      "cp2": {
-        "x": 153.33333333333334,
-        "y": 640
+        "x": 334.5,
+        "y": 292.99999809265137
       }
     }
   ],
   "links": [
     {
-      "id": "lineB::end-lineC::start",
+      "id": "lineA::end-lineB::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineB",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineA::end-lineC::start",
+      "line1": {
+        "lineId": "lineA",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineC",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineB::start-lineC::start",
       "line1": {
         "lineId": "lineB",
-        "endpoint": "end"
+        "endpoint": "start"
       },
       "line2": {
         "lineId": "lineC",
         "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineB::end-lineD::start",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineD",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::start-lineD::start",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineD",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineB::end-lineE::start",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineE",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::start-lineE::start",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineE",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineD::start-lineE::start",
-      "line1": {
-        "lineId": "lineD",
-        "endpoint": "start"
-      },
-      "line2": {
-        "lineId": "lineE",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineD::end-lineG::end",
-      "line1": {
-        "lineId": "lineD",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineG",
-        "endpoint": "end"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineC::end-lineI::start",
-      "line1": {
-        "lineId": "lineC",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineI",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineI::end-lineJ::end",
-      "line1": {
-        "lineId": "lineI",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineJ",
-        "endpoint": "end"
       },
       "activated": true
     }
   ],
   "starts": [
     {
-      "id": "start1",
-      "lineId": "lineB",
+      "id": "start3",
+      "lineId": "lineA",
       "endpoint": "start",
       "delay": 6,
       "tokens": [
         {
-          "id": "token1",
-          "color": "#e53935",
+          "id": "token4",
+          "color": "#8e24aa",
           "type": "round",
           "speed": 40
         },
         {
-          "id": "token2",
-          "color": "#00acc1",
+          "id": "token5",
+          "color": "#1a73e8",
           "type": "square",
           "speed": 40
-        }
-      ]
-    },
-    {
-      "id": "start2",
-      "lineId": "lineJ",
-      "endpoint": "start",
-      "delay": 6,
-      "tokens": [
+        },
         {
-          "id": "token3",
+          "id": "token6",
+          "color": "#fb8c00",
+          "type": "round",
+          "speed": 40
+        },
+        {
+          "id": "token7",
+          "color": "#546e7a",
+          "type": "square",
+          "speed": 40
+        },
+        {
+          "id": "token8",
           "color": "#e53935",
           "type": "round",
           "speed": 40
@@ -291,7 +142,17 @@
       ]
     }
   ],
-  "switches": {},
+  "switches": {
+    "switch1": {
+      "linkIds": [
+        "lineA::end-lineB::start",
+        "lineA::end-lineC::start"
+      ],
+      "activeLinkId": "lineA::end-lineB::start",
+      "linkedSwitchIds": [],
+      "color": "#546e7a"
+    }
+  },
   "transformers": [],
   "inverters": [],
   "arrival": null,

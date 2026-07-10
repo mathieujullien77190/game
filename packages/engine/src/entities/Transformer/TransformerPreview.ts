@@ -1,8 +1,9 @@
 import type { Renderer } from "../../render/Renderer"
 import type { Point } from "../../types"
+import { COLORS, STROKE_WIDTHS, RADII } from "../../theme"
 import { Transformer } from "./Transformer"
 
-const ORBIT_R = 20
+const ORBIT_R = RADII.ring
 const TRAIL_SEGS = 12
 const TRAIL_SPAN = Math.PI * 0.5
 
@@ -19,7 +20,7 @@ export class TransformerPreview extends Transformer {
       : Math.PI / 4 + elapsedSeconds * 0.4
 
   private orbitDot = (ctx: Renderer, angle: number) => {
-    ctx.fillStyle = "#999"
+    ctx.fillStyle = COLORS.gray
     ctx.beginPath()
     ctx.arc(Math.cos(angle) * ORBIT_R, Math.sin(angle) * ORBIT_R, 4, 0, Math.PI * 2)
     ctx.fill()
@@ -27,7 +28,7 @@ export class TransformerPreview extends Transformer {
 
   private trailArcs = (ctx: Renderer, angle: number, stroke: string) => {
     if (this.transformProgress <= 0) return
-    ctx.lineWidth = 4
+    ctx.lineWidth = STROKE_WIDTHS.bold
     ctx.lineCap = "butt"
     for (let i = 0; i < TRAIL_SEGS; i++) {
       const a0 = angle - TRAIL_SPAN * (1 - i / TRAIL_SEGS)
@@ -47,15 +48,15 @@ export class TransformerPreview extends Transformer {
     ctx.translate(this._pt.x, this._pt.y)
     if (this.type === "rotate") {
       const r = 16
-      ctx.strokeStyle = "#ccc"
-      ctx.lineWidth = 5
+      ctx.strokeStyle = COLORS.grayLight
+      ctx.lineWidth = STROKE_WIDTHS.heavy
       ctx.setLineDash([])
       ctx.beginPath()
       ctx.arc(0, 0, r, 0, Math.PI * 2)
       ctx.stroke()
       ctx.rotate(this._elapsed * Math.PI * 1.4)
-      ctx.strokeStyle = "#666"
-      ctx.lineWidth = 3.5
+      ctx.strokeStyle = COLORS.grayDark
+      ctx.lineWidth = STROKE_WIDTHS.transformerActive
       ctx.lineCap = "round"
       for (let i = 0; i < 3; i++) {
         const end = (i * Math.PI * 2) / 3 + Math.PI * 0.5
@@ -70,9 +71,9 @@ export class TransformerPreview extends Transformer {
       }
     } else if (this.type === "color" || this.type === "shape" || this.type === "fade") {
       const angle = this.dotAngle(this._elapsed)
-      const trailColor = this.type === "color" ? (this.currentTokenColor || this.color) as string : "#999"
-      ctx.strokeStyle = "#ccc"
-      ctx.lineWidth = 5
+      const trailColor = this.type === "color" ? (this.currentTokenColor || this.color) as string : COLORS.gray
+      ctx.strokeStyle = COLORS.grayLight
+      ctx.lineWidth = STROKE_WIDTHS.heavy
       ctx.setLineDash([])
       ctx.beginPath()
       ctx.arc(0, 0, ORBIT_R, 0, Math.PI * 2)
@@ -88,7 +89,7 @@ export class TransformerPreview extends Transformer {
     this._elapsed = elapsedSeconds
     ctx.save()
     ctx.translate(pt.x, pt.y)
-    ctx.fillStyle = "#fff"
+    ctx.fillStyle = COLORS.white
     ctx.beginPath()
     ctx.arc(0, 0, this.type === "rotate" ? 16 : ORBIT_R, 0, Math.PI * 2)
     ctx.fill()
@@ -98,14 +99,14 @@ export class TransformerPreview extends Transformer {
       ctx.arc(0, 0, 5, 0, Math.PI * 2)
       ctx.fill()
     } else if (this.type === "shape") {
-      ctx.fillStyle = "#999"
+      ctx.fillStyle = COLORS.gray
       ctx.beginPath()
       if (this.targetType === "square") ctx.roundRect(-5, -5, 10, 10, 2)
       else ctx.arc(0, 0, 5, 0, Math.PI * 2)
       ctx.fill()
     } else if (this.type === "fade") {
       ctx.globalAlpha = this.amount
-      ctx.fillStyle = "#999"
+      ctx.fillStyle = COLORS.gray
       ctx.beginPath()
       ctx.arc(0, 0, 5, 0, Math.PI * 2)
       ctx.fill()

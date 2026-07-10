@@ -27,7 +27,7 @@ export type MapJson = {
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string; color?: string }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
   inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" | "dark" }[]
-  arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string } | null
+  arrival?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string; queueSide?: "top" | "bottom" | "left" | "right" | "hidden" } | null
   screenGates?: { id: string; linkId: string; screenId?: string; targetScreenId: string; entryKey: string; exitKey: string }[]
   screenTimeMultipliers?: Record<string, number>
   // legacy fields for backward compat
@@ -115,6 +115,7 @@ export const serializeMap = (
         endpoint: arrival.endpoint,
         demands: arrival.demands,
         ...(arrival.screenId !== "main" ? { screenId: arrival.screenId } : {}),
+        ...(arrival.queueSide !== "right" ? { queueSide: arrival.queueSide } : {}),
       }
     : null,
   screenGates: Object.values(screenGates).map((sg) => ({
@@ -215,7 +216,7 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   let arrival: ArrivalEditor | null = null
   if (json.arrival) {
-    arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any, json.arrival.screenId)
+    arrival = new ArrivalEditor(json.arrival.lineId, json.arrival.endpoint, json.arrival.id, (json.arrival.demands ?? []) as any, json.arrival.screenId, json.arrival.queueSide)
     syncArrivalCounter([json.arrival.id])
   }
 

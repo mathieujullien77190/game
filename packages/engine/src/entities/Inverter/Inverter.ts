@@ -1,15 +1,8 @@
-let inverterCounter = 0
+import { createIdCounter } from "../idCounter"
 
-export const syncInverterCounter = (ids: string[]) => {
-  let max = 0
-  for (const id of ids) {
-    const m = id.match(/^inv(\d+)$/)
-    if (m) max = Math.max(max, parseInt(m[1]))
-  }
-  inverterCounter = max
-}
+const inverterIds = createIdCounter("inv")
 
-const generateInverterId = () => `inv${++inverterCounter}`
+export const syncInverterCounter = (ids: string[]) => inverterIds.sync(ids)
 
 export class Inverter {
   id: string
@@ -17,7 +10,7 @@ export class Inverter {
   screenId: string = "main"
   effect: "invert" | "grayscale" | "dark" = "invert"
   constructor(linkId: string, id?: string, screenId?: string) {
-    this.id = id ?? generateInverterId()
+    this.id = id ?? inverterIds.next()
     this.linkId = linkId
     if (screenId) this.screenId = screenId
   }

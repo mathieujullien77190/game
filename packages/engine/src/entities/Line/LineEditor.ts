@@ -1,4 +1,5 @@
 import type { Renderer } from "../../render/Renderer"
+import { COLORS, STROKE_WIDTHS } from "../../theme"
 import { Line } from "./Line"
 
 export class LineEditor extends Line {
@@ -16,7 +17,7 @@ export class LineEditor extends Line {
       my = (this.start.y + this.end.y) / 2
     }
     ctx.font = "bold 10px monospace"
-    ctx.fillStyle = "#333"
+    ctx.fillStyle = COLORS.ink
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
     ctx.fillText(this.id, mx, my - 10)
@@ -24,8 +25,8 @@ export class LineEditor extends Line {
 
   draw = (ctx: Renderer, hovered = false, showId = false) => {
     ctx.lineCap = "round"
-    ctx.strokeStyle = hovered ? "#000" : "#999"
-    ctx.lineWidth = hovered ? 3 : 2
+    ctx.strokeStyle = hovered ? COLORS.black : COLORS.gray
+    ctx.lineWidth = hovered ? STROKE_WIDTHS.medium : STROKE_WIDTHS.base
     ctx.setLineDash([6, 5])
     ctx.beginPath()
     ctx.moveTo(this.start.x, this.start.y)
@@ -42,8 +43,8 @@ export class LineEditor extends Line {
     ctx.setLineDash([])
 
     if (this.type === "curve") {
-      ctx.strokeStyle = "#ccc"
-      ctx.lineWidth = 1
+      ctx.strokeStyle = COLORS.grayLight
+      ctx.lineWidth = STROKE_WIDTHS.hairline
       ctx.setLineDash([3, 3])
       ctx.beginPath()
       ctx.moveTo(this.start.x, this.start.y)
@@ -55,12 +56,12 @@ export class LineEditor extends Line {
       ctx.stroke()
       ctx.setLineDash([])
 
-      ctx.fillStyle = "#4caf50"
+      ctx.fillStyle = COLORS.green
       ctx.beginPath()
       ctx.arc(this.cp1.x, this.cp1.y, 5, 0, Math.PI * 2)
       ctx.fill()
 
-      ctx.fillStyle = "#9c27b0"
+      ctx.fillStyle = COLORS.cp2Purple
       ctx.beginPath()
       ctx.arc(this.cp2.x, this.cp2.y, 5, 0, Math.PI * 2)
       ctx.fill()
@@ -70,21 +71,21 @@ export class LineEditor extends Line {
       const corner = this.flip
         ? { x: this.end.x, y: this.start.y }
         : { x: this.start.x, y: this.end.y }
-      ctx.fillStyle = "#fff"
-      ctx.strokeStyle = "#666"
-      ctx.lineWidth = 1.5
+      ctx.fillStyle = COLORS.white
+      ctx.strokeStyle = COLORS.grayDark
+      ctx.lineWidth = STROKE_WIDTHS.thin
       ctx.beginPath()
       ctx.arc(corner.x, corner.y, 5, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
     }
 
-    ctx.fillStyle = "#f9ab00"
+    ctx.fillStyle = COLORS.amber
     ctx.beginPath()
     ctx.arc(this.start.x, this.start.y, 5, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.fillStyle = "#1a73e8"
+    ctx.fillStyle = COLORS.blue
     ctx.beginPath()
     ctx.arc(this.end.x, this.end.y, 7, 0, Math.PI * 2)
     ctx.fill()

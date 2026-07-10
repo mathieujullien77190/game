@@ -11,6 +11,36 @@ export const ButtonRow = styled.div`
   gap: 6px;
 `
 
+export const MapRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+`
+
+export const MapButton = styled.button<{ $active: boolean }>`
+  padding: 4px 10px;
+  background: ${({ $active }) => ($active ? "#333" : "#e8e8e8")};
+  color: ${({ $active }) => ($active ? "#fff" : "#666")};
+  border: 1px solid ${({ $active }) => ($active ? "#333" : "#ddd")};
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 11px;
+  &:hover { background: ${({ $active }) => ($active ? "#555" : "#ddd")}; }
+`
+
+export const NewMapButton = styled.button`
+  padding: 6px 10px;
+  font-size: 11px;
+  font-family: monospace;
+  background: #f0fff4;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover { background: #2e7d32; color: #fff; }
+`
+
 export const ClearButton = styled.button`
   padding: 6px 10px;
   font-size: 11px;

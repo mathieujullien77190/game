@@ -1,12 +1,8 @@
-let switchCounter = 1
+import { createIdCounter } from "../idCounter"
 
-export const syncSwitchCounter = (ids: string[]) => {
-  const max = ids.reduce((m, id) => {
-    const n = parseInt(id.replace("switch", ""))
-    return isNaN(n) ? m : Math.max(m, n)
-  }, 0)
-  if (max >= switchCounter) switchCounter = max + 1
-}
+const switchIds = createIdCounter("switch")
+
+export const syncSwitchCounter = (ids: string[]) => switchIds.sync(ids)
 
 export class Switch {
   id: string
@@ -16,7 +12,7 @@ export class Switch {
   color: string = "#ccc"
 
   constructor(id?: string, linkIds?: string[], activeLinkId?: string | null, screenId?: string, color?: string) {
-    this.id = id ?? `switch${switchCounter++}`
+    this.id = id ?? switchIds.next()
     this.linkIds = linkIds ?? []
     this.activeLinkId = activeLinkId ?? null
     if (screenId) this.screenId = screenId

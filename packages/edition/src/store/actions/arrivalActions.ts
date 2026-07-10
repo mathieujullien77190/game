@@ -1,5 +1,5 @@
 import { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
-import { makeDemand } from "@drift/engine/entities/Arrival/Arrival"
+import { makeDemand, type QueueSide } from "@drift/engine/entities/Arrival/Arrival"
 import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
 import type { Set } from "store/types"
 
@@ -33,6 +33,13 @@ export const createArrivalActions = (set: Set) => ({
       state.arrival.demands = state.arrival.demands.map((d) =>
         d.id === id ? { ...d, ...patch } : d
       )
+      return { revision: state.revision + 1 }
+    }),
+
+  setArrivalQueueSide: (queueSide: QueueSide) =>
+    set((state) => {
+      if (!state.arrival) return {}
+      state.arrival.queueSide = queueSide
       return { revision: state.revision + 1 }
     }),
 })

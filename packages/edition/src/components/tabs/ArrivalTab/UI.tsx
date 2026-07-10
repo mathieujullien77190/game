@@ -84,6 +84,25 @@ export const DemandRow = styled.div`
   gap: 6px;
 `
 
+export const Field = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`
+
+export const FieldLabel = styled.span`
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+`
+
+export const QueueSideRow = styled.div`
+  display: flex;
+  gap: 4px;
+`
+
 export const TypeToggle = styled.button<{ $active?: boolean }>`
   padding: 4px 8px;
   background: ${(p) => (p.$active ? "#333" : "#e8e8e8")};

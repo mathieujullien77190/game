@@ -1,5 +1,5 @@
 import type { Link, LinkEndpoint } from "../Link/Link"
-import type { LinePoint } from "../../types"
+import type { Point } from "../../types"
 
 export const getSwitchEnterPoint = (
   linkIds: string[],
@@ -22,7 +22,7 @@ export const getSwitchEnterPoint = (
 }
 
 export const curveIntersectAngle = (
-  pts: LinePoint[],
+  pts: Point[],
   endpointSide: "start" | "end",
   cx: number,
   cy: number,

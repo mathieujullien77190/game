@@ -3,18 +3,18 @@ import type { Point } from "../types"
 import { CANVAS_H, CANVAS_W, GRID_MAJOR, GRID_MINOR } from "../constants"
 import { LineEditor } from "../entities/Line/LineEditor"
 import { Link } from "../entities/Link/Link"
-import { StartEditor } from "../entities/Start/StartEditor"
-import { SwitchEditor } from "../entities/Switch/SwitchEditor"
+import { StartEditor, drawStartShape } from "../entities/Start/StartEditor"
+import { SwitchEditor, drawSwitchShape } from "../entities/Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "../entities/Switch/switchUtils"
-import { InverterEditor } from "../entities/Inverter/InverterEditor"
-import { TransformerEditor } from "../entities/Transformer/TransformerEditor"
+import { InverterEditor, drawInverterShape } from "../entities/Inverter/InverterEditor"
+import { TransformerEditor, TYPE_COLOR } from "../entities/Transformer/TransformerEditor"
 import type { TransformerType } from "../entities/Transformer/Transformer"
-import { ArrivalEditor } from "../entities/Arrival/ArrivalEditor"
-import { ScreenGateEditor } from "../entities/ScreenGate/ScreenGateEditor"
+import { ArrivalEditor, drawArrivalEmptyShape } from "../entities/Arrival/ArrivalEditor"
+import { ScreenGateEditor, drawGateShape } from "../entities/ScreenGate/ScreenGateEditor"
 import { drawStats } from "../stats"
+import { COLORS, STROKE_WIDTHS, ALPHA, RADII } from "../theme"
+import { pointsEqual } from "../Utils/geometry"
 import { Manager } from "./Manager"
-
-const pointsEqual = (a: Point, b: Point) => a.x === b.x && a.y === b.y
 
 export class EditorManager extends Manager<LineEditor> {
   data = {
@@ -81,8 +81,8 @@ export class EditorManager extends Manager<LineEditor> {
   drawGrid = (ctx: Renderer) => {
     ctx.setLineDash([])
 
-    ctx.strokeStyle = "#f0f0f0"
-    ctx.lineWidth = 1
+    ctx.strokeStyle = COLORS.gridMinor
+    ctx.lineWidth = STROKE_WIDTHS.hairline
     for (let x = 0; x <= CANVAS_W; x += GRID_MINOR) {
       ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, CANVAS_H); ctx.stroke()
     }
@@ -90,8 +90,8 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(CANVAS_W, y + 0.5); ctx.stroke()
     }
 
-    ctx.strokeStyle = "#e0e0e0"
-    ctx.lineWidth = 1
+    ctx.strokeStyle = COLORS.gridMajor
+    ctx.lineWidth = STROKE_WIDTHS.hairline
     for (let x = 0; x <= CANVAS_W; x += GRID_MAJOR) {
       ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, CANVAS_H); ctx.stroke()
     }
@@ -140,17 +140,14 @@ export class EditorManager extends Manager<LineEditor> {
       const line = this.data.lines[ep.lineId]
       if (!line) continue
       const pt = ep.endpoint === "end" ? line.end : line.start
-      ctx.globalAlpha = hoveredSwitchId === sw.id ? 1 : 0.4
+      ctx.globalAlpha = hoveredSwitchId === sw.id ? ALPHA.hovered : ALPHA.dimmed
       sw.draw(ctx, pt)
       ctx.globalAlpha = 1
     }
 
     if (previewSwitchPt) {
-      ctx.globalAlpha = 0.45
-      ctx.fillStyle = "#7c3aed"
-      ctx.beginPath()
-      ctx.arc(previewSwitchPt.x, previewSwitchPt.y, 18, 0, Math.PI * 2)
-      ctx.fill()
+      ctx.globalAlpha = ALPHA.ghostPreview
+      drawSwitchShape(ctx, previewSwitchPt)
       ctx.globalAlpha = 1
     }
 
@@ -162,7 +159,7 @@ export class EditorManager extends Manager<LineEditor> {
       const isEnd = link.line1.endpoint === "end"
       const pt = isEnd ? line.end : line.start
       const angle = Math.atan2(line.end.y - line.start.y, line.end.x - line.start.x)
-      ctx.globalAlpha = hoveredInverterId === inv.id ? 1 : 0.4
+      ctx.globalAlpha = hoveredInverterId === inv.id ? ALPHA.hovered : ALPHA.dimmed
       inv.draw(ctx, pt, angle)
       ctx.globalAlpha = 1
     }
@@ -173,30 +170,23 @@ export class EditorManager extends Manager<LineEditor> {
       const line = this.data.lines[link.line1.lineId]
       if (!line) continue
       const pt = link.line1.endpoint === "end" ? line.end : line.start
-      ctx.globalAlpha = hoveredTransformerId === tr.id ? 1 : 0.4
+      ctx.globalAlpha = hoveredTransformerId === tr.id ? ALPHA.hovered : ALPHA.dimmed
       tr.draw(ctx, pt)
       ctx.globalAlpha = 1
     }
 
     if (previewTransformerPt) {
-      const typeColors: Record<string, string> = { fade: "#546e7a", rotate: "#00ACC1", color: "#7B1FA2", shape: "#2e7d32" }
-      ctx.globalAlpha = 0.45
-      ctx.fillStyle = typeColors[previewTransformerType ?? ""] ?? "#888"
+      ctx.globalAlpha = ALPHA.ghostPreview
+      ctx.fillStyle = TYPE_COLOR[previewTransformerType ?? ""] ?? "#888"
       ctx.beginPath()
-      ctx.arc(previewTransformerPt.x, previewTransformerPt.y, 18, 0, Math.PI * 2)
+      ctx.arc(previewTransformerPt.x, previewTransformerPt.y, RADII.node, 0, Math.PI * 2)
       ctx.fill()
       ctx.globalAlpha = 1
     }
 
     if (previewInverterPt) {
-      ctx.globalAlpha = 0.45
-      ctx.strokeStyle = "#7b1fa2"
-      ctx.lineWidth = 3
-      ctx.lineCap = "round"
-      ctx.beginPath()
-      ctx.moveTo(previewInverterPt.x - 14, previewInverterPt.y)
-      ctx.lineTo(previewInverterPt.x + 14, previewInverterPt.y)
-      ctx.stroke()
+      ctx.globalAlpha = ALPHA.ghostPreview
+      drawInverterShape(ctx, previewInverterPt, -Math.PI / 2)
       ctx.globalAlpha = 1
     }
 
@@ -211,7 +201,7 @@ export class EditorManager extends Manager<LineEditor> {
         const eLine = this.data.lines[eLineId]
         if (eLine) {
           const pt = eEp === "end" ? eLine.end : eLine.start
-          ctx.fillStyle = "#000"
+          ctx.fillStyle = COLORS.black
           ctx.beginPath()
           ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2)
           ctx.fill()
@@ -222,13 +212,13 @@ export class EditorManager extends Manager<LineEditor> {
         const xLine = this.data.lines[xLineId]
         if (xLine) {
           const pt = xEp === "end" ? xLine.end : xLine.start
-          ctx.strokeStyle = "#000"
-          ctx.lineWidth = 2
+          ctx.strokeStyle = COLORS.black
+          ctx.lineWidth = STROKE_WIDTHS.base
           ctx.setLineDash([])
           ctx.beginPath()
           ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2)
           ctx.stroke()
-          ctx.fillStyle = "#000"
+          ctx.fillStyle = COLORS.black
           ctx.beginPath()
           ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2)
           ctx.fill()
@@ -252,13 +242,8 @@ export class EditorManager extends Manager<LineEditor> {
     }
 
     if (previewArrivalPt) {
-      ctx.globalAlpha = 0.45
-      ctx.fillStyle = "#000"
-      ctx.beginPath()
-      ctx.arc(previewArrivalPt.x, previewArrivalPt.y, 14, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.fillStyle = "#fff"
-      ctx.fillRect(previewArrivalPt.x - 5, previewArrivalPt.y - 5, 10, 10)
+      ctx.globalAlpha = ALPHA.ghostPreview
+      drawArrivalEmptyShape(ctx, previewArrivalPt)
       ctx.globalAlpha = 1
     }
 
@@ -268,42 +253,26 @@ export class EditorManager extends Manager<LineEditor> {
       const line = this.data.lines[link.line1.lineId]
       if (!line) continue
       const pt = link.line1.endpoint === "end" ? line.end : line.start
-      ctx.globalAlpha = hoveredScreenGateId === sg.id ? 1 : 0.4
+      ctx.globalAlpha = hoveredScreenGateId === sg.id ? ALPHA.hovered : ALPHA.dimmed
       sg.draw(ctx, pt)
       ctx.globalAlpha = 1
     }
 
     if (previewScreenGatePt) {
-      ctx.globalAlpha = 0.45
-      ctx.fillStyle = "#fff"
-      ctx.strokeStyle = "#000"
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.roundRect(previewScreenGatePt.x - 18, previewScreenGatePt.y - 32, 36, 64, 5)
-      ctx.fill()
-      ctx.stroke()
+      ctx.globalAlpha = ALPHA.ghostPreview
+      drawGateShape(ctx, previewScreenGatePt)
       ctx.globalAlpha = 1
     }
 
     if (previewStartPt) {
-      ctx.globalAlpha = 0.45
-      ctx.fillStyle = "#000"
-      ctx.beginPath()
-      ctx.arc(previewStartPt.x, previewStartPt.y, 14, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.fillStyle = "#fff"
-      ctx.beginPath()
-      ctx.moveTo(previewStartPt.x - 4, previewStartPt.y - 6)
-      ctx.lineTo(previewStartPt.x + 8, previewStartPt.y)
-      ctx.lineTo(previewStartPt.x - 4, previewStartPt.y + 6)
-      ctx.closePath()
-      ctx.fill()
+      ctx.globalAlpha = ALPHA.ghostPreview
+      drawStartShape(ctx, previewStartPt)
       ctx.globalAlpha = 1
     }
 
     if (pendingPoint && snapPoint) {
-      ctx.strokeStyle = "#999"
-      ctx.lineWidth = 2
+      ctx.strokeStyle = COLORS.gray
+      ctx.lineWidth = STROKE_WIDTHS.base
       ctx.lineCap = "round"
       ctx.setLineDash([6, 5])
       ctx.beginPath()
@@ -314,7 +283,7 @@ export class EditorManager extends Manager<LineEditor> {
     }
 
     if (pendingPoint) {
-      ctx.fillStyle = "#f9ab00"
+      ctx.fillStyle = COLORS.amber
       ctx.beginPath()
       ctx.arc(pendingPoint.x, pendingPoint.y, 5, 0, Math.PI * 2)
       ctx.fill()
@@ -322,7 +291,7 @@ export class EditorManager extends Manager<LineEditor> {
 
     if (snapPoint) {
       const isSecond = pendingPoint !== null
-      ctx.fillStyle = isSecond ? "#1a73e8" : "#f9ab00"
+      ctx.fillStyle = isSecond ? COLORS.blue : COLORS.amber
       ctx.beginPath()
       ctx.arc(snapPoint.x, snapPoint.y, isSecond ? 7 : 5, 0, Math.PI * 2)
       ctx.fill()

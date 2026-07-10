@@ -8,6 +8,7 @@ import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
 import type { Transformer, TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 import type { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
+import type { QueueSide } from "@drift/engine/entities/Arrival/Arrival"
 import type { Inverter } from "@drift/engine/entities/Inverter/Inverter"
 import type { ScreenGate } from "@drift/engine/entities/ScreenGate/ScreenGate"
 import type { Point } from "@drift/engine/types"
@@ -41,6 +42,8 @@ export interface StoreState {
   screens: string[]
   currentScreenId: string
   screenTimeMultipliers: Record<string, number>
+  mapName: string
+  availableMaps: string[]
 }
 
 export interface StoreActions {
@@ -86,6 +89,7 @@ export interface StoreActions {
   addArrivalDemand: () => void
   removeArrivalDemand: (id: string) => void
   updateArrivalDemand: (id: string, patch: { color?: TokenColor; type?: TokenType; angled?: boolean }) => void
+  setArrivalQueueSide: (queueSide: QueueSide) => void
   setHoveredSwitchId: (id: string | null) => void
   setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void
@@ -94,6 +98,9 @@ export interface StoreActions {
   setLineType: (lineType: LineType) => void
   setLinePreset: (preset: "arc" | null) => void
   loadMap: (json: MapJson) => void
+  setAvailableMaps: (names: string[]) => void
+  switchMap: (name: string) => Promise<void>
+  createMap: () => void
   addScreenGate: (linkId: string) => void
   removeScreenGate: (id: string) => void
   setHoveredScreenGateId: (id: string | null) => void

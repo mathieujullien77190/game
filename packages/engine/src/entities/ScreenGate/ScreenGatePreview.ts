@@ -1,6 +1,7 @@
 import type { Renderer } from "../../render/Renderer"
 import type { Point } from "../../types"
-import type { Animation, AnimTime } from "../Animation"
+import { runAnimations, type Animation } from "../Animation"
+import { COLORS, STROKE_WIDTHS } from "../../theme"
 import { ScreenGate } from "./ScreenGate"
 import { GATE_W, GATE_H } from "./ScreenGateEditor"
 import { CANVAS_W } from "../../constants"
@@ -29,20 +30,20 @@ export class ScreenGatePreview extends ScreenGate {
   private _elapsed: number = 0
 
   drawEntry = (ctx: Renderer, pt: Point) => {
-    ctx.fillStyle = "#000"
+    ctx.fillStyle = COLORS.black
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2)
     ctx.fill()
   }
 
   drawExit = (ctx: Renderer, pt: Point) => {
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2
+    ctx.strokeStyle = COLORS.black
+    ctx.lineWidth = STROKE_WIDTHS.base
     ctx.setLineDash([])
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2)
     ctx.stroke()
-    ctx.fillStyle = "#000"
+    ctx.fillStyle = COLORS.black
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2)
     ctx.fill()
@@ -52,16 +53,16 @@ export class ScreenGatePreview extends ScreenGate {
     if (!this._pt) return
     ctx.save()
     ctx.translate(this._pt.x, this._pt.y)
-    ctx.fillStyle = "#fff"
-    ctx.strokeStyle = "#000"
-    ctx.lineWidth = 2
+    ctx.fillStyle = COLORS.white
+    ctx.strokeStyle = COLORS.black
+    ctx.lineWidth = STROKE_WIDTHS.base
     ctx.beginPath()
     ctx.roundRect(-GATE_W / 2, -GATE_H / 2, GATE_W, GATE_H, 5)
     ctx.fill()
     ctx.stroke()
     ctx.save()
     ctx.globalAlpha = 0.5
-    ctx.fillStyle = "#000"
+    ctx.fillStyle = COLORS.black
     ctx.font = "bold 10px monospace"
     ctx.textAlign = "center"
     ctx.textBaseline = "top"
@@ -101,8 +102,7 @@ export class ScreenGatePreview extends ScreenGate {
     this._tokens = tokens ?? []
     this._lines = lines ?? {}
     this._elapsed = elapsed ?? 0
-    const t: AnimTime = { elapsed: this._elapsed, now: Date.now() }
     this.drawStatic(ctx)
-    for (const anim of this.animations) anim.draw(ctx, t)
+    runAnimations(this.animations, ctx, this._elapsed)
   }
 }

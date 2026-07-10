@@ -1,15 +1,8 @@
-let screenGateCounter = 0
+import { createIdCounter } from "../idCounter"
 
-export const syncScreenGateCounter = (ids: string[]) => {
-  let max = 0
-  for (const id of ids) {
-    const m = id.match(/^gate(\d+)$/)
-    if (m) max = Math.max(max, parseInt(m[1]))
-  }
-  screenGateCounter = max
-}
+const screenGateIds = createIdCounter("gate")
 
-const generateScreenGateId = () => `gate${++screenGateCounter}`
+export const syncScreenGateCounter = (ids: string[]) => screenGateIds.sync(ids)
 
 export class ScreenGate {
   id: string
@@ -20,7 +13,7 @@ export class ScreenGate {
   exitKey: string = ""
 
   constructor(linkId: string, id?: string, screenId?: string, targetScreenId = "", entryKey = "", exitKey = "") {
-    this.id = id ?? generateScreenGateId()
+    this.id = id ?? screenGateIds.next()
     this.linkId = linkId
     if (screenId) this.screenId = screenId
     this.targetScreenId = targetScreenId

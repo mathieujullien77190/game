@@ -1,0 +1,13 @@
+{
+  "screens": [
+    "main"
+  ],
+  "lines": [],
+  "links": [],
+  "starts": [],
+  "switches": {},
+  "transformers": [],
+  "inverters": [],
+  "arrival": null,
+  "screenGates": []
+}

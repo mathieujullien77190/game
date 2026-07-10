@@ -35,9 +35,9 @@ Foo/
 ## Timing drawBefore / drawAfter dans drawAllPreview
 
 ```
-drawBefore :  Line · Switch · Transformer · Arrival · Start (vide)
+drawBefore :  Line · Switch · Transformer · Arrival (vide, stocke pt) · Start (vide)
               ↓ tokens ↓
-drawAfter  :  Line · Switch · Start (countdown) · ScreenGate · Inverter
+drawAfter  :  Line · Switch · Start (countdown) · Arrival (anneau + démande, dessiné après pour passer sous le token) · ScreenGate · Inverter
 ```
 
 ## Structure interne des *Preview — Animation
@@ -48,6 +48,7 @@ Chaque `*Preview` sépare le dessin statique des animations via l'interface `Ani
 // Animation.ts
 type AnimTime = { elapsed: number; now: number }
 interface Animation { draw(ctx: Renderer, t: AnimTime): void }
+export const runAnimations = (animations: Animation[], ctx: Renderer, elapsed = 0) => { /* boucle t + anim.draw */ }
 
 // Dans chaque *Preview :
 private drawStatic = (ctx) => { /* formes fixes */ }
@@ -60,10 +61,11 @@ readonly animations: Animation[] = [
 drawBefore = (ctx, ...) => {
   // stocker l'état transitoire (this._pt, etc.)
   this.drawStatic(ctx)
-  const t: AnimTime = { elapsed, now: Date.now() }
-  for (const anim of this.animations) anim.draw(ctx, t)
+  runAnimations(this.animations, ctx, elapsed)
 }
 ```
+
+`runAnimations` (dans `Animation.ts`) factorise la boucle `{elapsed, now: Date.now()} + for (anim of animations) anim.draw(ctx, t)` — ne pas la réinliner manuellement dans un nouveau `*Preview`.
 
 - `t.elapsed` = secondes simulation (passé par le manager via `elapsedSeconds`)
 - `t.now` = `Date.now()` pour les animations temps-réel (pulse token, cop flash)

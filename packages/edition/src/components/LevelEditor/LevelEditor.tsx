@@ -9,6 +9,7 @@ import { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
 import { ScreenGateEditor } from "@drift/engine/entities/ScreenGate/ScreenGateEditor"
 import { CANVAS_H, CANVAS_W, GRID_SIZE } from "@drift/engine/constants"
 import type { Point } from "@drift/engine/types"
+import { distance } from "@drift/engine/Utils/geometry"
 import { useStore } from "store"
 import { useCanvasDraw } from "hooks/useCanvasDraw"
 import { PreviewCanvas } from "components/PreviewCanvas"
@@ -27,8 +28,7 @@ const findElbowFlipAt = (lines: LineEditor[], point: Point) => {
   for (const line of lines) {
     if (line.type !== "elbow") continue
     const corner = line.flip ? { x: line.end.x, y: line.start.y } : { x: line.start.x, y: line.end.y }
-    const dx = point.x - corner.x, dy = point.y - corner.y
-    if (Math.sqrt(dx * dx + dy * dy) <= HIT_RADIUS) return line.id
+    if (distance(point, corner) <= HIT_RADIUS) return line.id
   }
   return null
 }
@@ -36,23 +36,17 @@ const findElbowFlipAt = (lines: LineEditor[], point: Point) => {
 const findControlPointAt = (lines: LineEditor[], point: Point) => {
   for (const line of lines) {
     if (line.type !== "curve") continue
-    const d1x = point.x - line.cp1.x; const d1y = point.y - line.cp1.y
-    if (Math.sqrt(d1x * d1x + d1y * d1y) <= HIT_RADIUS) return { lineId: line.id, cp: "cp1" as const }
-    const d2x = point.x - line.cp2.x; const d2y = point.y - line.cp2.y
-    if (Math.sqrt(d2x * d2x + d2y * d2y) <= HIT_RADIUS) return { lineId: line.id, cp: "cp2" as const }
+    if (distance(point, line.cp1) <= HIT_RADIUS) return { lineId: line.id, cp: "cp1" as const }
+    if (distance(point, line.cp2) <= HIT_RADIUS) return { lineId: line.id, cp: "cp2" as const }
   }
   return null
 }
 
 const findEndpointAt = (lines: LineEditor[], point: Point) => {
   for (const line of lines) {
-    const dsx = point.x - line.start.x
-    const dsy = point.y - line.start.y
-    if (Math.sqrt(dsx * dsx + dsy * dsy) <= HIT_RADIUS)
+    if (distance(point, line.start) <= HIT_RADIUS)
       return { lineId: line.id, endpoint: "start" as const }
-    const dex = point.x - line.end.x
-    const dey = point.y - line.end.y
-    if (Math.sqrt(dex * dex + dey * dey) <= HIT_RADIUS)
+    if (distance(point, line.end) <= HIT_RADIUS)
       return { lineId: line.id, endpoint: "end" as const }
   }
   return null

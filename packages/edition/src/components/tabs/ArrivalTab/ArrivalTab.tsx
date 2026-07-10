@@ -6,7 +6,7 @@ import * as S from "./UI"
 
 
 export const ArrivalTab = () => {
-  const { arrival, revision: _revision, mode, setMode, removeArrival, addArrivalDemand, removeArrivalDemand, updateArrivalDemand } = useStore(
+  const { arrival, revision: _revision, mode, setMode, removeArrival, addArrivalDemand, removeArrivalDemand, updateArrivalDemand, setArrivalQueueSide } = useStore(
     useShallow((s) => ({
       arrival: s.arrival,
       revision: s.revision,
@@ -16,6 +16,7 @@ export const ArrivalTab = () => {
       addArrivalDemand: s.addArrivalDemand,
       removeArrivalDemand: s.removeArrivalDemand,
       updateArrivalDemand: s.updateArrivalDemand,
+      setArrivalQueueSide: s.setArrivalQueueSide,
     }))
   )
 
@@ -35,6 +36,17 @@ export const ArrivalTab = () => {
             <S.Info>{arrival.lineId} [{arrival.endpoint}]</S.Info>
             <S.DeleteButton onClick={() => removeArrival()}>✕</S.DeleteButton>
           </S.Header>
+
+          <S.Field>
+            <S.FieldLabel>Queue side</S.FieldLabel>
+            <S.QueueSideRow>
+              <S.TypeToggle $active={arrival.queueSide === "top"} onClick={() => setArrivalQueueSide("top")}>Haut</S.TypeToggle>
+              <S.TypeToggle $active={arrival.queueSide === "bottom"} onClick={() => setArrivalQueueSide("bottom")}>Bas</S.TypeToggle>
+              <S.TypeToggle $active={arrival.queueSide === "left"} onClick={() => setArrivalQueueSide("left")}>Gauche</S.TypeToggle>
+              <S.TypeToggle $active={arrival.queueSide === "right"} onClick={() => setArrivalQueueSide("right")}>Droite</S.TypeToggle>
+              <S.TypeToggle $active={arrival.queueSide === "hidden"} onClick={() => setArrivalQueueSide("hidden")}>Masqué</S.TypeToggle>
+            </S.QueueSideRow>
+          </S.Field>
 
           <S.AddDemandButton onClick={() => addArrivalDemand()}>
             + Add Demand

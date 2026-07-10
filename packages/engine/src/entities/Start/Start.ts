@@ -1,14 +1,10 @@
+import { createIdCounter } from "../idCounter"
+
 export type TokenConfig = { id: string; color: string; type: string; speed: number }
 
-let startCounter = 1
+const startIds = createIdCounter("start")
 
-export const syncStartCounter = (ids: string[]) => {
-  const max = ids.reduce((m, id) => {
-    const n = parseInt(id.replace("start", ""))
-    return isNaN(n) ? m : Math.max(m, n)
-  }, 0)
-  if (max >= startCounter) startCounter = max + 1
-}
+export const syncStartCounter = (ids: string[]) => startIds.sync(ids)
 
 export class Start {
   id: string
@@ -20,7 +16,7 @@ export class Start {
   tokens: TokenConfig[] = []
 
   constructor(lineId: string, endpoint: "start" | "end", delay: number = 6, id?: string, screenId?: string, firstDelay?: number, tokens: TokenConfig[] = []) {
-    this.id = id ?? `start${startCounter++}`
+    this.id = id ?? startIds.next()
     this.lineId = lineId
     this.endpoint = endpoint
     this.delay = delay

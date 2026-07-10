@@ -5,7 +5,7 @@ import { EMPTY_MAP } from "store/actions/mapActions"
 import * as S from "./UI"
 
 export const JsonTab = () => {
-  const { editorManager, starts, switches, switchLinks, revision, loadMap } = useStore(
+  const { editorManager, starts, switches, switchLinks, revision, loadMap, mapName, availableMaps, switchMap, createMap } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       starts: s.starts,
@@ -13,6 +13,10 @@ export const JsonTab = () => {
       switchLinks: s.switchLinks,
       revision: s.revision,
       loadMap: s.loadMap,
+      mapName: s.mapName,
+      availableMaps: s.availableMaps,
+      switchMap: s.switchMap,
+      createMap: s.createMap,
     }))
   )
 
@@ -24,6 +28,14 @@ export const JsonTab = () => {
 
   return (
     <S.Container>
+      <S.MapRow>
+        {availableMaps.map((name) => (
+          <S.MapButton key={name} $active={name === mapName} onClick={() => switchMap(name)}>
+            {name}
+          </S.MapButton>
+        ))}
+        <S.NewMapButton onClick={() => createMap()}>+ New Map</S.NewMapButton>
+      </S.MapRow>
       <S.ButtonRow>
         <S.ClearButton onClick={() => loadMap(EMPTY_MAP)}>Clear map</S.ClearButton>
         <S.CopyButton onClick={() => navigator.clipboard.writeText(json)}>Copy</S.CopyButton>
