@@ -97,6 +97,9 @@ export const TransformerTab = () => {
                   <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "square"} onClick={() => updateTransformerTargetType(tr.id, "square")}>
                     □ square
                   </Button>
+                  <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "triangle"} onClick={() => updateTransformerTargetType(tr.id, "triangle")}>
+                    △ triangle
+                  </Button>
                 </ToggleGroup>
               </S.Row>
             )}

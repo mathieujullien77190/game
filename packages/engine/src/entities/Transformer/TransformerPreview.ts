@@ -1,6 +1,7 @@
 import type { Renderer } from "../../render/Renderer"
 import type { Point } from "../../types"
 import { COLORS, STROKE_WIDTHS, RADII } from "../../theme"
+import { traceTriangle } from "../../Utils/geometry"
 import { Transformer } from "./Transformer"
 
 const ORBIT_R = RADII.ring
@@ -100,9 +101,15 @@ export class TransformerPreview extends Transformer {
       ctx.fill()
     } else if (this.type === "shape") {
       ctx.fillStyle = COLORS.gray
-      ctx.beginPath()
-      if (this.targetType === "square") ctx.roundRect(-5, -5, 10, 10, 2)
-      else ctx.arc(0, 0, 5, 0, Math.PI * 2)
+      if (this.targetType === "square") {
+        ctx.beginPath()
+        ctx.roundRect(-5, -5, 10, 10, 2)
+      } else if (this.targetType === "triangle") {
+        traceTriangle(ctx, 0, 0, 7)
+      } else {
+        ctx.beginPath()
+        ctx.arc(0, 0, 5, 0, Math.PI * 2)
+      }
       ctx.fill()
     } else if (this.type === "fade") {
       ctx.globalAlpha = this.amount

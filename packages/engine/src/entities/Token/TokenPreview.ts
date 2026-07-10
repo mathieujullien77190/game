@@ -3,6 +3,7 @@ import { POINT_SPACING } from "../../constants"
 import type { Point } from "../../types"
 import { runAnimations, type Animation } from "../Animation"
 import { COLORS, STROKE_WIDTHS } from "../../theme"
+import { traceTriangle } from "../../Utils/geometry"
 import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
@@ -10,6 +11,19 @@ import type { TransformerPreview } from "../Transformer/TransformerPreview"
 import type { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview"
 import type { SwitchPreview } from "../Switch/SwitchPreview"
 import { Token } from "./Token"
+
+// Symétrie rotationnelle par forme : période après laquelle l'orientation se répète visuellement
+// (carré : 4 → π/2 ; triangle équilatéral : 3 → 2π/3). 0 = pas d'état "angled" (round, cop).
+const ROTATION_PERIOD: Partial<Record<string, number>> = { square: Math.PI / 2, triangle: (Math.PI * 2) / 3 }
+const rotationPeriod = (type: string) => ROTATION_PERIOD[type] ?? 0
+
+// Incrément du transformer "rotate" : un tour complet + la moitié de la période de la forme
+// (flourish visuel de spin qui atterrit pile sur l'état "angled" opposé). Sans période
+// particulière (round/cop), on garde l'incrément historique du carré (sans effet visible).
+const rotateStep = (type: string) => {
+  const p = rotationPeriod(type)
+  return p > 0 ? Math.PI * 2 + p / 2 : Math.PI * 2.25
+}
 
 export type TransitionCtx = {
   arrivalByKey: Record<string, ArrivalPreview>
@@ -116,13 +130,13 @@ export class TokenPreview extends Token {
     if (arrival) {
       const demand = arrival.demands[arrival.currentDemandIndex]
       const tokenColor = this.displayColor || (this.color as string)
-      const isSquare = (this.type as string) === "square"
-      const norm = isSquare ? (((this.targetRotationOffset % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2)) : 0
-      const tokenAngled = isSquare && norm > Math.PI / 8
+      const period = rotationPeriod(this.type as string)
+      const norm = period > 0 ? (((this.targetRotationOffset % period) + period) % period) : 0
+      const tokenAngled = period > 0 && norm > period / 4
       const matches = !!demand
         && demand.color === tokenColor
         && demand.type === (this.type as string)
-        && (demand.type !== "square" || demand.angled === tokenAngled)
+        && (period === 0 || demand.angled === tokenAngled)
       if (matches) {
         const n = arrival.demands.length
         arrival.flashColor = COLORS.arrivalMatch
@@ -141,7 +155,7 @@ export class TokenPreview extends Token {
 
     const linkId = ctx.linkByEndpointKey[`${this.lineId}::${arrivedAt}`]
     const transformer = linkId ? ctx.transformers[ctx.transformerByLinkId[linkId]] : undefined
-    if (transformer?.type === "rotate") this.targetRotationOffset += Math.PI * 2.25
+    if (transformer?.type === "rotate") this.targetRotationOffset += rotateStep(this.type as string)
     const inverterEffect = linkId ? ctx.inverterLinkMap.get(linkId) : undefined
     if (inverterEffect === "invert") isInverted = !isInverted
     else if (inverterEffect === "grayscale") isGrayscale = !isGrayscale
@@ -289,6 +303,20 @@ export class TokenPreview extends Token {
       ctx.roundRect(-9, -9, 18, 18, 3)
       ctx.fill()
       ctx.restore()
+    } else if (type === "triangle") {
+      const angle = (this.direction === -1 ? (pt.angle ?? 0) + Math.PI : (pt.angle ?? 0)) + this.rotationOffset
+      ctx.save()
+      ctx.translate(pt.x, pt.y)
+      if (moving) {
+        ctx.globalAlpha = 0.1 * eff
+        traceTriangle(ctx, 0, 0, 11 * 1.8, angle)
+        ctx.fill()
+      }
+      ctx.globalAlpha = eff
+      ctx.scale(pulse, pulse)
+      traceTriangle(ctx, 0, 0, 11, angle)
+      ctx.fill()
+      ctx.restore()
     } else {
       if (moving) {
         ctx.globalAlpha = 0.1 * eff
@@ -316,13 +344,20 @@ export class TokenPreview extends Token {
     const seed = this.explosionSeed
     const rng = (i: number) => { const n = Math.sin(seed + i * 9301 + 49297) * 233280; return n - Math.floor(n) }
     const isSquare = this.type === "square"
+    const isTriangle = this.type === "triangle"
 
     const drawPiece = (px: number, py: number, r: number, alpha: number) => {
       ctx.globalAlpha = Math.max(0, alpha * fade)
       ctx.fillStyle = color
-      ctx.beginPath()
-      if (isSquare) ctx.rect(px - r, py - r, r * 2, r * 2)
-      else ctx.arc(px, py, r, 0, Math.PI * 2)
+      if (isSquare) {
+        ctx.beginPath()
+        ctx.rect(px - r, py - r, r * 2, r * 2)
+      } else if (isTriangle) {
+        traceTriangle(ctx, px, py, r)
+      } else {
+        ctx.beginPath()
+        ctx.arc(px, py, r, 0, Math.PI * 2)
+      }
       ctx.fill()
     }
 
@@ -348,9 +383,15 @@ export class TokenPreview extends Token {
     ctx.fillStyle = color
     ctx.strokeStyle = COLORS.black
     ctx.lineWidth = STROKE_WIDTHS.hairline
-    ctx.beginPath()
-    if (this.type === "square") ctx.rect(x - 3, y - 3, 6, 6)
-    else ctx.arc(x, y, 3, 0, Math.PI * 2)
+    if (this.type === "square") {
+      ctx.beginPath()
+      ctx.rect(x - 3, y - 3, 6, 6)
+    } else if (this.type === "triangle") {
+      traceTriangle(ctx, x, y, 5)
+    } else {
+      ctx.beginPath()
+      ctx.arc(x, y, 3, 0, Math.PI * 2)
+    }
     ctx.fill()
     ctx.stroke()
   }

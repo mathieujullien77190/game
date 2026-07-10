@@ -7,7 +7,7 @@ import { DeleteButton } from "components/ui/DeleteButton"
 import { Card } from "components/ui/Card"
 import { Divider } from "components/ui/Divider"
 import { TokenShape } from "components/ui/TokenShape"
-import { TOKEN_COLORS, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS, ANGLED_LABEL, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
 import { useStore } from "store"
 import * as S from "./UI"
 
@@ -66,12 +66,12 @@ export const StartTab = () => {
             {start.tokens.map((token) => (
               <Card key={token.id} $nested>
                 <S.TokenHeader>
-                  <TokenShape $color={token.color} $round={token.type === "round"} />
+                  <TokenShape $color={token.color} $shape={token.type} />
                   <S.TokenId>{token.id}</S.TokenId>
                   <DeleteButton onClick={() => removeTokenFromStart(start.id, token.id)} />
                 </S.TokenHeader>
                 <ToggleGroup>
-                  {(["round", "square"] as TokenType[]).map((t) => (
+                  {(["round", "square", "triangle"] as TokenType[]).map((t) => (
                     <Button key={t} $size="sm" $accent="#333" $active={token.type === t} onClick={() => updateStartToken(start.id, token.id, { type: t })}>
                       {t}
                     </Button>
@@ -87,10 +87,10 @@ export const StartTab = () => {
                   value={token.speed}
                   onChange={(v) => updateStartToken(start.id, token.id, { speed: v })}
                 />
-                {token.type === "square" && (
+                {ANGLED_LABEL[token.type as TokenType] && (
                   <ToggleGroup>
                     <Button $size="sm" $accent="#333" $active={!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: false })}>0°</Button>
-                    <Button $size="sm" $accent="#333" $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>45°</Button>
+                    <Button $size="sm" $accent="#333" $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>{ANGLED_LABEL[token.type as TokenType]}</Button>
                   </ToggleGroup>
                 )}
               </Card>

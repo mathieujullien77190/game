@@ -3,7 +3,7 @@
 ## Structure (4 fichiers, pas 3)
 
 - `Arrival.ts` — base : `id`, `lineId`, `endpoint`, `demands: Demand[]`, `screenId`, `queueSide`. Deux compteurs d'ID distincts via `createIdCounter` : `arrival` (id de l'entité) et `demand` (id de chaque `Demand`, créée par `makeDemand()`). `queueSide: "top" | "bottom" | "left" | "right" | "hidden"` contrôle où s'affiche la file des prochaines demandes en preview.
-- `demandShape.ts` — helper partagé `traceDemandShape(ctx, x, y, type, angled, lineAngle=0, r=8)` : construit le path (cercle ou carré arrondi, orienté sur `lineAngle`, +45° si `angled`) sans fill/stroke. `lineAngle` = angle de la ligne au point d'arrivée (cohérent avec la rotation réelle d'un token carré, cf. `Token/CLAUDE.md`), pas l'angle écran. Éditeur et Preview l'utilisent puis appliquent leur propre style (l'éditeur ajoute un contour noir, le preview non).
+- `demandShape.ts` — helper partagé `traceDemandShape(ctx, x, y, type, angled, lineAngle=0, r=8)` : construit le path (cercle, carré arrondi, ou triangle via `traceTriangle`) orienté sur `lineAngle`, +45° si `angled` pour un carré ou +60° pour un triangle (voir `Token/CLAUDE.md` pour la logique de période par forme), sans fill/stroke. `lineAngle` = angle de la ligne au point d'arrivée (cohérent avec la rotation réelle du token, cf. `Token/CLAUDE.md`), pas l'angle écran. Éditeur et Preview l'utilisent puis appliquent leur propre style (l'éditeur ajoute un contour noir, le preview non).
 - `ArrivalEditor.ts` — dessine un disque noir (r14) + soit un carré blanc (aucune demand), soit le premier `Demand` par-dessus. Exporte aussi `drawArrivalEmptyShape(ctx, pt)` (disque + carré blanc), réutilisé tel quel par `EditorManager` pour le ghost-preview au moment de placer une arrivée.
 - `ArrivalPreview.ts` — toute la logique visuelle de simulation.
 
@@ -19,7 +19,7 @@
 
 ## Matching couleur/forme/orientation
 
-La vérification (couleur ET type ET, pour un carré, orientation) ne vit **pas** dans cette classe mais dans `TokenPreview.transition()` (voir `Token/CLAUDE.md`). L'orientation attendue (`Demand.angled`) est comparée à l'orientation réelle du token, dérivée de `targetRotationOffset % (π/2)` (chaque passage dans un transformer `rotate` ajoute `2.25π`, soit `+45°` net). En cas de mismatch : flash rouge, mais `arcTarget`/`currentDemandIndex` ne bougent pas — la demande reste ouverte pour le prochain token.
+La vérification (couleur ET type ET, pour les formes à symétrie rotationnelle, orientation) ne vit **pas** dans cette classe mais dans `TokenPreview.transition()` (voir `Token/CLAUDE.md`). L'orientation attendue (`Demand.angled`) est comparée à l'orientation réelle du token, dérivée de `targetRotationOffset % period` où `period` dépend de la forme (carré : π/2, triangle : 2π/3 ; round/cop n'ont pas de `period` donc pas de vérification d'orientation). En cas de mismatch : flash rouge, mais `arcTarget`/`currentDemandIndex` ne bougent pas — la demande reste ouverte pour le prochain token.
 
 ## Plusieurs arrivées
 

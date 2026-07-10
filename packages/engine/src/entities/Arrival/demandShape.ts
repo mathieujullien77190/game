@@ -1,4 +1,5 @@
 import type { Renderer } from "../../render/Renderer"
+import { traceTriangle } from "../../Utils/geometry"
 
 export const traceDemandShape = (ctx: Renderer, x: number, y: number, type: string, angled: boolean, lineAngle = 0, r = 8) => {
   if (type === "square") {
@@ -8,6 +9,8 @@ export const traceDemandShape = (ctx: Renderer, x: number, y: number, type: stri
     ctx.beginPath()
     ctx.roundRect(-r, -r, r * 2, r * 2, r * 0.375)
     ctx.restore()
+  } else if (type === "triangle") {
+    traceTriangle(ctx, x, y, r + 2, lineAngle + (angled ? Math.PI / 3 : 0))
   } else {
     ctx.beginPath()
     ctx.arc(x, y, r, 0, Math.PI * 2)

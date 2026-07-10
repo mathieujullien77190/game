@@ -8,6 +8,6 @@
   "switches": {},
   "transformers": [],
   "inverters": [],
-  "arrival": null,
+  "arrivals": [],
   "screenGates": []
 }

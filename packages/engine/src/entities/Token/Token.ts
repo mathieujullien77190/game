@@ -4,7 +4,12 @@ const tokenIds = createIdCounter("token")
 
 export const syncTokenCounter = (ids: string[]) => tokenIds.sync(ids)
 
-export type TokenType = "round" | "square" | "cop"
+export type TokenType = "round" | "square" | "cop" | "triangle"
+
+// Label affiché pour l'état "angled" de chaque type ayant une orientation alternative
+// (carré : symétrie 4, 90°/2 = 45° ; triangle : symétrie 3, 120°/2 = 60°). Absent des types
+// sans état angled (round, cop) — voir period()/ANGLED_LABEL dans TokenPreview.ts.
+export const ANGLED_LABEL: Partial<Record<TokenType, string>> = { square: "45°", triangle: "60°" }
 
 export const TOKEN_COLORS = [
   "#e53935",

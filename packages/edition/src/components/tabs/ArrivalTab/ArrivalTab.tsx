@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
-import { TOKEN_COLORS, type TokenColor } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS, ANGLED_LABEL, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
@@ -66,14 +66,15 @@ export const ArrivalTab = () => {
                     <ToggleGroup>
                       <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "round"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "round" })}>●</Button>
                       <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "square"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "square" })}>■</Button>
+                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "triangle"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "triangle" })}>▲</Button>
                     </ToggleGroup>
                     <DeleteButton onClick={() => removeArrivalDemand(arrival.id, d.id)} />
                   </S.DemandRow>
                   <ColorPicker palette={TOKEN_COLORS} value={d.color as any} onChange={(c) => updateArrivalDemand(arrival.id, d.id, { color: c as TokenColor })} />
-                  {d.type === "square" && (
+                  {ANGLED_LABEL[d.type as TokenType] && (
                     <ToggleGroup>
                       <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={!d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: false })}>0°</Button>
-                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: true })}>45°</Button>
+                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: true })}>{ANGLED_LABEL[d.type as TokenType]}</Button>
                     </ToggleGroup>
                   )}
                 </Card>
