@@ -234,6 +234,18 @@
       "activated": true
     },
     {
+      "id": "lineD::end-lineE::start",
+      "line1": {
+        "lineId": "lineD",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineE",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
       "id": "lineA::end-lineF::start",
       "line1": {
         "lineId": "lineA",
@@ -337,18 +349,6 @@
       },
       "line2": {
         "lineId": "lineI",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
-      "id": "lineD::end-lineE::start",
-      "line1": {
-        "lineId": "lineD",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineE",
         "endpoint": "start"
       },
       "activated": true

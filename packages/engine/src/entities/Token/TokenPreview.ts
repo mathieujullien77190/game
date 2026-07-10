@@ -3,7 +3,7 @@ import { POINT_SPACING } from "../../constants"
 import type { Point } from "../../types"
 import { runAnimations, type Animation } from "../Animation"
 import { COLORS, STROKE_WIDTHS } from "../../theme"
-import { traceTriangle } from "../../Utils/geometry"
+import { traceTriangle, traceShapeMorph } from "../../Utils/geometry"
 import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
 import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
@@ -16,6 +16,12 @@ import { Token } from "./Token"
 // (carré : 4 → π/2 ; triangle équilatéral : 3 → 2π/3). 0 = pas d'état "angled" (round, cop).
 const ROTATION_PERIOD: Partial<Record<string, number>> = { square: Math.PI / 2, triangle: (Math.PI * 2) / 3 }
 const rotationPeriod = (type: string) => ROTATION_PERIOD[type] ?? 0
+
+// Rayon d'affichage par forme (round/square: 9, triangle un peu plus grand pour compenser sa
+// surface visuellement plus faible à circumradius égal — cf. drawShape). "cop" et types inconnus
+// retombent sur 9 (round), cohérent avec le fallback de shapeRadiusAt.
+const SHAPE_RADIUS: Partial<Record<string, number>> = { round: 9, square: 9, triangle: 11 }
+const shapeRadius = (type: string) => SHAPE_RADIUS[type] ?? 9
 
 // Incrément du transformer "rotate" : un tour complet + la moitié de la période de la forme
 // (flourish visuel de spin qui atterrit pile sur l'état "angled" opposé). Sans période
@@ -336,6 +342,34 @@ export class TokenPreview extends Token {
     ctx.globalAlpha = 1
   }
 
+  // Transformer "shape" en cours : contour interpolé entre l'ancienne et la nouvelle forme
+  // (traceShapeMorph) plutôt qu'un fade entre deux formes superposées — cf. Token/CLAUDE.md.
+  private drawMorphingShape = (ctx: Renderer, pt: Point, eff = 1) => {
+    const color = this.displayColor || (this.color as string)
+    const moving = this.direction !== 0 && this.currentSpeed > 0
+    const phase = (parseInt(this.id.replace(/\D/g, "") || "0") * 1.7) % (Math.PI * 2)
+    const pulse = 1 + Math.sin(Date.now() / 700 + phase) * 0.13
+    const angle = (this.direction === -1 ? (pt.angle ?? 0) + Math.PI : (pt.angle ?? 0)) + this.rotationOffset
+
+    const rFrom = shapeRadius(this.type as string)
+    const rTo = shapeRadius(this.pendingType)
+
+    ctx.fillStyle = color
+    ctx.save()
+    ctx.translate(pt.x, pt.y)
+    if (moving) {
+      ctx.globalAlpha = 0.1 * eff
+      traceShapeMorph(ctx, 0, 0, this.type as string, this.pendingType, rFrom * 1.8, rTo * 1.8, this.transformProgress, angle)
+      ctx.fill()
+    }
+    ctx.globalAlpha = eff
+    ctx.scale(pulse, pulse)
+    traceShapeMorph(ctx, 0, 0, this.type as string, this.pendingType, rFrom, rTo, this.transformProgress, angle)
+    ctx.fill()
+    ctx.restore()
+    ctx.globalAlpha = 1
+  }
+
   drawExplosion = (ctx: Renderer, pt: Point) => {
     const progress = this.explosionProgress
     const fade = 1 - this.explosionFadeProgress
@@ -408,8 +442,7 @@ export class TokenPreview extends Token {
     const eff = this._eff
     const pt = this._pt
     if (this.isTransforming && this.transformProgress > 0 && this.transformMode === "shape") {
-      this.drawShape(ctx, pt, this.type as string, eff * (1 - this.transformProgress))
-      this.drawShape(ctx, pt, this.pendingType, eff * this.transformProgress)
+      this.drawMorphingShape(ctx, pt, eff)
       return
     }
     this.drawShape(ctx, pt, this.type as string, eff)
