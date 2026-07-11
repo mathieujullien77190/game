@@ -21,7 +21,11 @@ export const TOKEN_COLORS = [
   "#8e24aa",
   "#e91e63",
   "#546e7a",
-  "#222222",
+  "#f8bbd0",
+  "#ce93d8",
+  "#90caf9",
+  "#a5d6a7",
+  "#ffe0b2",
 ] as const
 
 export type TokenColor = (typeof TOKEN_COLORS)[number]

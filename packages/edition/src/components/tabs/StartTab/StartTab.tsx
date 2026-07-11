@@ -1,6 +1,7 @@
 import { useShallow } from "zustand/react/shallow"
 import { NumberInput } from "components/form/NumberInput"
 import { ColorPicker } from "components/form/ColorPicker"
+import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { DeleteButton } from "components/ui/DeleteButton"
@@ -70,28 +71,35 @@ export const StartTab = () => {
                   <S.TokenId>{token.id}</S.TokenId>
                   <DeleteButton onClick={() => removeTokenFromStart(start.id, token.id)} />
                 </S.TokenHeader>
-                <ToggleGroup>
-                  {(["round", "square", "triangle"] as TokenType[]).map((t) => (
-                    <Button key={t} $size="sm" $accent="#333" $active={token.type === t} onClick={() => updateStartToken(start.id, token.id, { type: t })}>
-                      {t}
-                    </Button>
-                  ))}
-                </ToggleGroup>
-                <ColorPicker
-                  palette={TOKEN_COLORS}
-                  value={token.color as TokenColor}
-                  onChange={(color) => updateStartToken(start.id, token.id, { color: color as TokenColor })}
-                />
+                <Divider />
+                <Field label="Type" $direction="row">
+                  <ToggleGroup>
+                    {(["round", "square", "triangle"] as TokenType[]).map((t) => (
+                      <Button key={t} $size="sm" $accent="#333" $active={token.type === t} onClick={() => updateStartToken(start.id, token.id, { type: t })}>
+                        {t}
+                      </Button>
+                    ))}
+                  </ToggleGroup>
+                </Field>
+                <Field label="Color" $direction="row">
+                  <ColorPicker
+                    palette={TOKEN_COLORS}
+                    value={token.color as TokenColor}
+                    onChange={(color) => updateStartToken(start.id, token.id, { color: color as TokenColor })}
+                  />
+                </Field>
                 <NumberInput
                   label="Speed"
                   value={token.speed}
                   onChange={(v) => updateStartToken(start.id, token.id, { speed: v })}
                 />
                 {ANGLED_LABEL[token.type as TokenType] && (
-                  <ToggleGroup>
-                    <Button $size="sm" $accent="#333" $active={!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: false })}>0°</Button>
-                    <Button $size="sm" $accent="#333" $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>{ANGLED_LABEL[token.type as TokenType]}</Button>
-                  </ToggleGroup>
+                  <Field label="Angle" $direction="row">
+                    <ToggleGroup>
+                      <Button $size="sm" $accent="#333" $active={!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: false })}>0°</Button>
+                      <Button $size="sm" $accent="#333" $active={!!token.angled} onClick={() => updateStartToken(start.id, token.id, { angled: true })}>{ANGLED_LABEL[token.type as TokenType]}</Button>
+                    </ToggleGroup>
+                  </Field>
                 )}
               </Card>
             ))}

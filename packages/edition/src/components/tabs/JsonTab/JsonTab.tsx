@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { serializeMap } from "@drift/engine/Map/mapJson"
@@ -26,6 +27,25 @@ export const JsonTab = () => {
 
   const json = JSON.stringify(serializeMap(editorManager, starts, switches, switchLinks, transformers, arrivals, inverters, screens, screenGates, screenTimeMultipliers), null, 2)
 
+  const [prevRevision, setPrevRevision] = useState(revision)
+  const [text, setText] = useState(json)
+  const [error, setError] = useState<string | null>(null)
+
+  if (revision !== prevRevision) {
+    setPrevRevision(revision)
+    setText(json)
+    setError(null)
+  }
+
+  const handleApply = () => {
+    try {
+      loadMap(JSON.parse(text))
+      setError(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <S.Container>
       <S.MapRow>
@@ -39,8 +59,10 @@ export const JsonTab = () => {
       <S.ButtonRow>
         <S.ClearButton onClick={() => loadMap(EMPTY_MAP)}>Clear map</S.ClearButton>
         <S.CopyButton onClick={() => navigator.clipboard.writeText(json)}>Copy</S.CopyButton>
+        <S.ApplyButton onClick={handleApply}>Apply JSON</S.ApplyButton>
       </S.ButtonRow>
-      <S.Pre key={revision}>{json}</S.Pre>
+      {error && <S.ErrorText>{error}</S.ErrorText>}
+      <S.TextArea value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
     </S.Container>
   )
 }

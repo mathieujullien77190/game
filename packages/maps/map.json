@@ -1,6 +1,7 @@
 {
   "screens": [
-    "main"
+    "main",
+    "screen1"
   ],
   "lines": [
     {
@@ -21,7 +22,9 @@
       "cp2": {
         "x": 200,
         "y": 573.3333333333334
-      }
+      },
+      "boost": 0.4,
+      "color": "#e53935"
     },
     {
       "id": "lineB",
@@ -182,6 +185,67 @@
         "x": 260,
         "y": 346.6666666666667
       }
+    },
+    {
+      "id": "lineJ",
+      "start": {
+        "x": 40,
+        "y": 300
+      },
+      "end": {
+        "x": 40,
+        "y": 120
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 40,
+        "y": 240
+      },
+      "cp2": {
+        "x": 40,
+        "y": 180
+      }
+    },
+    {
+      "id": "lineK",
+      "start": {
+        "x": 120,
+        "y": 300
+      },
+      "end": {
+        "x": 120,
+        "y": 120
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 120,
+        "y": 240
+      },
+      "cp2": {
+        "x": 120,
+        "y": 180
+      }
+    },
+    {
+      "id": "lineL",
+      "start": {
+        "x": 200,
+        "y": 600
+      },
+      "end": {
+        "x": 200,
+        "y": 140
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 200,
+        "y": 446.66666666666663
+      },
+      "cp2": {
+        "x": 200,
+        "y": 293.3333333333333
+      },
+      "screenId": "screen1"
     }
   ],
   "links": [
@@ -352,6 +416,30 @@
         "endpoint": "start"
       },
       "activated": true
+    },
+    {
+      "id": "lineC::end-lineJ::start",
+      "line1": {
+        "lineId": "lineC",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineJ",
+        "endpoint": "start"
+      },
+      "activated": true
+    },
+    {
+      "id": "lineE::end-lineK::start",
+      "line1": {
+        "lineId": "lineE",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineK",
+        "endpoint": "start"
+      },
+      "activated": true
     }
   ],
   "starts": [
@@ -363,19 +451,19 @@
       "tokens": [
         {
           "id": "token3",
-          "color": "#e53935",
+          "color": "#ce93d8",
           "type": "round",
           "speed": 40
         },
         {
           "id": "token4",
-          "color": "#00acc1",
+          "color": "#a5d6a7",
           "type": "square",
           "speed": 40
         },
         {
           "id": "token5",
-          "color": "#43a047",
+          "color": "#ffe0b2",
           "type": "triangle",
           "speed": 40
         }
@@ -429,7 +517,44 @@
       "targetType": "triangle"
     }
   ],
-  "inverters": [],
-  "arrivals": [],
-  "screenGates": []
+  "inverters": [
+    {
+      "id": "inv1",
+      "linkId": "lineC::end-lineJ::start",
+      "effect": "dark"
+    }
+  ],
+  "arrivals": [
+    {
+      "id": "arrival1",
+      "lineId": "lineJ",
+      "endpoint": "end",
+      "demands": [
+        {
+          "id": "demand1",
+          "color": "#fb8c00",
+          "type": "round",
+          "angled": false
+        },
+        {
+          "id": "demand2",
+          "color": "#e53935",
+          "type": "square",
+          "angled": false
+        }
+      ]
+    }
+  ],
+  "screenGates": [
+    {
+      "id": "gate1",
+      "linkId": "lineE::end-lineK::start",
+      "targetScreenId": "screen1",
+      "entryKey": "lineL::start",
+      "exitKey": "lineL::end"
+    }
+  ],
+  "screenTimeMultipliers": {
+    "screen1": 1.7
+  }
 }

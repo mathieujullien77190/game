@@ -1,9 +1,11 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
+import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { DeleteButton } from "components/ui/DeleteButton"
 import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
 import * as S from "./UI"
 
 const INVERTER_ACCENT = "#7b1fa2"
@@ -40,17 +42,20 @@ export const InverterTab = () => {
               <S.InverterId>{inv.id}</S.InverterId>
               <DeleteButton onClick={() => removeInverter(inv.id)} />
             </S.Row>
-            <ToggleGroup $equal>
-              <Button $size="sm" $accent={INVERTER_ACCENT} $active={!inv.effect || inv.effect === "invert"} onClick={() => updateInverterEffect(inv.id, "invert")}>
-                invert
-              </Button>
-              <Button $size="sm" $accent={INVERTER_ACCENT} $active={inv.effect === "grayscale"} onClick={() => updateInverterEffect(inv.id, "grayscale")}>
-                gray
-              </Button>
-              <Button $size="sm" $accent={INVERTER_ACCENT} $active={inv.effect === "dark"} onClick={() => updateInverterEffect(inv.id, "dark")}>
-                dark
-              </Button>
-            </ToggleGroup>
+            <Divider />
+            <Field label="type" $direction="row">
+              <ToggleGroup $wrap>
+                <Button $size="sm" $accent={INVERTER_ACCENT} $active={!inv.effect || inv.effect === "invert"} onClick={() => updateInverterEffect(inv.id, "invert")}>
+                  invert
+                </Button>
+                <Button $size="sm" $accent={INVERTER_ACCENT} $active={inv.effect === "grayscale"} onClick={() => updateInverterEffect(inv.id, "grayscale")}>
+                  gray
+                </Button>
+                <Button $size="sm" $accent={INVERTER_ACCENT} $active={inv.effect === "dark"} onClick={() => updateInverterEffect(inv.id, "dark")}>
+                  dark
+                </Button>
+              </ToggleGroup>
+            </Field>
           </Card>
         ))}
       </S.InverterList>

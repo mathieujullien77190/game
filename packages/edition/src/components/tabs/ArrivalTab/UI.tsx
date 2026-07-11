@@ -12,20 +12,10 @@ export const ArrivalList = styled.div`
   gap: 10px;
 `
 
-export const ArrivalCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`
-
 export const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
 `
 
 export const Info = styled.span`
@@ -35,17 +25,34 @@ export const Info = styled.span`
   color: #555;
 `
 
-export const AddDemandButton = styled.button`
-  width: 100%;
-  padding: 6px;
-  background: transparent;
-  border: 1px dashed #ccc;
-  border-radius: 6px;
-  cursor: pointer;
+export const DemandSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
+
+export const DemandSectionLabel = styled.span`
   font-family: monospace;
   font-size: 10px;
-  color: #888;
-  &:hover { border-color: #888; color: #333; }
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+`
+
+export const AddDemandButton = styled.button`
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  color: #555;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 5px;
+
+  &:hover {
+    border-color: #333;
+    color: #333;
+  }
 `
 
 export const DemandList = styled.div`
@@ -54,8 +61,15 @@ export const DemandList = styled.div`
   gap: 6px;
 `
 
-export const DemandRow = styled.div`
+export const DemandHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
+`
+
+export const DemandId = styled.span`
+  font-family: monospace;
+  font-size: 10px;
+  color: #777;
+  flex: 1;
 `

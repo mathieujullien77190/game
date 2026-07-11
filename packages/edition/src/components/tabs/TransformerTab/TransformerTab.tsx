@@ -3,10 +3,12 @@ import { useStore } from "store"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import { NumberInput } from "components/form/NumberInput"
+import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { DeleteButton } from "components/ui/DeleteButton"
 import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
 import * as S from "./UI"
 import type { TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 
@@ -61,8 +63,8 @@ export const TransformerTab = () => {
               <S.TransformerId>{tr.id}</S.TransformerId>
               <DeleteButton onClick={() => removeTransformer(tr.id)} />
             </S.Row>
-            <S.Row>
-              <S.Label>type</S.Label>
+            <Divider />
+            <Field label="type" $direction="row">
               <ToggleGroup $wrap>
                 {ALL_TYPES.map((t) => (
                   <Button key={t} $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.type === t} onClick={() => updateTransformerType(tr.id, t)}>
@@ -70,10 +72,9 @@ export const TransformerTab = () => {
                   </Button>
                 ))}
               </ToggleGroup>
-            </S.Row>
+            </Field>
             {tr.type === "fade" && (
-              <S.Row>
-                <S.Label>opacity</S.Label>
+              <Field label="opacity" $direction="row">
                 <NumberInput
                   value={tr.amount}
                   min={0.05}
@@ -82,14 +83,15 @@ export const TransformerTab = () => {
                   commitOn="blur"
                   onChange={(v) => updateTransformerAmount(tr.id, v)}
                 />
-              </S.Row>
+              </Field>
             )}
             {tr.type === "color" && (
-              <ColorPicker palette={TOKEN_COLORS} value={tr.color} onChange={(c) => updateTransformerColor(tr.id, c)} />
+              <Field label="color" $direction="row">
+                <ColorPicker palette={TOKEN_COLORS} value={tr.color} onChange={(c) => updateTransformerColor(tr.id, c)} />
+              </Field>
             )}
             {tr.type === "shape" && (
-              <S.Row>
-                <S.Label>target</S.Label>
+              <Field label="target" $direction="row">
                 <ToggleGroup $wrap>
                   <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "round"} onClick={() => updateTransformerTargetType(tr.id, "round")}>
                     ○ round
@@ -101,7 +103,7 @@ export const TransformerTab = () => {
                     △ triangle
                   </Button>
                 </ToggleGroup>
-              </S.Row>
+              </Field>
             )}
           </Card>
         ))}

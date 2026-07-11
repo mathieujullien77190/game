@@ -2,6 +2,7 @@ import { useShallow } from "zustand/react/shallow"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
 import { ColorPicker } from "components/form/ColorPicker"
+import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { DeleteButton } from "components/ui/DeleteButton"
@@ -79,65 +80,64 @@ export const SwitchTab = () => {
               </S.Row>
 
               <Divider />
-              <S.Label>color</S.Label>
-              <ColorPicker
-                palette={SWITCH_COLORS}
-                value={sw.color}
-                onChange={(color) => updateSwitchColor(sw.id, color)}
-              />
+              <Field label="color" $direction="row">
+                <ColorPicker
+                  palette={SWITCH_COLORS}
+                  value={sw.color}
+                  onChange={(color) => updateSwitchColor(sw.id, color)}
+                />
+              </Field>
 
-              <Divider />
-              <S.Label>mode</S.Label>
-              <ToggleGroup $wrap>
-                {SWITCH_MODES.map((m) => (
-                  <Button
-                    key={m}
-                    $size="sm"
-                    $accent={SWITCH_ACCENT}
-                    $active={sw.mode === m}
-                    onClick={() => updateSwitchMode(sw.id, m)}
-                  >
-                    {m}
-                  </Button>
-                ))}
-              </ToggleGroup>
+              <Field label="mode" $direction="row">
+                <ToggleGroup $wrap>
+                  {SWITCH_MODES.map((m) => (
+                    <Button
+                      key={m}
+                      $size="sm"
+                      $accent={SWITCH_ACCENT}
+                      $active={sw.mode === m}
+                      onClick={() => updateSwitchMode(sw.id, m)}
+                    >
+                      {m}
+                    </Button>
+                  ))}
+                </ToggleGroup>
+              </Field>
               {sw.mode === "auto" && (
                 <S.NoLinks>auto : couleur du token en priorité, sinon ligne grise</S.NoLinks>
               )}
 
-              <Divider />
-              <S.Label>enter</S.Label>
-              <ToggleGroup $wrap>
-                {junctionEndpoints.map(({ lineId, endpoint }) => {
-                  const key = `${lineId}::${endpoint}`
-                  const isActive = ep?.lineId === lineId && ep?.endpoint === endpoint
-                  return (
-                    <Button
-                      key={key}
-                      $size="sm"
-                      $accent={SWITCH_ACCENT}
-                      $active={isActive}
-                      onClick={() => {
-                        if (isActive) return
-                        const newLinkIds = Object.values(links)
-                          .filter((lk) =>
-                            (lk.line1.lineId === lineId && lk.line1.endpoint === endpoint) ||
-                            (lk.line2.lineId === lineId && lk.line2.endpoint === endpoint)
-                          )
-                          .map((lk) => lk.id)
-                        updateSwitchLinks(sw.id, newLinkIds, newLinkIds[0] ?? null)
-                      }}
-                    >
-                      {lineId} [{endpoint}]
-                    </Button>
-                  )
-                })}
-              </ToggleGroup>
+              <Field label="enter" $direction="row">
+                <ToggleGroup $wrap>
+                  {junctionEndpoints.map(({ lineId, endpoint }) => {
+                    const key = `${lineId}::${endpoint}`
+                    const isActive = ep?.lineId === lineId && ep?.endpoint === endpoint
+                    return (
+                      <Button
+                        key={key}
+                        $size="sm"
+                        $accent={SWITCH_ACCENT}
+                        $active={isActive}
+                        onClick={() => {
+                          if (isActive) return
+                          const newLinkIds = Object.values(links)
+                            .filter((lk) =>
+                              (lk.line1.lineId === lineId && lk.line1.endpoint === endpoint) ||
+                              (lk.line2.lineId === lineId && lk.line2.endpoint === endpoint)
+                            )
+                            .map((lk) => lk.id)
+                          updateSwitchLinks(sw.id, newLinkIds, newLinkIds[0] ?? null)
+                        }}
+                      >
+                        {lineId} [{endpoint}]
+                      </Button>
+                    )
+                  })}
+                </ToggleGroup>
+              </Field>
 
               {ep && sw.mode !== "auto" && (
-                <>
-                  <Divider />
-                  <S.Label>active output</S.Label>
+                <Field label="active output" $direction="row">
                   {sw.linkIds.length === 0 ? (
                     <S.NoLinks>no links at enter endpoint</S.NoLinks>
                   ) : (
@@ -163,13 +163,11 @@ export const SwitchTab = () => {
                       })}
                     </ToggleGroup>
                   )}
-                </>
+                </Field>
               )}
 
               {otherSwitches.length > 0 && (
-                <>
-                  <Divider />
-                  <S.Label>linked switches</S.Label>
+                <Field label="linked switches" $direction="row">
                   <ToggleGroup $wrap>
                     {otherSwitches.map((other) => (
                       <Button
@@ -183,7 +181,7 @@ export const SwitchTab = () => {
                       </Button>
                     ))}
                   </ToggleGroup>
-                </>
+                </Field>
               )}
             </Card>
           )

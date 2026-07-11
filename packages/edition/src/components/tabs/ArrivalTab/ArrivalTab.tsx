@@ -7,6 +7,7 @@ import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { DeleteButton } from "components/ui/DeleteButton"
 import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
 import * as S from "./UI"
 
 const ARRIVAL_ACCENT = "#333"
@@ -39,13 +40,14 @@ export const ArrivalTab = () => {
 
       <S.ArrivalList>
         {Object.values(arrivals).map((arrival) => (
-          <S.ArrivalCard key={arrival.id}>
+          <Card key={arrival.id}>
             <S.Header>
               <S.Info>{arrival.lineId} [{arrival.endpoint}]</S.Info>
               <DeleteButton onClick={() => removeArrival(arrival.id)} />
             </S.Header>
+            <Divider />
 
-            <Field label="Queue side">
+            <Field label="Queue side" $direction="row">
               <ToggleGroup $wrap>
                 <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "top"} onClick={() => setArrivalQueueSide(arrival.id, "top")}>Haut</Button>
                 <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={arrival.queueSide === "bottom"} onClick={() => setArrivalQueueSide(arrival.id, "bottom")}>Bas</Button>
@@ -55,32 +57,42 @@ export const ArrivalTab = () => {
               </ToggleGroup>
             </Field>
 
-            <S.AddDemandButton onClick={() => addArrivalDemand(arrival.id)}>
-              + Add Demand
-            </S.AddDemandButton>
+            <Divider />
+            <S.DemandSectionHeader>
+              <S.DemandSectionLabel>Demands</S.DemandSectionLabel>
+              <S.AddDemandButton onClick={() => addArrivalDemand(arrival.id)}>+</S.AddDemandButton>
+            </S.DemandSectionHeader>
 
             <S.DemandList>
               {arrival.demands.map((d) => (
                 <Card key={d.id} $nested>
-                  <S.DemandRow>
+                  <S.DemandHeader>
+                    <S.DemandId>{d.id}</S.DemandId>
+                    <DeleteButton onClick={() => removeArrivalDemand(arrival.id, d.id)} />
+                  </S.DemandHeader>
+                  <Divider />
+                  <Field label="Type" $direction="row">
                     <ToggleGroup>
                       <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "round"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "round" })}>●</Button>
                       <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "square"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "square" })}>■</Button>
                       <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.type === "triangle"} onClick={() => updateArrivalDemand(arrival.id, d.id, { type: "triangle" })}>▲</Button>
                     </ToggleGroup>
-                    <DeleteButton onClick={() => removeArrivalDemand(arrival.id, d.id)} />
-                  </S.DemandRow>
-                  <ColorPicker palette={TOKEN_COLORS} value={d.color as any} onChange={(c) => updateArrivalDemand(arrival.id, d.id, { color: c as TokenColor })} />
+                  </Field>
+                  <Field label="Color" $direction="row">
+                    <ColorPicker palette={TOKEN_COLORS} value={d.color as TokenColor} onChange={(c) => updateArrivalDemand(arrival.id, d.id, { color: c as TokenColor })} />
+                  </Field>
                   {ANGLED_LABEL[d.type as TokenType] && (
-                    <ToggleGroup>
-                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={!d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: false })}>0°</Button>
-                      <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: true })}>{ANGLED_LABEL[d.type as TokenType]}</Button>
-                    </ToggleGroup>
+                    <Field label="Angle" $direction="row">
+                      <ToggleGroup>
+                        <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={!d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: false })}>0°</Button>
+                        <Button $size="sm" $accent={ARRIVAL_ACCENT} $active={d.angled} onClick={() => updateArrivalDemand(arrival.id, d.id, { angled: true })}>{ANGLED_LABEL[d.type as TokenType]}</Button>
+                      </ToggleGroup>
+                    </Field>
                   )}
                 </Card>
               ))}
             </S.DemandList>
-          </S.ArrivalCard>
+          </Card>
         ))}
       </S.ArrivalList>
     </S.Container>

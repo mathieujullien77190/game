@@ -1,10 +1,12 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
 import { NumberInput } from "components/form/NumberInput"
-import { Select } from "components/form/Select"
+import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
+import { ToggleGroup } from "components/ui/ToggleGroup"
 import { DeleteButton } from "components/ui/DeleteButton"
 import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
 import * as S from "./UI"
 
 const GATE_ACCENT = "#1a237e"
@@ -68,41 +70,61 @@ export const ScreenGateTab = () => {
                 <S.GateId>{sg.id}</S.GateId>
                 <DeleteButton onClick={() => removeScreenGate(sg.id)} />
               </S.Row>
-              <Select
-                label="Target Screen"
-                placeholder="— select —"
-                value={sg.targetScreenId}
-                options={targetScreenOptions.map((s) => ({ value: s, label: s }))}
-                onChange={(v) => updateScreenGateTargetScreen(sg.id, v)}
-              />
+              <Divider />
+
+              <Field label="Target Screen" $direction="row">
+                {targetScreenOptions.length === 0 ? (
+                  <S.NoOptions>no other screen</S.NoOptions>
+                ) : (
+                  <ToggleGroup $wrap>
+                    {targetScreenOptions.map((s) => (
+                      <Button key={s} $size="sm" $accent={GATE_ACCENT} $active={sg.targetScreenId === s} onClick={() => updateScreenGateTargetScreen(sg.id, s)}>
+                        {s}
+                      </Button>
+                    ))}
+                  </ToggleGroup>
+                )}
+              </Field>
+
               {sg.targetScreenId && (
-                <S.ScreenTimeRow>
-                  <S.Label>Time ×</S.Label>
-                  <NumberInput
-                    value={screenTimeMultipliers[sg.targetScreenId] ?? 1}
-                    min={0.01}
-                    step={0.1}
-                    commitOn="blur"
-                    onChange={(v) => setScreenTimeMultiplier(sg.targetScreenId, v)}
-                  />
-                </S.ScreenTimeRow>
+                <NumberInput
+                  label="Time ×"
+                  value={screenTimeMultipliers[sg.targetScreenId] ?? 1}
+                  min={0.01}
+                  step={0.1}
+                  commitOn="blur"
+                  onChange={(v) => setScreenTimeMultiplier(sg.targetScreenId, v)}
+                />
               )}
+
               {sg.targetScreenId && (
                 <>
-                  <Select
-                    label="Entry Line"
-                    placeholder="— select —"
-                    value={sg.entryKey}
-                    options={lineOpts}
-                    onChange={(v) => updateScreenGateEntryKey(sg.id, v)}
-                  />
-                  <Select
-                    label="Exit Line"
-                    placeholder="— select —"
-                    value={sg.exitKey}
-                    options={lineOpts}
-                    onChange={(v) => updateScreenGateExitKey(sg.id, v)}
-                  />
+                  <Field label="Entry Line" $direction="row">
+                    {lineOpts.length === 0 ? (
+                      <S.NoOptions>no lines in target screen</S.NoOptions>
+                    ) : (
+                      <ToggleGroup $wrap>
+                        {lineOpts.map((opt) => (
+                          <Button key={opt.value} $size="sm" $accent={GATE_ACCENT} $active={sg.entryKey === opt.value} onClick={() => updateScreenGateEntryKey(sg.id, opt.value)}>
+                            {opt.label}
+                          </Button>
+                        ))}
+                      </ToggleGroup>
+                    )}
+                  </Field>
+                  <Field label="Exit Line" $direction="row">
+                    {lineOpts.length === 0 ? (
+                      <S.NoOptions>no lines in target screen</S.NoOptions>
+                    ) : (
+                      <ToggleGroup $wrap>
+                        {lineOpts.map((opt) => (
+                          <Button key={opt.value} $size="sm" $accent={GATE_ACCENT} $active={sg.exitKey === opt.value} onClick={() => updateScreenGateExitKey(sg.id, opt.value)}>
+                            {opt.label}
+                          </Button>
+                        ))}
+                      </ToggleGroup>
+                    )}
+                  </Field>
                 </>
               )}
             </Card>

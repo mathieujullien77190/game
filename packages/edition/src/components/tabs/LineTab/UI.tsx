@@ -96,15 +96,21 @@ export const TypeBadge = styled.span<{ $type: string }>`
   letter-spacing: 0.3px;
 `
 
-export const BoostRow = styled.div`
+export const ParamsBox = styled.div`
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 8px;
   background: #fafafa;
   border: 1px solid #e8e8e8;
   border-top: none;
   border-radius: 0 0 4px 4px;
+`
+
+export const BoostRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
 
 export const BoostLabel = styled.span`
@@ -113,7 +119,8 @@ export const BoostLabel = styled.span`
   color: #aaa;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  flex: 1;
+  min-width: 62px;
+  flex-shrink: 0;
 `
 
 export const LinkActivated = styled.button<{ $on: boolean }>`

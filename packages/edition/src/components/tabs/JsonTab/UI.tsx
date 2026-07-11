@@ -3,6 +3,8 @@ import styled from "styled-components"
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: 8px;
 `
 
@@ -65,12 +67,43 @@ export const CopyButton = styled.button`
   &:hover { background: #1565c0; color: #fff; }
 `
 
-export const Pre = styled.pre`
-  margin: 0;
+export const ApplyButton = styled.button`
+  padding: 6px 10px;
+  font-size: 11px;
+  font-family: monospace;
+  background: #f0fff4;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover { background: #2e7d32; color: #fff; }
+`
+
+export const ErrorText = styled.div`
+  font-family: monospace;
+  font-size: 10px;
+  color: #c62828;
+  white-space: pre-wrap;
+  word-break: break-word;
+`
+
+export const TextArea = styled.textarea`
+  width: 100%;
+  flex: 1;
+  min-height: 120px;
+  padding: 8px;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
   font-family: monospace;
   font-size: 11px;
   line-height: 1.6;
   color: #333;
-  white-space: pre-wrap;
-  word-break: break-all;
+
+  &:focus {
+    outline: none;
+    border-color: #333;
+  }
 `

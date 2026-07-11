@@ -33,6 +33,9 @@ export const TabButton = styled.button<{ $active: boolean }>`
 
 export const TabContent = styled.div`
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   padding: 12px;
 `

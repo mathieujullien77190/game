@@ -89,68 +89,70 @@ export const LineTab = () => {
                 </S.LineLabel>
                 <DeleteButton onClick={() => removeLine(line.id)} />
               </S.LineItem>
-              <S.BoostRow>
-                <S.BoostLabel>boost</S.BoostLabel>
-                <NumberInput
-                  value={line.boost}
-                  onChange={(v) => updateLineBoost(line.id, v)}
-                  min={0}
-                  step={10}
-                />
-              </S.BoostRow>
-              <S.BoostRow>
-                <S.BoostLabel>tunnel</S.BoostLabel>
-                <Checkbox checked={line.tunnel} onChange={(checked) => updateLineTunnel(line.id, checked)} />
-              </S.BoostRow>
-              <S.BoostRow>
-                <S.BoostLabel>show speed</S.BoostLabel>
-                <Checkbox checked={line.showSpeed} onChange={(checked) => updateLineShowSpeed(line.id, checked)} />
-              </S.BoostRow>
-              <S.BoostRow>
-                <S.BoostLabel>limitation</S.BoostLabel>
-                <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
-              </S.BoostRow>
-              <S.BoostRow>
-                <S.BoostLabel>color</S.BoostLabel>
-                <ColorPicker
-                  palette={TOKEN_COLORS}
-                  value={line.color ?? ""}
-                  onChange={(color) => updateLineColor(line.id, color)}
-                  onClear={() => updateLineColor(line.id, null)}
-                />
-              </S.BoostRow>
-              {line.type === "spiral" && (
+              <S.ParamsBox>
                 <S.BoostRow>
-                  <S.BoostLabel>turns</S.BoostLabel>
+                  <S.BoostLabel>boost</S.BoostLabel>
                   <NumberInput
-                    value={line.turns}
-                    onChange={(v) => updateLineSpiral(line.id, v)}
-                    step={1}
+                    value={line.boost}
+                    onChange={(v) => updateLineBoost(line.id, v)}
+                    min={0}
+                    step={10}
                   />
                 </S.BoostRow>
-              )}
-              {line.type === "sine" && (
-                <>
+                <S.BoostRow>
+                  <S.BoostLabel>tunnel</S.BoostLabel>
+                  <Checkbox checked={line.tunnel} onChange={(checked) => updateLineTunnel(line.id, checked)} />
+                </S.BoostRow>
+                <S.BoostRow>
+                  <S.BoostLabel>show speed</S.BoostLabel>
+                  <Checkbox checked={line.showSpeed} onChange={(checked) => updateLineShowSpeed(line.id, checked)} />
+                </S.BoostRow>
+                <S.BoostRow>
+                  <S.BoostLabel>limitation</S.BoostLabel>
+                  <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
+                </S.BoostRow>
+                <S.BoostRow>
+                  <S.BoostLabel>color</S.BoostLabel>
+                  <ColorPicker
+                    palette={TOKEN_COLORS}
+                    value={line.color ?? ""}
+                    onChange={(color) => updateLineColor(line.id, color)}
+                    onClear={() => updateLineColor(line.id, null)}
+                  />
+                </S.BoostRow>
+                {line.type === "spiral" && (
                   <S.BoostRow>
-                    <S.BoostLabel>freq</S.BoostLabel>
+                    <S.BoostLabel>turns</S.BoostLabel>
                     <NumberInput
-                      value={line.frequency}
-                      onChange={(v) => updateLineSine(line.id, v, line.amplitude)}
-                      min={1}
+                      value={line.turns}
+                      onChange={(v) => updateLineSpiral(line.id, v)}
                       step={1}
                     />
                   </S.BoostRow>
-                  <S.BoostRow>
-                    <S.BoostLabel>amp</S.BoostLabel>
-                    <NumberInput
-                      value={line.amplitude}
-                      onChange={(v) => updateLineSine(line.id, line.frequency, v)}
-                      min={1}
-                      step={5}
-                    />
-                  </S.BoostRow>
-                </>
-              )}
+                )}
+                {line.type === "sine" && (
+                  <>
+                    <S.BoostRow>
+                      <S.BoostLabel>freq</S.BoostLabel>
+                      <NumberInput
+                        value={line.frequency}
+                        onChange={(v) => updateLineSine(line.id, v, line.amplitude)}
+                        min={1}
+                        step={1}
+                      />
+                    </S.BoostRow>
+                    <S.BoostRow>
+                      <S.BoostLabel>amp</S.BoostLabel>
+                      <NumberInput
+                        value={line.amplitude}
+                        onChange={(v) => updateLineSine(line.id, line.frequency, v)}
+                        min={1}
+                        step={5}
+                      />
+                    </S.BoostRow>
+                  </>
+                )}
+              </S.ParamsBox>
               {expandedLines.has(line.id) && lineLinks.map((lk) => {
                 const other = lk.line1.lineId === line.id ? lk.line2 : lk.line1
                 return (

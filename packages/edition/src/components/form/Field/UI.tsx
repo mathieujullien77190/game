@@ -21,7 +21,7 @@ export const Label = styled.span<{ $direction: "row" | "column" }>`
   text-transform: uppercase;
   letter-spacing: 0.4px;
   ${(p) => p.$direction === "row" && css`
-    min-width: 50px;
+    min-width: 96px;
     flex-shrink: 0;
   `}
 `

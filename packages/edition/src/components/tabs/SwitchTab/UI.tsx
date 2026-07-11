@@ -31,15 +31,6 @@ export const Row = styled.div`
   justify-content: space-between;
 `
 
-export const Label = styled.span`
-  font-family: monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #999;
-  white-space: nowrap;
-`
-
 export const SwitchInfo = styled.span`
   font-family: monospace;
   font-size: 10px;

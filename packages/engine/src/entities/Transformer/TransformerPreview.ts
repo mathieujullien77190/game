@@ -85,7 +85,7 @@ export class TransformerPreview extends Transformer {
     ctx.restore()
   }
 
-  drawBefore = (ctx: Renderer, pt: Point, elapsedSeconds: number) => {
+  drawBefore = (ctx: Renderer, pt: Point, elapsedSeconds: number, lineAngle = 0) => {
     this._pt = pt
     this._elapsed = elapsedSeconds
     ctx.save()
@@ -102,15 +102,20 @@ export class TransformerPreview extends Transformer {
     } else if (this.type === "shape") {
       ctx.fillStyle = COLORS.gray
       if (this.targetType === "square") {
+        ctx.save()
+        ctx.rotate(lineAngle)
         ctx.beginPath()
         ctx.roundRect(-5, -5, 10, 10, 2)
+        ctx.fill()
+        ctx.restore()
       } else if (this.targetType === "triangle") {
-        traceTriangle(ctx, 0, 0, 7)
+        traceTriangle(ctx, 0, 0, 7, lineAngle)
+        ctx.fill()
       } else {
         ctx.beginPath()
         ctx.arc(0, 0, 5, 0, Math.PI * 2)
+        ctx.fill()
       }
-      ctx.fill()
     } else if (this.type === "fade") {
       ctx.globalAlpha = this.amount
       ctx.fillStyle = COLORS.gray

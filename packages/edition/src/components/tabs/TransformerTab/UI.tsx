@@ -24,12 +24,3 @@ export const TransformerId = styled.span`
   color: #2e7d32;
   flex: 1;
 `
-
-export const Label = styled.span`
-  font-family: monospace;
-  font-size: 10px;
-  color: #888;
-  text-transform: uppercase;
-  width: 42px;
-  flex-shrink: 0;
-`

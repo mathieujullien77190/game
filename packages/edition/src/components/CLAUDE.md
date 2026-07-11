@@ -19,7 +19,7 @@ ComponentName/
 ```
 components/
   ui/        → primitives d'affichage réutilisables (Button, ToggleGroup, DeleteButton, Card, Divider, TokenShape)
-  form/      → contrôles de formulaire réutilisables (Field, NumberInput, ColorPicker, Checkbox, Select)
+  form/      → contrôles de formulaire réutilisables (Field, NumberInput, ColorPicker, Checkbox)
   tabs/      → onglets du panneau d'outils (LineTab, StartTab, SwitchTab, TransformerTab, InverterTab, ArrivalTab, ScreenGateTab, JsonTab, PerfTab)
 ```
 
@@ -36,11 +36,12 @@ Ces deux dossiers existent pour absorber les patterns **réellement dupliqués**
 
 ## Composants form
 
-- `Field` — label (10px monospace gris, uppercase) au-dessus d'un children quelconque par défaut ; `$direction="row"` pour un label à gauche (utilisé en interne par `NumberInput`/`Select`).
-- `NumberInput` — accepte `label?` : se wrape dans `Field` (`row`) si fourni. `min?`/`max?`/`step?`. `commitOn?: "change" | "blur"` (défaut `"change"` = valeur remontée à chaque frappe ; `"blur"` = bufferisé localement et remonté à la perte de focus, nécessaire pour les champs décimaux — sinon la resynchronisation du contrôle sur `value` écrase une saisie du type `"0."` en cours de frappe).
-- `ColorPicker` — prend `palette`, `value`, `onChange`, `onClear?` (pas de `label` — toujours utilisé avec un label externe posé par l'appelant).
+- `Field` — label (10px monospace gris, uppercase) au-dessus d'un children quelconque par défaut ; `$direction="row"` pour un label à gauche (utilisé en interne par `NumberInput`, et explicitement par les onglets pour aligner label+`ToggleGroup`/`ColorPicker`).
+- `NumberInput` — accepte `label?` : se wrape dans `Field` (`row`) si fourni. `min?`/`max?`/`step?`. `commitOn?: "change" | "blur"` (défaut `"change"` = valeur remontée à chaque frappe ; `"blur"` = bufferisé localement et remonté à la perte de focus, nécessaire pour les champs décimaux — sinon la resynchronisation du contrôle sur `value` écrase une saisie du type `"0."` en cours de frappe). Encadré de 4 `StepButton` (`−1`/`−.1`/`+.1`/`+1`) qui appliquent directement `onChange` (indépendants du `step` de l'input), désactivés à `min`/`max`.
+- `ColorPicker` — prend `palette`, `value`, `onChange`, `onClear?` (pas de `label` — toujours utilisé avec un label externe posé par l'appelant, généralement via `Field`).
 - `Checkbox` — checkbox stylée, `checked`/`onChange(checked)`.
-- `Select` — `<select>` stylé, `options: {value,label}[]`, `placeholder?`, `label?` (wrape dans `Field` si fourni).
+
+Pas de `<select>` HTML dans l'éditeur — tout choix parmi une liste (écran cible, ligne d'entrée/sortie…) passe par `Field` + `ToggleGroup` de `Button`, comme les autres champs à choix (type, mode…), avec un `S.NoOptions`/équivalent quand la liste est vide.
 
 ## Règles
 

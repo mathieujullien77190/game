@@ -26,17 +26,9 @@ export const GateId = styled.span`
   color: #1a237e;
 `
 
-export const Label = styled.div`
+export const NoOptions = styled.span`
   font-family: monospace;
   font-size: 10px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-`
-
-export const ScreenTimeRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  color: #bbb;
+  font-style: italic;
 `

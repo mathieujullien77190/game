@@ -461,8 +461,10 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!link) continue;
       const line = this.data.lines[link.line1.lineId];
       if (!line || line.screenId !== sid) continue;
-      const pt = link.line1.endpoint === "end" ? line.end : line.start;
-      tr.drawBefore(ctx, pt, this.data.elapsedSeconds);
+      const isEnd = link.line1.endpoint === "end";
+      const pt = isEnd ? line.end : line.start;
+      const ptAngle = isEnd ? line.points[line.points.length - 1] : line.points[0];
+      tr.drawBefore(ctx, pt, this.data.elapsedSeconds, ptAngle?.angle ?? 0);
     }
   };
 
