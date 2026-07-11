@@ -12,13 +12,6 @@ export const GateList = styled.div`
   gap: 6px;
 `
 
-export const Row = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-`
-
 export const GateId = styled.span`
   font-family: monospace;
   font-size: 12px;

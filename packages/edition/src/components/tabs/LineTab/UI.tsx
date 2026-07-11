@@ -9,57 +9,28 @@ export const Container = styled.div`
 export const LineList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 `
 
-export const LineItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-`
-
-export const LineLabel = styled.span<{ $clickable?: boolean }>`
-  font-size: 10px;
-  color: #555;
-  font-family: monospace;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
-  user-select: none;
-`
-
-export const Chevron = styled.span<{ $open: boolean }>`
-  font-size: 8px;
-  color: #aaa;
-  transform: ${({ $open }) => ($open ? "rotate(90deg)" : "rotate(0deg)")};
-  transition: transform 0.15s ease;
-  display: inline-block;
-`
-
-export const LinkCount = styled.span`
-  padding: 0px 5px;
+export const LinkCount = styled.button<{ $active?: boolean }>`
+  padding: 0px 6px;
+  border: none;
   border-radius: 8px;
-  background: #e0e0e0;
-  color: #888;
+  background: ${(p) => (p.$active ? "#333" : "#e0e0e0")};
+  color: ${(p) => (p.$active ? "#fff" : "#888")};
   font-family: monospace;
   font-size: 9px;
-`
+  cursor: pointer;
+  flex-shrink: 0;
 
-export const LineBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  &:hover {
+    background: ${(p) => (p.$active ? "#444" : "#d0d0d0")};
+  }
 `
 
 export const LineId = styled.span`
   font-weight: bold;
   color: #333;
-  margin-right: 6px;
 `
 
 export const LinkItem = styled.div`
@@ -96,17 +67,6 @@ export const TypeBadge = styled.span<{ $type: string }>`
   letter-spacing: 0.3px;
 `
 
-export const ParamsBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 6px 8px;
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-`
-
 export const BoostRow = styled.div`
   display: flex;
   align-items: center;
@@ -138,4 +98,3 @@ export const LinkActivated = styled.button<{ $on: boolean }>`
     background: ${({ $on }) => ($on ? "#d4edda" : "#ebebeb")};
   }
 `
-

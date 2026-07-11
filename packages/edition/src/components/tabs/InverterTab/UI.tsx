@@ -12,12 +12,6 @@ export const InverterList = styled.div`
   gap: 6px;
 `
 
-export const Row = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`
-
 export const InverterId = styled.span`
   font-family: monospace;
   font-size: 12px;

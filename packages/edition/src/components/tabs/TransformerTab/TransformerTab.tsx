@@ -1,12 +1,13 @@
 import { useShallow } from "zustand/react/shallow"
+import { useToggleSet } from "hooks/useToggleSet"
 import { useStore } from "store"
-import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS, TYPE_GLYPH } from "@drift/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import { NumberInput } from "components/form/NumberInput"
 import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
-import { DeleteButton } from "components/ui/DeleteButton"
+import { EntityHeader } from "components/ui/EntityHeader"
 import { Card } from "components/ui/Card"
 import { Divider } from "components/ui/Divider"
 import * as S from "./UI"
@@ -17,16 +18,15 @@ const TRANSFORMER_ACCENT = "#2e7d32"
 
 export const TransformerTab = () => {
   const {
-    transformers, revision: _revision, mode, pendingTransformerType,
+    transformers, revision: _revision, mode, currentScreenId,
     setMode, removeTransformer, setHoveredTransformerId,
     updateTransformerAmount, updateTransformerColor, updateTransformerTargetType, updateTransformerType,
-    setPendingTransformerType,
   } = useStore(
     useShallow((s) => ({
       transformers: s.transformers,
       revision: s.revision,
       mode: s.mode,
-      pendingTransformerType: s.pendingTransformerType,
+      currentScreenId: s.currentScreenId,
       setMode: s.setMode,
       removeTransformer: s.removeTransformer,
       setHoveredTransformerId: s.setHoveredTransformerId,
@@ -34,76 +34,78 @@ export const TransformerTab = () => {
       updateTransformerColor: s.updateTransformerColor,
       updateTransformerTargetType: s.updateTransformerTargetType,
       updateTransformerType: s.updateTransformerType,
-      setPendingTransformerType: s.setPendingTransformerType,
     }))
   )
 
   const isPlacing = mode === "addTransformer"
+  const transformersForScreen = Object.values(transformers).filter((tr) => tr.screenId === currentScreenId)
+  const collapsed = useToggleSet()
 
   return (
     <S.Container>
-      <ToggleGroup $equal>
-        {ALL_TYPES.map((t) => (
-          <Button key={t} $size="sm" $accent={TRANSFORMER_ACCENT} $active={pendingTransformerType === t} onClick={() => setPendingTransformerType(t)}>
-            {t}
-          </Button>
-        ))}
-      </ToggleGroup>
       <Button $active={isPlacing} $accent={TRANSFORMER_ACCENT} $full onClick={() => setMode(isPlacing ? "select" : "addTransformer")}>
-        {isPlacing ? "Cancel" : `+ Add ${pendingTransformerType}`}
+        {isPlacing ? "Cancel" : "+ Add Transformer"}
       </Button>
       <S.TransformerList>
-        {Object.values(transformers).map((tr) => (
+        {transformersForScreen.map((tr) => (
           <Card
             key={tr.id}
             onMouseEnter={() => setHoveredTransformerId(tr.id)}
             onMouseLeave={() => setHoveredTransformerId(null)}
           >
-            <S.Row>
+            <EntityHeader
+              screenId={tr.screenId}
+              onDelete={() => removeTransformer(tr.id)}
+              collapsed={collapsed.has(tr.id)}
+              onToggleCollapsed={() => collapsed.toggle(tr.id)}
+            >
               <S.TransformerId>{tr.id}</S.TransformerId>
-              <DeleteButton onClick={() => removeTransformer(tr.id)} />
-            </S.Row>
-            <Divider />
-            <Field label="type" $direction="row">
-              <ToggleGroup $wrap>
-                {ALL_TYPES.map((t) => (
-                  <Button key={t} $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.type === t} onClick={() => updateTransformerType(tr.id, t)}>
-                    {t}
-                  </Button>
-                ))}
-              </ToggleGroup>
-            </Field>
-            {tr.type === "fade" && (
-              <Field label="opacity" $direction="row">
-                <NumberInput
-                  value={tr.amount}
-                  min={0.05}
-                  max={1}
-                  step={0.05}
-                  commitOn="blur"
-                  onChange={(v) => updateTransformerAmount(tr.id, v)}
-                />
-              </Field>
-            )}
-            {tr.type === "color" && (
-              <Field label="color" $direction="row">
-                <ColorPicker palette={TOKEN_COLORS} value={tr.color} onChange={(c) => updateTransformerColor(tr.id, c)} />
-              </Field>
-            )}
-            {tr.type === "shape" && (
-              <Field label="target" $direction="row">
-                <ToggleGroup $wrap>
-                  <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "round"} onClick={() => updateTransformerTargetType(tr.id, "round")}>
-                    ○ round
-                  </Button>
-                  <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "square"} onClick={() => updateTransformerTargetType(tr.id, "square")}>
-                    □ square
-                  </Button>
-                  <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "triangle"} onClick={() => updateTransformerTargetType(tr.id, "triangle")}>
-                    △ triangle
-                  </Button>
-                </ToggleGroup>
-              </Field>
+            </EntityHeader>
+            {!collapsed.has(tr.id) && (
+              <>
+                <Divider />
+                <Field label="type" $direction="row">
+                  <ToggleGroup $wrap>
+                    {ALL_TYPES.map((t) => (
+                      <Button key={t} $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.type === t} onClick={() => updateTransformerType(tr.id, t)}>
+                        {t}
+                      </Button>
+                    ))}
+                  </ToggleGroup>
+                </Field>
+                {tr.type === "fade" && (
+                  <Field label="opacity" $direction="row">
+                    <NumberInput
+                      value={tr.amount}
+                      min={0.05}
+                      max={1}
+                      step={0.05}
+                      commitOn="blur"
+                      onChange={(v) => updateTransformerAmount(tr.id, v)}
+                    />
+                  </Field>
+                )}
+                {tr.type === "color" && (
+                  <Field label="color" $direction="row">
+                    <ColorPicker palette={TOKEN_COLORS} value={tr.color} onChange={(c) => updateTransformerColor(tr.id, c)} />
+                  </Field>
+                )}
+                {tr.type === "shape" && (
+                  <Field label="target" $direction="row">
+                    <ToggleGroup $wrap>
+                      <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "round"} onClick={() => updateTransformerTargetType(tr.id, "round")}>
+                        {TYPE_GLYPH.round}
+                      </Button>
+                      <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "square"} onClick={() => updateTransformerTargetType(tr.id, "square")}>
+                        {TYPE_GLYPH.square}
+                      </Button>
+                      <Button $size="sm" $accent={TRANSFORMER_ACCENT} $active={tr.targetType === "triangle"} onClick={() => updateTransformerTargetType(tr.id, "triangle")}>
+                        {TYPE_GLYPH.triangle}
+                      </Button>
+                    </ToggleGroup>
+                  </Field>
+                )}
+              </>
             )}
           </Card>
         ))}

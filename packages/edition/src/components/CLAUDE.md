@@ -18,7 +18,7 @@ ComponentName/
 
 ```
 components/
-  ui/        → primitives d'affichage réutilisables (Button, ToggleGroup, DeleteButton, Card, Divider, TokenShape)
+  ui/        → primitives d'affichage réutilisables (Button, ToggleGroup, DeleteButton, EntityHeader, Tag, Card, Divider, TokenShape)
   form/      → contrôles de formulaire réutilisables (Field, NumberInput, ColorPicker, Checkbox)
   tabs/      → onglets du panneau d'outils (LineTab, StartTab, SwitchTab, TransformerTab, InverterTab, ArrivalTab, ScreenGateTab, JsonTab, PerfTab)
 ```
@@ -30,6 +30,8 @@ Ces deux dossiers existent pour absorber les patterns **réellement dupliqués**
 - `Button` — bouton à bascule générique. Props `$active?`, `$accent?` (couleur de fond/bordure à l'état actif, défaut `#333`), `$full?` (largeur 100%, look CTA majuscule — pour les "+ Add X"), `$size?: "sm" | "md"`. Chaque onglet passe sa propre couleur d'accent.
 - `ToggleGroup` — wrapper flex autour de plusieurs `Button` formant un groupe de bascule. Props `$wrap?` (flex-wrap, pour les listes de taille variable), `$equal?` (boutons à largeur égale, `flex:1`).
 - `DeleteButton` — le ✕ de suppression, prop `$size?` (px, défaut 12).
+- `EntityHeader` — header standard d'une carte d'entité de premier niveau (id/info à gauche, `Tag` d'écran optionnel juste après si `screenId` fourni, `DeleteButton` à droite). Utilisé par Start/Switch/Transformer/Inverter/Arrival/ScreenGate. Ne pas l'utiliser pour un item imbriqué (token dans un start, demand dans une arrival) : ces entités n'ont pas de `screenId` propre — elles gardent leur header local (`TokenHeader`, `DemandHeader`…).
+- `Tag` — petit badge texte (pilule grise). Utilisé par `EntityHeader` pour l'écran, et directement par `LineTab` (pas de header dédié, juste ajouté dans son `LineLabel` existant à côté du `TypeBadge`).
 - `Card` — carte d'entité (fond gris clair, bordure, radius). Props `$accent?` (bordure gauche colorée 3px), `$nested?` (variante plus sombre/compacte pour une carte imbriquée dans une autre, ex: un token dans un start).
 - `Divider` — `<hr>` gris fin.
 - `TokenShape` — glyphe rond/carré coloré représentant un token.

@@ -1,29 +1,26 @@
-import { useState } from "react"
 import { useShallow } from "zustand/react/shallow"
+import { useToggleSet } from "hooks/useToggleSet"
 import { useStore } from "store"
 import { NumberInput } from "components/form/NumberInput"
 import { ColorPicker } from "components/form/ColorPicker"
 import { Checkbox } from "components/form/Checkbox"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
-import { DeleteButton } from "components/ui/DeleteButton"
+import { EntityHeader } from "components/ui/EntityHeader"
+import { Card } from "components/ui/Card"
+import { Divider } from "components/ui/Divider"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import * as S from "./UI"
 
 export const LineTab = () => {
-  const [expandedLines, setExpandedLines] = useState<Set<string>>(new Set())
+  const collapsed = useToggleSet()
+  const expandedLinks = useToggleSet()
 
-  const toggleExpand = (id: string) =>
-    setExpandedLines((prev) => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-
-  const { editorManager, mode, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineColor, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, mode, currentScreenId, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineColor, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       mode: s.mode,
+      currentScreenId: s.currentScreenId,
       setMode: s.setMode,
       setLineType: s.setLineType,
       setLinePreset: s.setLinePreset,
@@ -41,6 +38,7 @@ export const LineTab = () => {
   )
 
   const allLinks = Object.values(editorManager.data.links)
+  const linesForScreen = Object.values(editorManager.data.lines).filter((line) => line.screenId === currentScreenId)
 
   return (
     <S.Container>
@@ -70,102 +68,111 @@ export const LineTab = () => {
       )}
 
       <S.LineList>
-        {Object.values(editorManager.data.lines).map((line) => {
+        {linesForScreen.map((line) => {
           const lineLinks = allLinks.filter(
             (lk) => lk.line1.lineId === line.id || lk.line2.lineId === line.id
           )
+          const isCollapsed = collapsed.has(line.id)
+          const linksVisible = !isCollapsed && expandedLinks.has(line.id)
           return (
-            <S.LineBlock key={line.id} onMouseEnter={() => setHoveredLineId(line.id)} onMouseLeave={() => setHoveredLineId(null)}>
-              <S.LineItem>
-                <S.LineLabel onClick={() => lineLinks.length > 0 && toggleExpand(line.id)} $clickable={lineLinks.length > 0}>
-                  {lineLinks.length > 0 && (
-                    <S.Chevron $open={expandedLines.has(line.id)}>▶</S.Chevron>
-                  )}
-                  <S.LineId>{line.id}</S.LineId>
-                  <S.TypeBadge $type={line.type}>{line.type}</S.TypeBadge>
-                  {lineLinks.length > 0 && !expandedLines.has(line.id) && (
-                    <S.LinkCount>{lineLinks.length}</S.LinkCount>
-                  )}
-                </S.LineLabel>
-                <DeleteButton onClick={() => removeLine(line.id)} />
-              </S.LineItem>
-              <S.ParamsBox>
-                <S.BoostRow>
-                  <S.BoostLabel>boost</S.BoostLabel>
-                  <NumberInput
-                    value={line.boost}
-                    onChange={(v) => updateLineBoost(line.id, v)}
-                    min={0}
-                    step={10}
-                  />
-                </S.BoostRow>
-                <S.BoostRow>
-                  <S.BoostLabel>tunnel</S.BoostLabel>
-                  <Checkbox checked={line.tunnel} onChange={(checked) => updateLineTunnel(line.id, checked)} />
-                </S.BoostRow>
-                <S.BoostRow>
-                  <S.BoostLabel>show speed</S.BoostLabel>
-                  <Checkbox checked={line.showSpeed} onChange={(checked) => updateLineShowSpeed(line.id, checked)} />
-                </S.BoostRow>
-                <S.BoostRow>
-                  <S.BoostLabel>limitation</S.BoostLabel>
-                  <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
-                </S.BoostRow>
-                <S.BoostRow>
-                  <S.BoostLabel>color</S.BoostLabel>
-                  <ColorPicker
-                    palette={TOKEN_COLORS}
-                    value={line.color ?? ""}
-                    onChange={(color) => updateLineColor(line.id, color)}
-                    onClear={() => updateLineColor(line.id, null)}
-                  />
-                </S.BoostRow>
-                {line.type === "spiral" && (
+            <Card key={line.id} onMouseEnter={() => setHoveredLineId(line.id)} onMouseLeave={() => setHoveredLineId(null)}>
+              <EntityHeader
+                screenId={line.screenId}
+                onDelete={() => removeLine(line.id)}
+                collapsed={isCollapsed}
+                onToggleCollapsed={() => collapsed.toggle(line.id)}
+              >
+                <S.LineId>{line.id}</S.LineId>
+                <S.TypeBadge $type={line.type}>{line.type}</S.TypeBadge>
+                {lineLinks.length > 0 && (
+                  <S.LinkCount
+                    $active={linksVisible}
+                    onClick={(e) => { e.stopPropagation(); expandedLinks.toggle(line.id) }}
+                  >
+                    {lineLinks.length} link{lineLinks.length > 1 ? "s" : ""}
+                  </S.LinkCount>
+                )}
+              </EntityHeader>
+              {!isCollapsed && (
+                <>
+                  <Divider />
                   <S.BoostRow>
-                    <S.BoostLabel>turns</S.BoostLabel>
+                    <S.BoostLabel>boost</S.BoostLabel>
                     <NumberInput
-                      value={line.turns}
-                      onChange={(v) => updateLineSpiral(line.id, v)}
-                      step={1}
+                      value={line.boost}
+                      onChange={(v) => updateLineBoost(line.id, v)}
+                      min={0}
+                      step={10}
                     />
                   </S.BoostRow>
-                )}
-                {line.type === "sine" && (
-                  <>
+                  <S.BoostRow>
+                    <S.BoostLabel>tunnel</S.BoostLabel>
+                    <Checkbox checked={line.tunnel} onChange={(checked) => updateLineTunnel(line.id, checked)} />
+                  </S.BoostRow>
+                  <S.BoostRow>
+                    <S.BoostLabel>show speed</S.BoostLabel>
+                    <Checkbox checked={line.showSpeed} onChange={(checked) => updateLineShowSpeed(line.id, checked)} />
+                  </S.BoostRow>
+                  <S.BoostRow>
+                    <S.BoostLabel>limitation</S.BoostLabel>
+                    <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />
+                  </S.BoostRow>
+                  <S.BoostRow>
+                    <S.BoostLabel>color</S.BoostLabel>
+                    <ColorPicker
+                      palette={TOKEN_COLORS}
+                      value={line.color ?? ""}
+                      onChange={(color) => updateLineColor(line.id, color)}
+                      onClear={() => updateLineColor(line.id, null)}
+                    />
+                  </S.BoostRow>
+                  {line.type === "spiral" && (
                     <S.BoostRow>
-                      <S.BoostLabel>freq</S.BoostLabel>
+                      <S.BoostLabel>turns</S.BoostLabel>
                       <NumberInput
-                        value={line.frequency}
-                        onChange={(v) => updateLineSine(line.id, v, line.amplitude)}
-                        min={1}
+                        value={line.turns}
+                        onChange={(v) => updateLineSpiral(line.id, v)}
                         step={1}
                       />
                     </S.BoostRow>
-                    <S.BoostRow>
-                      <S.BoostLabel>amp</S.BoostLabel>
-                      <NumberInput
-                        value={line.amplitude}
-                        onChange={(v) => updateLineSine(line.id, line.frequency, v)}
-                        min={1}
-                        step={5}
-                      />
-                    </S.BoostRow>
-                  </>
-                )}
-              </S.ParamsBox>
-              {expandedLines.has(line.id) && lineLinks.map((lk) => {
-                const other = lk.line1.lineId === line.id ? lk.line2 : lk.line1
-                return (
-                  <S.LinkItem key={lk.id}>
-                    <S.LinkId>{lk.id}</S.LinkId>
-                    <S.LinkDetail>{other.lineId}[{other.endpoint}]</S.LinkDetail>
-                    <S.LinkActivated $on={lk.activated} onClick={() => toggleLinkActivated(lk.id)}>
-                      {lk.activated ? "on" : "off"}
-                    </S.LinkActivated>
-                  </S.LinkItem>
-                )
-              })}
-            </S.LineBlock>
+                  )}
+                  {line.type === "sine" && (
+                    <>
+                      <S.BoostRow>
+                        <S.BoostLabel>freq</S.BoostLabel>
+                        <NumberInput
+                          value={line.frequency}
+                          onChange={(v) => updateLineSine(line.id, v, line.amplitude)}
+                          min={1}
+                          step={1}
+                        />
+                      </S.BoostRow>
+                      <S.BoostRow>
+                        <S.BoostLabel>amp</S.BoostLabel>
+                        <NumberInput
+                          value={line.amplitude}
+                          onChange={(v) => updateLineSine(line.id, line.frequency, v)}
+                          min={1}
+                          step={5}
+                        />
+                      </S.BoostRow>
+                    </>
+                  )}
+                  {linksVisible && lineLinks.map((lk) => {
+                    const other = lk.line1.lineId === line.id ? lk.line2 : lk.line1
+                    return (
+                      <S.LinkItem key={lk.id}>
+                        <S.LinkId>{lk.id}</S.LinkId>
+                        <S.LinkDetail>{other.lineId}[{other.endpoint}]</S.LinkDetail>
+                        <S.LinkActivated $on={lk.activated} onClick={() => toggleLinkActivated(lk.id)}>
+                          {lk.activated ? "on" : "off"}
+                        </S.LinkActivated>
+                      </S.LinkItem>
+                    )
+                  })}
+                </>
+              )}
+            </Card>
           )
         })}
       </S.LineList>

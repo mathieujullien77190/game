@@ -11,21 +11,29 @@ export type TokenType = "round" | "square" | "cop" | "triangle"
 // sans état angled (round, cop) — voir period()/ANGLED_LABEL dans TokenPreview.ts.
 export const ANGLED_LABEL: Partial<Record<TokenType, string>> = { square: "45°", triangle: "60°" }
 
+// Glyphe affiché pour chaque forme dans les sélecteurs (StartTab, ArrivalTab, TransformerTab),
+// seule source de vérité pour rester visuellement cohérent partout où une forme se choisit.
+export const TYPE_GLYPH: Partial<Record<TokenType, string>> = { round: "●", square: "■", triangle: "▲" }
+
 export const TOKEN_COLORS = [
   "#e53935",
   "#fb8c00",
-  "#f9ab00",
+  "#fdd835",
   "#43a047",
   "#00acc1",
   "#1a73e8",
   "#8e24aa",
   "#e91e63",
   "#546e7a",
-  "#f8bbd0",
-  "#ce93d8",
-  "#90caf9",
-  "#a5d6a7",
+  "#ffcdd2",
   "#ffe0b2",
+  "#fff59d",
+  "#a5d6a7",
+  "#b2ebf2",
+  "#90caf9",
+  "#ce93d8",
+  "#f8bbd0",
+  "#cfd8dc",
 ] as const
 
 export type TokenColor = (typeof TOKEN_COLORS)[number]

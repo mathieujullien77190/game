@@ -246,6 +246,28 @@
         "y": 293.3333333333333
       },
       "screenId": "screen1"
+    },
+    {
+      "id": "lineM",
+      "start": {
+        "x": 240,
+        "y": 80
+      },
+      "end": {
+        "x": 200,
+        "y": 300
+      },
+      "type": "sine",
+      "cp1": {
+        "x": 200,
+        "y": 300
+      },
+      "cp2": {
+        "x": 200,
+        "y": 300
+      },
+      "frequency": 1,
+      "amplitude": 20
     }
   ],
   "links": [
@@ -440,6 +462,18 @@
         "endpoint": "start"
       },
       "activated": true
+    },
+    {
+      "id": "lineG::end-lineM::end",
+      "line1": {
+        "lineId": "lineG",
+        "endpoint": "end"
+      },
+      "line2": {
+        "lineId": "lineM",
+        "endpoint": "end"
+      },
+      "activated": true
     }
   ],
   "starts": [
@@ -514,7 +548,15 @@
       "type": "shape",
       "amount": 0.5,
       "color": "#e53935",
-      "targetType": "triangle"
+      "targetType": "square"
+    },
+    {
+      "id": "transform7",
+      "linkId": "lineG::end-lineM::end",
+      "type": "color",
+      "amount": 0.5,
+      "color": "#00acc1",
+      "targetType": "square"
     }
   ],
   "inverters": [
@@ -539,7 +581,7 @@
         {
           "id": "demand2",
           "color": "#e53935",
-          "type": "square",
+          "type": "triangle",
           "angled": false
         }
       ]

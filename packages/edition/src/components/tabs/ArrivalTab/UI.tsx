@@ -12,12 +12,6 @@ export const ArrivalList = styled.div`
   gap: 10px;
 `
 
-export const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`
-
 export const Info = styled.span`
   font-family: monospace;
   font-size: 10px;

@@ -1,11 +1,12 @@
 import { useShallow } from "zustand/react/shallow"
+import { useToggleSet } from "hooks/useToggleSet"
 import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
 import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
 import { ColorPicker } from "components/form/ColorPicker"
 import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
-import { DeleteButton } from "components/ui/DeleteButton"
+import { EntityHeader } from "components/ui/EntityHeader"
 import { Card } from "components/ui/Card"
 import { Divider } from "components/ui/Divider"
 import { useStore } from "store"
@@ -20,7 +21,7 @@ const SWITCH_MODES: SwitchMode[] = ["manual", "auto"]
 export const SwitchTab = () => {
   const {
     switches, switchLinks, editorManager, revision: _revision,
-    mode, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, updateSwitchColor, updateSwitchMode, toggleSwitchLink, setHoveredSwitchId,
+    mode, currentScreenId, setMode, removeSwitch, updateSwitchActiveLink, updateSwitchLinks, updateSwitchColor, updateSwitchMode, toggleSwitchLink, setHoveredSwitchId,
   } = useStore(
     useShallow((s) => ({
       switches: s.switches,
@@ -28,6 +29,7 @@ export const SwitchTab = () => {
       editorManager: s.editorManager,
       revision: s.revision,
       mode: s.mode,
+      currentScreenId: s.currentScreenId,
       setMode: s.setMode,
       removeSwitch: s.removeSwitch,
       updateSwitchActiveLink: s.updateSwitchActiveLink,
@@ -40,6 +42,8 @@ export const SwitchTab = () => {
   )
 
   const isPlacing = mode === "addSwitch"
+  const switchesForScreen = Object.values(switches).filter((sw) => sw.screenId === currentScreenId)
+  const collapsed = useToggleSet()
 
   return (
     <S.Container>
@@ -48,7 +52,7 @@ export const SwitchTab = () => {
       </Button>
 
       <S.SwitchList>
-        {Object.values(switches).map((sw) => {
+        {switchesForScreen.map((sw) => {
           const links = editorManager.data.links
           const ep = getSwitchEnterPoint(sw.linkIds, links)
 
@@ -74,114 +78,122 @@ export const SwitchTab = () => {
               onMouseEnter={() => setHoveredSwitchId(sw.id)}
               onMouseLeave={() => setHoveredSwitchId(null)}
             >
-              <S.Row>
+              <EntityHeader
+                screenId={sw.screenId}
+                onDelete={() => removeSwitch(sw.id)}
+                collapsed={collapsed.has(sw.id)}
+                onToggleCollapsed={() => collapsed.toggle(sw.id)}
+              >
                 <S.SwitchId>{sw.id}</S.SwitchId>
-                <DeleteButton onClick={() => removeSwitch(sw.id)} />
-              </S.Row>
+              </EntityHeader>
 
-              <Divider />
-              <Field label="color" $direction="row">
-                <ColorPicker
-                  palette={SWITCH_COLORS}
-                  value={sw.color}
-                  onChange={(color) => updateSwitchColor(sw.id, color)}
-                />
-              </Field>
+              {!collapsed.has(sw.id) && (
+                <>
+                  <Divider />
+                  <Field label="color" $direction="row">
+                    <ColorPicker
+                      palette={SWITCH_COLORS}
+                      value={sw.color}
+                      onChange={(color) => updateSwitchColor(sw.id, color)}
+                    />
+                  </Field>
 
-              <Field label="mode" $direction="row">
-                <ToggleGroup $wrap>
-                  {SWITCH_MODES.map((m) => (
-                    <Button
-                      key={m}
-                      $size="sm"
-                      $accent={SWITCH_ACCENT}
-                      $active={sw.mode === m}
-                      onClick={() => updateSwitchMode(sw.id, m)}
-                    >
-                      {m}
-                    </Button>
-                  ))}
-                </ToggleGroup>
-              </Field>
-              {sw.mode === "auto" && (
-                <S.NoLinks>auto : couleur du token en priorité, sinon ligne grise</S.NoLinks>
-              )}
-
-              <Field label="enter" $direction="row">
-                <ToggleGroup $wrap>
-                  {junctionEndpoints.map(({ lineId, endpoint }) => {
-                    const key = `${lineId}::${endpoint}`
-                    const isActive = ep?.lineId === lineId && ep?.endpoint === endpoint
-                    return (
-                      <Button
-                        key={key}
-                        $size="sm"
-                        $accent={SWITCH_ACCENT}
-                        $active={isActive}
-                        onClick={() => {
-                          if (isActive) return
-                          const newLinkIds = Object.values(links)
-                            .filter((lk) =>
-                              (lk.line1.lineId === lineId && lk.line1.endpoint === endpoint) ||
-                              (lk.line2.lineId === lineId && lk.line2.endpoint === endpoint)
-                            )
-                            .map((lk) => lk.id)
-                          updateSwitchLinks(sw.id, newLinkIds, newLinkIds[0] ?? null)
-                        }}
-                      >
-                        {lineId} [{endpoint}]
-                      </Button>
-                    )
-                  })}
-                </ToggleGroup>
-              </Field>
-
-              {ep && sw.mode !== "auto" && (
-                <Field label="active output" $direction="row">
-                  {sw.linkIds.length === 0 ? (
-                    <S.NoLinks>no links at enter endpoint</S.NoLinks>
-                  ) : (
+                  <Field label="mode" $direction="row">
                     <ToggleGroup $wrap>
-                      {sw.linkIds.map((lkId) => {
-                        const lk = links[lkId]
-                        if (!lk) return null
-                        const other =
-                          lk.line1.lineId === ep.lineId && lk.line1.endpoint === ep.endpoint
-                            ? lk.line2
-                            : lk.line1
+                      {SWITCH_MODES.map((m) => (
+                        <Button
+                          key={m}
+                          $size="sm"
+                          $accent={SWITCH_ACCENT}
+                          $active={sw.mode === m}
+                          onClick={() => updateSwitchMode(sw.id, m)}
+                        >
+                          {m}
+                        </Button>
+                      ))}
+                    </ToggleGroup>
+                  </Field>
+                  {sw.mode === "auto" && (
+                    <S.NoLinks>auto : couleur du token en priorité, sinon ligne grise</S.NoLinks>
+                  )}
+
+                  <Field label="enter" $direction="row">
+                    <ToggleGroup $wrap>
+                      {junctionEndpoints.map(({ lineId, endpoint }) => {
+                        const key = `${lineId}::${endpoint}`
+                        const isActive = ep?.lineId === lineId && ep?.endpoint === endpoint
                         return (
                           <Button
-                            key={lkId}
+                            key={key}
                             $size="sm"
                             $accent={SWITCH_ACCENT}
-                            $active={sw.activeLinkId === lkId}
-                            onClick={() => updateSwitchActiveLink(sw.id, lkId)}
+                            $active={isActive}
+                            onClick={() => {
+                              if (isActive) return
+                              const newLinkIds = Object.values(links)
+                                .filter((lk) =>
+                                  (lk.line1.lineId === lineId && lk.line1.endpoint === endpoint) ||
+                                  (lk.line2.lineId === lineId && lk.line2.endpoint === endpoint)
+                                )
+                                .map((lk) => lk.id)
+                              updateSwitchLinks(sw.id, newLinkIds, newLinkIds[0] ?? null)
+                            }}
                           >
-                            {other.lineId} [{other.endpoint}]
+                            {lineId} [{endpoint}]
                           </Button>
                         )
                       })}
                     </ToggleGroup>
-                  )}
-                </Field>
-              )}
+                  </Field>
 
-              {otherSwitches.length > 0 && (
-                <Field label="linked switches" $direction="row">
-                  <ToggleGroup $wrap>
-                    {otherSwitches.map((other) => (
-                      <Button
-                        key={other.id}
-                        $size="sm"
-                        $accent={SWITCH_ACCENT}
-                        $active={linkedIds.has(other.id)}
-                        onClick={() => toggleSwitchLink(sw.id, other.id)}
-                      >
-                        {other.id}
-                      </Button>
-                    ))}
-                  </ToggleGroup>
-                </Field>
+                  {ep && sw.mode !== "auto" && (
+                    <Field label="active output" $direction="row">
+                      {sw.linkIds.length === 0 ? (
+                        <S.NoLinks>no links at enter endpoint</S.NoLinks>
+                      ) : (
+                        <ToggleGroup $wrap>
+                          {sw.linkIds.map((lkId) => {
+                            const lk = links[lkId]
+                            if (!lk) return null
+                            const other =
+                              lk.line1.lineId === ep.lineId && lk.line1.endpoint === ep.endpoint
+                                ? lk.line2
+                                : lk.line1
+                            return (
+                              <Button
+                                key={lkId}
+                                $size="sm"
+                                $accent={SWITCH_ACCENT}
+                                $active={sw.activeLinkId === lkId}
+                                onClick={() => updateSwitchActiveLink(sw.id, lkId)}
+                              >
+                                {other.lineId} [{other.endpoint}]
+                              </Button>
+                            )
+                          })}
+                        </ToggleGroup>
+                      )}
+                    </Field>
+                  )}
+
+                  {otherSwitches.length > 0 && (
+                    <Field label="linked switches" $direction="row">
+                      <ToggleGroup $wrap>
+                        {otherSwitches.map((other) => (
+                          <Button
+                            key={other.id}
+                            $size="sm"
+                            $accent={SWITCH_ACCENT}
+                            $active={linkedIds.has(other.id)}
+                            onClick={() => toggleSwitchLink(sw.id, other.id)}
+                          >
+                            {other.id}
+                          </Button>
+                        ))}
+                      </ToggleGroup>
+                    </Field>
+                  )}
+                </>
               )}
             </Card>
           )
