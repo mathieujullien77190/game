@@ -18,7 +18,7 @@ ComponentName/
 
 ```
 components/
-  ui/        → primitives d'affichage réutilisables (Button, ToggleGroup, DeleteButton, EntityHeader, Tag, Card, Divider, TokenShape)
+  ui/        → primitives d'affichage réutilisables (Button, ToggleGroup, DeleteButton, Box, EntityHeader, Tag, Card, Divider, TokenShape)
   form/      → contrôles de formulaire réutilisables (Field, NumberInput, ColorPicker, Checkbox)
   tabs/      → onglets du panneau d'outils (LineTab, StartTab, SwitchTab, TransformerTab, InverterTab, ArrivalTab, ScreenGateTab, JsonTab, PerfTab)
 ```
@@ -30,11 +30,14 @@ Ces deux dossiers existent pour absorber les patterns **réellement dupliqués**
 - `Button` — bouton à bascule générique. Props `$active?`, `$accent?` (couleur de fond/bordure à l'état actif, défaut `#333`), `$full?` (largeur 100%, look CTA majuscule — pour les "+ Add X"), `$size?: "sm" | "md"`. Chaque onglet passe sa propre couleur d'accent.
 - `ToggleGroup` — wrapper flex autour de plusieurs `Button` formant un groupe de bascule. Props `$wrap?` (flex-wrap, pour les listes de taille variable), `$equal?` (boutons à largeur égale, `flex:1`).
 - `DeleteButton` — le ✕ de suppression, prop `$size?` (px, défaut 12).
-- `EntityHeader` — header standard d'une carte d'entité de premier niveau (id/info à gauche, `Tag` d'écran optionnel juste après si `screenId` fourni, `DeleteButton` à droite). Utilisé par Start/Switch/Transformer/Inverter/Arrival/ScreenGate. Ne pas l'utiliser pour un item imbriqué (token dans un start, demand dans une arrival) : ces entités n'ont pas de `screenId` propre — elles gardent leur header local (`TokenHeader`, `DemandHeader`…).
-- `Tag` — petit badge texte (pilule grise). Utilisé par `EntityHeader` pour l'écran, et directement par `LineTab` (pas de header dédié, juste ajouté dans son `LineLabel` existant à côté du `TypeBadge`).
-- `Card` — carte d'entité (fond gris clair, bordure, radius). Props `$accent?` (bordure gauche colorée 3px), `$nested?` (variante plus sombre/compacte pour une carte imbriquée dans une autre, ex: un token dans un start).
+- `Box` — **la brique d'entité générique, utilisée par tous les onglets** (Start/Switch/Transformer/Inverter/Arrival/ScreenGate/Line, et les items imbriqués token/demand). Combine `Card` + `EntityHeader` + `Divider` + repli : props `id` (texte homogène, une seule couleur pour tout le monde — plus de couleur par onglet), `leading?` (avant l'id, ex. `TokenShape`), `tags?` (après l'id, avant le `Tag` écran — ex. `TypeBadge`/compteur de links de `LineTab`), `screenId?` (délégué à `EntityHeader`), `onDelete`, `nested?` (délégué à `Card` `$nested`), `onMouseEnter?`/`onMouseLeave?` (survol → surbrillance canvas), `defaultCollapsed?`. Gère lui-même l'état replié/déplié (repli niveau 1) — l'appelant n'a plus besoin de `useToggleSet` pour ça. `children` = contenu du corps, caché avec le `Divider` quand replié. Cas `LineTab` : repli niveau 2 (liste des links) géré à part par l'onglet via son propre `useToggleSet`, indépendant du repli niveau 1 de `Box`.
+- `EntityHeader` — le header seul (sans `Card`/`Divider`/repli), utilisé en interne par `Box`. Ne pas l'utiliser directement dans un onglet — passer par `Box`.
+- `Tag` — petit badge texte (pilule grise). Utilisé par `EntityHeader` pour l'écran.
+- `Card` — carte d'entité (fond gris clair, bordure, radius), utilisée en interne par `Box`. Props `$nested?` (variante plus sombre/compacte pour une carte imbriquée). Pas de prop de couleur d'accent (bordure colorée) — supprimée : chaque onglet avait sa propre couleur (vert transformer, violet switch/inverter, indigo gate), maintenant homogénéisé.
 - `Divider` — `<hr>` gris fin.
 - `TokenShape` — glyphe rond/carré coloré représentant un token.
+
+Couleur d'accent des `Button`/`ToggleGroup` : **`#333`** partout (plus de couleur spécifique par onglet). Seule exception légitime : `TypeBadge` de `LineTab`, dont la couleur encode une info réelle (le type de ligne), pas une déco d'onglet.
 
 ## Composants form
 

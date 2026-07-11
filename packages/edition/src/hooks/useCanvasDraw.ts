@@ -39,6 +39,8 @@ export const useCanvasDraw = (
   previewScreenGatePt: Point | null = null,
   screenGateMarkers: { entryKey: string; exitKey: string }[] = [],
   visibleLineIds?: Set<string>,
+  hoveredStartId: string | null = null,
+  hoveredArrivalId: string | null = null,
 ) => {
   const lastTimestampRef = useRef<number | null>(null)
   const fpsRef = useRef(0)
@@ -62,7 +64,8 @@ export const useCanvasDraw = (
       arrivals, previewArrivalPt,
       screenGates, hoveredScreenGateId, previewScreenGatePt,
       screenGateMarkers,
-      visibleLineIds
+      visibleLineIds,
+      hoveredStartId, hoveredArrivalId
     )
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrivals, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrivals, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds, hoveredStartId, hoveredArrivalId])
 }

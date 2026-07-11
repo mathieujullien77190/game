@@ -28,11 +28,6 @@ export const LinkCount = styled.button<{ $active?: boolean }>`
   }
 `
 
-export const LineId = styled.span`
-  font-weight: bold;
-  color: #333;
-`
-
 export const LinkItem = styled.div`
   display: flex;
   align-items: center;

@@ -28,9 +28,11 @@ export interface StoreState {
   inverters: Record<string, Inverter>
   arrivals: Record<string, ArrivalEditor>
   hoveredLineId: string | null
+  hoveredStartId: string | null
   hoveredSwitchId: string | null
   hoveredTransformerId: string | null
   hoveredInverterId: string | null
+  hoveredArrivalId: string | null
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -68,6 +70,7 @@ export interface StoreActions {
   addTokenToStart: (startId: string) => void
   removeTokenFromStart: (startId: string, tokenId: string) => void
   updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType; angled?: boolean }) => void
+  setHoveredStartId: (id: string | null) => void
   addSwitch: (sw: SwitchEditor) => void
   removeSwitch: (id: string) => void
   updateSwitchActiveLink: (id: string, activeLinkId: string) => void
@@ -93,6 +96,7 @@ export interface StoreActions {
   removeArrivalDemand: (arrivalId: string, id: string) => void
   updateArrivalDemand: (arrivalId: string, id: string, patch: { color?: TokenColor; type?: TokenType; angled?: boolean }) => void
   setArrivalQueueSide: (arrivalId: string, queueSide: QueueSide) => void
+  setHoveredArrivalId: (id: string | null) => void
   setHoveredSwitchId: (id: string | null) => void
   setHoveredLineId: (id: string | null) => void
   setMode: (mode: Mode) => void

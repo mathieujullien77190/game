@@ -12,13 +12,6 @@ export const ArrivalList = styled.div`
   gap: 10px;
 `
 
-export const Info = styled.span`
-  font-family: monospace;
-  font-size: 10px;
-  font-weight: bold;
-  color: #555;
-`
-
 export const DemandSectionHeader = styled.div`
   display: flex;
   align-items: center;
@@ -53,17 +46,4 @@ export const DemandList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
-`
-
-export const DemandHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`
-
-export const DemandId = styled.span`
-  font-family: monospace;
-  font-size: 10px;
-  color: #777;
-  flex: 1;
 `

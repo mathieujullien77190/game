@@ -65,4 +65,6 @@ export const createStartActions = (set: Set) => ({
       if (patch.angled !== undefined) tok.angled = patch.angled
       return { revision: state.revision + 1 }
     }),
+
+  setHoveredStartId: (id: string | null) => set(() => ({ hoveredStartId: id })),
 })

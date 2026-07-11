@@ -12,13 +12,6 @@ export const GateList = styled.div`
   gap: 6px;
 `
 
-export const GateId = styled.span`
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: bold;
-  color: #1a237e;
-`
-
 export const NoOptions = styled.span`
   font-family: monospace;
   font-size: 10px;

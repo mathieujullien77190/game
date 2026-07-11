@@ -50,4 +50,6 @@ export const createArrivalActions = (set: Set) => ({
       a.queueSide = queueSide
       return { revision: state.revision + 1 }
     }),
+
+  setHoveredArrivalId: (id: string | null) => set(() => ({ hoveredArrivalId: id })),
 })

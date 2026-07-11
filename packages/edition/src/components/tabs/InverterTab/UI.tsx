@@ -11,10 +11,3 @@ export const InverterList = styled.div`
   flex-direction: column;
   gap: 6px;
 `
-
-export const InverterId = styled.span`
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: bold;
-  color: #4a148c;
-`

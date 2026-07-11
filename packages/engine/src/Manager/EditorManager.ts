@@ -125,7 +125,9 @@ export class EditorManager extends Manager<LineEditor> {
     hoveredScreenGateId: string | null = null,
     previewScreenGatePt: Point | null = null,
     screenGateMarkers: { entryKey: string; exitKey: string }[] = [],
-    visibleLineIds?: Set<string>
+    visibleLineIds?: Set<string>,
+    hoveredStartId: string | null = null,
+    hoveredArrivalId: string | null = null
   ) => {
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -230,7 +232,9 @@ export class EditorManager extends Manager<LineEditor> {
       const line = this.data.lines[start.lineId]
       if (!line) continue
       const pt = start.endpoint === "end" ? line.end : line.start
+      ctx.globalAlpha = hoveredStartId === start.id ? ALPHA.hovered : ALPHA.dimmed
       start.draw(ctx, pt)
+      ctx.globalAlpha = 1
     }
 
     for (const arrival of arrivals) {
@@ -238,7 +242,9 @@ export class EditorManager extends Manager<LineEditor> {
       if (!line) continue
       const pt = arrival.endpoint === "end" ? line.end : line.start
       const lineAngle = (arrival.endpoint === "end" ? line.points[line.points.length - 1]?.angle : line.points[0]?.angle) ?? 0
+      ctx.globalAlpha = hoveredArrivalId === arrival.id ? ALPHA.hovered : ALPHA.dimmed
       arrival.draw(ctx, pt, lineAngle)
+      ctx.globalAlpha = 1
     }
 
     if (previewArrivalPt) {

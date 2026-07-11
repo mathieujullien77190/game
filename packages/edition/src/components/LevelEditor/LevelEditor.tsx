@@ -28,7 +28,7 @@ export const LevelEditor = () => {
     editorManager, previewManager, revision, arrivals,
     mode, viewMode, pendingPoint, pendingTransformerType,
     starts, switches, transformers, inverters, screenGates,
-    hoveredLineId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredScreenGateId,
+    hoveredLineId, hoveredStartId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredArrivalId, hoveredScreenGateId,
     lineType, linePreset, screens, currentScreenId,
     addLine, addStart, addSwitch, addTransformer, addInverter, addArrival, addScreenGate,
     setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, toggleLineFlip, setHoveredLineId, setLinePreset,
@@ -49,9 +49,11 @@ export const LevelEditor = () => {
       inverters: s.inverters,
       screenGates: s.screenGates,
       hoveredLineId: s.hoveredLineId,
+      hoveredStartId: s.hoveredStartId,
       hoveredSwitchId: s.hoveredSwitchId,
       hoveredTransformerId: s.hoveredTransformerId,
       hoveredInverterId: s.hoveredInverterId,
+      hoveredArrivalId: s.hoveredArrivalId,
       hoveredScreenGateId: s.hoveredScreenGateId,
       lineType: s.lineType,
       linePreset: s.linePreset,
@@ -138,6 +140,8 @@ export const LevelEditor = () => {
     mode === "addScreenGate" ? (addScreenGateSnap?.pt ?? null) : null,
     screenGateMarkersArray,
     visibleLineIds,
+    hoveredStartId,
+    hoveredArrivalId,
   )
 
   return (

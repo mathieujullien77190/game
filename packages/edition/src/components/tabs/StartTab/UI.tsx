@@ -12,13 +12,6 @@ export const StartList = styled.div`
   gap: 6px;
 `
 
-export const StartInfo = styled.span`
-  font-family: monospace;
-  font-size: 10px;
-  font-weight: bold;
-  color: #555;
-`
-
 export const TokenSectionHeader = styled.div`
   display: flex;
   align-items: center;
@@ -47,18 +40,5 @@ export const AddTokenButton = styled.button`
     border-color: #333;
     color: #333;
   }
-`
-
-export const TokenHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`
-
-export const TokenId = styled.span`
-  font-family: monospace;
-  font-size: 10px;
-  color: #777;
-  flex: 1;
 `
 

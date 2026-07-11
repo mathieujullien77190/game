@@ -12,13 +12,6 @@ export const SwitchList = styled.div`
   gap: 6px;
 `
 
-export const SwitchId = styled.span`
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: bold;
-  color: #3b0764;
-`
-
 export const NoLinks = styled.span`
   font-family: monospace;
   font-size: 10px;

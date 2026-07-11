@@ -11,9 +11,3 @@ export const TransformerList = styled.div`
   flex-direction: column;
   gap: 6px;
 `
-
-export const TransformerId = styled.span`
-  font-family: monospace;
-  font-size: 11px;
-  color: #2e7d32;
-`

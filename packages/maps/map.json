@@ -24,7 +24,7 @@
         "y": 573.3333333333334
       },
       "boost": 0.4,
-      "color": "#e53935"
+      "color": "#fb8c00"
     },
     {
       "id": "lineB",
@@ -268,6 +268,26 @@
       },
       "frequency": 1,
       "amplitude": 20
+    },
+    {
+      "id": "lineN",
+      "start": {
+        "x": 320,
+        "y": 280
+      },
+      "end": {
+        "x": 320,
+        "y": 80
+      },
+      "type": "straight",
+      "cp1": {
+        "x": 320,
+        "y": 213.33333333333331
+      },
+      "cp2": {
+        "x": 320,
+        "y": 146.66666666666666
+      }
     }
   ],
   "links": [
@@ -592,8 +612,8 @@
       "id": "gate1",
       "linkId": "lineE::end-lineK::start",
       "targetScreenId": "screen1",
-      "entryKey": "lineL::start",
-      "exitKey": "lineL::end"
+      "entryKey": "lineL::end",
+      "exitKey": "lineL::start"
     }
   ],
   "screenTimeMultipliers": {
