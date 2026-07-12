@@ -35,14 +35,14 @@ export const populatePreviewLines = (pm: PreviewManager, em: EditorManager) => {
 // Charge une MapJson dans un PreviewManager prêt à simuler (game/app).
 export const buildPreviewManager = (json: MapJson): PreviewManager => {
   const em = new EditorManager()
-  const { starts, switches, switchLinks, transformers, arrivals, inverters, screenGates, screenTimeMultipliers } =
+  const { starts, switches, switchLinks, cloners, transformers, arrivals, inverters, screenGates, screenTimeMultipliers } =
     deserializeMap(json, em)
 
   const pm = new PreviewManager()
   populatePreviewLines(pm, em)
   pm.initSimulation(
     em.data.links, starts, switches, switchLinks,
-    transformers, arrivals, inverters, screenGates, screenTimeMultipliers,
+    transformers, arrivals, inverters, screenGates, screenTimeMultipliers, cloners,
   )
   return pm
 }

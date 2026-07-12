@@ -27,10 +27,10 @@ export const LevelEditor = () => {
   const {
     editorManager, previewManager, revision, arrivals,
     mode, viewMode, pendingPoint, pendingTransformerType,
-    starts, switches, transformers, inverters, screenGates,
-    hoveredLineId, hoveredStartId, hoveredSwitchId, hoveredTransformerId, hoveredInverterId, hoveredArrivalId, hoveredScreenGateId,
+    starts, switches, cloners, transformers, inverters, screenGates,
+    hoveredLineId, hoveredStartId, hoveredSwitchId, hoveredClonerId, hoveredTransformerId, hoveredInverterId, hoveredArrivalId, hoveredScreenGateId,
     lineType, linePreset, screens, currentScreenId,
-    addLine, addStart, addSwitch, addTransformer, addInverter, addArrival, addScreenGate,
+    addLine, addStart, addSwitch, addCloner, addTransformer, addInverter, addArrival, addScreenGate,
     setPendingPoint, setMode, setViewMode, updateLineEndpoint, updateLineControlPoint, toggleLineFlip, setHoveredLineId, setLinePreset,
     addScreen, setCurrentScreen, removeScreen,
   } = useStore(
@@ -45,12 +45,14 @@ export const LevelEditor = () => {
       pendingTransformerType: s.pendingTransformerType,
       starts: s.starts,
       switches: s.switches,
+      cloners: s.cloners,
       transformers: s.transformers,
       inverters: s.inverters,
       screenGates: s.screenGates,
       hoveredLineId: s.hoveredLineId,
       hoveredStartId: s.hoveredStartId,
       hoveredSwitchId: s.hoveredSwitchId,
+      hoveredClonerId: s.hoveredClonerId,
       hoveredTransformerId: s.hoveredTransformerId,
       hoveredInverterId: s.hoveredInverterId,
       hoveredArrivalId: s.hoveredArrivalId,
@@ -62,6 +64,7 @@ export const LevelEditor = () => {
       addLine: s.addLine,
       addStart: s.addStart,
       addSwitch: s.addSwitch,
+      addCloner: s.addCloner,
       addTransformer: s.addTransformer,
       addInverter: s.addInverter,
       addScreenGate: s.addScreenGate,
@@ -82,12 +85,12 @@ export const LevelEditor = () => {
 
   const {
     snapPoint,
-    addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap,
+    addStartSnap, addSwitchSnap, addClonerSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap,
     onCanvasMouseDown, onMouseMove, onCanvasMouseUp, onMouseLeave, onCanvasClick,
     canvasCursor,
   } = useEditorInteraction({
     mode, editorManager, currentScreenId, pendingPoint, pendingTransformerType, lineType, linePreset,
-    addLine, addStart, addSwitch, addTransformer, addArrival, addInverter, addScreenGate,
+    addLine, addStart, addSwitch, addCloner, addTransformer, addArrival, addInverter, addScreenGate,
     setPendingPoint, setMode, setLinePreset, toggleLineFlip, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
   })
 
@@ -98,6 +101,7 @@ export const LevelEditor = () => {
   )
   const startsArray = Object.values(starts).filter((s) => s.screenId === currentScreenId)
   const switchesArray = Object.values(switches).filter((sw) => sw.screenId === currentScreenId)
+  const clonersArray = Object.values(cloners).filter((cl) => cl.screenId === currentScreenId)
   const transformersArray = Object.values(transformers)
     .filter((tr) => tr.screenId === currentScreenId)
     .map((tr) => new TransformerEditor(tr.linkId, tr.type, tr.id, tr.amount, tr.color, tr.targetType))
@@ -142,6 +146,9 @@ export const LevelEditor = () => {
     visibleLineIds,
     hoveredStartId,
     hoveredArrivalId,
+    clonersArray,
+    hoveredClonerId,
+    mode === "addCloner" ? (addClonerSnap?.pt ?? null) : null,
   )
 
   return (

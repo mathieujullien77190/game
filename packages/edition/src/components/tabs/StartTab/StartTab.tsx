@@ -14,7 +14,7 @@ import * as S from "./UI"
 export const StartTab = () => {
   const {
     starts, mode, currentScreenId, setMode, removeStart,
-    updateStartDelay, updateStartFirstDelay,
+    updateStartDelay, updateStartFirstDelay, updateStartFadeLineAfter,
     addTokenToStart, removeTokenFromStart, updateStartToken, setHoveredStartId,
   } = useStore(
     useShallow((s) => ({
@@ -25,6 +25,7 @@ export const StartTab = () => {
       removeStart: s.removeStart,
       updateStartDelay: s.updateStartDelay,
       updateStartFirstDelay: s.updateStartFirstDelay,
+      updateStartFadeLineAfter: s.updateStartFadeLineAfter,
       addTokenToStart: s.addTokenToStart,
       removeTokenFromStart: s.removeTokenFromStart,
       updateStartToken: s.updateStartToken,
@@ -62,6 +63,12 @@ export const StartTab = () => {
               value={start.delay}
               min={1}
               onChange={(v) => updateStartDelay(start.id, v)}
+            />
+            <NumberInput
+              label="Fade line after (s)"
+              value={start.fadeLineAfter}
+              min={0}
+              onChange={(v) => updateStartFadeLineAfter(start.id, v)}
             />
             <Divider />
             <S.TokenSectionHeader>

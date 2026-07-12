@@ -10,6 +10,7 @@ import type { ArrivalPreview } from "../Arrival/ArrivalPreview"
 import type { TransformerPreview } from "../Transformer/TransformerPreview"
 import type { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview"
 import type { SwitchPreview } from "../Switch/SwitchPreview"
+import type { ClonerPreview } from "../Cloner/ClonerPreview"
 import { Token } from "./Token"
 
 // Symétrie rotationnelle par forme : période après laquelle l'orientation se répète visuellement
@@ -38,6 +39,8 @@ export type TransitionCtx = {
   lines: Record<string, LinePreview>
   links: Record<string, Link>
   switchByEnterKey: Record<string, SwitchPreview>
+  clonerByEnterKey: Record<string, ClonerPreview>
+  tokens: TokenPreview[]
   transformers: Record<string, TransformerPreview>
   transformerByLinkId: Record<string, string>
   inverterLinkMap: Map<string, "invert" | "grayscale" | "dark">
@@ -73,12 +76,17 @@ export class TokenPreview extends Token {
   pendingPointIndex: number = 0
   pendingDirection: 1 | -1 = 1
   pendingRemainder: number = 0
+  pendingOpacity: number = 1
   portalContext: { returnLineId: string; returnPointIndex: number; returnDirection: 1 | -1; returnRemainder: number } | null = null
   speedingLineId: string = ""
   exploding: boolean = false
   explosionProgress: number = 0
   explosionFadeProgress: number = 0
   explosionSeed: number = 0
+  // Fait glisser `opacity` vers `pendingOpacity` (cf. PreviewManager.tickSim) — utilisé par le
+  // Cloner : `true` en continu tant que le fondu (entrée ou sortie) n'est pas arrivé à
+  // destination, remis à `false` automatiquement une fois convergé.
+  fadingOpacity: boolean = false
 
   private _pt: Point | null = null
   private _speedDelta: number = 0
@@ -231,7 +239,56 @@ export class TokenPreview extends Token {
       }
     }
 
-    const other = this.resolveNext(`${this.lineId}::${arrivedAt}`, ctx)
+    const key = `${this.lineId}::${arrivedAt}`
+    const cloner = ctx.clonerByEnterKey[key]
+    if (cloner) {
+      // `cloner.linkIds` ne contient, par construction (cf. getSwitchEnterPoint / placement
+      // dans l'éditeur), que des links où la ligne d'arrivée (ep) est un côté — jamais un link
+      // "entre deux autres sorties" — donc pas besoin d'exclure un "link d'arrivée" : chaque
+      // link de linkIds pointe déjà vers une des AUTRES lignes du carrefour.
+      const ep: LinkEndpoint = { lineId: this.lineId, endpoint: arrivedAt }
+      let firstDest: LinkEndpoint | undefined
+      for (const lid of cloner.linkIds) {
+        const link = ctx.links[lid]
+        if (!link || !link.activated) continue
+        const dest = link.line1.lineId === ep.lineId && link.line1.endpoint === ep.endpoint
+          ? link.line2
+          : link.line1
+        if (!firstDest) firstDest = dest
+        const destLine = ctx.lines[dest.lineId]
+        const clone = new TokenPreview(this.color, this.speed, undefined, this.type)
+        clone.rotationOffset = this.rotationOffset
+        clone.targetRotationOffset = this.targetRotationOffset
+        clone.lineId = dest.lineId
+        clone.pointIndex = dest.endpoint === "start" ? 0 : (destLine?.points.length ?? 1) - 1
+        clone.remainder = excess
+        clone.direction = dest.endpoint === "start" ? 1 : -1
+        // Part tout de suite, mais invisible : PreviewManager.tickSim fait glisser son
+        // opacity de 0 vers `pendingOpacity` (cf. Cloner/CLAUDE.md).
+        clone.opacity = 0
+        clone.pendingOpacity = this.opacity
+        clone.fadingOpacity = true
+        ctx.tokens.push(clone)
+      }
+      cloner.trigger()
+      // Ne s'arrête pas net sur le carrefour : continue sur la première sortie comme un clone
+      // de plus (même ligne/direction), en se fondant vers opacity 0 en route plutôt que de
+      // rester figé — `arrived` n'est posé qu'une fois ce fondu terminé (cf. Cloner/CLAUDE.md).
+      if (firstDest) {
+        const destLine = ctx.lines[firstDest.lineId]
+        this.lineId = firstDest.lineId
+        this.pointIndex = firstDest.endpoint === "start" ? 0 : (destLine?.points.length ?? 1) - 1
+        this.direction = firstDest.endpoint === "start" ? 1 : -1
+        this.remainder = excess
+      } else {
+        this.direction = 0
+      }
+      this.pendingOpacity = 0
+      this.fadingOpacity = true
+      return { isInverted, isGrayscale, isDark }
+    }
+
+    const other = this.resolveNext(key, ctx)
     if (other) {
       this.lineId = other.lineId
       const newLine = ctx.lines[this.lineId]
@@ -385,7 +442,7 @@ export class TokenPreview extends Token {
       ctx.fillStyle = color
       if (isSquare) {
         ctx.beginPath()
-        ctx.rect(px - r, py - r, r * 2, r * 2)
+        ctx.roundRect(px - r, py - r, r * 2, r * 2, r * 0.4)
       } else if (isTriangle) {
         traceTriangle(ctx, px, py, r)
       } else {

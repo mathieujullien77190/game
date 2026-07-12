@@ -6,6 +6,7 @@ import { Link } from "../entities/Link/Link"
 import { StartEditor, drawStartShape } from "../entities/Start/StartEditor"
 import { SwitchEditor, drawSwitchShape } from "../entities/Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "../entities/Switch/switchUtils"
+import { ClonerEditor, drawClonerShape } from "../entities/Cloner/ClonerEditor"
 import { InverterEditor, drawInverterShape } from "../entities/Inverter/InverterEditor"
 import { TransformerEditor, TYPE_COLOR } from "../entities/Transformer/TransformerEditor"
 import type { TransformerType } from "../entities/Transformer/Transformer"
@@ -127,7 +128,10 @@ export class EditorManager extends Manager<LineEditor> {
     screenGateMarkers: { entryKey: string; exitKey: string }[] = [],
     visibleLineIds?: Set<string>,
     hoveredStartId: string | null = null,
-    hoveredArrivalId: string | null = null
+    hoveredArrivalId: string | null = null,
+    cloners: ClonerEditor[] = [],
+    hoveredClonerId: string | null = null,
+    previewClonerPt: Point | null = null
   ) => {
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -150,6 +154,23 @@ export class EditorManager extends Manager<LineEditor> {
     if (previewSwitchPt) {
       ctx.globalAlpha = ALPHA.ghostPreview
       drawSwitchShape(ctx, previewSwitchPt)
+      ctx.globalAlpha = 1
+    }
+
+    for (const cl of cloners) {
+      const ep = getSwitchEnterPoint(cl.linkIds, this.data.links)
+      if (!ep) continue
+      const line = this.data.lines[ep.lineId]
+      if (!line) continue
+      const pt = ep.endpoint === "end" ? line.end : line.start
+      ctx.globalAlpha = hoveredClonerId === cl.id ? ALPHA.hovered : ALPHA.dimmed
+      cl.draw(ctx, pt)
+      ctx.globalAlpha = 1
+    }
+
+    if (previewClonerPt) {
+      ctx.globalAlpha = ALPHA.ghostPreview
+      drawClonerShape(ctx, previewClonerPt)
       ctx.globalAlpha = 1
     }
 
@@ -192,10 +213,12 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.globalAlpha = 1
     }
 
-    for (const line of Object.values(this.data.lines)) {
-      if (visibleLineIds && !visibleLineIds.has(line.id)) continue
-      line.draw(ctx, line.id === hoveredLineId, showIds)
-    }
+    const visibleLines = Object.values(this.data.lines).filter(
+      (line) => !visibleLineIds || visibleLineIds.has(line.id)
+    )
+    for (const line of visibleLines) line.drawPath(ctx, line.id === hoveredLineId, showIds)
+    for (const line of visibleLines) line.drawEndPoint(ctx)
+    for (const line of visibleLines) line.drawStartPoint(ctx)
 
     for (const { entryKey, exitKey } of screenGateMarkers) {
       if (entryKey) {
@@ -293,6 +316,12 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.beginPath()
       ctx.arc(pendingPoint.x, pendingPoint.y, 5, 0, Math.PI * 2)
       ctx.fill()
+      ctx.strokeStyle = COLORS.black
+      ctx.lineWidth = STROKE_WIDTHS.hairline
+      ctx.setLineDash([])
+      ctx.beginPath()
+      ctx.arc(pendingPoint.x, pendingPoint.y, 7, 0, Math.PI * 2)
+      ctx.stroke()
     }
 
     if (snapPoint) {
@@ -301,6 +330,12 @@ export class EditorManager extends Manager<LineEditor> {
       ctx.beginPath()
       ctx.arc(snapPoint.x, snapPoint.y, isSecond ? 7 : 5, 0, Math.PI * 2)
       ctx.fill()
+      ctx.strokeStyle = COLORS.black
+      ctx.lineWidth = STROKE_WIDTHS.hairline
+      ctx.setLineDash([])
+      ctx.beginPath()
+      ctx.arc(snapPoint.x, snapPoint.y, isSecond ? 9 : 7, 0, Math.PI * 2)
+      ctx.stroke()
     }
 
     drawStats(ctx, fps, 0)

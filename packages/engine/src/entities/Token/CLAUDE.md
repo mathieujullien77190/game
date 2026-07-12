@@ -17,6 +17,7 @@
   5. `ScreenGate` (stocke `portalContext` pour le retour, saute à la ligne d'entrée du gate)
   6. transformer `color`/`shape`/`fade` (immobilise le token — `direction = 0` — pendant `PAINT_DURATION`, anime `colorProgress`/`pendingType`/`opacityFrom`)
   7. suivi normal du link (`linkMap`) ou arrêt en cul-de-sac (`direction = 0`)
+  8. `Cloner` (`clonerByEnterKey`) : crée un clone par sortie activée, `direction` réelle appliquée tout de suite (il part immédiatement) mais `opacity = 0` + `pendingOpacity` = opacité cible + `fadingOpacity = true` — il se **matérialise** en route plutôt que d'apparaître d'un coup. Le token consommé, lui, **ne s'arrête pas non plus** : il est redirigé sur la première sortie activée (même mécanique qu'un clone — `lineId`/`pointIndex`/`direction` mis à jour) tout en se fondant vers `pendingOpacity = 0` (même mécanisme) plutôt que de rester figé sur le carrefour ; `arrived` n'est posé qu'une fois ce fondu terminé (pas de disparition instantanée). `PreviewManager.tickSim` fait glisser `opacity` vers `pendingOpacity` par lissage exponentiel (`OPACITY_FADE_TAU`) tant que `fadingOpacity` est `true`, et le repasse à `false` une fois la cible atteinte (à ~0.01 près) — si `pendingOpacity === 0` à ce moment-là, pose aussi `arrived = true`. Mécanisme générique, réutilisable par d'autres entités qui doivent faire apparaître/disparaître un token en douceur plutôt que d'un coup.
 
 ## Rendu
 

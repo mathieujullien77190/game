@@ -10,7 +10,7 @@ export const createModeActions = (set: Set) => ({
     set((state) => {
       if (viewMode === "preview") {
         populatePreviewLines(state.previewManager, state.editorManager)
-        state.previewManager.initSimulation(state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrivals, state.inverters, state.screenGates, state.screenTimeMultipliers)
+        state.previewManager.initSimulation(state.editorManager.data.links, state.starts, state.switches, state.switchLinks, state.transformers, state.arrivals, state.inverters, state.screenGates, state.screenTimeMultipliers, state.cloners)
         Profiler.setEnabled(true)
       } else {
         Profiler.setEnabled(false)

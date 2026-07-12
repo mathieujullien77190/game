@@ -56,7 +56,7 @@ export class TransformerPreview extends Transformer {
       ctx.arc(0, 0, r, 0, Math.PI * 2)
       ctx.stroke()
       ctx.rotate(this._elapsed * Math.PI * 1.4)
-      ctx.strokeStyle = COLORS.grayDark
+      ctx.strokeStyle = COLORS.gray
       ctx.lineWidth = STROKE_WIDTHS.transformerActive
       ctx.lineCap = "round"
       for (let i = 0; i < 3; i++) {

@@ -23,7 +23,12 @@ export class LineEditor extends Line {
     ctx.fillText(this.id, mx, my - 10)
   }
 
-  draw = (ctx: Renderer, hovered = false, showId = false) => {
+  // Path + décorations (contrôles curve, coin elbow) + id — pas les points start/end.
+  // Séparé de drawStartPoint/drawEndPoint pour que l'ordre de superposition jaune/bleu
+  // reste correct même entre deux lignes différentes partageant un endpoint (voir
+  // EditorManager.drawAll : toutes les lignes sont d'abord tracées, puis tous les points
+  // bleus (end), puis tous les points jaunes (start), en 3 passes globales).
+  drawPath = (ctx: Renderer, hovered = false, showId = false) => {
     ctx.lineCap = "round"
     ctx.strokeStyle = hovered ? COLORS.black : COLORS.gray
     ctx.lineWidth = hovered ? STROKE_WIDTHS.medium : STROKE_WIDTHS.base
@@ -80,16 +85,20 @@ export class LineEditor extends Line {
       ctx.stroke()
     }
 
-    ctx.fillStyle = COLORS.amber
-    ctx.beginPath()
-    ctx.arc(this.start.x, this.start.y, 5, 0, Math.PI * 2)
-    ctx.fill()
+    if (showId) this.drawId(ctx)
+  }
 
+  drawEndPoint = (ctx: Renderer) => {
     ctx.fillStyle = COLORS.blue
     ctx.beginPath()
     ctx.arc(this.end.x, this.end.y, 7, 0, Math.PI * 2)
     ctx.fill()
+  }
 
-    if (showId) this.drawId(ctx)
+  drawStartPoint = (ctx: Renderer) => {
+    ctx.fillStyle = COLORS.amber
+    ctx.beginPath()
+    ctx.arc(this.start.x, this.start.y, 5, 0, Math.PI * 2)
+    ctx.fill()
   }
 }

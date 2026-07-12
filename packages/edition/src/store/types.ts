@@ -7,6 +7,7 @@ import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
 import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
 import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
+import { ClonerEditor } from "@drift/engine/entities/Cloner/ClonerEditor"
 import type { Transformer, TransformerType } from "@drift/engine/entities/Transformer/Transformer"
 import type { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
 import type { QueueSide } from "@drift/engine/entities/Arrival/Arrival"
@@ -15,7 +16,7 @@ import type { ScreenGate } from "@drift/engine/entities/ScreenGate/ScreenGate"
 import type { Point } from "@drift/engine/types"
 import type { MapJson } from "@drift/engine/Map/mapJson"
 
-export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransformer" | "addArrival" | "addInverter" | "addScreenGate"
+export type Mode = "select" | "addLine" | "addStart" | "addSwitch" | "addTransformer" | "addArrival" | "addInverter" | "addScreenGate" | "addCloner"
 export type ViewMode = "editor" | "preview"
 
 export interface StoreState {
@@ -24,6 +25,7 @@ export interface StoreState {
   starts: Record<string, StartEditor>
   switches: Record<string, SwitchEditor>
   switchLinks: Record<string, string[]>
+  cloners: Record<string, ClonerEditor>
   transformers: Record<string, Transformer>
   inverters: Record<string, Inverter>
   arrivals: Record<string, ArrivalEditor>
@@ -33,6 +35,7 @@ export interface StoreState {
   hoveredTransformerId: string | null
   hoveredInverterId: string | null
   hoveredArrivalId: string | null
+  hoveredClonerId: string | null
   revision: number
   mode: Mode
   viewMode: ViewMode
@@ -67,6 +70,7 @@ export interface StoreActions {
   removeStart: (id: string) => void
   updateStartDelay: (id: string, delay: number) => void
   updateStartFirstDelay: (id: string, firstDelay: number) => void
+  updateStartFadeLineAfter: (id: string, fadeLineAfter: number) => void
   addTokenToStart: (startId: string) => void
   removeTokenFromStart: (startId: string, tokenId: string) => void
   updateStartToken: (startId: string, tokenId: string, patch: { color?: TokenColor; speed?: number; type?: TokenType; angled?: boolean }) => void
@@ -78,6 +82,10 @@ export interface StoreActions {
   updateSwitchColor: (id: string, color: string) => void
   updateSwitchMode: (id: string, mode: SwitchMode) => void
   toggleSwitchLink: (id1: string, id2: string) => void
+  addCloner: (cl: ClonerEditor) => void
+  removeCloner: (id: string) => void
+  updateClonerLinks: (id: string, linkIds: string[]) => void
+  setHoveredClonerId: (id: string | null) => void
   addTransformer: (linkId: string, type: TransformerType) => void
   removeTransformer: (id: string) => void
   setHoveredTransformerId: (id: string | null) => void

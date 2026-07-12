@@ -2,6 +2,9 @@ import type { Renderer } from "../render/Renderer"
 import { ACCEL_TIME, PAINT_DURATION, ROTATION_SPEED, CANVAS_W, CANVAS_H } from "../constants";
 
 const EXPLOSION_DURATION = 2;
+// Constante de lissage du fondu d'opacité d'un token (cf. TokenPreview.fadingOpacity,
+// utilisé par le Cloner pour matérialiser un clone / faire disparaître le token consommé).
+const OPACITY_FADE_TAU = 0.4;
 
 import { LinePreview } from "../entities/Line/LinePreview";
 import type { Link, LinkEndpoint } from "../entities/Link/Link";
@@ -10,6 +13,8 @@ import { StartPreview } from "../entities/Start/StartPreview";
 import type { Switch } from "../entities/Switch/Switch";
 import { SwitchPreview } from "../entities/Switch/SwitchPreview";
 import { getSwitchEnterPoint } from "../entities/Switch/switchUtils";
+import type { Cloner } from "../entities/Cloner/Cloner";
+import { ClonerPreview } from "../entities/Cloner/ClonerPreview";
 import { drawStats, smoothFps } from "../stats";
 import { TokenPreview } from "../entities/Token/TokenPreview";
 import type { Inverter } from "../entities/Inverter/Inverter";
@@ -46,6 +51,8 @@ export class PreviewManager extends Manager<LinePreview> {
     switches: {} as Record<string, SwitchPreview>,
     switchByEnterKey: {} as Record<string, SwitchPreview>,
     switchLinks: {} as Record<string, string[]>,
+    cloners: {} as Record<string, ClonerPreview>,
+    clonerByEnterKey: {} as Record<string, ClonerPreview>,
     links: {} as Record<string, Link>,
     linkMap: {} as LinkMap,
     transformers: {} as Record<string, TransformerPreview>,
@@ -80,6 +87,7 @@ export class PreviewManager extends Manager<LinePreview> {
     inverters: Record<string, Inverter> = {},
     screenGates: Record<string, ScreenGate> = {},
     screenTimeMultipliers: Record<string, number> = {},
+    cloners: Record<string, Cloner> = {},
   ) => {
     if (PROFILING) Profiler.reset();
     this.data.switchLinks = switchLinks;
@@ -121,6 +129,15 @@ export class PreviewManager extends Manager<LinePreview> {
       if (ep) this.data.switchByEnterKey[`${ep.lineId}::${ep.endpoint}`] = sw;
     }
 
+    this.data.cloners = {};
+    this.data.clonerByEnterKey = {};
+    for (const c of Object.values(cloners)) {
+      const cp = new ClonerPreview(c.id, c.linkIds, c.screenId);
+      this.data.cloners[c.id] = cp;
+      const ep = getSwitchEnterPoint(c.linkIds, links);
+      if (ep) this.data.clonerByEnterKey[`${ep.lineId}::${ep.endpoint}`] = cp;
+    }
+
     this.data.inverters = {};
     this.data.inverterLinkMap = new Map();
     this.data.isInverted = false;
@@ -158,7 +175,7 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.starts = [];
     this.data.tokens = [];
     for (const s of Object.values(starts)) {
-      const sp = new StartPreview(s.lineId, s.endpoint, s.delay, s.id, s.screenId, s.firstDelay);
+      const sp = new StartPreview(s.lineId, s.endpoint, s.delay, s.id, s.screenId, s.firstDelay, [], s.fadeLineAfter);
       this.data.starts.push(sp);
       const line = this.data.lines[s.lineId];
       if (!line) continue;
@@ -196,11 +213,19 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.elapsedSeconds += deltaSeconds;
 
     for (const sw of Object.values(this.data.switches)) sw.tick(deltaSeconds);
+    for (const cl of Object.values(this.data.cloners)) cl.tick(deltaSeconds);
 
     for (const start of this.data.starts) {
       const hasWaitingTokens = this.data.tokens.some((t) => t.startId === start.id && this.data.elapsedSeconds < t.startAt);
       const target = hasWaitingTokens ? 1 : 0;
       start.opacity = approach(start.opacity, target, 2, deltaSeconds);
+
+      if (hasWaitingTokens) start.queueEmptyAt = undefined;
+      else if (start.queueEmptyAt === undefined) start.queueEmptyAt = this.data.elapsedSeconds;
+
+      const lineTarget = start.fadeLineAfter > 0 && start.queueEmptyAt !== undefined
+        && this.data.elapsedSeconds >= start.queueEmptyAt + start.fadeLineAfter ? 0 : 1;
+      start.lineOpacity = approach(start.lineOpacity, lineTarget, 2, deltaSeconds);
     }
 
     for (const arrival of this.data.arrivals) {
@@ -225,6 +250,16 @@ export class PreviewManager extends Manager<LinePreview> {
 
     for (const token of this.data.tokens) {
       if (this.data.elapsedSeconds < token.startAt) continue;
+
+      if (token.fadingOpacity) {
+        const k = 1 - Math.exp(-deltaSeconds / OPACITY_FADE_TAU);
+        token.opacity += (token.pendingOpacity - token.opacity) * k;
+        if (Math.abs(token.pendingOpacity - token.opacity) < 0.01) {
+          token.opacity = token.pendingOpacity;
+          token.fadingOpacity = false;
+          if (token.pendingOpacity === 0) token.arrived = true;
+        }
+      }
 
       if (token.isTransforming) {
         token.transformProgress = Math.min(1, token.transformProgress + deltaSeconds / PAINT_DURATION);
@@ -355,6 +390,10 @@ export class PreviewManager extends Manager<LinePreview> {
     this.drawSwitchesBefore(ctx, sid);
     if (PROFILING) Profiler.end("drawSwitchesBefore");
 
+    if (PROFILING) Profiler.start("drawClonersBefore");
+    this.drawClonersBefore(ctx, sid);
+    if (PROFILING) Profiler.end("drawClonersBefore");
+
     if (PROFILING) Profiler.start("drawSwitchLinks");
     this.drawSwitchLinks(ctx);
     if (PROFILING) Profiler.end("drawSwitchLinks");
@@ -382,6 +421,10 @@ export class PreviewManager extends Manager<LinePreview> {
     if (PROFILING) Profiler.start("drawSwitchesAfter");
     this.drawSwitchesAfter(ctx, sid);
     if (PROFILING) Profiler.end("drawSwitchesAfter");
+
+    if (PROFILING) Profiler.start("drawClonersAfter");
+    this.drawClonersAfter(ctx, sid);
+    if (PROFILING) Profiler.end("drawClonersAfter");
 
     if (PROFILING) Profiler.start("drawTokens");
     this.drawTokens(ctx, sid);
@@ -425,8 +468,21 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.restore();
   };
 
+  // Opacité à appliquer à une ligne : celle du start qui la revendique via `fadeLineAfter`,
+  // sinon pleinement visible. Un seul start référence en pratique une ligne donnée.
+  private lineFadeOpacity = (lineId: string): number => {
+    const s = this.data.starts.find((st) => st.fadeLineAfter > 0 && st.lineId === lineId);
+    return s ? s.lineOpacity : 1;
+  };
+
   drawLinesBefore = (ctx: Renderer, visibleLines: LinePreview[]) => {
-    for (const line of visibleLines) line.drawBefore(ctx, this.data.elapsedSeconds);
+    for (const line of visibleLines) {
+      const alpha = this.lineFadeOpacity(line.id);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      line.drawBefore(ctx, this.data.elapsedSeconds);
+      ctx.restore();
+    }
   };
 
   drawSwitchesBefore = (ctx: Renderer, sid: string) => {
@@ -436,6 +492,25 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!link) continue;
       if (this.data.lines[link.line1.lineId]?.screenId !== sid) continue;
       sw.drawBefore(ctx);
+    }
+  };
+
+  drawClonersBefore = (ctx: Renderer, sid: string) => {
+    for (const cl of Object.values(this.data.cloners)) {
+      cl.prepareFrame(this.data.lines, this.data.links);
+      const link = this.data.links[cl.linkIds[0]];
+      if (!link) continue;
+      if (this.data.lines[link.line1.lineId]?.screenId !== sid) continue;
+      cl.drawBefore(ctx);
+    }
+  };
+
+  drawClonersAfter = (ctx: Renderer, sid: string) => {
+    for (const cl of Object.values(this.data.cloners)) {
+      const link = this.data.links[cl.linkIds[0]];
+      if (!link) continue;
+      if (this.data.lines[link.line1.lineId]?.screenId !== sid) continue;
+      cl.drawAfter(ctx);
     }
   };
 
@@ -515,7 +590,10 @@ export class PreviewManager extends Manager<LinePreview> {
   drawLinesAfter = (ctx: Renderer, visibleLines: LinePreview[]) => {
     for (const line of visibleLines) {
       const token = this.data.tokens.find(t => t.lineId === line.id && !t.exploding);
+      ctx.save();
+      ctx.globalAlpha = this.lineFadeOpacity(line.id);
       line.drawAfter(ctx, token?.currentSpeed, token ? (token.displayColor || token.color as string) : undefined);
+      ctx.restore();
     }
   };
 

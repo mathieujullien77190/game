@@ -30,14 +30,14 @@ drawAllPreview(ctx)             ← appelé après tickSim
 | Méthode | Rôle |
 |---|---|
 | `clearBackground` | reset canvas + fond blanc |
-| `drawLinesBefore` | fond des rails |
+| `drawLinesBefore` | fond des rails (opacité par `lineFadeOpacity`, voir ci-dessous) |
 | `drawSwitchesBefore` | prepareFrame + arc avant |
 | `drawSwitchLinks` | liaisons pointillées entre switches |
 | `drawScreenGateMarkers` | points entry/exit dans l'écran cible |
 | `drawTransformers` | nœuds transformer |
 | `drawArrival` | nœud d'arrivée |
 | `drawStartNode` | nœud de départ + token en attente |
-| `drawLinesAfter` | indicateurs de vitesse sur les rails |
+| `drawLinesAfter` | indicateurs de vitesse sur les rails (même opacité que `drawLinesBefore`) |
 | `drawSwitchesAfter` | dot actif du switch |
 | `drawTokens` | tokens (normal + explosion) |
 | `drawStartAfter` | anneau de compte à rebours |
@@ -62,6 +62,10 @@ drawAllPreview(ctx)             ← appelé après tickSim
 ## Ordre de dessin des lignes (`visibleLines`)
 
 `drawAllPreview` calcule `visibleLines` une fois par frame (`Object.values(this.data.lines)` filtré sur l'écran courant), réutilisé tel quel par `drawLinesBefore` et `drawLinesAfter`. Il est **trié** (tri stable) pour que les lignes sans `color` (grises) soient dessinées en dernier, donc par-dessus les lignes colorées aux intersections — indépendant de l'ordre du tableau `lines` dans `map.json`.
+
+## `lineFadeOpacity(lineId)` — ligne accrochée à un Start `fadeLineAfter`
+
+`drawLinesBefore`/`drawLinesAfter` enveloppent chaque `line.drawBefore`/`drawAfter` d'un `ctx.save()` / `ctx.globalAlpha = this.lineFadeOpacity(line.id)` / `ctx.restore()`. `lineFadeOpacity` cherche, parmi `this.data.starts`, celui dont `fadeLineAfter > 0` et `lineId` correspond, et retourne son `lineOpacity` (sinon `1`, pleinement visible) — voir `Start/CLAUDE.md`. Le minuteur ne démarre pas à `elapsedSeconds = 0` mais au départ du **dernier** token du start (`start.queueEmptyAt`, posé par `tickSim` dès que sa file de spawn est vide) ; `tickSim` fait glisser `start.lineOpacity` vers `0`/`1` (`approach`, `2/s`) selon que `elapsedSeconds` a dépassé `queueEmptyAt + fadeLineAfter`, avant `drawAllPreview` — la valeur lue ici est donc toujours celle de la frame courante.
 
 ## Règles
 

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react"
 import { LineEditor } from "@drift/engine/entities/Line/LineEditor"
 import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
+import { ClonerEditor } from "@drift/engine/entities/Cloner/ClonerEditor"
 import type { EditorManager } from "@drift/engine/Manager/EditorManager"
 import type { LineType } from "@drift/engine/entities/Line/Line"
 import type { TransformerType } from "@drift/engine/entities/Transformer/Transformer"
@@ -66,6 +67,7 @@ interface Params {
   addLine: (line: LineEditor) => void
   addStart: (start: StartEditor) => void
   addSwitch: (sw: SwitchEditor) => void
+  addCloner: (cl: ClonerEditor) => void
   addTransformer: (linkId: string, type: TransformerType) => void
   addArrival: (lineId: string, endpoint: "start" | "end") => void
   addInverter: (linkId: string) => void
@@ -81,7 +83,7 @@ interface Params {
 
 export const useEditorInteraction = ({
   mode, editorManager, currentScreenId, pendingPoint, pendingTransformerType, lineType, linePreset,
-  addLine, addStart, addSwitch, addTransformer, addArrival, addInverter, addScreenGate,
+  addLine, addStart, addSwitch, addCloner, addTransformer, addArrival, addInverter, addScreenGate,
   setPendingPoint, setMode, setLinePreset, toggleLineFlip, updateLineEndpoint, updateLineControlPoint, setHoveredLineId,
 }: Params) => {
   const [snapPoint, setSnapPoint] = useState<Point | null>(null)
@@ -89,6 +91,7 @@ export const useEditorInteraction = ({
   const [hoverNearEndpoint, setHoverNearEndpoint] = useState(false)
   const [addStartSnap, setAddStartSnap] = useState<EndpointSnap>(null)
   const [addSwitchSnap, setAddSwitchSnap] = useState<EndpointSnap>(null)
+  const [addClonerSnap, setAddClonerSnap] = useState<EndpointSnap>(null)
   const [addTransformerSnap, setAddTransformerSnap] = useState<EndpointSnap>(null)
   const [addArrivalSnap, setAddArrivalSnap] = useState<EndpointSnap>(null)
   const [addInverterSnap, setAddInverterSnap] = useState<EndpointSnap>(null)
@@ -141,6 +144,16 @@ export const useEditorInteraction = ({
         setHoverNearEndpoint(true)
       } else {
         setAddSwitchSnap(null)
+        setHoverNearEndpoint(false)
+      }
+    } else if (mode === "addCloner") {
+      const hit = findEndpointAt(Object.values(editorManager.data.lines), raw)
+      if (hit) {
+        const line = editorManager.data.lines[hit.lineId]
+        setAddClonerSnap({ lineId: hit.lineId, endpoint: hit.endpoint, pt: line[hit.endpoint] })
+        setHoverNearEndpoint(true)
+      } else {
+        setAddClonerSnap(null)
         setHoverNearEndpoint(false)
       }
     } else if (mode === "addTransformer") {
@@ -210,6 +223,7 @@ export const useEditorInteraction = ({
     setSnapPoint(null)
     setAddStartSnap(null)
     setAddSwitchSnap(null)
+    setAddClonerSnap(null)
     setAddTransformerSnap(null)
     setAddArrivalSnap(null)
     setAddInverterSnap(null)
@@ -241,6 +255,20 @@ export const useEditorInteraction = ({
             .map((lk) => lk.id)
           addSwitch(new SwitchEditor(undefined, linkIds, linkIds[0] ?? null, currentScreenId))
           setAddSwitchSnap(null)
+          setMode("select")
+        }
+        return
+      }
+      if (mode === "addCloner") {
+        if (addClonerSnap) {
+          const linkIds = Object.values(editorManager.data.links)
+            .filter((lk) =>
+              (lk.line1.lineId === addClonerSnap.lineId && lk.line1.endpoint === addClonerSnap.endpoint) ||
+              (lk.line2.lineId === addClonerSnap.lineId && lk.line2.endpoint === addClonerSnap.endpoint)
+            )
+            .map((lk) => lk.id)
+          addCloner(new ClonerEditor(undefined, linkIds, currentScreenId))
+          setAddClonerSnap(null)
           setMode("select")
         }
         return
@@ -315,12 +343,12 @@ export const useEditorInteraction = ({
         setMode("select")
       }
     },
-    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addTransformer, addInverter, addScreenGate, addArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
+    [mode, pendingPoint, pendingTransformerType, addStartSnap, addSwitchSnap, addClonerSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap, lineType, linePreset, addLine, addStart, addSwitch, addCloner, addTransformer, addInverter, addScreenGate, addArrival, setPendingPoint, setMode, setLinePreset, toggleLineFlip, editorManager, currentScreenId]
   )
 
   const canvasCursor = mode === "addLine"
     ? "none"
-    : (mode === "addStart" || mode === "addSwitch" || mode === "addTransformer" || mode === "addArrival" || mode === "addInverter" || mode === "addScreenGate")
+    : (mode === "addStart" || mode === "addSwitch" || mode === "addCloner" || mode === "addTransformer" || mode === "addArrival" || mode === "addInverter" || mode === "addScreenGate")
       ? (hoverNearEndpoint ? "pointer" : "crosshair")
       : isDragging
       ? "grabbing"
@@ -330,7 +358,7 @@ export const useEditorInteraction = ({
 
   return {
     snapPoint, isDragging, hoverNearEndpoint,
-    addStartSnap, addSwitchSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap,
+    addStartSnap, addSwitchSnap, addClonerSnap, addTransformerSnap, addArrivalSnap, addInverterSnap, addScreenGateSnap,
     onCanvasMouseDown, onMouseMove, onCanvasMouseUp, onMouseLeave, onCanvasClick,
     canvasCursor,
   }

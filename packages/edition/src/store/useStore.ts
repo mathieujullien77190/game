@@ -9,6 +9,7 @@ import { createLinkActions } from "./actions/linkActions"
 import { createModeActions } from "./actions/modeActions"
 import { createStartActions } from "./actions/startActions"
 import { createSwitchActions } from "./actions/switchActions"
+import { createClonerActions } from "./actions/clonerActions"
 import { createTransformerActions } from "./actions/transformerActions"
 import { createArrivalActions } from "./actions/arrivalActions"
 import { createInverterActions } from "./actions/inverterActions"
@@ -27,6 +28,7 @@ export const useStore = create<Store>()((set) => ({
   starts: {},
   switches: {},
   switchLinks: {},
+  cloners: {},
   transformers: {},
   inverters: {},
   screenGates: {},
@@ -37,6 +39,7 @@ export const useStore = create<Store>()((set) => ({
   hoveredTransformerId: null,
   hoveredInverterId: null,
   hoveredArrivalId: null,
+  hoveredClonerId: null,
   hoveredScreenGateId: null,
   revision: 0,
   mode: "select",
@@ -55,6 +58,7 @@ export const useStore = create<Store>()((set) => ({
   ...createModeActions(set),
   ...createStartActions(set),
   ...createSwitchActions(set),
+  ...createClonerActions(set),
   ...createTransformerActions(set),
   ...createArrivalActions(set),
   ...createInverterActions(set),
@@ -75,6 +79,7 @@ useStore.subscribe((state) => {
     const json: MapJson = serializeMap(
       state.editorManager, state.starts, state.switches, state.switchLinks,
       state.transformers, state.arrivals, state.inverters, state.screens, state.screenGates, state.screenTimeMultipliers,
+      state.cloners,
     )
     const str = JSON.stringify(json)
     if (str === lastSaved && state.mapName === lastSavedMapName) return

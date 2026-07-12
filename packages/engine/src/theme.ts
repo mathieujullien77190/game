@@ -25,6 +25,7 @@ export const COLORS = {
   switchGhost: "#7c3aed",
   inverterAccent: "#7b1fa2",
   cp2Purple: "#9c27b0",
+  clonerGhost: "#ff7043",
 
   arrivalMatch: "#2E9E6B",
 } as const

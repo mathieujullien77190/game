@@ -2,6 +2,7 @@ import { useEffect, useRef, type RefObject } from "react"
 import { EditorManager } from "@drift/engine/Manager/EditorManager"
 import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
+import { ClonerEditor } from "@drift/engine/entities/Cloner/ClonerEditor"
 import { InverterEditor } from "@drift/engine/entities/Inverter/InverterEditor"
 import { TransformerEditor } from "@drift/engine/entities/Transformer/TransformerEditor"
 import type { TransformerType } from "@drift/engine/entities/Transformer/Transformer"
@@ -41,6 +42,9 @@ export const useCanvasDraw = (
   visibleLineIds?: Set<string>,
   hoveredStartId: string | null = null,
   hoveredArrivalId: string | null = null,
+  cloners: ClonerEditor[] = [],
+  hoveredClonerId: string | null = null,
+  previewClonerPt: Point | null = null,
 ) => {
   const lastTimestampRef = useRef<number | null>(null)
   const fpsRef = useRef(0)
@@ -65,7 +69,8 @@ export const useCanvasDraw = (
       screenGates, hoveredScreenGateId, previewScreenGatePt,
       screenGateMarkers,
       visibleLineIds,
-      hoveredStartId, hoveredArrivalId
+      hoveredStartId, hoveredArrivalId,
+      cloners, hoveredClonerId, previewClonerPt
     )
-  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrivals, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds, hoveredStartId, hoveredArrivalId])
+  }, [canvasRef, manager, revision, hoveredLineId, snapPoint, pendingPoint, showIds, starts, switches, previewStartPt, previewSwitchPt, dpr, hoveredSwitchId, transformers, hoveredTransformerId, previewTransformerPt, previewTransformerType, inverters, hoveredInverterId, previewInverterPt, arrivals, previewArrivalPt, screenGates, hoveredScreenGateId, previewScreenGatePt, screenGateMarkers, visibleLineIds, hoveredStartId, hoveredArrivalId, cloners, hoveredClonerId, previewClonerPt])
 }

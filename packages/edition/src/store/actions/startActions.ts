@@ -21,7 +21,7 @@ export const createStartActions = (set: Set) => ({
       const s = state.starts[id]
       if (!s) return {}
       return {
-        starts: { ...state.starts, [id]: new StartEditor(s.lineId, s.endpoint, delay, s.id, s.screenId, s.firstDelay, s.tokens) },
+        starts: { ...state.starts, [id]: new StartEditor(s.lineId, s.endpoint, delay, s.id, s.screenId, s.firstDelay, s.tokens, s.fadeLineAfter) },
         revision: state.revision + 1,
       }
     }),
@@ -31,7 +31,17 @@ export const createStartActions = (set: Set) => ({
       const s = state.starts[id]
       if (!s) return {}
       return {
-        starts: { ...state.starts, [id]: new StartEditor(s.lineId, s.endpoint, s.delay, s.id, s.screenId, firstDelay, s.tokens) },
+        starts: { ...state.starts, [id]: new StartEditor(s.lineId, s.endpoint, s.delay, s.id, s.screenId, firstDelay, s.tokens, s.fadeLineAfter) },
+        revision: state.revision + 1,
+      }
+    }),
+
+  updateStartFadeLineAfter: (id: string, fadeLineAfter: number) =>
+    set((state) => {
+      const s = state.starts[id]
+      if (!s) return {}
+      return {
+        starts: { ...state.starts, [id]: new StartEditor(s.lineId, s.endpoint, s.delay, s.id, s.screenId, s.firstDelay, s.tokens, fadeLineAfter) },
         revision: state.revision + 1,
       }
     }),

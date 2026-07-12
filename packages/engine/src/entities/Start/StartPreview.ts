@@ -8,6 +8,13 @@ const R = RADII.ring
 
 export class StartPreview extends Start {
   opacity: number = 1
+  // Opacité de la ligne accrochée (`fadeLineAfter`), pilotée par PreviewManager.tickSim —
+  // indépendante de `opacity` (celle-ci suit la file de spawn, pas un minuteur).
+  lineOpacity: number = 1
+  // elapsedSeconds au moment où le dernier token de ce start est parti (plus aucun en attente
+  // de spawn) — point de départ du minuteur `fadeLineAfter`. `undefined` tant qu'il reste des
+  // tokens en attente.
+  queueEmptyAt: number | undefined = undefined
 
   private _pt: Point | null = null
   private _remaining: number = 0
@@ -40,7 +47,7 @@ export class StartPreview extends Start {
     const baseAngle = pt.angle ?? 0
     const angle = this.endpoint === "end" ? baseAngle + Math.PI : baseAngle
     ctx.setLineDash([])
-    ctx.lineWidth = STROKE_WIDTHS.bold
+    ctx.lineWidth = STROKE_WIDTHS.heavy
     ctx.strokeStyle = this._tokenColor ?? COLORS.gray
     ctx.lineCap = "round"
     ctx.beginPath()

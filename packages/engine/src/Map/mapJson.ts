@@ -5,6 +5,8 @@ import { StartEditor } from "../entities/Start/StartEditor"
 import { syncStartCounter } from "../entities/Start/Start"
 import { SwitchEditor } from "../entities/Switch/SwitchEditor"
 import { syncSwitchCounter } from "../entities/Switch/Switch"
+import { ClonerEditor } from "../entities/Cloner/ClonerEditor"
+import { syncClonerCounter } from "../entities/Cloner/Cloner"
 import { Transformer, syncTransformerCounter, type TransformerType } from "../entities/Transformer/Transformer"
 import { Inverter, syncInverterCounter } from "../entities/Inverter/Inverter"
 import { ScreenGate, syncScreenGateCounter } from "../entities/ScreenGate/ScreenGate"
@@ -14,9 +16,10 @@ import type { EditorManager } from "../Manager/EditorManager"
 import type { Point } from "../types"
 import type { StartEditor as StartEditorType } from "../entities/Start/StartEditor"
 import type { SwitchEditor as SwitchEditorType } from "../entities/Switch/SwitchEditor"
+import type { ClonerEditor as ClonerEditorType } from "../entities/Cloner/ClonerEditor"
 
 type MapToken = { id: string; color: string; type: string; speed: number; angled?: boolean }
-type MapStart = { id: string; lineId: string; endpoint: "start" | "end"; delay: number; firstDelay?: number; screenId?: string; tokens?: MapToken[] }
+type MapStart = { id: string; lineId: string; endpoint: "start" | "end"; delay: number; firstDelay?: number; screenId?: string; tokens?: MapToken[]; fadeLineAfter?: number }
 
 export type MapJson = {
   screens?: string[]
@@ -25,6 +28,7 @@ export type MapJson = {
   tokens?: MapToken[]
   starts: MapStart[]
   switches: Record<string, { linkIds: string[]; activeLinkId: string | null; linkedSwitchIds: string[]; screenId?: string; color?: string; mode?: "manual" | "auto" }>
+  cloners?: Record<string, { linkIds: string[]; screenId?: string }>
   transformers?: { id: string; linkId: string; type: TransformerType; amount: number; color: string; targetType: string; screenId?: string }[]
   inverters?: { id: string; linkId: string; screenId?: string; effect?: "invert" | "grayscale" | "dark" }[]
   arrivals?: { id: string; lineId: string; endpoint: "start" | "end"; demands?: { id: string; color: string; type: string; angled: boolean }[]; screenId?: string; queueSide?: "top" | "bottom" | "left" | "right" | "hidden" }[]
@@ -50,6 +54,7 @@ export const serializeMap = (
   screens: string[] = ["main"],
   screenGates: Record<string, ScreenGate> = {},
   screenTimeMultipliers: Record<string, number> = {},
+  cloners: Record<string, ClonerEditorType> = {},
 ): MapJson => ({
   screens,
   lines: Object.values(editorManager.data.lines).map((l) => ({
@@ -83,6 +88,7 @@ export const serializeMap = (
     tokens: s.tokens,
     ...(s.firstDelay !== 2 ? { firstDelay: s.firstDelay } : {}),
     ...(s.screenId !== "main" ? { screenId: s.screenId } : {}),
+    ...(s.fadeLineAfter > 0 ? { fadeLineAfter: s.fadeLineAfter } : {}),
   })),
   switches: Object.fromEntries(
     Object.values(switches).map((sw) => [
@@ -94,6 +100,15 @@ export const serializeMap = (
         ...(sw.screenId !== "main" ? { screenId: sw.screenId } : {}),
         ...(sw.color !== "#ccc" ? { color: sw.color } : {}),
         ...(sw.mode !== "manual" ? { mode: sw.mode } : {}),
+      },
+    ])
+  ),
+  cloners: Object.fromEntries(
+    Object.values(cloners).map((cl) => [
+      cl.id,
+      {
+        linkIds: cl.linkIds,
+        ...(cl.screenId !== "main" ? { screenId: cl.screenId } : {}),
       },
     ])
   ),
@@ -162,8 +177,8 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   })
 
   const starts: Record<string, StartEditorType> = {}
-  json.starts?.forEach(({ id, lineId, endpoint, delay, firstDelay, screenId, tokens }) => {
-    const s = new StartEditor(lineId, endpoint, delay, id, screenId, firstDelay, tokens ?? [])
+  json.starts?.forEach(({ id, lineId, endpoint, delay, firstDelay, screenId, tokens, fadeLineAfter }) => {
+    const s = new StartEditor(lineId, endpoint, delay, id, screenId, firstDelay, tokens ?? [], fadeLineAfter ?? 0)
     starts[s.id] = s
   })
 
@@ -186,6 +201,12 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
     switchLinks[id] = linkedSwitchIds ?? []
   })
   syncSwitchCounter(Object.keys(switches))
+
+  const cloners: Record<string, ClonerEditor> = {}
+  Object.entries(json.cloners ?? {}).forEach(([id, { linkIds, screenId }]) => {
+    cloners[id] = new ClonerEditor(id, linkIds ?? [], screenId)
+  })
+  syncClonerCounter(Object.keys(cloners))
 
   const transformers: Record<string, Transformer> = {}
   json.transformers?.forEach(({ id, linkId, type, amount, color, targetType, screenId }) => {
@@ -238,5 +259,5 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
 
   const screenTimeMultipliers: Record<string, number> = json.screenTimeMultipliers ?? {}
 
-  return { starts, switches, switchLinks, transformers, inverters, arrivals, screens, screenGates, screenTimeMultipliers }
+  return { starts, switches, switchLinks, cloners, transformers, inverters, arrivals, screens, screenGates, screenTimeMultipliers }
 }
