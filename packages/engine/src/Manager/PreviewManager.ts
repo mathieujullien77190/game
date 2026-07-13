@@ -21,6 +21,7 @@ import type { Inverter } from "../entities/Inverter/Inverter";
 import { InverterPreview } from "../entities/Inverter/InverterPreview";
 import type { Transformer } from "../entities/Transformer/Transformer";
 import { TransformerPreview } from "../entities/Transformer/TransformerPreview";
+import { setAnimationsEnabled, areAnimationsEnabled } from "../entities/Animation";
 import type { ScreenGate } from "../entities/ScreenGate/ScreenGate";
 import { ScreenGatePreview } from "../entities/ScreenGate/ScreenGatePreview";
 import type { Arrival } from "../entities/Arrival/Arrival";
@@ -76,6 +77,13 @@ export class PreviewManager extends Manager<LinePreview> {
     fps: 0,
     frameMs: 0,
   };
+
+  // Coupe toutes les animations d'entités en un seul point (debug / perf). Le rendu
+  // statique (nœuds, rails, tokens) reste ; seule la couche animée est sautée.
+  // Délègue au flag module de `Animation.ts` (toutes les entités passent par
+  // `runAnimations`), donc un seul booléen gèle l'animation de tout le jeu.
+  get animationsEnabled() { return areAnimationsEnabled(); }
+  set animationsEnabled(v: boolean) { setAnimationsEnabled(v); }
 
   initSimulation = (
     links: Record<string, Link>,
@@ -539,7 +547,7 @@ export class PreviewManager extends Manager<LinePreview> {
       const isEnd = link.line1.endpoint === "end";
       const pt = isEnd ? line.end : line.start;
       const ptAngle = isEnd ? line.points[line.points.length - 1] : line.points[0];
-      tr.drawBefore(ctx, pt, this.data.elapsedSeconds, ptAngle?.angle ?? 0);
+      tr.drawBefore(ctx, pt, ptAngle?.angle ?? 0);
     }
   };
 
@@ -549,7 +557,9 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!link) continue;
       const line = this.data.lines[link.line1.lineId];
       if (!line || line.screenId !== sid) continue;
-      tr.drawAfter(ctx);
+      const isEnd = link.line1.endpoint === "end";
+      const pt = isEnd ? line.end : line.start;
+      tr.drawAnimation(ctx, pt, this.data.elapsedSeconds);
     }
   };
 
@@ -703,8 +713,8 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.roundRect(mx, my, MW, MH, 4)
     ctx.fillStyle = COLORS.white
     ctx.fill()
-    ctx.strokeStyle = COLORS.black
-    ctx.lineWidth = STROKE_WIDTHS.base
+    ctx.strokeStyle = COLORS.grayLight
+    ctx.lineWidth = STROKE_WIDTHS.lineGlow
     ctx.setLineDash([])
     ctx.stroke()
 
@@ -714,7 +724,7 @@ export class PreviewManager extends Manager<LinePreview> {
       if (!line || line.screenId !== prevSid) continue
       const pt = line.points[token.pointIndex]
       if (!pt) continue
-      token.drawMini(ctx, mx + pt.x * S, my + pt.y * S)
+      token.drawMini(ctx, mx + pt.x * S, my + pt.y * S, token.orientation(pt))
     }
   };
 

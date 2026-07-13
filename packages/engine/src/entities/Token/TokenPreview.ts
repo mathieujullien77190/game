@@ -2,7 +2,7 @@ import type { Renderer } from "../../render/Renderer"
 import { POINT_SPACING } from "../../constants"
 import type { Point } from "../../types"
 import { runAnimations, type Animation } from "../Animation"
-import { COLORS, STROKE_WIDTHS } from "../../theme"
+import { COLORS } from "../../theme"
 import { traceTriangle, traceShapeMorph } from "../../Utils/geometry"
 import type { Link, LinkEndpoint } from "../Link/Link"
 import type { LinePreview } from "../Line/LinePreview"
@@ -469,22 +469,29 @@ export class TokenPreview extends Token {
     ctx.restore()
   }
 
-  drawMini = (ctx: Renderer, x: number, y: number) => {
-    const color = (this.displayColor || this.color) as string
-    ctx.fillStyle = color
-    ctx.strokeStyle = COLORS.black
-    ctx.lineWidth = STROKE_WIDTHS.hairline
+  // Angle d'orientation réel du token à un point de ligne (même formule que drawShape) :
+  // tangente de la ligne (inversée si direction -1) + rotationOffset courant.
+  orientation = (pt: Point): number =>
+    (this.direction === -1 ? (pt.angle ?? 0) + Math.PI : (pt.angle ?? 0)) + this.rotationOffset
+
+  drawMini = (ctx: Renderer, x: number, y: number, angle = 0) => {
+    ctx.fillStyle = (this.displayColor || this.color) as string
     if (this.type === "square") {
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.rotate(angle)
       ctx.beginPath()
-      ctx.rect(x - 3, y - 3, 6, 6)
+      ctx.rect(-3, -3, 6, 6)
+      ctx.fill()
+      ctx.restore()
     } else if (this.type === "triangle") {
-      traceTriangle(ctx, x, y, 5)
+      traceTriangle(ctx, x, y, 5, angle)
+      ctx.fill()
     } else {
       ctx.beginPath()
       ctx.arc(x, y, 3, 0, Math.PI * 2)
+      ctx.fill()
     }
-    ctx.fill()
-    ctx.stroke()
   }
 
   private drawStatic = (_ctx: Renderer) => {}

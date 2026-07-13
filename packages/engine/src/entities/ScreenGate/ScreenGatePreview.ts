@@ -54,8 +54,9 @@ export class ScreenGatePreview extends ScreenGate {
     ctx.save()
     ctx.translate(this._pt.x, this._pt.y)
     ctx.fillStyle = COLORS.white
-    ctx.strokeStyle = COLORS.black
-    ctx.lineWidth = STROKE_WIDTHS.base
+    ctx.strokeStyle = COLORS.grayLight
+    ctx.lineWidth = STROKE_WIDTHS.lineGlow
+    ctx.setLineDash([])
     ctx.beginPath()
     ctx.roundRect(-GATE_W / 2, -GATE_H / 2, GATE_W, GATE_H, 5)
     ctx.fill()
@@ -86,7 +87,7 @@ export class ScreenGatePreview extends ScreenGate {
       if (!tp) continue
       const dx = tp.x * S - GATE_W / 2
       const dy = tp.y * S - GATE_H / 2
-      token.drawMini(ctx, dx, dy)
+      token.drawMini(ctx, dx, dy, token.orientation(tp))
     }
     ctx.restore()
   }
