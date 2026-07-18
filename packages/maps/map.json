@@ -22,8 +22,7 @@
       "cp2": {
         "x": 200,
         "y": 573.3333333333334
-      },
-      "boost": 0.4
+      }
     },
     {
       "id": "lineB",
@@ -43,26 +42,6 @@
       "cp2": {
         "x": 93.33333333333333,
         "y": 473.3333333333333
-      }
-    },
-    {
-      "id": "lineC",
-      "start": {
-        "x": 40,
-        "y": 440
-      },
-      "end": {
-        "x": 40,
-        "y": 300
-      },
-      "type": "straight",
-      "cp1": {
-        "x": 40,
-        "y": 393.3333333333333
-      },
-      "cp2": {
-        "x": 40,
-        "y": 346.6666666666667
       }
     },
     {
@@ -189,7 +168,7 @@
       "id": "lineJ",
       "start": {
         "x": 40,
-        "y": 300
+        "y": 440
       },
       "end": {
         "x": 40,
@@ -203,7 +182,10 @@
       "cp2": {
         "x": 40,
         "y": 180
-      }
+      },
+      "showSpeed": true,
+      "speedPos": "right",
+      "limitation": 20
     },
     {
       "id": "lineK",
@@ -363,18 +345,6 @@
       "activated": true
     },
     {
-      "id": "lineB::end-lineC::start",
-      "line1": {
-        "lineId": "lineB",
-        "endpoint": "end"
-      },
-      "line2": {
-        "lineId": "lineC",
-        "endpoint": "start"
-      },
-      "activated": true
-    },
-    {
       "id": "lineA::end-lineD::start",
       "line1": {
         "lineId": "lineA",
@@ -519,9 +489,9 @@
       "activated": true
     },
     {
-      "id": "lineC::end-lineJ::start",
+      "id": "lineB::end-lineJ::start",
       "line1": {
-        "lineId": "lineC",
+        "lineId": "lineB",
         "endpoint": "end"
       },
       "line2": {
@@ -675,7 +645,7 @@
         "lineA::end-lineF::start",
         "lineA::end-lineH::start"
       ],
-      "activeLinkId": "lineA::end-lineF::start",
+      "activeLinkId": "lineA::end-lineB::start",
       "linkedSwitchIds": [],
       "color": "#546e7a"
     }
@@ -690,14 +660,6 @@
     }
   },
   "transformers": [
-    {
-      "id": "transform3",
-      "linkId": "lineB::end-lineC::start",
-      "type": "color",
-      "amount": 0.5,
-      "color": "#e53935",
-      "targetType": "square"
-    },
     {
       "id": "transform4",
       "linkId": "lineD::end-lineE::start",
@@ -731,13 +693,7 @@
       "targetType": "square"
     }
   ],
-  "inverters": [
-    {
-      "id": "inv1",
-      "linkId": "lineC::end-lineJ::start",
-      "effect": "dark"
-    }
-  ],
+  "inverters": [],
   "arrivals": [
     {
       "id": "arrival1",
@@ -745,14 +701,20 @@
       "endpoint": "end",
       "demands": [
         {
-          "id": "demand1",
-          "color": "#fb8c00",
+          "id": "demand4",
+          "color": "#ce93d8",
           "type": "round",
           "angled": false
         },
         {
-          "id": "demand2",
-          "color": "#e53935",
+          "id": "demand5",
+          "color": "#a5d6a7",
+          "type": "square",
+          "angled": false
+        },
+        {
+          "id": "demand6",
+          "color": "#ffe0b2",
           "type": "triangle",
           "angled": false
         }

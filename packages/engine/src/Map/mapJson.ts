@@ -1,5 +1,5 @@
 import { LineEditor } from "../entities/Line/LineEditor"
-import { syncLineCounter, type LineType } from "../entities/Line/Line"
+import { syncLineCounter, type LineType, type SpeedPos } from "../entities/Line/Line"
 import { syncTokenCounter } from "../entities/Token/Token"
 import { StartEditor } from "../entities/Start/StartEditor"
 import { syncStartCounter } from "../entities/Start/Start"
@@ -11,7 +11,7 @@ import { Transformer, syncTransformerCounter, type TransformerType } from "../en
 import { Inverter, syncInverterCounter } from "../entities/Inverter/Inverter"
 import { ScreenGate, syncScreenGateCounter } from "../entities/ScreenGate/ScreenGate"
 import { ArrivalEditor } from "../entities/Arrival/ArrivalEditor"
-import { syncArrivalCounter } from "../entities/Arrival/Arrival"
+import { syncArrivalCounter, syncDemandCounter } from "../entities/Arrival/Arrival"
 import type { EditorManager } from "../Manager/EditorManager"
 import type { Point } from "../types"
 import type { StartEditor as StartEditorType } from "../entities/Start/StartEditor"
@@ -23,7 +23,7 @@ type MapStart = { id: string; lineId: string; endpoint: "start" | "end"; delay: 
 
 export type MapJson = {
   screens?: string[]
-  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; limitation?: number; frequency?: number; amplitude?: number; turns?: number; screenId?: string; color?: string }[]
+  lines: { id: string; start: Point; end: Point; type: LineType; cp1?: Point; cp2?: Point; boost?: number; flip?: boolean; tunnel?: boolean; showSpeed?: boolean; speedPos?: SpeedPos; limitation?: number; frequency?: number; amplitude?: number; turns?: number; screenId?: string; color?: string }[]
   links: { id: string; line1: { lineId: string; endpoint: "start" | "end" }; line2: { lineId: string; endpoint: "start" | "end" }; activated: boolean }[]
   tokens?: MapToken[]
   starts: MapStart[]
@@ -68,6 +68,7 @@ export const serializeMap = (
     ...(l.flip ? { flip: true } : {}),
     ...(l.tunnel ? { tunnel: true } : {}),
     ...(l.showSpeed ? { showSpeed: true } : {}),
+    ...(l.showSpeed && l.speedPos !== "top" ? { speedPos: l.speedPos } : {}),
     ...(l.limitation !== 0 ? { limitation: l.limitation } : {}),
     ...(l.type === "sine" ? { frequency: l.frequency, amplitude: l.amplitude } : {}),
     ...(l.type === "spiral" ? { turns: l.turns } : {}),
@@ -150,12 +151,13 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
   editorManager.data.lines = {}
   editorManager.data.links = {}
 
-  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, flip, tunnel, showSpeed, limitation, frequency, amplitude, turns, screenId, color }) => {
+  json.lines?.forEach(({ id, start, end, type, cp1, cp2, boost, flip, tunnel, showSpeed, speedPos, limitation, frequency, amplitude, turns, screenId, color }) => {
     const line = new LineEditor(start, end, type ?? "straight", id, cp1, cp2, screenId)
     if (boost) line.boost = boost
     if (flip) { line.flip = true; line.computePoints() }
     if (tunnel) line.tunnel = true
     if (showSpeed) line.showSpeed = true
+    if (speedPos) line.speedPos = speedPos
     if (limitation) line.limitation = limitation
     if (color) line.color = color
     if (type === "sine") {
@@ -248,6 +250,7 @@ export const deserializeMap = (json: MapJson, editorManager: EditorManager) => {
     arrivals[a.id] = new ArrivalEditor(a.lineId, a.endpoint, a.id, (a.demands ?? []) as any, a.screenId, a.queueSide)
   }
   syncArrivalCounter(Object.keys(arrivals))
+  syncDemandCounter(Object.values(arrivals).flatMap((a) => a.demands.map((d) => d.id)))
 
   const screens = json.screens ?? ["main"]
 

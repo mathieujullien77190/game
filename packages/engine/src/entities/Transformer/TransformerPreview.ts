@@ -76,9 +76,10 @@ export class TransformerPreview extends Transformer {
   // Construit une fois la liste d'animations selon le type (déclaré avant, donc dispo ici).
   readonly animations: Animation[] = this.type === "rotate" ? [this.arrowsAnim()] : [this.orbitAnim()]
 
-  // Statique, dessiné SOUS les tokens : disque blanc + glyphe central. Ne dépend plus du temps.
-  drawBefore = (ctx: Renderer, pt: Point, lineAngle = 0) => {
-    this._pt = pt
+  // Statique, dessiné SOUS les tokens : disque blanc + glyphe central. Ne dépend pas du temps.
+  private drawStatic = (ctx: Renderer, lineAngle: number) => {
+    const pt = this._pt
+    if (!pt) return
     ctx.save()
     ctx.translate(pt.x, pt.y)
     ctx.fillStyle = COLORS.white
@@ -116,6 +117,12 @@ export class TransformerPreview extends Transformer {
       ctx.globalAlpha = 1
     }
     ctx.restore()
+  }
+
+  // Statique, dessiné SOUS les tokens.
+  drawBefore = (ctx: Renderer, pt: Point, lineAngle = 0) => {
+    this._pt = pt
+    this.drawStatic(ctx, lineAngle)
   }
 
   // Animé, dessiné AU-DESSUS des tokens : le temps arrive en paramètre (plus de _elapsed stashé).

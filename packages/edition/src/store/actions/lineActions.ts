@@ -1,5 +1,5 @@
 import { LineEditor } from "@drift/engine/entities/Line/LineEditor"
-import type { LineType } from "@drift/engine/entities/Line/Line"
+import type { LineType, SpeedPos } from "@drift/engine/entities/Line/Line"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
 import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
 import type { Link } from "@drift/engine/entities/Link/Link"
@@ -131,6 +131,14 @@ export const createLineActions = (set: Set) => ({
       const line = state.editorManager.data.lines[id]
       if (!line) return {}
       line.showSpeed = showSpeed
+      return { revision: state.revision + 1 }
+    }),
+
+  updateLineSpeedPos: (id: string, speedPos: SpeedPos) =>
+    set((state) => {
+      const line = state.editorManager.data.lines[id]
+      if (!line) return {}
+      line.speedPos = speedPos
       return { revision: state.revision + 1 }
     }),
 

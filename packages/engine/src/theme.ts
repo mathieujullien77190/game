@@ -21,6 +21,7 @@ export const COLORS = {
   amber: "#f9ab00",
   glow: "#ffcc00",
   limitationRed: "#e00",
+  limitationRedPastel: "#f5a3a3",
 
   switchGhost: "#7c3aed",
   inverterAccent: "#7b1fa2",

@@ -248,7 +248,7 @@ export class PreviewManager extends Manager<LinePreview> {
         if (arrival.fadeAlpha <= 0) {
           arrival.isFading = false
           arrival.fadeAlpha = 1
-          arrival.currentDemandIndex++
+          arrival.fadingIndex = -1
         }
       }
       const arrivalDone = arrival.demands.length > 0 && arrival.currentDemandIndex >= arrival.demands.length
@@ -599,10 +599,14 @@ export class PreviewManager extends Manager<LinePreview> {
 
   drawLinesAfter = (ctx: Renderer, visibleLines: LinePreview[]) => {
     for (const line of visibleLines) {
-      const token = this.data.tokens.find(t => t.lineId === line.id && !t.exploding);
+      const badges = line.showSpeed
+        ? this.data.tokens
+            .filter(t => t.lineId === line.id && !t.exploding && t.type !== "cop" && line.points[t.pointIndex])
+            .map(t => ({ pt: line.points[t.pointIndex], speed: t.currentSpeed, color: t.displayColor || (t.color as string) }))
+        : [];
       ctx.save();
       ctx.globalAlpha = this.lineFadeOpacity(line.id);
-      line.drawAfter(ctx, token?.currentSpeed, token ? (token.displayColor || token.color as string) : undefined);
+      line.drawAfter(ctx, badges);
       ctx.restore();
     }
   };

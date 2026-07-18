@@ -2,6 +2,7 @@ import type { Renderer } from "../../render/Renderer"
 import type { Link } from "../Link/Link"
 import type { Point } from "../../types"
 import { runAnimations, type Animation } from "../Animation"
+import { orbitingDots } from "../../Utils/anim"
 import { COLORS, STROKE_WIDTHS, RADII } from "../../theme"
 import { getSwitchEnterPoint, curveIntersectAngle } from "../Switch/switchUtils"
 import { Cloner } from "./Cloner"
@@ -70,43 +71,19 @@ export class ClonerPreview extends Cloner {
     ctx.fill()
   }
 
-  // Anneau gris statique, comme Transformer, sans dot orbital.
-  private animRing = (ctx: Renderer) => {
-    const pt = this._pt
-    if (!pt) return
-    ctx.save()
-    ctx.setLineDash([])
-    ctx.strokeStyle = COLORS.grayLight
-    ctx.lineWidth = STROKE_WIDTHS.heavy
-    ctx.beginPath()
-    ctx.arc(pt.x, pt.y, ORBIT_R, 0, Math.PI * 2)
-    ctx.stroke()
-    ctx.restore()
-  }
-
-  // N pastilles grises sur le bord de l'anneau, déphasées de 2π/n. `_dotAngle` (accumulé dans
-  // `tick`, jamais dérivé du temps absolu) tourne lentement en idle et vite pendant le clonage
-  // — un changement de vitesse plutôt que de position, donc jamais de saut visuel.
-  private animInner = (ctx: Renderer) => {
-    const pt = this._pt
-    const n = this._allAngles.length
-    if (!pt || n === 0) return
-    ctx.save()
-    for (let i = 0; i < n; i++) {
-      const angle = this._dotAngle + (i * Math.PI * 2) / n
-      ctx.fillStyle = COLORS.gray
-      ctx.beginPath()
-      ctx.arc(pt.x + Math.cos(angle) * ORBIT_R, pt.y + Math.sin(angle) * ORBIT_R, IDLE_DOT_R, 0, Math.PI * 2)
-      ctx.fill()
-    }
-    ctx.restore()
-  }
-
+  // Anneau gris + N pastilles sur son bord (déphasées de 2π/n), via le mark orbital réutilisable.
+  // `_dotAngle` (accumulé dans `tick`, jamais dérivé du temps absolu) tourne lentement en idle et
+  // vite pendant le clonage — un changement de vitesse plutôt que de position, donc jamais de saut.
   readonly animations: Animation[] = [
-    { draw: (ctx, _t) => {
-      this.animRing(ctx)
-      this.animInner(ctx)
-    } },
+    orbitingDots({
+      center: () => this._pt,
+      radius: ORBIT_R,
+      count: () => this._allAngles.length,
+      angle: () => this._dotAngle,
+      color: COLORS.gray,
+      dotR: IDLE_DOT_R,
+      ring: { color: COLORS.grayLight, width: STROKE_WIDTHS.heavy },
+    }),
   ]
 
   drawBefore = (ctx: Renderer) => {

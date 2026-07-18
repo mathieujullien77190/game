@@ -2,7 +2,7 @@ import type { StoreApi } from "zustand"
 import { EditorManager } from "@drift/engine/Manager/EditorManager"
 import { PreviewManager } from "@drift/engine/Manager/PreviewManager"
 import { LineEditor } from "@drift/engine/entities/Line/LineEditor"
-import type { LineType } from "@drift/engine/entities/Line/Line"
+import type { LineType, SpeedPos } from "@drift/engine/entities/Line/Line"
 import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
 import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
 import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
@@ -61,6 +61,7 @@ export interface StoreActions {
   updateLineBoost: (id: string, boost: number) => void
   updateLineTunnel: (id: string, tunnel: boolean) => void
   updateLineShowSpeed: (id: string, showSpeed: boolean) => void
+  updateLineSpeedPos: (id: string, speedPos: SpeedPos) => void
   updateLineLimitation: (id: string, limitation: number) => void
   updateLineColor: (id: string, color: string | null) => void
   updateLineSine: (id: string, frequency: number, amplitude: number) => void

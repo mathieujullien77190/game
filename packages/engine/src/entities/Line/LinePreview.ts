@@ -1,10 +1,13 @@
 import type { Renderer } from "../../render/Renderer"
+import type { Point } from "../../types"
 import { runAnimations, type Animation } from "../Animation"
 import { COLORS, STROKE_WIDTHS } from "../../theme"
 import { Line } from "./Line"
 
+export type SpeedBadge = { pt: Point; speed: number; color: string }
+
 export class LinePreview extends Line {
-  lastSpeed: number | undefined = undefined
+  private _badges: SpeedBadge[] = []
 
   private tracePath = (ctx: Renderer) => {
     ctx.beginPath()
@@ -69,8 +72,63 @@ export class LinePreview extends Line {
     ctx.restore()
   }
 
+  // Un badge vitesse par token, collé au token et le suit ; animé (sa position = celle du token,
+  // recalculée chaque frame). `_badges` est réalimenté par le manager via `drawAfter`.
+  private animSpeedBadges = (ctx: Renderer) => {
+    if (!this.showSpeed || this._badges.length === 0) return
+    const rw = 26, rh = 19, gap = 10, tokenR = 9
+    ctx.save()
+    ctx.font = "bold 9px monospace"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    for (const b of this._badges) {
+      if (!b.pt) continue
+      let cx = b.pt.x, cy = b.pt.y
+      if (this.speedPos === "left") cx -= tokenR + gap + rw / 2
+      else if (this.speedPos === "right") cx += tokenR + gap + rw / 2
+      else if (this.speedPos === "bottom") cy += tokenR + gap + rh / 2
+      else cy -= tokenR + gap + rh / 2
+      const rx = cx - rw / 2, ry = cy - rh / 2
+      ctx.fillStyle = b.color || COLORS.white
+      ctx.beginPath()
+      ctx.roundRect(rx, ry, rw, rh, 4)
+      ctx.fill()
+      ctx.fillStyle = COLORS.black
+      ctx.fillText(Math.round(b.speed).toString(), cx, cy)
+    }
+    ctx.restore()
+  }
+
+  // Cercle de limitation — statique (indépendant du temps), dessiné au-dessus des tokens.
+  private drawLimitation = (ctx: Renderer) => {
+    if (this.limitation === 0) return
+    const mid = this.points[Math.floor(this.points.length / 2)]
+    if (!mid) return
+    const r = 11
+    ctx.save()
+    ctx.font = "bold 9px monospace"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    ctx.fillStyle = COLORS.white
+    ctx.strokeStyle = COLORS.limitationRedPastel
+    ctx.lineWidth = STROKE_WIDTHS.lineGlow - 2
+    ctx.beginPath()
+    ctx.arc(mid.x, mid.y, r, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+    ctx.fillStyle = COLORS.black
+    ctx.fillText(this.limitation.toString(), mid.x, mid.y + 1)
+    ctx.restore()
+  }
+
+  // Couche animée SOUS les tokens (le glow suit le rail, doit rester derrière la balle).
   readonly animations: Animation[] = [
     { draw: (ctx, t) => this.drawGlow(ctx, t.elapsed) },
+  ]
+
+  // Couche animée AU-DESSUS des tokens (les badges collent aux tokens, doivent rester devant).
+  readonly overlayAnimations: Animation[] = [
+    { draw: (ctx, _t) => this.animSpeedBadges(ctx) },
   ]
 
   drawBefore = (ctx: Renderer, elapsedSeconds = 0) => {
@@ -78,46 +136,9 @@ export class LinePreview extends Line {
     runAnimations(this.animations, ctx, elapsedSeconds)
   }
 
-  drawAfter = (ctx: Renderer, speed?: number, tokenColor?: string) => {
-    const mid = this.points[Math.floor(this.points.length / 2)]
-    if (!mid) return
-    ctx.font = "bold 9px monospace"
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-
-    if (this.showSpeed) {
-      const rw = 26, rh = 19
-      const rx = mid.x - rw / 2, ry = mid.y - rh / 2
-      ctx.save()
-      ctx.fillStyle = tokenColor ?? COLORS.white
-      ctx.strokeStyle = COLORS.black
-      ctx.lineWidth = STROKE_WIDTHS.thin
-      ctx.beginPath()
-      ctx.roundRect(rx, ry, rw, rh, 4)
-      ctx.fill()
-      ctx.stroke()
-      if (speed !== undefined) this.lastSpeed = speed
-      if (this.lastSpeed !== undefined) {
-        ctx.fillStyle = COLORS.black
-        ctx.fillText(Math.round(this.lastSpeed).toString(), mid.x, mid.y)
-      }
-      ctx.restore()
-    }
-
-    if (this.limitation !== 0) {
-      const r = 11
-      const ox = this.showSpeed ? r * 2 + 4 : 0
-      ctx.save()
-      ctx.fillStyle = COLORS.white
-      ctx.strokeStyle = COLORS.limitationRed
-      ctx.lineWidth = STROKE_WIDTHS.base
-      ctx.beginPath()
-      ctx.arc(mid.x + ox, mid.y, r, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke()
-      ctx.fillStyle = COLORS.black
-      ctx.fillText(this.limitation.toString(), mid.x + ox, mid.y)
-      ctx.restore()
-    }
+  drawAfter = (ctx: Renderer, badges: SpeedBadge[] = []) => {
+    this._badges = badges
+    this.drawLimitation(ctx)
+    runAnimations(this.overlayAnimations, ctx)
   }
 }

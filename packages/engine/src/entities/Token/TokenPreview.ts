@@ -142,25 +142,30 @@ export class TokenPreview extends Token {
 
     const arrival = ctx.arrivalByKey[`${this.lineId}::${arrivedAt}`]
     if (arrival) {
-      const demand = arrival.demands[arrival.currentDemandIndex]
-      const tokenColor = this.displayColor || (this.color as string)
-      const period = rotationPeriod(this.type as string)
-      const norm = period > 0 ? (((this.targetRotationOffset % period) + period) % period) : 0
-      const tokenAngled = period > 0 && norm > period / 4
-      const matches = !!demand
-        && demand.color === tokenColor
-        && demand.type === (this.type as string)
-        && (period === 0 || demand.angled === tokenAngled)
-      if (matches) {
-        const n = arrival.demands.length
-        arrival.flashColor = COLORS.arrivalMatch
-        arrival.flashProgress = 0
-        arrival.arcTarget = Math.min(n, arrival.arcTarget + 1)
-        arrival.isFading = true
-        arrival.fadeAlpha = 1
-      } else {
-        arrival.flashColor = COLORS.red
-        arrival.flashProgress = 0
+      // Les cop sont ignorés par l'arrivée (pas de match/flash) mais retirés du réseau.
+      if (this.type !== "cop") {
+        const demand = arrival.demands[arrival.currentDemandIndex]
+        const tokenColor = this.displayColor || (this.color as string)
+        const period = rotationPeriod(this.type as string)
+        const norm = period > 0 ? (((this.targetRotationOffset % period) + period) % period) : 0
+        const tokenAngled = period > 0 && norm > period / 4
+        const matches = !!demand
+          && demand.color === tokenColor
+          && demand.type === (this.type as string)
+          && (period === 0 || demand.angled === tokenAngled)
+        if (matches) {
+          const n = arrival.demands.length
+          arrival.flashColor = COLORS.arrivalMatch
+          arrival.flashProgress = 0
+          arrival.arcTarget = Math.min(n, arrival.arcTarget + 1)
+          arrival.fadingIndex = arrival.currentDemandIndex
+          arrival.isFading = true
+          arrival.fadeAlpha = 1
+          arrival.currentDemandIndex++
+        } else {
+          arrival.flashColor = COLORS.red
+          arrival.flashProgress = 0
+        }
       }
       this.arrived = true
       this.direction = 0

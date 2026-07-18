@@ -29,6 +29,7 @@ export class ArrivalPreview extends Arrival {
   currentDemandIndex: number = 0
   fadeAlpha: number = 1
   isFading: boolean = false
+  fadingIndex: number = -1
   correctCount: number = 0
   arcFill: number = 0
   arcTarget: number = 0
@@ -100,14 +101,28 @@ export class ArrivalPreview extends Arrival {
   }
 
   private animDemandFade = (ctx: Renderer) => {
-    const demand = this.demands[this.currentDemandIndex]
-    if (!demand || !this._pt) return
+    if (!this._pt) return
     const pt = this._pt
-    ctx.save()
-    ctx.translate(pt.x, pt.y)
-    ctx.globalAlpha = this.fadeAlpha * this.opacity
-    drawDemandToken(ctx, 0, 0, demand.color, demand.type, demand.angled, pt.angle ?? 0)
-    ctx.restore()
+    // Demande courante attendue (pleine).
+    const cur = this.demands[this.currentDemandIndex]
+    if (cur) {
+      ctx.save()
+      ctx.translate(pt.x, pt.y)
+      ctx.globalAlpha = this.opacity
+      drawDemandToken(ctx, 0, 0, cur.color, cur.type, cur.angled, pt.angle ?? 0)
+      ctx.restore()
+    }
+    // Demande validée qui s'efface par-dessus (découplé de l'avancement logique).
+    if (this.isFading && this.fadingIndex >= 0) {
+      const fd = this.demands[this.fadingIndex]
+      if (fd) {
+        ctx.save()
+        ctx.translate(pt.x, pt.y)
+        ctx.globalAlpha = this.fadeAlpha * this.opacity
+        drawDemandToken(ctx, 0, 0, fd.color, fd.type, fd.angled, pt.angle ?? 0)
+        ctx.restore()
+      }
+    }
   }
 
   private animNextDemands = (ctx: Renderer) => {

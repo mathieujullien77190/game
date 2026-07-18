@@ -63,3 +63,41 @@ export const orbitingDot = (cfg: {
     ctx.restore()
   },
 })
+
+// `n` pastilles réparties sur un cercle (déphasées de 2π/n), à l'angle de base fourni par le
+// signal (le déphasage est ajouté par dot). `count`/`angle` lus à chaque frame (closures sur
+// l'entité — le nombre de sorties et l'angle accumulé varient). Anneau de fond optionnel.
+export const orbitingDots = (cfg: {
+  center: () => Point | null
+  radius: number
+  count: () => number
+  angle: Signal
+  color: string
+  dotR?: number
+  ring?: { color: string; width: number } | null
+}): Animation => ({
+  draw: (ctx: Renderer, t: AnimTime) => {
+    const c = cfg.center()
+    if (!c) return
+    const n = cfg.count()
+    if (n === 0) return
+    const base = cfg.angle(t)
+    ctx.save()
+    ctx.setLineDash([])
+    if (cfg.ring) {
+      ctx.strokeStyle = cfg.ring.color
+      ctx.lineWidth = cfg.ring.width
+      ctx.beginPath()
+      ctx.arc(c.x, c.y, cfg.radius, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+    ctx.fillStyle = cfg.color
+    for (let i = 0; i < n; i++) {
+      const a = base + (i * Math.PI * 2) / n
+      ctx.beginPath()
+      ctx.arc(c.x + Math.cos(a) * cfg.radius, c.y + Math.sin(a) * cfg.radius, cfg.dotR ?? 4, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    ctx.restore()
+  },
+})

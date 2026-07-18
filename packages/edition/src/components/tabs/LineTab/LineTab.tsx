@@ -13,7 +13,7 @@ import * as S from "./UI"
 export const LineTab = () => {
   const expandedLinks = useToggleSet()
 
-  const { editorManager, mode, currentScreenId, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineLimitation, updateLineColor, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
+  const { editorManager, mode, currentScreenId, setMode, setLineType, setLinePreset, removeLine, updateLineBoost, updateLineTunnel, updateLineShowSpeed, updateLineSpeedPos, updateLineLimitation, updateLineColor, updateLineSine, updateLineSpiral, toggleLinkActivated, setHoveredLineId } = useStore(
     useShallow((s) => ({
       editorManager: s.editorManager,
       mode: s.mode,
@@ -25,6 +25,7 @@ export const LineTab = () => {
       updateLineBoost: s.updateLineBoost,
       updateLineTunnel: s.updateLineTunnel,
       updateLineShowSpeed: s.updateLineShowSpeed,
+      updateLineSpeedPos: s.updateLineSpeedPos,
       updateLineLimitation: s.updateLineLimitation,
       updateLineColor: s.updateLineColor,
       updateLineSine: s.updateLineSine,
@@ -109,6 +110,24 @@ export const LineTab = () => {
                 <S.BoostLabel>show speed</S.BoostLabel>
                 <Checkbox checked={line.showSpeed} onChange={(checked) => updateLineShowSpeed(line.id, checked)} />
               </S.BoostRow>
+              {line.showSpeed && (
+                <S.BoostRow>
+                  <S.BoostLabel>speed pos</S.BoostLabel>
+                  <ToggleGroup $equal>
+                    {(["left", "top", "bottom", "right"] as const).map((pos) => (
+                      <Button
+                        key={pos}
+                        $accent="#333"
+                        $size="sm"
+                        $active={line.speedPos === pos}
+                        onClick={() => updateLineSpeedPos(line.id, pos)}
+                      >
+                        {pos}
+                      </Button>
+                    ))}
+                  </ToggleGroup>
+                </S.BoostRow>
+              )}
               <S.BoostRow>
                 <S.BoostLabel>limitation</S.BoostLabel>
                 <NumberInput value={line.limitation} onChange={(v) => updateLineLimitation(line.id, v)} />

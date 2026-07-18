@@ -12,6 +12,7 @@ export const populatePreviewLines = (pm: PreviewManager, em: EditorManager) => {
     lp.boost = l.boost
     lp.tunnel = l.tunnel
     lp.showSpeed = l.showSpeed
+    lp.speedPos = l.speedPos
     lp.limitation = l.limitation
     lp.color = l.color
     if (l.type === "sine") {

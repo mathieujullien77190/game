@@ -2,6 +2,7 @@ import { POINT_SPACING } from "../../constants"
 import type { Point } from "../../types"
 
 export type LineType = "straight" | "curve" | "sine" | "elbow" | "spiral"
+export type SpeedPos = "left" | "right" | "top" | "bottom"
 
 let lineCounter = 0
 
@@ -34,6 +35,7 @@ export class Line {
   flip: boolean = false
   tunnel: boolean = false
   showSpeed: boolean = false
+  speedPos: SpeedPos = "top"
   limitation: number = 0
   frequency: number = 1
   amplitude: number = 20

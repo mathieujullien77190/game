@@ -5,6 +5,7 @@ const arrivalIds = createIdCounter("arrival")
 const demandIds = createIdCounter("demand")
 
 export const syncArrivalCounter = (ids: string[]) => arrivalIds.sync(ids)
+export const syncDemandCounter = (ids: string[]) => demandIds.sync(ids)
 
 export type Demand = {
   id: string
