@@ -1,11 +1,11 @@
 ---
 name: commit
-description: Commit les modifs en cours avec un message selon la convention du repo (français, sujet concis à l'impératif, corps à puces si le « pourquoi » n'est pas évident) + trailer Co-Authored-By. Déclencheurs — "commit", "commit les modifs", "commit ça", "fais un commit", "commit avec un message".
+description: Commit les modifs en cours avec un message selon la convention du repo (français, sujet concis à l'impératif, corps à puces si le « pourquoi » n'est pas évident) + trailer Co-Authored-By, puis push. Déclencheurs — "commit", "commit les modifs", "commit ça", "fais un commit", "commit avec un message", "commit et push".
 ---
 
 # commit
 
-Crée **un** commit propre des modifications en cours. Un message peut être passé en argument ; sinon, le générer à partir du diff.
+Crée **un** commit propre des modifications en cours **puis le push**. Un message peut être passé en argument ; sinon, le générer à partir du diff.
 
 ## Étapes
 
@@ -14,7 +14,8 @@ Crée **un** commit propre des modifications en cours. Un message peut être pas
 3. **Stage** — si rien n'est encore staged, `git add -A` (ou seulement les fichiers pertinents si le diff mélange des choses sans rapport — demander en cas de doute).
 4. **Message** — rédiger selon la convention ci-dessous.
 5. **Commit** — via heredoc (message multi-ligne), avec le trailer obligatoire.
-6. **Confirmer** — afficher le hash + `git status` propre. **Ne pas push** sauf demande explicite.
+6. **Push** — `git push`. Si la branche courante n'a pas d'upstream, `git push -u origin <branche>`.
+7. **Confirmer** — afficher le hash, l'état du push, et `git status` propre.
 
 ## Convention de message
 
@@ -52,5 +53,5 @@ Pour un changement trivial (un seul sujet clair), sujet seul suffit — pas de c
 
 - **Un seul commit** par invocation (pas d'amend d'un commit existant sauf demande).
 - Ne jamais `--no-verify` ni contourner les hooks/la signature.
-- Ne pas push, ne pas ouvrir de PR sauf demande explicite.
-- Si le diff est vide → le signaler, ne rien commiter.
+- **Push** après le commit (étape 6). Ne pas ouvrir de PR sauf demande explicite.
+- Si le diff est vide → le signaler, ne rien commiter ni push.
