@@ -183,6 +183,7 @@
         "x": 40,
         "y": 180
       },
+      "boost": 40,
       "showSpeed": true,
       "speedPos": "right",
       "limitation": 20
@@ -691,6 +692,14 @@
       "amount": 0.5,
       "color": "#00acc1",
       "targetType": "square"
+    },
+    {
+      "id": "transform8",
+      "linkId": "lineB::end-lineJ::start",
+      "type": "fade",
+      "amount": 0.5,
+      "color": "#e53935",
+      "targetType": "square"
     }
   ],
   "inverters": [],
@@ -731,6 +740,6 @@
     }
   ],
   "screenTimeMultipliers": {
-    "screen1": 1.7
+    "screen1": 2
   }
 }

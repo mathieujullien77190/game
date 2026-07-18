@@ -312,17 +312,30 @@ export class TokenPreview extends Token {
 
   drawBoostTrail = (ctx: Renderer, speedDelta: number, points: Point[], eff: number) => {
     if (speedDelta <= 0.5 || this.direction === 0) return
-    const intensity = Math.min(speedDelta / 100, 1)
+    // Sensibilité doublée (/50 au lieu de /100) : à vitesse 40 la traînée a la taille qu'elle
+    // avait à 80 (saturée dès 50).
+    const intensity = Math.min(speedDelta / 50, 1)
     const trailLen = Math.round(10 + 30 * intensity)
+    // Dots plus petits pour les cop, au même rapport que leur corps (dessiné à 9/1.6).
+    const sizeRatio = this.type === "cop" ? 1 / 1.6 : 1
+    // Décalage arrière : un peu plus pour le carré, réduit pour les cop (au rapport de leur taille).
+    const backPx = (this.type === "square" ? 8 : 4) * sizeRatio
+    const ang = points[this.pointIndex]?.angle ?? 0
+    const ox = -this.direction * Math.cos(ang) * backPx
+    const oy = -this.direction * Math.sin(ang) * backPx
+    // Cop : la traînée clignote rouge/bleu comme le corps (même horloge que drawShape).
+    const copFlash = this.type === "cop"
+      ? (Math.sin(Date.now() / 1000 * Math.PI * 4) > 0 ? COLORS.red : COLORS.blue)
+      : null
     for (let i = 1; i <= trailLen; i++) {
       const idx = this.pointIndex - this.direction * i
       if (idx < 0 || idx >= points.length) break
       const tpt = points[idx]
       const frac = 1 - i / (trailLen + 1)
-      ctx.globalAlpha = frac * 0.55 * eff
-      ctx.fillStyle = this.displayColor || (this.color as string)
+      ctx.globalAlpha = eff
+      ctx.fillStyle = copFlash ?? (this.displayColor || (this.color as string))
       ctx.beginPath()
-      ctx.arc(tpt.x, tpt.y, 9 * frac * 0.75, 0, Math.PI * 2)
+      ctx.arc(tpt.x + ox, tpt.y + oy, 9 * frac * 0.75 * sizeRatio, 0, Math.PI * 2)
       ctx.fill()
     }
     ctx.globalAlpha = 1
