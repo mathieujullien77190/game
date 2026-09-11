@@ -1,9 +1,9 @@
-import { LineEditor } from "@drift/engine/entities/Line/LineEditor"
-import type { LineType, SpeedPos } from "@drift/engine/entities/Line/Line"
-import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
-import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
-import type { Link } from "@drift/engine/entities/Link/Link"
-import type { Point } from "@drift/engine/types"
+import { LineEditor } from "@tic-tac-tic/engine/entities/Line/LineEditor"
+import type { LineType, SpeedPos } from "@tic-tac-tic/engine/entities/Line/Line"
+import { SwitchEditor } from "@tic-tac-tic/engine/entities/Switch/SwitchEditor"
+import { getSwitchEnterPoint } from "@tic-tac-tic/engine/entities/Switch/switchUtils"
+import type { Link } from "@tic-tac-tic/engine/entities/Link/Link"
+import type { Point } from "@tic-tac-tic/engine/types"
 import type { Set } from "store/types"
 
 const syncSwitches = (

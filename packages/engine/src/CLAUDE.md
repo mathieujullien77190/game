@@ -17,4 +17,4 @@ Calcul + dessin de la simulation (preview) et de l'éditeur. **Zéro React, zér
 - Pattern **Base → Editor / Preview** : la base n'a jamais de `draw` ; les managers n'instancient que les `*Editor` / `*Preview`.
 
 ## Profiler
-Singleton de mesure par passe, désactivé par défaut, horloge injectable (`setClock`). Gardé par la constante de build `__DRIFT_PROFILING__` (injectée par chaque `vite.config.ts`) : `true` en édition, `false` en mobile → la classe entière est éliminée (dead-code) du bundle mobile.
+Singleton de mesure par passe, désactivé par défaut, horloge injectable (`setClock`). Gardé par la constante de build `__TICTACTIC_PROFILING__` (injectée par chaque `vite.config.ts`) : `true` en édition, `false` en mobile → la classe entière est éliminée (dead-code) du bundle mobile.

@@ -1,5 +1,5 @@
 {
-  "name": "@drift/app",
+  "name": "@tic-tac-tic/app",
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
@@ -8,12 +8,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
+    "web": "vite webview --config webview/vite.config.ts --open",
     "build:preview": "node scripts/build-preview.mjs"
   },
   "dependencies": {
-    "@drift/canvas-render": "*",
-    "@drift/engine": "*",
-    "@drift/maps": "*",
+    "@tic-tac-tic/canvas-render": "*",
+    "@tic-tac-tic/engine": "*",
+    "@tic-tac-tic/maps": "*",
     "expo": "~53.0.0",
     "expo-dev-client": "~5.2.4",
     "react": "19.0.0",

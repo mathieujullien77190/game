@@ -1,5 +1,5 @@
-import { SwitchEditor } from "@drift/engine/entities/Switch/SwitchEditor"
-import type { SwitchMode } from "@drift/engine/entities/Switch/Switch"
+import { SwitchEditor } from "@tic-tac-tic/engine/entities/Switch/SwitchEditor"
+import type { SwitchMode } from "@tic-tac-tic/engine/entities/Switch/Switch"
 import type { Set } from "store/types"
 
 export const createSwitchActions = (set: Set) => ({

@@ -1,4 +1,4 @@
-import type { Renderer } from "@drift/engine/render/Renderer"
+import type { Renderer } from "@tic-tac-tic/engine/render/Renderer"
 
 // Adaptateur : implémente l'interface `Renderer` de l'engine en enveloppant le
 // CanvasRenderingContext2D du navigateur. Miroir web de SkiaRenderer. Délégation

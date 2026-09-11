@@ -38,9 +38,9 @@ import { Profiler } from "../Profiler";
 // esbuild élimine chaque `if (PROFILING)` ci-dessous — et donc tout l'import de Profiler — du
 // bundle mobile, cf. `../CLAUDE.md`.
 declare global {
-  const __DRIFT_PROFILING__: boolean | undefined
+  const __TICTACTIC_PROFILING__: boolean | undefined
 }
-const PROFILING = typeof __DRIFT_PROFILING__ !== "undefined" && __DRIFT_PROFILING__;
+const PROFILING = typeof __TICTACTIC_PROFILING__ !== "undefined" && __TICTACTIC_PROFILING__;
 
 type LinkMap = Record<string, LinkEndpoint>;
 

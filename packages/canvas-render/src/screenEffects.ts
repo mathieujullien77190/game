@@ -1,4 +1,4 @@
-import type { PreviewManager } from "@drift/engine/Manager/PreviewManager"
+import type { PreviewManager } from "@tic-tac-tic/engine/Manager/PreviewManager"
 
 // Effets plein écran (inverter / grayscale / dark) — rendu WEB (offscreen canvas,
 // compositing). Appliqués après PreviewManager.drawAllPreview(). L'engine ne fournit

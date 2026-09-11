@@ -1,11 +1,12 @@
 <!doctype html>
-<html>
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
+    <title>Tic-Tac-Tic</title>
     <style>
       html,
       body {
@@ -19,10 +20,170 @@
         display: block;
         touch-action: none;
       }
+
+      /* ── Page d'accueil ── niveau figé flouté en fond, retirée au clic sur « Jouer ». */
+      #home {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 24px;
+        box-sizing: border-box;
+        background: rgba(240, 240, 240, 0.72);
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #263238;
+        text-align: center;
+        transition: opacity 0.35s ease;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #home.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .logo {
+        width: min(88vw, 460px);
+      }
+      .words {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: clamp(36px, 12vw, 76px);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      .word {
+        display: inline-block;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      .tic {
+        color: #e53935;
+      }
+      .tac {
+        color: #1a73e8;
+        animation-duration: 1s;
+        animation-delay: -0.5s;
+      }
+      .tic.last {
+        animation-delay: -1s;
+      }
+      .sep {
+        color: #b0bec5;
+        font-size: 0.5em;
+      }
+
+      /* Balle-métronome : aller-retour sous les trois mots, en rythme avec leur pulsation. */
+      .track {
+        position: relative;
+        height: 18px;
+        margin-top: 14px;
+        border-radius: 9px;
+        background: #dde3e6;
+      }
+      .ball {
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #263238;
+        animation: swing 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1.08);
+        }
+        25%,
+        75% {
+          opacity: 0.35;
+          transform: scale(1);
+        }
+      }
+      @keyframes swing {
+        0%,
+        100% {
+          left: 1px;
+        }
+        50% {
+          left: calc(100% - 17px);
+        }
+      }
+
+      .tagline {
+        margin: 0;
+        font-size: clamp(16px, 4.4vw, 20px);
+        font-weight: 600;
+        color: #546e7a;
+      }
+
+      #play {
+        padding: 16px 64px;
+        border: none;
+        border-radius: 999px;
+        background: #e53935;
+        color: #fff;
+        font: inherit;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        box-shadow: 0 6px 0 #b71c1c;
+        cursor: pointer;
+        transition: transform 0.08s, box-shadow 0.08s;
+      }
+      #play:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 #b71c1c;
+      }
+      #play:focus-visible {
+        outline: 3px solid #1a73e8;
+        outline-offset: 4px;
+      }
+
+      .hint {
+        margin: 0;
+        max-width: 320px;
+        font-size: 14px;
+        color: #78909c;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .word,
+        .ball {
+          animation: none;
+        }
+      }
     </style>
   </head>
   <body>
     <canvas id="c"></canvas>
+
+    <div id="home">
+      <div class="logo" aria-label="Tic-Tac-Tic">
+        <div class="words" aria-hidden="true">
+          <span class="word tic">TIC</span>
+          <span class="sep">·</span>
+          <span class="word tac">TAC</span>
+          <span class="sep">·</span>
+          <span class="word tic last">TIC</span>
+        </div>
+        <div class="track" aria-hidden="true"><div class="ball"></div></div>
+      </div>
+      <p class="tagline">Route les balles. Maîtrise le temps.</p>
+      <button id="play" type="button">JOUER</button>
+      <p class="hint">Touche les aiguillages pour guider chaque balle jusqu'à l'arrivée.</p>
+    </div>
+
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

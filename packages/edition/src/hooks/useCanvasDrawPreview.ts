@@ -1,7 +1,7 @@
 import { type RefObject, useEffect } from "react";
-import { PreviewManager } from "@drift/engine/Manager/PreviewManager";
-import { Profiler } from "@drift/engine/Profiler";
-import { Canvas2DRenderer, applyScreenEffects } from "@drift/canvas-render";
+import { PreviewManager } from "@tic-tac-tic/engine/Manager/PreviewManager";
+import { Profiler } from "@tic-tac-tic/engine/Profiler";
+import { Canvas2DRenderer, applyScreenEffects } from "@tic-tac-tic/canvas-render";
 
 Profiler.setClock(() => performance.now());
 

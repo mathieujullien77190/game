@@ -7,7 +7,7 @@ import { Checkbox } from "components/form/Checkbox"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { Box } from "components/ui/Box"
-import { TOKEN_COLORS } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS } from "@tic-tac-tic/engine/entities/Token/Token"
 import * as S from "./UI"
 
 export const LineTab = () => {

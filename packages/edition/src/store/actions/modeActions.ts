@@ -1,6 +1,6 @@
-import { populatePreviewLines } from "@drift/engine/Map/loadPreview"
-import { Profiler } from "@drift/engine/Profiler"
-import type { Point } from "@drift/engine/types"
+import { populatePreviewLines } from "@tic-tac-tic/engine/Map/loadPreview"
+import { Profiler } from "@tic-tac-tic/engine/Profiler"
+import type { Point } from "@tic-tac-tic/engine/types"
 import type { Mode, ViewMode, Set } from "store/types"
 
 export const createModeActions = (set: Set) => ({

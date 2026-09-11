@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
-import { serializeMap } from "@drift/engine/Map/mapJson"
+import { serializeMap } from "@tic-tac-tic/engine/Map/mapJson"
 import { EMPTY_MAP } from "store/actions/mapActions"
 import * as S from "./UI"
 

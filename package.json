@@ -1,5 +1,5 @@
 {
-  "name": "drift",
+  "name": "tic-tac-tic",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,11 +11,12 @@
     "react-dom": "19.0.0"
   },
   "scripts": {
-    "edition": "yarn workspace @drift/edition dev",
-    "app": "yarn workspace @drift/app android",
-    "app:ios": "yarn workspace @drift/app ios",
-    "app:start": "yarn workspace @drift/app start",
-    "app:prebuild": "yarn workspace @drift/app prebuild",
+    "edition": "yarn workspace @tic-tac-tic/edition dev",
+    "app": "yarn workspace @tic-tac-tic/app android",
+    "app:web": "yarn workspace @tic-tac-tic/app web",
+    "app:ios":"yarn workspace @tic-tac-tic/app ios",
+    "app:start": "yarn workspace @tic-tac-tic/app start",
+    "app:prebuild": "yarn workspace @tic-tac-tic/app prebuild",
     "lint": "eslint ."
   },
   "devDependencies": {

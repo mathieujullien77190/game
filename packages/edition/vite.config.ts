@@ -17,7 +17,7 @@ const isValidMapName = (name: string): name is string => MAP_NAME_RE.test(name)
 // GET /__list-maps, charge via GET /__load-map?name=…, écrit via POST /__save-map?name=….
 // Suppression volontairement non exposée ici : on supprime un fichier à la main.
 const saveMapPlugin = (): Plugin => ({
-  name: "drift-save-map",
+  name: "tic-tac-tic-save-map",
   configureServer(server) {
     server.middlewares.use("/__list-maps", async (_req, res) => {
       try {
@@ -76,13 +76,13 @@ const saveMapPlugin = (): Plugin => ({
 export default defineConfig({
   plugins: [react(), saveMapPlugin()],
   // Active les sondes Profiler (onglet perf) — voir engine/src/CLAUDE.md.
-  define: { __DRIFT_PROFILING__: JSON.stringify(true) },
+  define: { __TICTACTIC_PROFILING__: JSON.stringify(true) },
   resolve: {
     alias: [
-      { find: /^@drift\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") },
-      { find: /^@drift\/maps\/(.*)$/, replacement: r("packages/maps/$1") },
-      { find: /^@drift\/canvas-render$/, replacement: r("packages/canvas-render/src/index.ts") },
-      { find: /^@drift\/edition$/, replacement: r("packages/edition/src/index.ts") },
+      { find: /^@tic-tac-tic\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") },
+      { find: /^@tic-tac-tic\/maps\/(.*)$/, replacement: r("packages/maps/$1") },
+      { find: /^@tic-tac-tic\/canvas-render$/, replacement: r("packages/canvas-render/src/index.ts") },
+      { find: /^@tic-tac-tic\/edition$/, replacement: r("packages/edition/src/index.ts") },
       { find: /^store$/, replacement: r("packages/edition/src/store/index.ts") },
       { find: /^store\/(.*)$/, replacement: r("packages/edition/src/store/$1") },
       { find: /^hooks\/(.*)$/, replacement: r("packages/edition/src/hooks/$1") },

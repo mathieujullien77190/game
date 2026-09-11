@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Profiler, type ProfileStat } from "@drift/engine/Profiler"
+import { Profiler, type ProfileStat } from "@tic-tac-tic/engine/Profiler"
 import * as S from "./UI"
 
 const POLL_MS = 250

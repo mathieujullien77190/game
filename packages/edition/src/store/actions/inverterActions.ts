@@ -1,4 +1,4 @@
-import { Inverter, syncInverterCounter } from "@drift/engine/entities/Inverter/Inverter"
+import { Inverter, syncInverterCounter } from "@tic-tac-tic/engine/entities/Inverter/Inverter"
 import type { Set } from "store/types"
 
 export const createInverterActions = (set: Set) => ({

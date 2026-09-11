@@ -1,5 +1,5 @@
-import { StartEditor } from "@drift/engine/entities/Start/StartEditor"
-import { Token, TOKEN_COLORS, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
+import { StartEditor } from "@tic-tac-tic/engine/entities/Start/StartEditor"
+import { Token, TOKEN_COLORS, type TokenColor, type TokenType } from "@tic-tac-tic/engine/entities/Token/Token"
 import type { Set } from "store/types"
 
 export const createStartActions = (set: Set) => ({

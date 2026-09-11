@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Drift",
-    "slug": "drift",
+    "name": "Tic-Tac-Tic",
+    "slug": "tic-tac-tic",
     "version": "0.0.0",
     "orientation": "portrait",
     "plugins": [
@@ -9,7 +9,7 @@
     ],
     "newArchEnabled": true,
     "android": {
-      "package": "com.anonymous.drift"
+      "package": "com.anonymous.tictactic"
     }
   }
 }

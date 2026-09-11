@@ -23,11 +23,11 @@ Exit `0` = synchro, `1` = divergence (détaillée), `2` = erreur de lecture.
 
 ## Quand l'utiliser
 
-- Après avoir ajouté/renommé un package ou un alias (`store/`, `hooks/`, `@drift/*`…)
+- Après avoir ajouté/renommé un package ou un alias (`store/`, `hooks/`, `@tic-tac-tic/*`…)
 - Avant un commit qui touche `tsconfig.base.json` ou un `vite.config.ts`
 - Dans le cadre du `/checkup`
 
 ## En cas d'échec
 
 Ouvrir le fichier signalé et ajouter/retirer l'entrée manquante. Rappel de la correspondance des formes :
-`@drift/engine/*` (tsconfig) ↔ `{ find: /^@drift\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") }` (vite).
+`@tic-tac-tic/engine/*` (tsconfig) ↔ `{ find: /^@tic-tac-tic\/engine\/(.*)$/, replacement: r("packages/engine/src/$1") }` (vite).

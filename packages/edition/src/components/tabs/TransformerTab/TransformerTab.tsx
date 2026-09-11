@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
-import { TOKEN_COLORS, TYPE_GLYPH } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS, TYPE_GLYPH } from "@tic-tac-tic/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import { NumberInput } from "components/form/NumberInput"
 import { Field } from "components/form/Field"
@@ -8,7 +8,7 @@ import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"
 import { Box } from "components/ui/Box"
 import * as S from "./UI"
-import type { TransformerType } from "@drift/engine/entities/Transformer/Transformer"
+import type { TransformerType } from "@tic-tac-tic/engine/entities/Transformer/Transformer"
 
 const ALL_TYPES: TransformerType[] = ["fade", "rotate", "color", "shape"]
 const TRANSFORMER_ACCENT = "#333"

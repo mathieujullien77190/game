@@ -1,5 +1,5 @@
 {
-  "name": "@drift/edition",
+  "name": "@tic-tac-tic/edition",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
     "./*": "./src/*.ts"
   },
   "dependencies": {
-    "@drift/engine": "*",
-    "@drift/canvas-render": "*",
+    "@tic-tac-tic/engine": "*",
+    "@tic-tac-tic/canvas-render": "*",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "styled-components": "^6.1.18",

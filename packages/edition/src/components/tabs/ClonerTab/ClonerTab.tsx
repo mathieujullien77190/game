@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow"
-import { getSwitchEnterPoint } from "@drift/engine/entities/Switch/switchUtils"
+import { getSwitchEnterPoint } from "@tic-tac-tic/engine/entities/Switch/switchUtils"
 import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"
 import { ToggleGroup } from "components/ui/ToggleGroup"

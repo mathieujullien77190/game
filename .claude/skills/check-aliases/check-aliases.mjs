@@ -14,7 +14,7 @@ import path from "node:path"
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
 
 // Normalise une clé d'alias vers son "token" de base : on ignore le suffixe /* ou /(.*)
-// pour comparer @drift/engine/* et @drift/engine/(.*) comme le même alias.
+// pour comparer @tic-tac-tic/engine/* et @tic-tac-tic/engine/(.*) comme le même alias.
 const norm = (raw) =>
   raw
     .replace(/\\/g, "") // \/ → /

@@ -1,4 +1,4 @@
-// Envoie la map au serveur dev (plugin drift-save-map) qui réécrit
+// Envoie la map au serveur dev (plugin tic-tac-tic-save-map) qui réécrit
 // packages/maps/<name>. Auto, aucun geste utilisateur (dev only).
 export const saveMap = (name: string, json: unknown): void => {
   void fetch(`/__save-map?name=${encodeURIComponent(name)}`, {

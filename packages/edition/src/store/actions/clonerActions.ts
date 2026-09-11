@@ -1,4 +1,4 @@
-import { ClonerEditor } from "@drift/engine/entities/Cloner/ClonerEditor"
+import { ClonerEditor } from "@tic-tac-tic/engine/entities/Cloner/ClonerEditor"
 import type { Set } from "store/types"
 
 export const createClonerActions = (set: Set) => ({

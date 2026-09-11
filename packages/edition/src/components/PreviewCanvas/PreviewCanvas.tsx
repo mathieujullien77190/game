@@ -1,6 +1,6 @@
 import { useRef } from "react"
-import { CANVAS_W, CANVAS_H } from "@drift/engine/constants"
-import type { PreviewManager } from "@drift/engine/Manager/PreviewManager"
+import { CANVAS_W, CANVAS_H } from "@tic-tac-tic/engine/constants"
+import type { PreviewManager } from "@tic-tac-tic/engine/Manager/PreviewManager"
 import { useCanvasDrawPreview } from "hooks/useCanvasDrawPreview"
 import * as S from "./UI"
 

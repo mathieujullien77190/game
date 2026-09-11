@@ -16,7 +16,7 @@ const checks = [
 ]
 
 console.log("╔══════════════════════════════════════╗")
-console.log("║          DRIFT · CHECKUP             ║")
+console.log("║        TIC-TAC-TIC · CHECKUP         ║")
 console.log("╚══════════════════════════════════════╝\n")
 
 const results = []

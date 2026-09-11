@@ -8,9 +8,9 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "paths": {
-      "@drift/engine/*": ["../engine/src/*"],
-      "@drift/maps/*": ["../maps/*"],
-      "@drift/canvas-render": ["../canvas-render/src/index.ts"]
+      "@tic-tac-tic/engine/*": ["../engine/src/*"],
+      "@tic-tac-tic/maps/*": ["../maps/*"],
+      "@tic-tac-tic/canvas-render": ["../canvas-render/src/index.ts"]
     }
   },
   "include": ["App.tsx", "index.js", "src"]

@@ -1,6 +1,6 @@
 import { View } from "react-native"
 import { WebView } from "react-native-webview"
-import mapJson from "@drift/maps/map.json"
+import mapJson from "@tic-tac-tic/maps/map.json"
 import { previewHtml } from "./src/previewHtml"
 
 // Coquille RN : héberge une WebView qui fait tourner la preview de l'engine en canvas2d
@@ -14,7 +14,7 @@ export default function App() {
       <WebView
         source={{ html: previewHtml }}
         originWhitelist={["*"]}
-        injectedJavaScriptBeforeContentLoaded={`window.__DRIFT_MAP__ = ${JSON.stringify(mapJson)}; true;`}
+        injectedJavaScriptBeforeContentLoaded={`window.__TICTACTIC_MAP__ = ${JSON.stringify(mapJson)}; true;`}
         style={{ flex: 1, backgroundColor: "#f0f0f0" }}
         androidLayerType="hardware"
         javaScriptEnabled

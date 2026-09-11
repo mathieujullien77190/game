@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow"
 import { useStore } from "store"
-import { TOKEN_COLORS, ANGLED_LABEL, TYPE_GLYPH, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS, ANGLED_LABEL, TYPE_GLYPH, type TokenColor, type TokenType } from "@tic-tac-tic/engine/entities/Token/Token"
 import { ColorPicker } from "components/form/ColorPicker"
 import { Field } from "components/form/Field"
 import { Button } from "components/ui/Button"

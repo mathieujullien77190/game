@@ -7,7 +7,7 @@ import { ToggleGroup } from "components/ui/ToggleGroup"
 import { Box } from "components/ui/Box"
 import { Divider } from "components/ui/Divider"
 import { TokenShape } from "components/ui/TokenShape"
-import { TOKEN_COLORS, ANGLED_LABEL, TYPE_GLYPH, type TokenColor, type TokenType } from "@drift/engine/entities/Token/Token"
+import { TOKEN_COLORS, ANGLED_LABEL, TYPE_GLYPH, type TokenColor, type TokenType } from "@tic-tac-tic/engine/entities/Token/Token"
 import { useStore } from "store"
 import * as S from "./UI"
 

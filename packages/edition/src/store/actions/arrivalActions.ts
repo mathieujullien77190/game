@@ -1,6 +1,6 @@
-import { ArrivalEditor } from "@drift/engine/entities/Arrival/ArrivalEditor"
-import { makeDemand, type QueueSide } from "@drift/engine/entities/Arrival/Arrival"
-import type { TokenColor, TokenType } from "@drift/engine/entities/Token/Token"
+import { ArrivalEditor } from "@tic-tac-tic/engine/entities/Arrival/ArrivalEditor"
+import { makeDemand, type QueueSide } from "@tic-tac-tic/engine/entities/Arrival/Arrival"
+import type { TokenColor, TokenType } from "@tic-tac-tic/engine/entities/Token/Token"
 import type { Set } from "store/types"
 
 export const createArrivalActions = (set: Set) => ({

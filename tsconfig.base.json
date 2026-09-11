@@ -22,11 +22,11 @@
     "noFallthroughCasesInSwitch": true,
 
     "paths": {
-      "@drift/engine/*": ["./packages/engine/src/*"],
-      "@drift/maps/*": ["./packages/maps/*"],
-      "@drift/canvas-render": ["./packages/canvas-render/src/index.ts"],
-      "@drift/edition": ["./packages/edition/src/index"],
-      "@drift/edition/*": ["./packages/edition/src/*"],
+      "@tic-tac-tic/engine/*": ["./packages/engine/src/*"],
+      "@tic-tac-tic/maps/*": ["./packages/maps/*"],
+      "@tic-tac-tic/canvas-render": ["./packages/canvas-render/src/index.ts"],
+      "@tic-tac-tic/edition": ["./packages/edition/src/index"],
+      "@tic-tac-tic/edition/*": ["./packages/edition/src/*"],
       "store": ["./packages/edition/src/store/index"],
       "store/*": ["./packages/edition/src/store/*"],
       "hooks/*": ["./packages/edition/src/hooks/*"],

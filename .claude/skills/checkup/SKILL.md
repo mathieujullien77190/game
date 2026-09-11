@@ -1,11 +1,11 @@
 ---
 name: checkup
-description: Lance TOUTES les vérifications du projet Drift en une commande — alias synchro, pureté de l'engine, validité de map.json — et affiche un récap. Déclencheurs — "checkup", "vérifie tout", "santé du projet", "avant commit", "tout est ok ?", "full check".
+description: Lance TOUTES les vérifications du projet Tic-Tac-Tic en une commande — alias synchro, pureté de l'engine, validité de map.json — et affiche un récap. Déclencheurs — "checkup", "vérifie tout", "santé du projet", "avant commit", "tout est ok ?", "full check".
 ---
 
 # checkup
 
-Commande de contrôle santé du monorepo Drift. Regroupe les trois vérifications :
+Commande de contrôle santé du monorepo Tic-Tac-Tic. Regroupe les trois vérifications :
 
 1. **check-aliases** — alias synchro entre `tsconfig.base.json` et les `vite.config.ts`
 2. **check-engine-purity** — engine sans React/DOM, pas de `draw` en classe de base

@@ -11,8 +11,8 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
     "paths": {
-      "@drift/engine/*": ["../../engine/src/*"],
-      "@drift/canvas-render": ["../../canvas-render/src/index.ts"]
+      "@tic-tac-tic/engine/*": ["../../engine/src/*"],
+      "@tic-tac-tic/canvas-render": ["../../canvas-render/src/index.ts"]
     }
   },
   "include": ["main.ts", "vite.config.ts"]

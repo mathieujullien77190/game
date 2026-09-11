@@ -1,5 +1,5 @@
 {
-  "name": "@drift/canvas-render",
+  "name": "@tic-tac-tic/canvas-render",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,6 +8,6 @@
     "./*": "./src/*.ts"
   },
   "dependencies": {
-    "@drift/engine": "*"
+    "@tic-tac-tic/engine": "*"
   }
 }

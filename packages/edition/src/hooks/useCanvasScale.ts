@@ -1,5 +1,5 @@
 import { useEffect, useState, type RefObject } from "react"
-import { CANVAS_H, CANVAS_W } from "@drift/engine/constants"
+import { CANVAS_H, CANVAS_W } from "@tic-tac-tic/engine/constants"
 
 const PADDING = 24
 

@@ -1,4 +1,4 @@
-import { ScreenGate } from "@drift/engine/entities/ScreenGate/ScreenGate"
+import { ScreenGate } from "@tic-tac-tic/engine/entities/ScreenGate/ScreenGate"
 import type { Set } from "store/types"
 
 export const createScreenGateActions = (set: Set) => ({

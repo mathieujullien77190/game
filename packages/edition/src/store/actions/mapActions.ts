@@ -1,4 +1,4 @@
-import { deserializeMap, type MapJson } from "@drift/engine/Map/mapJson"
+import { deserializeMap, type MapJson } from "@tic-tac-tic/engine/Map/mapJson"
 import type { Set } from "store/types"
 
 export const EMPTY_MAP: MapJson = { screens: ["main"], lines: [], links: [], starts: [], switches: {} }

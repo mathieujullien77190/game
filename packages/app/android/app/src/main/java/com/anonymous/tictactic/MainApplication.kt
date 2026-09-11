@@ -1,4 +1,4 @@
-package com.anonymous.drift
+package com.anonymous.tictactic
 
 import android.app.Application
 import android.content.res.Configuration
