@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAO 02 — Niveaux</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  /* Sélection de niveau = boîte « Ouvrir un fichier » : chapitres en dossiers, niveaux en .dwg. */
+  .path { padding: 10px 14px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--faint); background: rgba(13,34,56,.7); }
+  .path b { color: var(--line); font-weight: 400; }
+  .folders { display: flex; gap: 6px; padding: 10px 14px; overflow-x: auto; border-bottom: 1px solid var(--faint); scrollbar-width: none; }
+  .folders::-webkit-scrollbar { display: none; }
+  .folders a { flex: none; font-size: 11px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.14); border-radius: 3px; color: var(--muted); }
+  .folders a.on { border-color: var(--orange); color: var(--orange); }
+  .folders a.lock { opacity: .45; }
+  .list { flex: 1; overflow-y: auto; padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+  .file { border: 1px solid rgba(255,255,255,.14); background: rgba(13,34,56,.6); display: flex; flex-direction: column; }
+  .file.cur { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); }
+  .file .thumb { aspect-ratio: 1; border-bottom: 1px solid var(--faint); display: grid; place-items: center; }
+  .file .thumb svg { width: 78%; }
+  .file .thumb path { fill: none; stroke: #eaf4ff; stroke-width: 3; }
+  .file .meta { padding: 7px 8px; font-size: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .file .stars { color: var(--orange); letter-spacing: 1px; }
+  .file .stars s { color: rgba(255,255,255,.2); text-decoration: none; }
+  .file.locked { opacity: .4; }
+  .file.locked .thumb { font-size: 22px; color: var(--muted); }
+  .file.locked .thumb span { font-size: 9px; display: block; text-align: center; margin-top: 4px; }
+</style>
+</head>
+<body>
+  <div class="bar"><span><b>Ouvrir…</b> — sélectionne un plan</span><a href="01-accueil.html">✕</a></div>
+  <div class="path">/ niveaux / <b>01_initiation</b> /</div>
+  <div class="folders">
+    <a class="on">📁 01_initiation</a><a>📁 02_portes</a><a class="lock">🔒 03_dilatation</a><a class="lock">🔒 04_inversion</a>
+  </div>
+  <div class="list">
+    <a class="file" href="03-jeu.html"><div class="thumb"><svg viewBox="0 0 100 100"><path d="M50 10 L50 90" /></svg></div><div class="meta"><span>niv-01.dwg</span><span class="stars">★★★</span></div></a>
+    <a class="file" href="03-jeu.html"><div class="thumb"><svg viewBox="0 0 100 100"><path d="M20 10 L20 50 L50 80 L50 90 M80 10 L80 50 L50 80" /></svg></div><div class="meta"><span>niv-02.dwg</span><span class="stars">★★<s>★</s></span></div></a>
+    <a class="file cur" href="03-jeu.html"><div class="thumb"><svg viewBox="0 0 100 100"><path d="M15 10 L15 50 L50 65 M50 10 L50 90 M85 10 L85 45 L50 65 M50 65 L85 85" /></svg></div><div class="meta"><span>niv-03.dwg</span><span class="stars"><s>★★★</s></span></div></a>
+    <div class="file locked"><div class="thumb"><div>🔒<span>requiert 10 ★</span></div></div><div class="meta"><span>niv-04.dwg</span><span class="stars"><s>★★★</s></span></div></div>
+    <div class="file locked"><div class="thumb"><div>🔒<span>requiert 12 ★</span></div></div><div class="meta"><span>niv-05.dwg</span><span class="stars"><s>★★★</s></span></div></div>
+    <div class="file locked"><div class="thumb"><div>🔒<span>requiert 14 ★</span></div></div><div class="meta"><span>niv-06.dwg</span><span class="stars"><s>★★★</s></span></div></div>
+  </div>
+  <div class="status"><span>6 fichiers</span><span class="on">★ 5 / 18</span><span>chapitre 1 / 4</span></div>
+  <script src="cao.js"></script>
+</body>
+</html>

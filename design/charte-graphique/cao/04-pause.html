@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAO 04 — Pause</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  /* Pause : fenêtre « Propriétés » par-dessus le jeu figé. */
+  .level circle[r="6"] { display: none; }
+  .actions { display: flex; flex-direction: column; gap: 8px; }
+  .actions .btn { justify-content: space-between; }
+  .actions kbd { font: inherit; font-size: 10px; opacity: .6; }
+</style>
+</head>
+<body>
+  <div class="bar"><span><b>niv-03.dwg</b> — écran : MAIN</span><span class="o">❚❚ EN PAUSE</span></div>
+  <div class="tools"><span class="t">BALLES 3/8</span><span class="t">⏱ 00:12.4</span><span class="sp"></span><span class="t">★★☆</span></div>
+  <div class="stage">
+    <div data-level style="width:100%;height:100%;display:grid;place-items:center"></div>
+    <div class="veil">
+      <div class="dialog">
+        <div class="head"><b>Propriétés — Pause</b><a href="03-jeu.html">✕</a></div>
+        <div class="body">
+          <dl class="props">
+            <dt>Plan</dt><dd>niv-03.dwg</dd>
+            <dt>Balles arrivées</dt><dd>3 / 8</dd>
+            <dt>Temps écoulé</dt><dd>00:12.4</dd>
+            <dt>Objectif ★★★</dt><dd>&lt; 00:45.0</dd>
+          </dl>
+          <div class="actions">
+            <a class="btn" href="03-jeu.html">▶ REPRENDRE <kbd>ESPACE</kbd></a>
+            <a class="btn ghost" href="03-jeu.html">↻ RECOMMENCER <kbd>R</kbd></a>
+            <a class="btn ghost" href="02-niveaux.html">▤ NIVEAUX <kbd>L</kbd></a>
+            <a class="btn ghost" href="07-reglages.html">⚙ OPTIONS <kbd>O</kbd></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="status"><span>SIMULATION SUSPENDUE</span><span class="on">SW_01 : A</span></div>
+  <script src="cao.js"></script>
+</body>
+</html>

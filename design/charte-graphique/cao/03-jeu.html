@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAO 03 — En jeu</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  /* HUD en jeu : barre d'outils = compteurs, zone = plan animé, ligne de commande = journal d'événements. */
+  .chip { font-size: 10px; padding: 5px 8px; border: 1px solid rgba(255,255,255,.14); border-radius: 3px; color: var(--muted); white-space: nowrap; }
+  .chip b { color: var(--line); font-weight: 700; }
+  .chip.o b { color: var(--orange); }
+  .pause { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.2); border-radius: 3px; color: var(--line); font-size: 12px; }
+  .log { height: 73px; overflow: hidden; position: relative; }
+  .log div { animation: scroll 9s steps(3) infinite; }
+  .log p { margin: 0; height: 19px; }
+  @keyframes scroll { to { transform: translateY(-57px); } }
+  .ok { color: var(--ok); } .warn { color: var(--orange); }
+</style>
+</head>
+<body>
+  <div class="bar"><span><b>niv-03.dwg</b> — écran : MAIN</span><a class="pause" href="04-pause.html" title="Pause">❚❚</a></div>
+  <div class="tools">
+    <span class="chip">BALLES <b>3</b>/8</span>
+    <span class="chip">⏱ <b id="clock">00:12.4</b></span>
+    <span class="chip o">TEMPS <b>×1.0</b></span>
+    <span class="sp"></span>
+    <span class="chip o"><b>★★</b>☆</span>
+  </div>
+  <div class="stage"><div data-level style="width:100%;height:100%;display:grid;place-items:center"></div></div>
+  <div class="cmd log"><div>
+    <p><span class="ok">✓</span> <b>#1</b> arrivée · ROUGE</p>
+    <p>› <b>#2</b> SW_01 → branche A</p>
+    <p><span class="warn">⧗</span> <b>#3</b> entre dans ÉCRAN_1 (×0.5)</p>
+    <p><span class="ok">✓</span> <b>#2</b> arrivée · ROUGE</p>
+    <p>› <b>#4</b> T · peinte en ROUGE</p>
+    <p>› <b>#5</b> SW_01 → branche B</p>
+  </div></div>
+  <div class="status"><span>t 12.4 s</span><span class="on">SW_01 : A</span><span>ÉCRAN_1 ×0.5</span><span class="ok">0 ERREUR</span></div>
+  <script src="cao.js"></script>
+</body>
+</html>

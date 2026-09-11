@@ -1,0 +1,114 @@
+/* Charte CAO (dérivée de Blueprint F) — styles partagés par tous les écrans. */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap");
+
+:root {
+  --bg: #081626;
+  --bar: #0d2238;
+  --panel: #0f2740;
+  --grid: rgba(120, 180, 255, 0.06);
+  --grid-major: rgba(120, 180, 255, 0.13);
+  --line: #eaf4ff;
+  --muted: #7f9fc0;
+  --faint: rgba(255, 255, 255, 0.08);
+  --orange: #ff9f1c;
+  --sel: #4fc3ff;
+  --ok: #3ddc97;
+  --err: #ff5d5d;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background:
+    linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+    var(--bg);
+  color: var(--line);
+  font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+a { color: inherit; text-decoration: none; }
+/* barres de défilement discrètes (listes internes) */
+* { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.15) transparent; }
+
+/* ── barres ── */
+.bar { background: var(--bar); border-bottom: 1px solid var(--faint); padding: 10px 14px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--muted); }
+.bar b { color: var(--line); font-weight: 700; }
+.tools { display: flex; gap: 6px; padding: 8px 14px; background: var(--bar); border-bottom: 1px solid var(--faint); align-items: center; }
+.tools .t { min-width: 26px; height: 26px; padding: 0 6px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 4px; font-size: 11px; color: var(--muted); }
+.tools .t.on { border-color: var(--orange); color: var(--orange); }
+.tools .sp { flex: 1; }
+.status { background: var(--bar); border-top: 1px solid var(--faint); padding: 8px 14px; font-size: 10px; display: flex; gap: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.status .on { color: var(--orange); }
+.status .ok { color: var(--ok); }
+.status .err { color: var(--err); }
+
+.stage { flex: 1; position: relative; display: grid; place-items: center; padding: 14px; min-height: 0; }
+
+/* ── texte ── */
+.label { font-size: 9px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+.logo { margin: 0; font-weight: 800; font-size: clamp(30px, 10vw, 54px); letter-spacing: 0.06em; line-height: 1; }
+.o { color: var(--orange); }
+
+/* ── boutons ── */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 700; font-size: 14px; letter-spacing: 0.12em; color: var(--bg); background: var(--orange); border: 0; border-radius: 3px; padding: 12px 22px; cursor: pointer; }
+.btn:active { filter: brightness(0.9); }
+.btn.ghost { background: transparent; color: var(--line); border: 1px solid rgba(255, 255, 255, 0.25); }
+.btn.ghost:hover { border-color: var(--sel); color: var(--sel); }
+.btn.ok { background: var(--ok); }
+.btn.block { width: 100%; }
+
+/* ── sélection (boîte pointillée + poignées) ── */
+.sel { position: relative; padding: 14px 18px; border: 1px dashed var(--sel); }
+.sel > i { position: absolute; width: 8px; height: 8px; background: var(--bg); border: 1.5px solid var(--sel); }
+.sel > i:nth-of-type(1) { top: -5px; left: -5px; } .sel > i:nth-of-type(2) { top: -5px; right: -5px; }
+.sel > i:nth-of-type(3) { bottom: -5px; left: -5px; } .sel > i:nth-of-type(4) { bottom: -5px; right: -5px; }
+.sel .dim { position: absolute; top: -20px; left: 0; font-size: 9px; color: var(--sel); letter-spacing: 0.1em; white-space: nowrap; }
+
+/* ── fenêtre de dialogue ── */
+.dialog { width: min(100%, 340px); background: var(--panel); border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); }
+.dialog .head { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: var(--bar); border-bottom: 1px solid var(--faint); font-size: 11px; color: var(--muted); }
+.dialog .head b { color: var(--line); }
+.dialog .body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.dialog .foot { padding: 12px 16px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+.dialog.err { border-color: var(--err); }
+.dialog.err .head { background: rgba(255, 93, 93, 0.12); }
+.dialog.ok { border-color: var(--ok); }
+.dialog.ok .head { background: rgba(61, 220, 151, 0.1); }
+
+/* voile derrière une modale */
+.veil { position: absolute; inset: 0; background: rgba(4, 12, 22, 0.72); display: grid; place-items: center; padding: 16px; }
+
+/* ── tableaux de propriétés ── */
+.props { display: grid; grid-template-columns: 1fr auto; font-size: 12px; border-top: 1px solid var(--faint); }
+.props > * { padding: 7px 0; border-bottom: 1px solid var(--faint); }
+.props dt { color: var(--muted); }
+.props dd { margin: 0; text-align: right; }
+
+/* ── ligne de commande ── */
+.cmd { font-size: 11px; color: var(--muted); padding: 8px 14px; background: rgba(8, 22, 38, 0.85); border-top: 1px solid var(--faint); line-height: 1.6; }
+.cmd b { color: var(--line); font-weight: 400; }
+.caret { display: inline-block; width: 7px; height: 12px; background: var(--line); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── plan du niveau (injecté par cao.js) ── */
+.level { width: 100%; height: 100%; max-width: 380px; }
+.level .rail { fill: none; stroke: var(--line); stroke-width: 2.2; }
+.level .node { fill: var(--bg); stroke: var(--line); stroke-width: 2; }
+.level .lbl { font: 400 8.5px "JetBrains Mono", monospace; fill: var(--muted); letter-spacing: 0.5px; }
+.level .screen { fill: rgba(79, 195, 255, 0.05); stroke: var(--sel); stroke-width: 1; stroke-dasharray: 5 4; }
+.level .sw { fill: var(--bg); stroke: var(--orange); stroke-width: 2.2; }
+
+/* ── réticule (cao.js, si body[data-crosshair]) ── */
+.xh-v, .xh-h { position: fixed; pointer-events: none; background: rgba(234, 244, 255, 0.28); z-index: 50; }
+.xh-v { top: 0; bottom: 0; width: 1px; }
+.xh-h { left: 0; right: 0; height: 1px; }
+.xh-box { position: fixed; width: 14px; height: 14px; border: 1px solid var(--line); pointer-events: none; transform: translate(-7px, -7px); z-index: 50; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; }
+}

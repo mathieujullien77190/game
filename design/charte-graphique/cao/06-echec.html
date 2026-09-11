@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAO 06 — Échec</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  /* Échec = boîte d'erreur façon logiciel : code, message clair, localisation sur le plan. */
+  .stage { grid-template-rows: 1fr auto; place-items: stretch; gap: 10px; }
+  .plan { display: grid; place-items: center; min-height: 0; }
+  .level circle[r="6"] { display: none; }
+  .code { font-size: 22px; font-weight: 800; color: var(--err); letter-spacing: .06em; }
+  .msg { font-size: 13px; line-height: 1.6; margin: 0; }
+  .msg .c { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: 0; margin: 0 2px; }
+  .trace { font-size: 10px; color: var(--muted); line-height: 1.7; border-left: 2px solid var(--err); padding-left: 10px; }
+  .trace b { color: var(--line); font-weight: 400; }
+  .dialog { justify-self: center; }
+  .foot .btn { flex: 1; font-size: 11px; letter-spacing: .04em; padding: 11px 6px; white-space: nowrap; }
+</style>
+</head>
+<body>
+  <div class="bar"><span><b>niv-03.dwg</b> — écran : MAIN</span><span style="color:var(--err)">● ERREUR</span></div>
+  <div class="stage">
+    <div class="plan" data-level="error"></div>
+    <div class="dialog err">
+      <div class="head"><b style="color:var(--err)">✕ Erreur de routage</b><a href="03-jeu.html">✕</a></div>
+      <div class="body">
+        <div class="code">E-042 · MAUVAISE COULEUR</div>
+        <p class="msg">La balle <b>#4</b> est arrivée <span class="c" style="background:#4fc3ff"></span> bleue, l'arrivée attend <span class="c" style="background:#ff5d5d"></span> rouge.</p>
+        <div class="trace">
+          at <b>ARRIVÉE</b> (x 18.0, y 44.6) · t 00:17.8<br />
+          via <b>SW_01</b> → branche A<br />
+          depuis <b>S_C</b> · a évité <b>T · ROUGE</b>
+        </div>
+      </div>
+      <div class="foot">
+        <a class="btn" href="03-jeu.html">↻ RÉESSAYER</a>
+        <a class="btn ghost" href="03-jeu.html">◀◀ REPLAY</a>
+        <a class="btn ghost" href="02-niveaux.html">NIVEAUX</a>
+      </div>
+    </div>
+  </div>
+  <div class="status"><span class="err">1 ERREUR</span><span>balles 3 / 8</span><span>t 17.8 s</span></div>
+  <script src="cao.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blueprint C — Cyanotype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  /* Blueprint C — CYANOTYPE : vrai tirage papier vieilli. Bleu de Prusse, grain, pliures, tampon rouge, étiquette scotchée. */
+  :root {
+    --prussian: #163a6e; --prussian-2: #0e2a52;
+    --chalk: rgba(236, 244, 255, .88); --muted: rgba(200, 220, 245, .6);
+    --stamp: #ff4a3d; --label: #f3ecd9; --tape: rgba(255, 246, 200, .55);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      /* pliures du papier (1 verticale, 2 horizontales) */
+      linear-gradient(90deg, transparent calc(50% - 1px), rgba(0,0,0,.25) 50%, rgba(255,255,255,.08) calc(50% + 1px), transparent calc(50% + 2px)),
+      linear-gradient(transparent calc(33% - 1px), rgba(0,0,0,.22) 33%, rgba(255,255,255,.07) calc(33% + 1px), transparent calc(33% + 2px)),
+      linear-gradient(transparent calc(66% - 1px), rgba(0,0,0,.22) 66%, rgba(255,255,255,.07) calc(66% + 1px), transparent calc(66% + 2px)),
+      radial-gradient(ellipse at 50% 45%, var(--prussian) 30%, var(--prussian-2) 100%);
+    color: var(--chalk); font-family: "Special Elite", "Courier New", monospace;
+    display: grid; place-items: center; overflow: hidden; padding: 24px;
+  }
+  /* grain papier via turbulence SVG */
+  .grain { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .35; mix-blend-mode: overlay; }
+  main { position: relative; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+  svg.plan { width: min(84vw, 300px); }
+  svg.plan * { vector-effect: non-scaling-stroke; }
+  .stroke { fill: none; stroke: var(--chalk); stroke-width: 1.6; }
+  .note { font-family: "Special Elite", monospace; font-size: 10px; fill: var(--muted); }
+  .logo { margin: 0; font-family: "JetBrains Mono", monospace; font-weight: 800; font-size: clamp(34px, 10vw, 58px); letter-spacing: .06em; color: var(--chalk); text-shadow: 0 0 1px rgba(255,255,255,.4); }
+  .tag { margin: 0; font-size: 15px; color: var(--muted); }
+  .stamp {
+    position: absolute; top: 118px; right: -18px; transform: rotate(-14deg);
+    border: 4px double var(--stamp); color: var(--stamp); padding: 5px 12px; font-size: 18px; letter-spacing: .14em;
+    font-family: "JetBrains Mono", monospace; font-weight: 800; opacity: .9; text-shadow: 1px 0 0 rgba(22,58,110,.5), -1px 1px 0 rgba(22,58,110,.35);
+  }
+  .label { position: relative; background: var(--label); color: #2b2b2b; padding: 14px 40px; font-family: "Special Elite", monospace;
+           font-size: 20px; letter-spacing: .18em; border: 0; cursor: pointer; transform: rotate(-1.5deg); box-shadow: 0 3px 8px rgba(0,0,0,.35); }
+  .label::before, .label::after { content: ""; position: absolute; width: 46px; height: 16px; background: var(--tape); top: -8px; }
+  .label::before { left: -14px; transform: rotate(-30deg); }
+  .label::after { right: -14px; transform: rotate(28deg); }
+  .label:active { transform: rotate(-1.5deg) translateY(2px); }
+  .hint { margin: 0; font-size: 13px; color: var(--muted); max-width: 280px; }
+</style>
+</head>
+<body>
+  <svg class="grain" aria-hidden="true"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#n)" /></svg>
+  <main>
+    <svg class="plan" viewBox="0 0 300 150" aria-hidden="true">
+      <path class="stroke" d="M 20 20 L 20 70 Q 20 90 40 98 L 150 130" />
+      <path class="stroke" d="M 150 20 L 150 130 L 280 130" />
+      <path class="stroke" d="M 280 20 L 280 60 Q 280 80 260 88 L 150 130" />
+      <circle class="stroke" cx="20" cy="20" r="7" /><circle class="stroke" cx="150" cy="20" r="7" /><circle class="stroke" cx="280" cy="20" r="7" />
+      <rect class="stroke" x="143" y="123" width="14" height="14" />
+      <text class="note" x="32" y="52">départ n°1</text>
+      <text class="note" x="162" y="116">aiguillage</text>
+      <text class="note" x="222" y="146">→ arrivée</text>
+      <circle r="5" fill="#ecf4ff"><animateMotion dur="4.5s" repeatCount="indefinite" path="M 280 20 L 280 60 Q 280 80 260 88 L 150 130 L 280 130" /></circle>
+    </svg>
+    <h1 class="logo">TIC·TAC·TIC</h1>
+    <div class="stamp">APPROUVÉ</div>
+    <p class="tag">— plan n° 0001, tirage original —</p>
+    <button class="label" type="button">JOUER</button>
+    <p class="hint">Guide chaque bille jusqu'à l'arrivée. Ne plie pas le plan.</p>
+  </main>
+</body>
+</html>

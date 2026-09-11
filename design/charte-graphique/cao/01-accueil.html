@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAO 01 — Accueil</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  main { display: flex; flex-direction: column; align-items: center; gap: 26px; text-align: center; }
+  .menu { display: flex; flex-direction: column; gap: 10px; width: 230px; }
+  .menu .row { display: flex; gap: 10px; }
+  .menu .row .btn { flex: 1; font-size: 11px; padding: 10px; }
+</style>
+</head>
+<body data-crosshair>
+  <div class="bar"><span><b>tic-tac-tic.dwg</b> — calque : ROUTES</span><span>v1.0</span></div>
+  <div class="tools"><span class="t on">↖</span><span class="t">╱</span><span class="t">◯</span><span class="t">⌒</span><span class="t">▭</span><span class="sp"></span><span class="t">★ 12</span></div>
+  <div class="stage">
+    <main>
+      <div class="sel"><span class="dim">SÉLECTION · 1 OBJET</span><i></i><i></i><i></i><i></i>
+        <h1 class="logo">TIC<span class="o">·</span>TAC<span class="o">·</span>TIC</h1>
+      </div>
+      <div class="menu">
+        <a class="btn" href="03-jeu.html">▶ EXÉCUTER</a>
+        <div class="row">
+          <a class="btn ghost" href="02-niveaux.html">NIVEAUX</a>
+          <a class="btn ghost" href="07-reglages.html">OPTIONS</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="cmd">Commande : <b>_lancer_simulation</b> <span class="caret"></span></div>
+  <div class="status"><span id="xy">X 0.00 · Y 0.00</span><span class="on">SNAP</span><span class="on">ORTHO</span><span>GRILLE 20</span></div>
+  <script src="cao.js"></script>
+</body>
+</html>

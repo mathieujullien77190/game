@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAO 05 — Victoire</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  /* Victoire = rapport de validation du plan. Étoiles = 3 critères cochés un par un. */
+  .title { text-align: center; }
+  .title .big { font-size: 26px; font-weight: 800; color: var(--ok); letter-spacing: .08em; }
+  .checks { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+  .checks div { display: flex; align-items: center; gap: 10px; opacity: 0; animation: in .35s ease forwards; }
+  .checks div:nth-child(2) { animation-delay: .5s; } .checks div:nth-child(3) { animation-delay: 1s; }
+  .checks .box { width: 18px; height: 18px; border: 1.5px solid var(--orange); display: grid; place-items: center; color: var(--orange); font-size: 12px; }
+  .checks .miss .box { border-color: rgba(255,255,255,.25); color: transparent; }
+  .checks .miss { color: var(--muted); }
+  @keyframes in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+  .stamp { align-self: center; border: 3px double var(--ok); color: var(--ok); padding: 5px 14px; font-weight: 800; letter-spacing: .2em; font-size: 14px; transform: rotate(-6deg); opacity: 0; animation: stamp .3s cubic-bezier(.3,1.8,.5,1) 1.5s forwards; }
+  @keyframes stamp { from { opacity: 0; transform: rotate(-6deg) scale(2); } to { opacity: 1; transform: rotate(-6deg) scale(1); } }
+  .foot .btn { flex: 1; }
+</style>
+</head>
+<body>
+  <div class="bar"><span><b>niv-03.dwg</b> — validation</span><span class="status ok" style="padding:0;background:none;border:0">● OK</span></div>
+  <div class="stage">
+    <div class="dialog ok">
+      <div class="head"><b>✓ Rendu terminé</b><span>0 erreur · 0 avertissement</span></div>
+      <div class="body">
+        <div class="title"><div class="label">résultat</div><div class="big">PLAN VALIDÉ</div></div>
+        <dl class="props">
+          <dt>Balles arrivées</dt><dd>8 / 8</dd>
+          <dt>Couleur + forme</dt><dd style="color:var(--ok)">conformes</dd>
+          <dt>Temps</dt><dd>00:41.7</dd>
+          <dt>Aiguillages utilisés</dt><dd>6</dd>
+        </dl>
+        <div class="checks">
+          <div><span class="box">✓</span>toutes les balles à l'arrivée</div>
+          <div><span class="box">✓</span>temps &lt; 00:45.0</div>
+          <div class="miss"><span class="box">✓</span>≤ 4 aiguillages (6 utilisés)</div>
+        </div>
+        <div class="stamp">★ ★ ☆</div>
+      </div>
+      <div class="foot">
+        <a class="btn ghost" href="03-jeu.html">↻ REJOUER</a>
+        <a class="btn" href="03-jeu.html">SUIVANT ▶</a>
+      </div>
+    </div>
+  </div>
+  <div class="status"><span class="ok">VALIDATION OK</span><span class="on">+2 ★</span><span>total ★ 7 / 18</span></div>
+  <script src="cao.js"></script>
+</body>
+</html>

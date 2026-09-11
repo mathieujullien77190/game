@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Tic — 02 Rêve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* Charte 02 — RÊVE : nuit néon façon Inception. Écrans imbriqués qui s'enfoncent à l'infini. */
+  :root {
+    --night: #0b0820;
+    --night-2: #1d1247;
+    --cyan: #3ef2ff;
+    --magenta: #ff3ea5;
+    --violet: #9b7bff;
+    --text: #e9e6ff;
+    --muted: #8f88c2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at center, var(--night-2) 0%, var(--night) 70%);
+    color: var(--text);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    display: grid; place-items: center; overflow: hidden; padding: 24px;
+  }
+  /* Tunnel d'écrans : cadres concentriques qui grossissent et s'effacent → sensation de plongée. */
+  .tunnel { position: fixed; inset: 0; display: grid; place-items: center; perspective: 600px; }
+  .tunnel div {
+    position: absolute; width: 60vmin; height: 100vmin; max-height: 110vh;
+    border: 2px solid var(--violet); border-radius: 18px; opacity: 0;
+    animation: dive 6s linear infinite;
+  }
+  .tunnel div:nth-child(2) { animation-delay: -1.5s; border-color: var(--cyan); }
+  .tunnel div:nth-child(3) { animation-delay: -3s; border-color: var(--magenta); }
+  .tunnel div:nth-child(4) { animation-delay: -4.5s; }
+  @keyframes dive {
+    0% { transform: scale(.1); opacity: 0 }
+    20% { opacity: .55 }
+    100% { transform: scale(1.8); opacity: 0 }
+  }
+  main { position: relative; display: flex; flex-direction: column; align-items: center; gap: 28px; text-align: center; }
+  .depth { font-size: 12px; letter-spacing: .4em; color: var(--muted); text-transform: uppercase; }
+  .logo { font-weight: 700; font-size: clamp(40px, 12vw, 80px); letter-spacing: .02em; line-height: 1; }
+  .logo .c { color: var(--cyan); text-shadow: 0 0 12px var(--cyan), 0 0 40px rgba(62,242,255,.5); }
+  .logo .m { color: var(--magenta); text-shadow: 0 0 12px var(--magenta), 0 0 40px rgba(255,62,165,.5); }
+  .logo i { font-style: normal; color: var(--muted); padding: 0 .1em; }
+  .logo span { animation: flicker 4s infinite; }
+  .logo .m { animation-delay: -1.3s; }
+  @keyframes flicker { 0%, 92%, 100% { opacity: 1 } 94% { opacity: .4 } 96% { opacity: 1 } 97% { opacity: .6 } }
+  .tag { margin: 0; font-size: 18px; color: var(--text); opacity: .85; }
+  button {
+    font: inherit; font-weight: 700; font-size: 20px; letter-spacing: .3em;
+    color: var(--cyan); background: rgba(62,242,255,.06);
+    border: 2px solid var(--cyan); border-radius: 14px; padding: 16px 52px 16px 58px;
+    box-shadow: 0 0 18px rgba(62,242,255,.45), inset 0 0 18px rgba(62,242,255,.2);
+    cursor: pointer; animation: breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { box-shadow: 0 0 34px rgba(62,242,255,.8), inset 0 0 24px rgba(62,242,255,.35) } }
+  .hint { margin: 0; font-size: 14px; color: var(--muted); max-width: 300px; }
+</style>
+</head>
+<body>
+  <div class="tunnel" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
+  <main>
+    <div class="depth">niveau 0 · temps ×1</div>
+    <div class="logo" aria-label="Tic-Tac-Tic"><span class="c">TIC</span><i>·</i><span class="m">TAC</span><i>·</i><span class="c">TIC</span></div>
+    <p class="tag">Plus tu descends, plus le temps ralentit.</p>
+    <button type="button">PLONGER</button>
+    <p class="hint">Fais passer les balles d'un écran à l'autre sans qu'aucune ne se perde.</p>
+  </main>
+</body>
+</html>

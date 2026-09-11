@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blueprint F — CAO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* Blueprint F — CAO : l'accueil est un logiciel de dessin technique. Réticule qui suit le doigt, coordonnées live, logo « sélectionné ». */
+  :root {
+    --bg: #081626; --grid: rgba(120,180,255,.06); --grid-major: rgba(120,180,255,.13);
+    --line: #eaf4ff; --muted: #7f9fc0; --orange: #ff9f1c; --bar: #0d2238; --sel: #4fc3ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      var(--bg);
+    color: var(--line); font-family: "JetBrains Mono", ui-monospace, monospace;
+    display: flex; flex-direction: column; overflow: hidden; cursor: none;
+  }
+  .bar { background: var(--bar); border-bottom: 1px solid rgba(255,255,255,.08); padding: 10px 16px; font-size: 11px; display: flex; justify-content: space-between; color: var(--muted); }
+  .bar b { color: var(--line); font-weight: 700; }
+  .tools { display: flex; gap: 6px; padding: 8px 16px; background: var(--bar); border-bottom: 1px solid rgba(255,255,255,.08); }
+  .tools span { width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.12); border-radius: 4px; font-size: 12px; color: var(--muted); }
+  .tools span.on { border-color: var(--orange); color: var(--orange); }
+  .stage { flex: 1; display: grid; place-items: center; padding: 16px; }
+  main { display: flex; flex-direction: column; align-items: center; gap: 26px; text-align: center; }
+  /* logo sélectionné : boîte pointillée + poignées */
+  .sel { position: relative; padding: 14px 18px; border: 1px dashed var(--sel); }
+  .sel i { position: absolute; width: 8px; height: 8px; background: var(--bg); border: 1.5px solid var(--sel); }
+  .sel i:nth-child(1) { top: -5px; left: -5px; } .sel i:nth-child(2) { top: -5px; right: -5px; }
+  .sel i:nth-child(3) { bottom: -5px; left: -5px; } .sel i:nth-child(4) { bottom: -5px; right: -5px; }
+  .sel .dim { position: absolute; top: -22px; left: 0; font-size: 9px; color: var(--sel); letter-spacing: .1em; }
+  .logo { margin: 0; font-weight: 800; font-size: clamp(32px, 10vw, 56px); letter-spacing: .06em; line-height: 1; }
+  .logo b { color: var(--orange); }
+  button { font: inherit; font-weight: 700; font-size: 16px; letter-spacing: .15em; color: var(--bg); background: var(--orange);
+           border: 0; border-radius: 3px; padding: 13px 34px; cursor: none; }
+  button:active { filter: brightness(.9); }
+  .cmd { font-size: 12px; color: var(--muted); }
+  .cmd b { color: var(--line); font-weight: 400; }
+  .caret { display: inline-block; width: 7px; height: 13px; background: var(--line); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0 } }
+  .status { background: var(--bar); border-top: 1px solid rgba(255,255,255,.08); padding: 8px 16px; font-size: 10px; display: flex; gap: 14px; color: var(--muted); }
+  .status .on { color: var(--orange); }
+  /* réticule plein écran */
+  .xh-v, .xh-h { position: fixed; pointer-events: none; background: rgba(234,244,255,.35); }
+  .xh-v { top: 0; bottom: 0; width: 1px; } .xh-h { left: 0; right: 0; height: 1px; }
+  .xh-box { position: fixed; width: 14px; height: 14px; border: 1px solid var(--line); pointer-events: none; transform: translate(-7px, -7px); }
+</style>
+</head>
+<body>
+  <div class="bar"><span><b>tic-tac-tic.dwg</b> — calque : ROUTES</span><span>v1.0</span></div>
+  <div class="tools" aria-hidden="true"><span class="on">↖</span><span>╱</span><span>◯</span><span>⌒</span><span>▭</span><span>⤧</span></div>
+  <div class="stage">
+    <main>
+      <div class="sel">
+        <span class="dim">SÉLECTION · 1 OBJET</span>
+        <i></i><i></i><i></i><i></i>
+        <h1 class="logo">TIC<b>·</b>TAC<b>·</b>TIC</h1>
+      </div>
+      <button type="button">▶ EXÉCUTER</button>
+      <div class="cmd">Commande : <b>_lancer_simulation</b> <span class="caret"></span></div>
+    </main>
+  </div>
+  <div class="status"><span id="xy">X 0.00 · Y 0.00</span><span class="on">SNAP</span><span class="on">ORTHO</span><span>GRILLE 20</span></div>
+  <div class="xh-v" id="v"></div><div class="xh-h" id="h"></div><div class="xh-box" id="b"></div>
+  <script>
+    // Réticule : suit le pointeur ; au repos, dérive tout seul (pour la démo / écran tactile).
+    const v = document.getElementById("v"), h = document.getElementById("h"), b = document.getElementById("b"), xy = document.getElementById("xy")
+    let px = null, py = null, idleAt = 0
+    const place = (x, y) => {
+      const sx = Math.round(x / 20) * 20, sy = Math.round(y / 20) * 20 // snap grille
+      v.style.left = sx + "px"; h.style.top = sy + "px"; b.style.left = sx + "px"; b.style.top = sy + "px"
+      xy.textContent = `X ${(sx / 10).toFixed(2)} · Y ${(sy / 10).toFixed(2)}`
+    }
+    addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; idleAt = performance.now() + 2500; place(px, py) })
+    const loop = (t) => {
+      if (px === null || t > idleAt) {
+        const w = innerWidth, hh = innerHeight
+        place(w / 2 + Math.sin(t / 1300) * w * .32, hh / 2 + Math.sin(t / 900) * hh * .28)
+      }
+      requestAnimationFrame(loop)
+    }
+    requestAnimationFrame(loop)
+  </script>
+</body>
+</html>

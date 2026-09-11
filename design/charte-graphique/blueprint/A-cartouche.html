@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blueprint A — Cartouche</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* Blueprint A — CARTOUCHE : un vrai plan d'archi. Logo coté (lignes de cote), cartouche en bas qui contient le bouton. */
+  :root {
+    --blue: #0d3b66; --blue-2: #0a2f52;
+    --grid: rgba(255,255,255,.07); --grid-major: rgba(255,255,255,.15);
+    --line: #eaf4ff; --muted: #9dbbd8; --orange: #ff9f1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      var(--blue);
+    color: var(--line); font-family: "JetBrains Mono", ui-monospace, monospace;
+    display: flex; flex-direction: column; overflow: hidden; padding: 16px;
+  }
+  /* cadre de la feuille */
+  .sheet { flex: 1; border: 2px solid var(--line); outline: 1px solid var(--muted); outline-offset: -8px; display: flex; flex-direction: column; }
+  .top { display: flex; justify-content: space-between; padding: 14px 16px; font-size: 10px; color: var(--muted); letter-spacing: .12em; }
+  .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 0 16px; }
+  .logo { width: min(100%, 340px); overflow: visible; }
+  .logo .t { font: 800 42px "JetBrains Mono", monospace; fill: none; stroke: var(--line); stroke-width: 1.4; letter-spacing: 3px; }
+  .logo .dot { fill: var(--orange); }
+  .logo .cote { stroke: var(--muted); stroke-width: 1; }
+  .logo .lbl { font: 400 9px "JetBrains Mono", monospace; fill: var(--muted); letter-spacing: 1px; }
+  .tag { margin: 0; font-size: 13px; color: var(--muted); }
+  /* cartouche */
+  .cartouche { margin: 0 14px 14px auto; width: min(100% - 28px, 320px); border: 2px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; font-size: 10px; }
+  .cartouche div { padding: 7px 9px; border-right: 1px solid var(--muted); border-bottom: 1px solid var(--muted); }
+  .cartouche div:nth-child(2n) { border-right: 0; }
+  .cartouche small { display: block; color: var(--muted); font-size: 8px; letter-spacing: .15em; margin-bottom: 2px; }
+  .cartouche .title { grid-column: 1 / -1; font-size: 16px; font-weight: 800; letter-spacing: .1em; border-right: 0; }
+  .cartouche button {
+    grid-column: 1 / -1; font: inherit; font-weight: 800; font-size: 15px; letter-spacing: .25em;
+    color: var(--blue-2); background: var(--orange); border: 0; padding: 14px; cursor: pointer;
+  }
+  .cartouche button:active { filter: brightness(.9); }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="top"><span>FEUILLE 01/12</span><span>NE PAS MESURER SUR LE PLAN</span></div>
+    <div class="center">
+      <svg class="logo" viewBox="0 0 340 150" aria-label="Tic-Tac-Tic">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#9dbbd8" />
+          </marker>
+        </defs>
+        <!-- cote horizontale -->
+        <line class="cote" x1="14" y1="44" x2="14" y2="18" /><line class="cote" x1="326" y1="44" x2="326" y2="18" />
+        <line class="cote" x1="16" y1="24" x2="324" y2="24" marker-start="url(#arr)" marker-end="url(#arr)" />
+        <rect x="118" y="17" width="104" height="14" fill="#0d3b66" />
+        <text class="lbl" x="170" y="28" text-anchor="middle">3 TEMPS · 1 BOUCLE</text>
+        <!-- logo -->
+        <text class="t" x="170" y="92" text-anchor="middle">TIC TAC TIC</text>
+        <circle class="dot" cx="116" cy="78" r="4" /><circle class="dot" cx="224" cy="78" r="4" />
+        <!-- cote verticale -->
+        <line class="cote" x1="0" y1="58" x2="0" y2="98" marker-start="url(#arr)" marker-end="url(#arr)" />
+        <!-- rail + balle sous le logo -->
+        <path id="rail" d="M 20 124 L 320 124" stroke="#eaf4ff" stroke-width="2" />
+        <circle cx="20" cy="124" r="5" fill="none" stroke="#eaf4ff" stroke-width="2" />
+        <rect x="313" y="117" width="14" height="14" fill="#0d3b66" stroke="#ff9f1c" stroke-width="2" />
+        <circle r="5" fill="#ff9f1c"><animateMotion dur="3s" repeatCount="indefinite" path="M 20 124 L 320 124" /></circle>
+        <text class="lbl" x="20" y="144">START</text><text class="lbl" x="320" y="144" text-anchor="end">ARRIVÉE</text>
+      </svg>
+      <p class="tag">// route les balles, maîtrise le temps</p>
+    </div>
+    <div class="cartouche">
+      <div class="title"><small>PROJET</small>TIC-TAC-TIC</div>
+      <div><small>ÉCHELLE</small>1:1</div>
+      <div><small>DATE</small>2026</div>
+      <div><small>NIVEAU</small>01 — INITIATION</div>
+      <div><small>STATUT</small>PRÊT ✓</div>
+      <button type="button">LANCER</button>
+    </div>
+  </div>
+</body>
+</html>

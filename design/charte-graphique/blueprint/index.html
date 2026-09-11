@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Tic — Déclinaisons Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* Planche des déclinaisons Blueprint, elle-même en style plan. */
+  :root { --blue: #0a2f52; --card: #0d3b66; --line: #eaf4ff; --muted: #9dbbd8; --orange: #ff9f1c; --grid: rgba(255,255,255,.05); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 60px; color: var(--line); font-family: "JetBrains Mono", ui-monospace, monospace;
+    background: linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px, linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px, var(--blue);
+  }
+  header { max-width: 1200px; margin: 0 auto 32px; }
+  header a { color: var(--muted); font-size: 13px; }
+  h1 { margin: 12px 0 8px; font-size: 26px; letter-spacing: .05em; }
+  h1 b { color: var(--orange); }
+  header p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.6; font-size: 14px; }
+  .grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .card { border: 1.5px solid rgba(234,244,255,.5); background: rgba(13,59,102,.6); padding: 18px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+  .card::before { content: attr(data-ref); position: absolute; top: -10px; left: 14px; background: var(--orange); color: var(--blue); font-weight: 800; font-size: 12px; padding: 1px 8px; }
+  .phone { width: 254px; height: 496px; margin: 6px auto 0; border-radius: 30px; border: 6px solid #03121f; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+  .phone iframe { width: 390px; height: 780px; border: 0; transform: scale(.62); transform-origin: 0 0; }
+  h2 { margin: 0; font-size: 17px; letter-spacing: .06em; }
+  h2 small { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 6px; }
+  .desc { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+  .pros { margin: 0; padding: 0; list-style: none; font-size: 12px; display: grid; gap: 3px; }
+  .pros li::before { content: "+ "; color: var(--orange); }
+  .pros li.con::before { content: "− "; color: #ff6b6b; }
+  .card a { color: var(--line); font-size: 12px; }
+  .row { display: flex; justify-content: space-between; align-items: center; }
+  .reload { font: inherit; font-size: 11px; color: var(--muted); background: none; border: 1px solid rgba(234,244,255,.3); padding: 3px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+  <header>
+    <a href="../index.html">← toutes les chartes</a>
+    <h1>BLUEPRINT <b>·</b> déclinaisons home</h1>
+    <p>Six variantes de la charte 05. Base commune : bleu de plan, trait blanc, accent orange, typo mono, balles qui suivent des tracés. Chacune pousse une idée différente. Clique ↻ pour rejouer une animation d'intro.</p>
+  </header>
+  <div class="grid">
+    <article class="card" data-ref="A">
+      <div class="phone"><iframe src="A-cartouche.html" title="A Cartouche"></iframe></div>
+      <h2>CARTOUCHE <small>plan d'archi</small></h2>
+      <p class="desc">Feuille encadrée, logo coté (flèches de cote), cartouche en bas avec projet, échelle, niveau… et le bouton dedans.</p>
+      <ul class="pros"><li>Très « plan », identité forte</li><li>Le cartouche peut afficher le niveau et la progression</li><li class="con">Plus chargé en info</li></ul>
+      <div class="row"><a href="A-cartouche.html" target="_blank">plein écran ↗</a><button class="reload">↻</button></div>
+    </article>
+    <article class="card" data-ref="B">
+      <div class="phone"><iframe src="B-trace.html" title="B Tracé"></iframe></div>
+      <h2>TRACÉ <small>intro animée</small></h2>
+      <p class="desc">À l'ouverture, le plan se dessine tout seul : rails, nœuds, puis logo tracé au trait. Les balles partent ensuite, puis le bouton apparaît.</p>
+      <ul class="pros"><li>Effet « wow » au lancement</li><li>Montre la mécanique avant de jouer</li><li class="con">~3 s avant le bouton</li></ul>
+      <div class="row"><a href="B-trace.html" target="_blank">plein écran ↗</a><button class="reload">↻</button></div>
+    </article>
+    <article class="card" data-ref="C">
+      <div class="phone"><iframe src="C-cyanotype.html" title="C Cyanotype"></iframe></div>
+      <h2>CYANOTYPE <small>papier vieilli</small></h2>
+      <p class="desc">Vrai tirage bleu : grain, pliures, craie un peu passée, tampon rouge « APPROUVÉ », bouton en étiquette scotchée. Police machine à écrire.</p>
+      <ul class="pros"><li>Chaleureux, tactile, rétro</li><li>Se distingue des jeux « flat »</li><li class="con">Moins net sur petit écran</li></ul>
+      <div class="row"><a href="C-cyanotype.html" target="_blank">plein écran ↗</a><button class="reload">↻</button></div>
+    </article>
+    <article class="card" data-ref="D">
+      <div class="phone"><iframe src="D-calque.html" title="D Calque"></iframe></div>
+      <h2>CALQUE <small>version claire</small></h2>
+      <p class="desc">Blueprint inversé : papier calque, encre bleue, annotations au crayon écrites à la main (« aiguillage ! », « x2 plus lent ici »).</p>
+      <ul class="pros"><li>Lisible en plein soleil</li><li>Les notes à la main guident le joueur</li><li class="con">Moins spectaculaire</li></ul>
+      <div class="row"><a href="D-calque.html" target="_blank">plein écran ↗</a><button class="reload">↻</button></div>
+      <a href="../reseaux/index.html">→ 9 schémas de réseau au calque</a>
+    </article>
+    <article class="card" data-ref="E">
+      <div class="phone"><iframe src="E-mecanisme.html" title="E Mécanisme"></iframe></div>
+      <h2>MÉCANISME <small>horloge en plan</small></h2>
+      <p class="desc">Plan d'un mouvement d'horloge : 3 engrenages qui tournent (le petit à la seconde, en tic-tac), repères numérotés, légende = vitesses du temps.</p>
+      <ul class="pros"><li>Fusionne blueprint + tic-tac</li><li>Légende = métaphore des screenTimeMultipliers</li><li class="con">S'éloigne un peu des rails</li></ul>
+      <div class="row"><a href="E-mecanisme.html" target="_blank">plein écran ↗</a><button class="reload">↻</button></div>
+    </article>
+    <article class="card" data-ref="F">
+      <div class="phone"><iframe src="F-cao.html" title="F CAO"></iframe></div>
+      <h2>CAO <small>logiciel de dessin</small></h2>
+      <p class="desc">L'accueil ressemble à un logiciel de dessin technique : barre d'outils, réticule qui suit le doigt avec magnétisme, coordonnées en direct, logo « sélectionné », ligne de commande.</p>
+      <ul class="pros"><li>Interactif dès l'accueil</li><li>Clin d'œil à l'éditeur de niveaux</li><li class="con">Look « outil » plus que « jeu »</li></ul>
+      <div class="row"><a href="F-cao.html" target="_blank">plein écran ↗</a><button class="reload">↻</button></div>
+      <a href="../cao/index.html">→ 8 écrans du jeu en CAO</a>
+    </article>
+  </div>
+  <script>
+    // ↻ : recharge l'iframe de la carte (rejoue l'intro).
+    document.querySelectorAll(".reload").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const f = btn.closest(".card").querySelector("iframe")
+        f.src = f.src
+      }),
+    )
+  </script>
+</body>
+</html>

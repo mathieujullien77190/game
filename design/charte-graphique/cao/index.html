@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Tic — Écrans CAO</title>
+<link rel="stylesheet" href="cao.css" />
+<style>
+  /* Planche des écrans CAO : parcours du joueur, chaque écran dans un cadre téléphone. */
+  body { display: block; overflow: auto; padding: 36px 20px 60px; }
+  header { max-width: 1240px; margin: 0 auto 26px; }
+  header a.back { color: var(--muted); font-size: 12px; }
+  h1 { margin: 12px 0 8px; font-size: 24px; letter-spacing: .05em; }
+  header p { margin: 0; color: var(--muted); max-width: 800px; line-height: 1.6; font-size: 13px; }
+  .flow { max-width: 1240px; margin: 18px auto 30px; font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .flow span { border: 1px solid rgba(255,255,255,.18); padding: 4px 8px; color: var(--line); }
+  .flow i { font-style: normal; color: var(--orange); }
+  .grid { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 22px; }
+  .card { border: 1px solid rgba(255,255,255,.14); background: rgba(13,34,56,.65); padding: 16px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .card::before { content: attr(data-n); position: absolute; top: -10px; left: 12px; background: var(--orange); color: var(--bg); font-weight: 800; font-size: 11px; padding: 1px 7px; }
+  .phone { width: 246px; height: 480px; margin: 4px auto 0; border-radius: 28px; border: 6px solid #020a13; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .phone iframe { width: 390px; height: 780px; border: 0; transform: scale(.6); transform-origin: 0 0; }
+  h2 { margin: 0; font-size: 15px; letter-spacing: .06em; }
+  .card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+  .card a.full { font-size: 11px; color: var(--sel); }
+</style>
+</head>
+<body>
+  <header>
+    <a class="back" href="../blueprint/index.html">← déclinaisons Blueprint</a>
+    <h1>CAO <span class="o">·</span> écrans du jeu</h1>
+    <p>La charte « F — CAO » appliquée à tout le parcours. Le jeu se présente comme un logiciel de dessin technique : les niveaux sont des plans (.dwg), la partie une simulation, la victoire un rendu validé, l'échec une erreur de routage. Les écrans sont reliés : clique les boutons dans les cadres ou en plein écran pour naviguer.</p>
+  </header>
+  <div class="flow"><span>01 accueil</span><i>→</i><span>02 niveaux</span><i>→</i><span>08 tutoriel</span><i>→</i><span>03 jeu</span><i>⇄</i><span>04 pause</span><i>→</i><span>05 victoire</span><i>/</i><span>06 échec</span><i>·</i><span>07 options</span></div>
+  <div class="grid">
+    <article class="card" data-n="01"><div class="phone"><iframe src="01-accueil.html" title="Accueil"></iframe></div><h2>ACCUEIL</h2><p>Logo « sélectionné », réticule, ligne de commande. EXÉCUTER + accès Niveaux / Options.</p><a class="full" href="01-accueil.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="02"><div class="phone"><iframe src="02-niveaux.html" title="Niveaux"></iframe></div><h2>NIVEAUX</h2><p>Boîte « Ouvrir… » : chapitres = dossiers, niveaux = fichiers .dwg avec vignette du plan, étoiles, verrous.</p><a class="full" href="02-niveaux.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="03"><div class="phone"><iframe src="03-jeu.html" title="Jeu"></iframe></div><h2>EN JEU</h2><p>Compteurs en barre d'outils (balles, chrono, vitesse du temps, étoiles). Plan animé. Journal d'événements en ligne de commande.</p><a class="full" href="03-jeu.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="04"><div class="phone"><iframe src="04-pause.html" title="Pause"></iframe></div><h2>PAUSE</h2><p>Fenêtre « Propriétés » sur le jeu figé : état de la partie + actions avec raccourcis clavier.</p><a class="full" href="04-pause.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="05"><div class="phone"><iframe src="05-victoire.html" title="Victoire"></iframe></div><h2>VICTOIRE</h2><p>« Rendu terminé » : rapport, 3 critères cochés un à un (= étoiles), tampon final.</p><a class="full" href="05-victoire.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="06"><div class="phone"><iframe src="06-echec.html" title="Échec"></iframe></div><h2>ÉCHEC</h2><p>Erreur de routage avec code, message clair et « trace » : où, quand, par quel chemin. Balle fautive ciblée sur le plan.</p><a class="full" href="06-echec.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="07"><div class="phone"><iframe src="07-reglages.html" title="Options"></iframe></div><h2>OPTIONS</h2><p>Préférences logiciel : cases [■], curseurs gradués, segments (thème Nuit / Plan / Calque, langue).</p><a class="full" href="07-reglages.html" target="_blank">plein écran ↗</a></article>
+    <article class="card" data-n="08"><div class="phone"><iframe src="08-tutoriel.html" title="Tutoriel"></iframe></div><h2>TUTORIEL</h2><p>L'élément expliqué est « sélectionné » (poignées), le reste assombri, info-bulle reliée par un trait de cote.</p><a class="full" href="08-tutoriel.html" target="_blank">plein écran ↗</a></article>
+  </div>
+</body>
+</html>

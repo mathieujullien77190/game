@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blueprint E — Mécanisme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* Blueprint E — MÉCANISME : plan d'un mouvement d'horloge. Engrenages qui tournent, repères numérotés, rail de balles. */
+  :root {
+    --blue: #0d3b66; --blue-2: #0a2f52;
+    --grid: rgba(255,255,255,.07); --grid-major: rgba(255,255,255,.15);
+    --line: #eaf4ff; --muted: #9dbbd8; --orange: #ff9f1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      radial-gradient(ellipse at center, var(--blue), var(--blue-2));
+    color: var(--line); font-family: "JetBrains Mono", ui-monospace, monospace;
+    display: grid; place-items: center; overflow: hidden; padding: 24px;
+  }
+  main { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+  svg { width: min(90vw, 330px); overflow: visible; }
+  .gear { fill: none; stroke: var(--line); stroke-width: 1.6; }
+  .axis { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 6 3 1 3; }
+  .spin { transform-box: fill-box; transform-origin: center; }
+  /* engrenages : rapport de vitesse ≈ rapport des dents, sens opposés ; le petit avance par à-coups (tic-tac) */
+  .g1 { animation: cw 12s linear infinite; }
+  .g2 { animation: ccw 7.2s linear infinite; }
+  .g3 { animation: cw 2s steps(12) infinite; }
+  @keyframes cw { to { transform: rotate(360deg) } }
+  @keyframes ccw { to { transform: rotate(-360deg) } }
+  .ref { font: 700 9px "JetBrains Mono", monospace; fill: var(--line); }
+  .refc { fill: var(--blue); stroke: var(--line); stroke-width: 1.2; }
+  .leader { stroke: var(--muted); stroke-width: 1; fill: none; }
+  .legend { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 10px; color: var(--muted); text-align: left; }
+  .legend b { color: var(--line); }
+  .logo { margin: 0; font-weight: 800; font-size: clamp(32px, 10vw, 56px); letter-spacing: .08em; line-height: 1; color: transparent; -webkit-text-stroke: 1.4px var(--line); }
+  .logo b { color: var(--orange); -webkit-text-stroke: 0; }
+  button { position: relative; font: inherit; font-weight: 700; font-size: 17px; letter-spacing: .25em; color: var(--blue-2);
+           background: var(--orange); border: 0; padding: 14px 40px; cursor: pointer; }
+  button::before, button::after { content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid var(--line); }
+  button::before { top: -7px; left: -7px; border-right: 0; border-bottom: 0; }
+  button::after { bottom: -7px; right: -7px; border-left: 0; border-top: 0; }
+</style>
+</head>
+<body>
+  <main>
+    <svg viewBox="0 0 330 240" aria-hidden="true">
+      <line class="axis" x1="0" y1="110" x2="330" y2="110" />
+      <g class="spin g1"><path class="gear" id="gear1" /></g>
+      <g class="spin g2"><path class="gear" id="gear2" /></g>
+      <g class="spin g3"><path class="gear" id="gear3" /></g>
+      <!-- rail qui contourne le mécanisme -->
+      <path id="rail" d="M 10 222 L 120 222 Q 150 222 165 200 L 200 150" fill="none" stroke="#eaf4ff" stroke-width="2" />
+      <circle r="5" fill="#ff9f1c"><animateMotion dur="3s" repeatCount="indefinite" path="M 10 222 L 120 222 Q 150 222 165 200 L 200 150" /></circle>
+      <!-- repères -->
+      <path class="leader" d="M 60 60 L 30 22" /><circle class="refc" cx="30" cy="16" r="9" /><text class="ref" x="30" y="19" text-anchor="middle">1</text>
+      <path class="leader" d="M 222 70 L 250 24" /><circle class="refc" cx="254" cy="18" r="9" /><text class="ref" x="254" y="21" text-anchor="middle">2</text>
+      <path class="leader" d="M 292 128 L 316 170" /><circle class="refc" cx="318" cy="178" r="9" /><text class="ref" x="318" y="181" text-anchor="middle">3</text>
+    </svg>
+    <div class="legend"><b>1</b><span>BARILLET — temps ×1</span><b>2</b><span>ROUE — temps ×0.6</span><b>3</b><span>ÉCHAPPEMENT — tic-tac</span></div>
+    <h1 class="logo">TIC<b>·</b>TAC<b>·</b>TIC</h1>
+    <button type="button">REMONTER</button>
+  </main>
+  <script>
+    // Génère un profil d'engrenage (dents trapézoïdales) centré en (cx, cy).
+    const gearPath = (cx, cy, rIn, rOut, teeth) => {
+      const step = (Math.PI * 2) / teeth
+      const pt = (r, a) => `${(cx + r * Math.cos(a)).toFixed(2)} ${(cy + r * Math.sin(a)).toFixed(2)}`
+      let d = ""
+      for (let i = 0; i < teeth; i++) {
+        const a = i * step
+        d += `${i ? "L" : "M"} ${pt(rIn, a)} L ${pt(rOut, a + step * 0.15)} L ${pt(rOut, a + step * 0.45)} L ${pt(rIn, a + step * 0.6)} `
+      }
+      const hole = rIn * 0.28
+      return d + `Z M ${cx + hole} ${cy} A ${hole} ${hole} 0 1 0 ${cx - hole} ${cy} A ${hole} ${hole} 0 1 0 ${cx + hole} ${cy}`
+    }
+    document.getElementById("gear1").setAttribute("d", gearPath(95, 110, 62, 72, 20))
+    document.getElementById("gear2").setAttribute("d", gearPath(205, 110, 36, 46, 12))
+    document.getElementById("gear3").setAttribute("d", gearPath(272, 110, 16, 24, 12))
+  </script>
+</body>
+</html>

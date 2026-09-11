@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Tic — 05 Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* Charte 05 — BLUEPRINT : plan technique. Bleu d'architecte, grille, traits blancs, accent orange. */
+  :root {
+    --blue: #0d3b66;
+    --blue-2: #0a2f52;
+    --grid: rgba(255,255,255,.08);
+    --grid-major: rgba(255,255,255,.16);
+    --line: #eaf4ff;
+    --muted: #9dbbd8;
+    --orange: #ff9f1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      radial-gradient(ellipse at center, var(--blue) 0%, var(--blue-2) 100%);
+    color: var(--line);
+    font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    display: grid; place-items: center; overflow: hidden; padding: 24px;
+  }
+  main { display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+  .schema { width: min(80vw, 300px); }
+  .schema .rail { fill: none; stroke: var(--line); stroke-width: 2; }
+  .schema .dash { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+  .schema text { fill: var(--muted); font-size: 8px; font-family: inherit; }
+  .meta { display: flex; gap: 18px; font-size: 11px; color: var(--muted); letter-spacing: .1em; }
+  .logo {
+    font-weight: 800; font-size: clamp(32px, 10vw, 60px); letter-spacing: .08em; line-height: 1; margin: 0;
+    color: transparent; -webkit-text-stroke: 1.5px var(--line);
+  }
+  .logo b { color: var(--orange); -webkit-text-stroke: 0; font-weight: 800; }
+  .tag { margin: 0; font-size: 14px; color: var(--muted); }
+  button {
+    position: relative; font: inherit; font-weight: 700; font-size: 18px; letter-spacing: .25em;
+    color: var(--blue-2); background: var(--orange); border: 0; padding: 14px 40px; cursor: pointer;
+  }
+  /* repères de coin, comme sur un plan */
+  button::before, button::after {
+    content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid var(--line);
+  }
+  button::before { top: -7px; left: -7px; border-right: 0; border-bottom: 0; }
+  button::after { bottom: -7px; right: -7px; border-left: 0; border-top: 0; }
+  .hint { margin: 0; font-size: 12px; color: var(--muted); max-width: 300px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <main>
+    <svg class="schema" viewBox="0 0 300 170" aria-hidden="true">
+      <path id="route" class="rail" d="M 20 20 L 20 80 Q 20 100 40 110 L 150 150 L 280 150" />
+      <path class="rail" d="M 150 20 L 150 150" />
+      <path class="rail" d="M 280 20 L 280 60 Q 280 80 260 90 L 150 150" />
+      <path class="dash" d="M 0 150 L 300 150" transform="translate(0 12)" />
+      <circle cx="20" cy="20" r="8" fill="none" stroke="#eaf4ff" stroke-width="2" />
+      <circle cx="150" cy="20" r="8" fill="none" stroke="#eaf4ff" stroke-width="2" />
+      <circle cx="280" cy="20" r="8" fill="none" stroke="#eaf4ff" stroke-width="2" />
+      <rect x="143" y="143" width="14" height="14" fill="#0d3b66" stroke="#ff9f1c" stroke-width="2" />
+      <text x="30" y="16">START_A</text><text x="160" y="16">START_B</text><text x="222" y="16">GATE_02</text>
+      <text x="162" y="140">SW_01</text><text x="232" y="168">→ ARRIVÉE</text>
+      <circle r="6" fill="#ff9f1c"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#route" /></animateMotion></circle>
+    </svg>
+    <div class="meta"><span>FIG. 01</span><span>ÉCH. 1:1</span><span>REV. A</span></div>
+    <h1 class="logo">TIC<b>·</b>TAC<b>·</b>TIC</h1>
+    <p class="tag">// schéma de routage temporel</p>
+    <button type="button">LANCER</button>
+    <p class="hint">Trace la bonne route. Chaque aiguillage compte, chaque seconde aussi.</p>
+  </main>
+</body>
+</html>

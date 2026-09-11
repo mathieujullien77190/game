@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blueprint D — Calque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+<style>
+  /* Blueprint D — CALQUE : version claire (whiteprint). Papier calque, encre bleue, annotations au crayon à la main. */
+  :root {
+    --paper: #f6f4ee; --ink: #1d4e89; --ink-soft: rgba(29,78,137,.55);
+    --grid: rgba(29,78,137,.07); --grid-major: rgba(29,78,137,.14);
+    --orange: #ff7a00; --pencil: #5b5f66;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+      var(--paper);
+    color: var(--ink); font-family: "JetBrains Mono", ui-monospace, monospace;
+    display: grid; place-items: center; overflow: hidden; padding: 24px;
+  }
+  main { display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
+  svg { width: min(88vw, 320px); overflow: visible; }
+  .rail { fill: none; stroke: var(--ink); stroke-width: 2.2; }
+  .node { fill: var(--paper); stroke: var(--ink); stroke-width: 2.2; }
+  .lbl { font: 400 8px "JetBrains Mono", monospace; fill: var(--ink-soft); }
+  .pencil { font: 600 17px Caveat, cursive; fill: var(--pencil); }
+  .pencil-line { fill: none; stroke: var(--pencil); stroke-width: 1.3; stroke-linecap: round; }
+  .logo { margin: 0; font-weight: 800; font-size: clamp(34px, 10vw, 60px); letter-spacing: .06em; line-height: 1; }
+  .logo b { color: var(--orange); }
+  .tag { margin: -6px 0 0; font-size: 13px; color: var(--ink-soft); }
+  .scribble { font: 600 20px Caveat, cursive; color: var(--pencil); transform: rotate(-4deg); margin: -8px 0 -4px 120px; }
+  button { position: relative; font: inherit; font-weight: 700; font-size: 17px; letter-spacing: .25em; color: var(--paper);
+           background: var(--ink); border: 0; padding: 14px 42px; cursor: pointer; }
+  button::before, button::after { content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid var(--orange); }
+  button::before { top: -7px; left: -7px; border-right: 0; border-bottom: 0; }
+  button::after { bottom: -7px; right: -7px; border-left: 0; border-top: 0; }
+  button:active { background: #163c69; }
+  .hint { margin: 0; font-size: 11px; color: var(--ink-soft); max-width: 290px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <main>
+    <svg viewBox="0 0 320 212" aria-hidden="true">
+      <path class="rail" d="M 30 30 L 30 90 Q 30 110 50 118 L 160 160 L 290 160" />
+      <path class="rail" d="M 160 30 L 160 160" />
+      <path class="rail" d="M 290 30 L 290 80 Q 290 100 270 108 L 160 160" />
+      <circle class="node" cx="30" cy="30" r="8" /><circle class="node" cx="160" cy="30" r="8" /><circle class="node" cx="290" cy="30" r="8" />
+      <rect x="153" y="153" width="14" height="14" fill="#f6f4ee" stroke="#ff7a00" stroke-width="2.2" />
+      <text class="lbl" x="40" y="24">START_A</text><text class="lbl" x="170" y="24">START_B</text><text class="lbl" x="240" y="24">GATE_02</text>
+      <!-- annotations crayon -->
+      <path class="pencil-line" d="M 214 128 q 20 -14 40 -26" /><path class="pencil-line" d="M 176 150 l 38 -22 m -8 -1 l 8 1 l -3 7" />
+      <text class="pencil" x="222" y="96" transform="rotate(-8 222 96)">aiguillage !</text>
+      <path class="pencil-line" d="M 118 196 q 26 -4 40 -26 m -7 2 l 7 -2 l 1 7" /><text class="pencil" x="8" y="204">x2 plus lent ici</text>
+      <circle r="5" fill="#ff7a00"><animateMotion dur="4s" repeatCount="indefinite" path="M 30 30 L 30 90 Q 30 110 50 118 L 160 160 L 290 160" /></circle>
+    </svg>
+    <h1 class="logo">TIC<b>·</b>TAC<b>·</b>TIC</h1>
+    <p class="tag">// schéma de routage temporel</p>
+    <div class="scribble">↓ c'est parti</div>
+    <button type="button">LANCER</button>
+    <p class="hint">Trace la bonne route. Chaque aiguillage compte, chaque seconde aussi.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Tic — 03 Horlogerie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  /* Charte 03 — HORLOGERIE : crème, laiton, bordeaux. Élégant, rétro, cadran qui bat la seconde. */
+  :root {
+    --cream: #f3e9d2;
+    --cream-2: #e8dab8;
+    --brass: #b8862b;
+    --ink: #2b2118;
+    --burgundy: #7a1f2b;
+    --muted: #7d6a52;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 35%, var(--cream) 0%, var(--cream-2) 100%);
+    color: var(--ink);
+    font-family: "Cormorant Garamond", Georgia, serif;
+    display: grid; place-items: center; overflow: hidden; padding: 24px;
+  }
+  main { display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+  .dial { width: min(62vw, 240px); aspect-ratio: 1; }
+  .dial .hand { transform-origin: 100px 100px; animation: sec 60s steps(60) infinite; }
+  @keyframes sec { to { transform: rotate(360deg) } }
+  .dial .orbit { transform-origin: 100px 100px; animation: sec 8s linear infinite; }
+  .rule { display: flex; align-items: center; gap: 10px; color: var(--brass); font-size: 13px; letter-spacing: .22em; white-space: nowrap; }
+  .rule::before, .rule::after { content: ""; width: 32px; height: 1px; background: var(--brass); }
+  .logo { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-size: clamp(38px, 11vw, 68px); line-height: 1; margin: 0; }
+  .logo em { color: var(--burgundy); }
+  .tag { margin: 0; font-size: 21px; font-weight: 600; color: var(--muted); }
+  button {
+    font-family: "Playfair Display", Georgia, serif; font-size: 20px; letter-spacing: .12em;
+    color: var(--cream); background: var(--burgundy);
+    border: 2px solid var(--brass); outline: 1px solid var(--brass); outline-offset: 4px;
+    padding: 14px 48px; cursor: pointer;
+  }
+  button:active { background: #5e1620; }
+  .hint { margin: 0; font-size: 17px; color: var(--muted); max-width: 300px; font-style: italic; }
+</style>
+</head>
+<body>
+  <main>
+    <svg class="dial" viewBox="0 0 200 200" aria-hidden="true">
+      <circle cx="100" cy="100" r="94" fill="#fbf5e6" stroke="#b8862b" stroke-width="4" />
+      <circle cx="100" cy="100" r="84" fill="none" stroke="#b8862b" stroke-width="1" />
+      <g stroke="#2b2118" stroke-linecap="round">
+        <line x1="100" y1="20" x2="100" y2="34" stroke-width="4" />
+        <line x1="180" y1="100" x2="166" y2="100" stroke-width="4" />
+        <line x1="100" y1="180" x2="100" y2="166" stroke-width="4" />
+        <line x1="20" y1="100" x2="34" y2="100" stroke-width="4" />
+        <g stroke-width="2">
+          <line x1="140" y1="30.7" x2="136" y2="37.7" /><line x1="169.3" y1="60" x2="162.3" y2="64" />
+          <line x1="169.3" y1="140" x2="162.3" y2="136" /><line x1="140" y1="169.3" x2="136" y2="162.3" />
+          <line x1="60" y1="169.3" x2="64" y2="162.3" /><line x1="30.7" y1="140" x2="37.7" y2="136" />
+          <line x1="30.7" y1="60" x2="37.7" y2="64" /><line x1="60" y1="30.7" x2="64" y2="37.7" />
+        </g>
+      </g>
+      <!-- balles qui tournent sur la couronne : les « tokens » -->
+      <g class="orbit">
+        <circle cx="100" cy="11" r="5" fill="#7a1f2b" />
+        <circle cx="189" cy="100" r="5" fill="#b8862b" />
+        <circle cx="100" cy="189" r="5" fill="#2b2118" />
+      </g>
+      <line x1="100" y1="100" x2="100" y2="58" stroke="#2b2118" stroke-width="5" stroke-linecap="round" transform="rotate(-50 100 100)" />
+      <g class="hand"><line x1="100" y1="112" x2="100" y2="26" stroke="#7a1f2b" stroke-width="2" /></g>
+      <circle cx="100" cy="100" r="6" fill="#b8862b" />
+    </svg>
+    <div class="rule">MAISON FONDÉE EN MMXXVI</div>
+    <h1 class="logo">Tic · <em>Tac</em> · Tic</h1>
+    <p class="tag">Chaque seconde compte.</p>
+    <button type="button">Commencer</button>
+    <p class="hint">Remonte le mécanisme : aiguille chaque balle vers sa destination.</p>
+  </main>
+</body>
+</html>

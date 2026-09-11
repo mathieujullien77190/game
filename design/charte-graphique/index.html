@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Tic — Chartes graphiques</title>
+<style>
+  /* Planche de comparaison : chaque charte dans un cadre téléphone + palette + typo. */
+  :root { --bg: #16181d; --card: #20232a; --text: #eceff4; --muted: #9aa3b2; --border: #2e323b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, "Segoe UI", sans-serif; padding: 40px 20px 60px; }
+  header { max-width: 1200px; margin: 0 auto 36px; }
+  h1 { margin: 0 0 8px; font-size: 30px; }
+  header p { margin: 0; color: var(--muted); max-width: 720px; line-height: 1.5; }
+  .grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  /* téléphone 390×780 affiché à 0.62 */
+  .phone { width: 254px; height: 496px; margin: 0 auto; border-radius: 30px; border: 6px solid #0b0c0f; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .phone iframe { width: 390px; height: 780px; border: 0; transform: scale(.62); transform-origin: 0 0; }
+  h2 { margin: 0; font-size: 20px; display: flex; align-items: baseline; gap: 10px; }
+  h2 small { color: var(--muted); font-weight: 500; font-size: 13px; }
+  .desc { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .swatches span { width: 34px; height: 34px; border-radius: 8px; border: 1px solid rgba(255,255,255,.15); position: relative; }
+  .swatches span:hover::after { content: attr(title); position: absolute; top: 38px; left: 0; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  a { color: #8ab4ff; font-size: 14px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Tic-Tac-Tic · chartes graphiques</h1>
+    <p>Cinq directions pour la page d'accueil, et plus largement l'identité du jeu. Chaque cadre est la vraie page, animée. Clique sur « Plein écran » pour la voir en grand.</p>
+  </header>
+
+  <div class="grid">
+    <article class="card">
+      <div class="phone"><iframe src="01-papier.html" title="01 Papier" loading="lazy"></iframe></div>
+      <h2>01 · Papier <small>minimal</small></h2>
+      <p class="desc">Évolution de l'actuel. Papier crème, encre sombre, rouge et bleu francs. Des rails où glissent des balles en fond. Lisible, calme, intemporel.</p>
+      <div class="swatches"><span style="background:#f4f1ea" title="#f4f1ea papier"></span><span style="background:#1f2a30" title="#1f2a30 encre"></span><span style="background:#e5383b" title="#e5383b rouge"></span><span style="background:#1d6fe0" title="#1d6fe0 bleu"></span><span style="background:#d9d3c5" title="#d9d3c5 rail"></span></div>
+      <dl><dt>Typo</dt><dd>Inter 900 / 500</dd><dt>Ambiance</dt><dd>Épuré, Monument Valley en plat</dd><dt>Bouton</dt><dd>Pilule rouge, relief 3D</dd></dl>
+      <a href="01-papier.html" target="_blank">Plein écran ↗</a>
+    </article>
+
+    <article class="card">
+      <div class="phone"><iframe src="02-reve.html" title="02 Rêve" loading="lazy"></iframe></div>
+      <h2>02 · Rêve <small>néon nuit</small></h2>
+      <p class="desc">La direction Inception. Nuit violette, néons cyan et magenta, écrans imbriqués qui s'enfoncent en boucle. Colle aux screen gates et au temps dilaté.</p>
+      <div class="swatches"><span style="background:#0b0820" title="#0b0820 nuit"></span><span style="background:#1d1247" title="#1d1247 nuit 2"></span><span style="background:#3ef2ff" title="#3ef2ff cyan"></span><span style="background:#ff3ea5" title="#ff3ea5 magenta"></span><span style="background:#9b7bff" title="#9b7bff violet"></span></div>
+      <dl><dt>Typo</dt><dd>Space Grotesk 700</dd><dt>Ambiance</dt><dd>Onirique, mystérieux, glow</dd><dt>Bouton</dt><dd>Contour néon qui respire</dd></dl>
+      <a href="02-reve.html" target="_blank">Plein écran ↗</a>
+    </article>
+
+    <article class="card">
+      <div class="phone"><iframe src="03-horlogerie.html" title="03 Horlogerie" loading="lazy"></iframe></div>
+      <h2>03 · Horlogerie <small>rétro élégant</small></h2>
+      <p class="desc">Tout sur le « tic-tac ». Crème, laiton, bordeaux, serif italique. Un cadran dont la trotteuse bat la seconde, et des balles qui tournent sur la couronne.</p>
+      <div class="swatches"><span style="background:#f3e9d2" title="#f3e9d2 crème"></span><span style="background:#b8862b" title="#b8862b laiton"></span><span style="background:#7a1f2b" title="#7a1f2b bordeaux"></span><span style="background:#2b2118" title="#2b2118 encre"></span><span style="background:#7d6a52" title="#7d6a52 sépia"></span></div>
+      <dl><dt>Typo</dt><dd>Playfair Display + Cormorant</dd><dt>Ambiance</dt><dd>Montre suisse, premium</dd><dt>Bouton</dt><dd>Rectangle bordeaux, double filet laiton</dd></dl>
+      <a href="03-horlogerie.html" target="_blank">Plein écran ↗</a>
+    </article>
+
+    <article class="card">
+      <div class="phone"><iframe src="04-arcade.html" title="04 Arcade" loading="lazy"></iframe></div>
+      <h2>04 · Arcade <small>pop brutaliste</small></h2>
+      <p class="desc">Casual et fun. Jaune franc, contours noirs épais, ombres dures, mots qui sautillent et balles qui rebondissent. Idéal pour un public mobile large.</p>
+      <div class="swatches"><span style="background:#ffd400" title="#ffd400 jaune"></span><span style="background:#111" title="#111111 noir"></span><span style="background:#ff4fa3" title="#ff4fa3 rose"></span><span style="background:#2d6cff" title="#2d6cff bleu"></span><span style="background:#1ec28b" title="#1ec28b vert"></span></div>
+      <dl><dt>Typo</dt><dd>Rubik 900</dd><dt>Ambiance</dt><dd>Énergique, ludique, stickers</dd><dt>Bouton</dt><dd>Blanc, bord noir, ombre dure</dd></dl>
+      <a href="04-arcade.html" target="_blank">Plein écran ↗</a>
+    </article>
+
+    <article class="card">
+      <div class="phone"><iframe src="05-blueprint.html" title="05 Blueprint" loading="lazy"></iframe></div>
+      <h2>05 · Blueprint <small>plan technique</small></h2>
+      <p class="desc">Le jeu comme un schéma de routage. Bleu d'architecte, grille, traits blancs, mono, accent orange. Une balle suit le tracé à travers un aiguillage.</p>
+      <div class="swatches"><span style="background:#0d3b66" title="#0d3b66 bleu plan"></span><span style="background:#0a2f52" title="#0a2f52 bleu nuit"></span><span style="background:#eaf4ff" title="#eaf4ff trait"></span><span style="background:#9dbbd8" title="#9dbbd8 cote"></span><span style="background:#ff9f1c" title="#ff9f1c orange"></span></div>
+      <dl><dt>Typo</dt><dd>JetBrains Mono 800</dd><dt>Ambiance</dt><dd>Ingénieur, puzzle, précis</dd><dt>Bouton</dt><dd>Orange, repères de coin</dd></dl>
+      <a href="05-blueprint.html" target="_blank">Plein écran ↗</a>
+      <a href="blueprint/index.html">→ 6 déclinaisons Blueprint</a>
+    </article>
+  </div>
+</body>
+</html>
