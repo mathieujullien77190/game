@@ -31,6 +31,7 @@ import { approach, lerpHex } from "../Utils/numeric";
 import { distanceSq } from "../Utils/geometry";
 import { Manager } from "./Manager";
 import { Profiler } from "../Profiler";
+import type { SimEvent } from "./simEvents";
 
 // Constante de build : injectée par `define` dans les configs Vite (vraie en dev/edition, fausse
 // dans le build webview mobile). `typeof` évite un ReferenceError si un consommateur ne la définit
@@ -76,6 +77,18 @@ export class PreviewManager extends Manager<LinePreview> {
     lastTimestamp: null as number | null,
     fps: 0,
     frameMs: 0,
+    // File d'événements de la simulation, vidée par le frontend via drainEvents().
+    events: [] as SimEvent[],
+  };
+
+  // Affiche le compteur fps/tokens en bas à gauche du canvas (debug). Un frontend peut le couper.
+  hudStatsEnabled = true;
+
+  // Rend et vide la file d'événements émis depuis le dernier appel.
+  drainEvents = (): SimEvent[] => {
+    const evs = this.data.events;
+    this.data.events = [];
+    return evs;
   };
 
   // Coupe toutes les animations d'entités en un seul point (debug / perf). Le rendu
@@ -103,6 +116,7 @@ export class PreviewManager extends Manager<LinePreview> {
     this.data.linkMap = {};
     this.data.elapsedSeconds = 0;
     this.data.lastTimestamp = null;
+    this.data.events = [];
 
     this.data.linkByEndpointKey = {};
     for (const lk of Object.values(links)) {
@@ -362,6 +376,10 @@ export class PreviewManager extends Manager<LinePreview> {
         const pb = lineB?.points[active[j].pointIndex];
         if (!pb) continue;
         if (distanceSq(pa, pb) < 16 * 16) {
+          this.data.events.push({
+            type: "collision", t: this.data.elapsedSeconds,
+            colors: [active[i].displayColor || (active[i].color as string), active[j].displayColor || (active[j].color as string)],
+          });
           active[i].exploding = true; active[i].direction = 0; active[i].explosionSeed = (Math.random() * 999999) | 0;
           active[j].exploding = true; active[j].direction = 0; active[j].explosionSeed = (Math.random() * 999999) | 0;
         }
@@ -471,7 +489,7 @@ export class PreviewManager extends Manager<LinePreview> {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = COLORS.white;
+    ctx.fillStyle = COLORS.background;
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.restore();
   };
@@ -667,6 +685,7 @@ export class PreviewManager extends Manager<LinePreview> {
   };
 
   drawHudStats = (ctx: Renderer) => {
+    if (!this.hudStatsEnabled) return;
     const tokensInNetwork = this.data.tokens.filter(
       (t) => this.data.elapsedSeconds >= t.startAt && !t.exploding
     ).length;

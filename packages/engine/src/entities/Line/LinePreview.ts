@@ -34,8 +34,8 @@ export class LinePreview extends Line {
       ctx.fill()
       return
     }
-    ctx.strokeStyle = this.color ?? COLORS.grayLight
-    ctx.lineWidth = STROKE_WIDTHS.lineGlow
+    ctx.strokeStyle = this.color ?? COLORS.rail
+    ctx.lineWidth = STROKE_WIDTHS.rail
     ctx.lineCap = "round"
     ctx.setLineDash([])
     this.tracePath(ctx)

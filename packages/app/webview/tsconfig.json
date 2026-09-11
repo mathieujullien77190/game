@@ -15,5 +15,5 @@
       "@tic-tac-tic/canvas-render": ["../../canvas-render/src/index.ts"]
     }
   },
-  "include": ["main.ts", "vite.config.ts"]
+  "include": ["main.ts", "ui/**/*.ts", "vite.config.ts"]
 }

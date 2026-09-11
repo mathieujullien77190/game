@@ -14,6 +14,7 @@
     "edition": "yarn workspace @tic-tac-tic/edition dev",
     "app": "yarn workspace @tic-tac-tic/app android",
     "app:web": "yarn workspace @tic-tac-tic/app web",
+    "build:web": "yarn workspace @tic-tac-tic/app build:web",
     "app:ios":"yarn workspace @tic-tac-tic/app ios",
     "app:start": "yarn workspace @tic-tac-tic/app start",
     "app:prebuild": "yarn workspace @tic-tac-tic/app prebuild",

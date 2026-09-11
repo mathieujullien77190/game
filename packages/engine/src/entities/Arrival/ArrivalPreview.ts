@@ -7,7 +7,8 @@ import { traceDemandShape } from "./demandShape"
 
 const ARC_GAP = 0.05
 const R = RADII.ring
-const SW = STROKE_WIDTHS.bold
+// Épaisseur de l'anneau, lue à chaque draw (thème modifiable à l'exécution).
+const sw = () => STROKE_WIDTHS.bold
 const QUEUE_COUNT = 3
 const QUEUE_SPACING = 15
 const QUEUE_START_OFFSET = R + 12
@@ -45,8 +46,8 @@ export class ArrivalPreview extends Arrival {
     ctx.translate(this._pt.x, this._pt.y)
     ctx.setLineDash([])
     ctx.globalAlpha = this.opacity
-    ctx.strokeStyle = COLORS.grayLight
-    ctx.lineWidth = SW
+    ctx.strokeStyle = COLORS.arrivalRing
+    ctx.lineWidth = sw()
     ctx.beginPath()
     ctx.arc(0, 0, R, 0, Math.PI * 2)
     ctx.stroke()
@@ -66,8 +67,8 @@ export class ArrivalPreview extends Arrival {
     ctx.translate(pt.x, pt.y)
     ctx.setLineDash([])
     ctx.globalAlpha = this.opacity
-    ctx.strokeStyle = COLORS.gray
-    ctx.lineWidth = SW
+    ctx.strokeStyle = COLORS.arrivalProgress
+    ctx.lineWidth = sw()
     ctx.lineCap = "round"
     for (let k = 0; k < n; k++) {
       const a0 = lineAngle + k * segSpan + gap / 2
@@ -93,9 +94,9 @@ export class ArrivalPreview extends Arrival {
     ctx.setLineDash([])
     ctx.globalAlpha = (1 - this.flashProgress) * 0.55 * this.opacity
     ctx.strokeStyle = this.flashColor
-    ctx.lineWidth = SW * 2
+    ctx.lineWidth = sw() * 2
     ctx.beginPath()
-    ctx.arc(0, 0, R + SW / 2, 0, Math.PI * 2)
+    ctx.arc(0, 0, R + sw() / 2, 0, Math.PI * 2)
     ctx.stroke()
     ctx.restore()
   }

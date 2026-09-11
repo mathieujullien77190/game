@@ -1,12 +1,13 @@
 import type { Renderer } from "./render/Renderer"
 import { CANVAS_H } from "./constants"
+import { COLORS } from "./theme"
 
 export const smoothFps = (currentFps: number, deltaMs: number): number =>
   currentFps * 0.9 + (1000 / deltaMs) * 0.1
 
 export const drawStats = (ctx: Renderer, fps: number, tokens: number): void => {
   ctx.font = "bold 11px monospace"
-  ctx.fillStyle = "#333"
+  ctx.fillStyle = COLORS.ink
   ctx.textAlign = "left"
   ctx.textBaseline = "bottom"
   ctx.fillText(`${Math.round(fps)} fps  ${tokens} tok`, 8, CANVAS_H - 8)

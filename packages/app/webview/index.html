@@ -8,181 +8,249 @@
     />
     <title>Tic-Tac-Tic</title>
     <style>
-      html,
+      /* ── Charte « Calque » (Blueprint D, cf. design/charte-graphique/blueprint/D-calque.html) ──
+         papier calque + grille bleue, encre bleue, accent orange, annotations au crayon. */
+      :root {
+        --paper: #f6f4ee;
+        --paper-2: #fbfaf6;
+        --ink: #1d4e89;
+        --ink-soft: rgba(29, 78, 137, 0.6);
+        --faint: rgba(29, 78, 137, 0.16);
+        --grid: rgba(29, 78, 137, 0.07);
+        --grid-major: rgba(29, 78, 137, 0.14);
+        --orange: #ff7a00;
+        --pencil: #5b5f66;
+        --ok: #2e9e6b;
+        --err: #d64545;
+        --content: 560px;
+        /* pas de police web : la WebView doit tourner hors ligne */
+        --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", Consolas, monospace;
+        --hand: "Caveat", "Segoe Print", "Bradley Hand", "Dancing Script", cursive;
+      }
+      * { box-sizing: border-box; }
+      /* `hidden` doit gagner sur les display: flex/grid des écrans et du voile */
+      [hidden] { display: none !important; }
+      html, body { margin: 0; height: 100%; overflow: hidden; }
       body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-        background: #f0f0f0;
-      }
-      #c {
-        display: block;
-        touch-action: none;
-      }
-
-      /* ── Page d'accueil ── niveau figé flouté en fond, retirée au clic sur « Jouer ». */
-      #home {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 28px;
-        padding: 24px;
-        box-sizing: border-box;
-        background: rgba(240, 240, 240, 0.72);
-        -webkit-backdrop-filter: blur(6px);
-        backdrop-filter: blur(6px);
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        color: #263238;
-        text-align: center;
-        transition: opacity 0.35s ease;
+        background:
+          linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+          linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 100px 100px,
+          linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+          var(--paper);
+        color: var(--ink);
+        font-family: var(--mono);
         user-select: none;
         -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
       }
-      #home.hidden {
-        opacity: 0;
-        pointer-events: none;
-      }
+      body.no-grid { background: var(--paper); }
+      button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; }
 
-      .logo {
-        width: min(88vw, 460px);
-      }
-      .words {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        font-size: clamp(36px, 12vw, 76px);
-        font-weight: 900;
-        letter-spacing: -0.02em;
-        line-height: 1;
-      }
-      .word {
-        display: inline-block;
-        animation: pulse 2s ease-in-out infinite;
-      }
-      .tic {
-        color: #e53935;
-      }
-      .tac {
-        color: #1a73e8;
-        animation-duration: 1s;
-        animation-delay: -0.5s;
-      }
-      .tic.last {
-        animation-delay: -1s;
-      }
-      .sep {
-        color: #b0bec5;
-        font-size: 0.5em;
-      }
+      /* écrans plein cadre et transparents : la grille du body se répète uniformément derrière tout */
+      .screen { position: fixed; inset: 0; display: flex; flex-direction: column; }
 
-      /* Balle-métronome : aller-retour sous les trois mots, en rythme avec leur pulsation. */
-      .track {
-        position: relative;
-        height: 18px;
-        margin-top: 14px;
-        border-radius: 9px;
-        background: #dde3e6;
-      }
-      .ball {
-        position: absolute;
-        top: 1px;
-        left: 1px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #263238;
-        animation: swing 2s ease-in-out infinite;
-      }
+      /* barres (papier, filet d'encre) */
+      .bar { background: rgba(251, 250, 246, 0.92); border-bottom: 1.5px solid var(--ink); padding: 10px 14px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--ink-soft); min-height: 46px; }
+      .bar b { color: var(--ink); font-weight: 700; }
+      .bar .icon { width: 30px; height: 30px; display: grid; place-items: center; border: 1.5px solid var(--ink); color: var(--ink); font-size: 12px; flex: none; background: var(--paper-2); }
+      .tools { display: flex; gap: 6px; padding: 8px 14px; background: rgba(251, 250, 246, 0.85); border-bottom: 1px solid var(--faint); align-items: center; }
+      .chip { font-size: 10px; padding: 5px 8px; border: 1px solid var(--faint); color: var(--ink-soft); white-space: nowrap; background: var(--paper-2); }
+      .chip b { color: var(--ink); font-weight: 700; }
+      .chip.o b { color: var(--orange); }
+      .tag-count { font-size: 11px; color: var(--ink); border: 1px solid var(--faint); padding: 4px 8px; background: var(--paper-2); }
+      .status { background: rgba(251, 250, 246, 0.92); border-top: 1.5px solid var(--ink); padding: 8px 14px; font-size: 10px; display: flex; gap: 14px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; }
+      .on { color: var(--orange); }
+      .ok { color: var(--ok); }
+      .err { color: var(--err); }
 
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-          transform: scale(1.08);
-        }
-        25%,
-        75% {
-          opacity: 0.35;
-          transform: scale(1);
-        }
-      }
-      @keyframes swing {
-        0%,
-        100% {
-          left: 1px;
-        }
-        50% {
-          left: calc(100% - 17px);
-        }
-      }
+      .stage { flex: 1; position: relative; display: grid; place-items: center; padding: 14px; min-height: 0; }
 
-      .tagline {
-        margin: 0;
-        font-size: clamp(16px, 4.4vw, 20px);
-        font-weight: 600;
-        color: #546e7a;
-      }
+      /* texte */
+      .logo { margin: 0; font-weight: 800; font-size: clamp(34px, 10vw, 60px); letter-spacing: 0.06em; line-height: 1; color: var(--ink); }
+      .logo b { color: var(--orange); }
+      .o { color: var(--orange); }
+      .hand { font-family: var(--hand); font-weight: 600; color: var(--pencil); }
 
-      #play {
-        padding: 16px 64px;
-        border: none;
-        border-radius: 999px;
-        background: #e53935;
-        color: #fff;
-        font: inherit;
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        box-shadow: 0 6px 0 #b71c1c;
-        cursor: pointer;
-        transition: transform 0.08s, box-shadow 0.08s;
-      }
-      #play:active {
-        transform: translateY(4px);
-        box-shadow: 0 2px 0 #b71c1c;
-      }
-      #play:focus-visible {
-        outline: 3px solid #1a73e8;
-        outline-offset: 4px;
-      }
+      /* boutons : encre pleine + repères de coin orange (principal), filet d'encre (secondaire) */
+      .btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 14px; letter-spacing: 0.2em; color: var(--paper); background: var(--ink); padding: 13px 24px; }
+      .btn::before, .btn::after { content: ""; position: absolute; width: 10px; height: 10px; border: 2px solid var(--orange); pointer-events: none; }
+      .btn::before { top: -6px; left: -6px; border-right: 0; border-bottom: 0; }
+      .btn::after { bottom: -6px; right: -6px; border-left: 0; border-top: 0; }
+      .btn:active { background: #163c69; }
+      .btn.ghost { background: var(--paper-2); color: var(--ink); border: 1.5px solid var(--ink); letter-spacing: 0.12em; }
+      .btn.ghost::before, .btn.ghost::after { display: none; }
+      .btn.ghost:active { background: rgba(29, 78, 137, 0.08); }
+      .btn:disabled { opacity: 0.4; }
+      .btn.sm { font-size: 10px; padding: 8px 10px; }
 
-      .hint {
-        margin: 0;
-        max-width: 320px;
-        font-size: 14px;
-        color: #78909c;
-      }
+      /* journal (annotations d'encre) */
+      .cmd { font-size: 11px; color: var(--ink-soft); padding: 8px 14px; background: rgba(251, 250, 246, 0.88); border-top: 1px solid var(--faint); line-height: 1.6; }
+      .cmd b { color: var(--ink); font-weight: 700; }
+
+      /* dialogues : feuille posée sur le calque */
+      .veil { position: absolute; inset: 0; background: rgba(246, 244, 238, 0.7); display: grid; place-items: center; padding: 16px; z-index: 5; }
+      .dialog { position: relative; width: min(100%, 340px); background: var(--paper-2); border: 1.5px solid var(--ink); box-shadow: 6px 6px 0 rgba(29, 78, 137, 0.14); animation: pop 0.18s ease-out; }
+      @keyframes pop { from { opacity: 0; transform: translateY(8px) rotate(-0.5deg); } }
+      .dialog .head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px dashed var(--ink-soft); font-size: 11px; color: var(--ink-soft); }
+      .dialog .head b { color: var(--ink); }
+      .dialog .body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+      .dialog .foot { padding: 4px 16px 18px; display: flex; gap: 12px; }
+      .dialog .foot .btn { flex: 1; font-size: 12px; letter-spacing: 0.08em; padding: 12px 8px; white-space: nowrap; }
+      .dialog .actions { display: flex; flex-direction: column; gap: 10px; }
+      .dialog .actions .btn { justify-content: flex-start; }
+      .dialog.v-ok { border-color: var(--ok); box-shadow: 6px 6px 0 rgba(46, 158, 107, 0.16); }
+      .dialog.v-ok .head b { color: var(--ok); }
+      .dialog.v-err { border-color: var(--err); box-shadow: 6px 6px 0 rgba(214, 69, 69, 0.14); }
+      .dialog.v-err .head b { color: var(--err); }
+      /* note au crayon griffonnée dans un coin du dialogue */
+      .dialog .note { position: absolute; top: -22px; right: 10px; font-family: var(--hand); font-weight: 600; font-size: 22px; color: var(--pencil); transform: rotate(-5deg); pointer-events: none; }
+      .code { font-size: 20px; font-weight: 800; letter-spacing: 0.06em; color: var(--err); }
+      .big { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; text-align: center; }
+      .label { font-size: 9px; letter-spacing: 0.15em; color: var(--ink-soft); text-transform: uppercase; text-align: center; }
+      .msg { margin: 0; font-size: 13px; line-height: 1.6; }
+      .trace { font-size: 10px; color: var(--ink-soft); line-height: 1.7; border-left: 2px solid var(--err); padding-left: 10px; }
+      .trace b { color: var(--ink); }
+      .sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 2px; vertical-align: 0; box-shadow: 0 0 0 1px rgba(29, 78, 137, 0.35); }
+      .props { display: grid; grid-template-columns: 1fr auto; font-size: 12px; margin: 0; border-top: 1px solid var(--faint); }
+      .props > * { padding: 7px 0; border-bottom: 1px solid var(--faint); }
+      .props dt { color: var(--ink-soft); }
+      .props dd { margin: 0; text-align: right; }
+      .stamp { align-self: center; border: 3px double var(--ok); color: var(--ok); padding: 4px 12px; font-weight: 800; letter-spacing: 0.2em; font-size: 12px; transform: rotate(-6deg); animation: stamp 0.3s cubic-bezier(0.3, 1.8, 0.5, 1) 0.4s both; }
+      @keyframes stamp { from { opacity: 0; transform: rotate(-6deg) scale(2); } }
+
+      /* ── accueil ── */
+      #s-home main { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; width: 100%; }
+      .schema { width: min(88vw, 340px); overflow: visible; }
+      .schema .rail { fill: none; stroke: var(--ink); stroke-width: 2.2; }
+      .schema .node { fill: var(--paper); stroke: var(--ink); stroke-width: 2.2; }
+      .schema .lbl { font: 400 8px var(--mono); fill: var(--ink-soft); }
+      .schema .pencil { font: 600 17px var(--hand); fill: var(--pencil); }
+      .schema .pencil-line { fill: none; stroke: var(--pencil); stroke-width: 1.3; stroke-linecap: round; }
+      .home-tag { margin: -6px 0 0; font-size: 13px; color: var(--ink-soft); }
+      .scribble { font-size: 20px; transform: rotate(-4deg); margin: -6px 0 -6px 130px; }
+      #s-home .menu { display: flex; flex-direction: column; gap: 14px; width: 240px; }
+      #s-home .menu .row { display: flex; gap: 10px; }
+      #s-home .menu .row .btn { flex: 1; font-size: 11px; padding: 10px; }
+
+      /* ── niveaux ── */
+      .path { padding: 10px 14px; font-size: 11px; color: var(--ink-soft); border-bottom: 1px solid var(--faint); background: rgba(251, 250, 246, 0.85); }
+      .path b { color: var(--ink); }
+      .list { flex: 1; overflow-y: auto; padding: 18px max(14px, calc((100% - var(--content)) / 2)); display: flex; flex-direction: column; gap: 10px; scrollbar-width: none; }
+      .list::-webkit-scrollbar { display: none; }
+      /* une ligne par niveau : numéro | nom | état */
+      .level { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1.5px solid var(--ink); background: var(--paper-2); text-align: left; box-shadow: 4px 4px 0 rgba(29, 78, 137, 0.1); }
+      .level:active { background: rgba(29, 78, 137, 0.06); }
+      .level.cur { border-color: var(--orange); box-shadow: 4px 4px 0 rgba(255, 122, 0, 0.2); }
+      .level .num { font-size: 22px; font-weight: 800; color: var(--ink); min-width: 34px; }
+      .level.cur .num { color: var(--orange); }
+      .level .name { flex: 1; font-size: 12px; color: var(--ink-soft); }
+      .level .state { font-size: 11px; color: var(--ink-soft); }
+      .level .state.done { color: var(--ok); }
+
+      /* ── jeu ── */
+      #s-game .stage { padding: 0; display: block; }
+      #c { position: absolute; inset: 0; display: block; touch-action: none; }
+      #g-log { height: 73px; overflow: hidden; }
+      #g-log p { margin: 0; height: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: logIn 0.25s ease-out; }
+      @keyframes logIn { from { opacity: 0; transform: translateX(-6px); } }
+
+      /* ── options ── */
+      .panel { flex: 1; overflow-y: auto; padding: 6px max(14px, calc((100% - var(--content)) / 2)) 20px; }
+      .panel section { padding: 14px 0 6px; }
+      .panel h2 { margin: 0 0 8px; font-size: 10px; letter-spacing: 0.2em; color: var(--orange); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .panel h2::after { content: ""; flex: 1; height: 1px; background: var(--faint); }
+      .opt { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--faint); font-size: 12px; gap: 12px; }
+      .opt > span:first-child { flex: 1; min-width: 0; }
+      .opt small { display: block; color: var(--ink-soft); font-size: 10px; margin-top: 2px; }
+      .chk { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 1.5px solid var(--ink); background: var(--paper-2); margin: 0; display: grid; place-items: center; cursor: pointer; flex: none; }
+      .chk:checked::after { content: ""; width: 10px; height: 10px; background: var(--orange); }
 
       @media (prefers-reduced-motion: reduce) {
-        .word,
-        .ball {
-          animation: none;
-        }
+        *, *::before, *::after { animation: none !important; }
       }
     </style>
   </head>
   <body>
-    <canvas id="c"></canvas>
-
-    <div id="home">
-      <div class="logo" aria-label="Tic-Tac-Tic">
-        <div class="words" aria-hidden="true">
-          <span class="word tic">TIC</span>
-          <span class="sep">·</span>
-          <span class="word tac">TAC</span>
-          <span class="sep">·</span>
-          <span class="word tic last">TIC</span>
-        </div>
-        <div class="track" aria-hidden="true"><div class="ball"></div></div>
+    <!-- ═══ ACCUEIL ═══ -->
+    <section id="s-home" class="screen">
+      <div class="bar"><span><b>tic-tac-tic</b> — calque n° 01</span><span class="tag-count" id="h-progress">✓ 0/0</span></div>
+      <div class="stage">
+        <main>
+          <svg class="schema" viewBox="0 0 320 212" aria-hidden="true">
+            <!-- réseau « TRI » (design/charte-graphique/reseaux, n° 06) : deux départs, un aiguillage, une arrivée par couleur -->
+            <path class="rail" d="M 40 36 L 40 92 Q 40 120 68 120 L 170 120" />
+            <path class="rail" d="M 120 36 L 120 100 Q 120 120 140 120" />
+            <path class="rail" d="M 170 120 Q 222 120 240 90 L 262 58" />
+            <path class="rail" d="M 170 120 Q 222 120 240 150 L 262 182" />
+            <circle class="node" cx="40" cy="36" r="8" /><circle class="node" cx="120" cy="36" r="8" />
+            <rect x="163" y="113" width="14" height="14" fill="#f6f4ee" stroke="#ff7a00" stroke-width="2.2" />
+            <circle cx="270" cy="48" r="12" fill="none" stroke="#ff7a00" stroke-width="2.2" /><circle cx="270" cy="48" r="5" fill="#1d6fe0" />
+            <circle cx="270" cy="192" r="12" fill="none" stroke="#ff7a00" stroke-width="2.2" /><circle cx="270" cy="192" r="5" fill="#e5383b" />
+            <text class="lbl" x="50" y="32">START_A</text><text class="lbl" x="130" y="32">START_B</text>
+            <path class="pencil-line" d="M 150 180 q 2 -26 16 -46 m -7 3 l 7 -3 l 0 8" />
+            <text class="pencil" x="84" y="198" transform="rotate(-4 84 198)">trie les couleurs</text>
+            <text class="pencil" x="146" y="82" transform="rotate(-8 146 82)">bleu en haut</text>
+            <circle r="5" fill="#1d6fe0"><animateMotion dur="4.5s" repeatCount="indefinite" path="M 40 36 L 40 92 Q 40 120 68 120 L 170 120 Q 222 120 240 90 L 262 58" /></circle>
+            <circle r="5" fill="#e5383b"><animateMotion dur="4.5s" begin="-2.2s" repeatCount="indefinite" path="M 120 36 L 120 100 Q 120 120 140 120 L 170 120 Q 222 120 240 150 L 262 182" /></circle>
+          </svg>
+          <h1 class="logo">TIC<b>·</b>TAC<b>·</b>TIC</h1>
+          <p class="home-tag">// schéma de routage temporel</p>
+          <div class="scribble hand">↓ c'est parti</div>
+          <div class="menu">
+            <button class="btn" id="h-play" type="button">LANCER</button>
+            <div class="row">
+              <button class="btn ghost" id="h-levels" type="button">NIVEAUX</button>
+              <button class="btn ghost" id="h-options" type="button">OPTIONS</button>
+            </div>
+          </div>
+        </main>
       </div>
-      <p class="tagline">Route les balles. Maîtrise le temps.</p>
-      <button id="play" type="button">JOUER</button>
-      <p class="hint">Touche les aiguillages pour guider chaque balle jusqu'à l'arrivée.</p>
-    </div>
+      <div class="status"><span id="h-cmd">—</span></div>
+    </section>
+
+    <!-- ═══ NIVEAUX ═══ -->
+    <section id="s-levels" class="screen" hidden>
+      <div class="bar"><span><b>Plans</b> — choisis un calque</span><button class="icon" id="l-close" type="button" aria-label="Fermer">✕</button></div>
+      <div class="path">/ niveaux / <b>chapitre_01</b> /</div>
+      <div class="list" id="l-list"></div>
+      <div class="status"><span id="l-count">0 fichier</span><span class="on" id="l-done">✓ 0 / 0</span></div>
+    </section>
+
+    <!-- ═══ JEU ═══ -->
+    <section id="s-game" class="screen" hidden>
+      <div class="bar"><span><b id="g-file">niv-01</b> — écran : <span id="g-screen">MAIN</span></span><button class="icon" id="g-pause" type="button" aria-label="Pause">❚❚</button></div>
+      <div class="tools">
+        <span class="chip">BALLES <b id="g-balls">0</b>/<span id="g-total">0</span></span>
+        <span class="chip">⏱ <b id="g-clock">00:00.0</b></span>
+        <span class="chip o">TEMPS <b id="g-mult">×1.0</b></span>
+      </div>
+      <div class="stage" id="g-stage">
+        <canvas id="c"></canvas>
+        <div class="veil" id="g-veil" hidden><div class="dialog" id="g-dialog"></div></div>
+      </div>
+      <div class="cmd" id="g-log"></div>
+      <div class="status"><span id="g-t">t 0.0 s</span><span class="on" id="g-sw">AIG. 0</span><span class="ok" id="g-err">0 ERREUR</span></div>
+    </section>
+
+    <!-- ═══ OPTIONS ═══ -->
+    <section id="s-options" class="screen" hidden>
+      <div class="bar"><span><b>Options</b> — préférences</span><button class="icon" id="o-close" type="button" aria-label="Fermer">✕</button></div>
+      <div class="panel">
+        <section><h2>AFFICHAGE</h2>
+          <label class="opt"><span>Grille</span><input class="chk" type="checkbox" data-opt="grid" /></label>
+          <label class="opt"><span>Animations<small>anneaux, orbites, traînées</small></span><input class="chk" type="checkbox" data-opt="animations" /></label>
+          <label class="opt"><span>Compteur FPS</span><input class="chk" type="checkbox" data-opt="fps" /></label>
+        </section>
+        <section><h2>JEU</h2>
+          <label class="opt"><span>Vibrations<small>aiguillage, erreur, victoire</small></span><input class="chk" type="checkbox" data-opt="vibrate" /></label>
+        </section>
+        <section><h2>DONNÉES</h2>
+          <div class="opt"><span>Progression<small id="o-progress">0 niveau terminé</small></span><button class="btn ghost sm" id="o-reset" type="button">EFFACER</button></div>
+        </section>
+      </div>
+      <div class="status"><span class="ok" id="o-saved">● ENREGISTRÉ</span><span>prefs.cfg</span></div>
+    </section>
 
     <script type="module" src="./main.ts"></script>
   </body>

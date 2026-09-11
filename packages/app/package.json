@@ -4,12 +4,17 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "gen:levels": "node ../maps/mapFiles.mjs",
+    "prestart": "yarn gen:levels",
     "start": "expo start --dev-client",
+    "preandroid": "yarn gen:levels",
     "android": "expo run:android",
+    "preios": "yarn gen:levels",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
     "web": "vite webview --config webview/vite.config.ts --open",
-    "build:preview": "node scripts/build-preview.mjs"
+    "build:preview": "node scripts/build-preview.mjs",
+    "build:web": "vite build webview --config webview/vite.config.ts --mode web"
   },
   "dependencies": {
     "@tic-tac-tic/canvas-render": "*",

@@ -129,6 +129,9 @@ export class SwitchPreview extends Switch {
     return distanceSq({ x, y }, this._pt) <= SWITCH_R * SWITCH_R
   }
 
+  // Couleur de dessin : surcharge du thème (manuel / auto) si définie, sinon couleur de la map.
+  private accent = () => (this.mode === "auto" ? COLORS.switchAutoAccent : COLORS.switchAccent) || this.color
+
   private drawStatic = (ctx: Renderer) => {
     const pt = this._pt
     if (!pt) return
@@ -147,7 +150,7 @@ export class SwitchPreview extends Switch {
     ctx.save()
     ctx.setLineDash([])
     ctx.globalAlpha = 1 - t
-    ctx.strokeStyle = this.color
+    ctx.strokeStyle = this.accent()
     ctx.lineWidth = STROKE_WIDTHS.base
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, SWITCH_R + t * 12, 0, Math.PI * 2)
@@ -165,7 +168,7 @@ export class SwitchPreview extends Switch {
     ctx.lineCap = "round"
 
     if (this._enterAngle !== undefined) {
-      ctx.strokeStyle = this.color
+      ctx.strokeStyle = this.accent()
       ctx.lineWidth = STROKE_WIDTHS.heavy
       ctx.beginPath()
       ctx.moveTo(pt.x, pt.y)
@@ -173,7 +176,7 @@ export class SwitchPreview extends Switch {
       ctx.stroke()
       const ex = pt.x + Math.cos(this._enterAngle) * r
       const ey = pt.y + Math.sin(this._enterAngle) * r
-      ctx.fillStyle = this.color
+      ctx.fillStyle = this.accent()
       ctx.beginPath()
       ctx.arc(ex, ey, 6.5, 0, Math.PI * 2)
       ctx.fill()
@@ -188,7 +191,7 @@ export class SwitchPreview extends Switch {
       if (isActive) continue
       const tx = pt.x + Math.cos(angle) * r
       const ty = pt.y + Math.sin(angle) * r
-      ctx.fillStyle = this.color
+      ctx.fillStyle = this.accent()
       ctx.beginPath()
       ctx.arc(tx, ty, 4.5, 0, Math.PI * 2)
       ctx.fill()
@@ -199,7 +202,7 @@ export class SwitchPreview extends Switch {
     }
 
     if (this.displayAngle !== undefined) {
-      ctx.strokeStyle = this.color
+      ctx.strokeStyle = this.accent()
       ctx.lineWidth = STROKE_WIDTHS.heavy
       ctx.beginPath()
       ctx.moveTo(pt.x, pt.y)
@@ -207,7 +210,7 @@ export class SwitchPreview extends Switch {
       ctx.stroke()
       const dx = pt.x + Math.cos(this.displayAngle) * r
       const dy = pt.y + Math.sin(this.displayAngle) * r
-      ctx.fillStyle = this.color
+      ctx.fillStyle = this.accent()
       ctx.beginPath()
       ctx.arc(dx, dy, 6.5, 0, Math.PI * 2)
       ctx.fill()
@@ -217,7 +220,7 @@ export class SwitchPreview extends Switch {
       ctx.fill()
     }
 
-    ctx.fillStyle = this.color
+    ctx.fillStyle = this.accent()
     ctx.beginPath()
     ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2)
     ctx.fill()

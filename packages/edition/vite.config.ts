@@ -1,15 +1,15 @@
 import { defineConfig, type Plugin } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
-import { readFile, writeFile, readdir } from "fs/promises"
+import { readFile, writeFile } from "fs/promises"
+import { MAPS_DIR, isMapFile, listMapFiles, writeLevelsIndex } from "../maps/mapFiles.mjs"
 
 const r = (p: string) => path.resolve(__dirname, "../..", p)
-const MAPS_DIR = r("packages/maps")
 
 // Nom de fichier autorisé : map.json, map2.json, map3.json… jamais de chemin
-// (protège /__load-map et /__save-map contre la traversée de répertoire).
-const MAP_NAME_RE = /^map\d*\.json$/
-const isValidMapName = (name: string): name is string => MAP_NAME_RE.test(name)
+// (protège /__load-map et /__save-map contre la traversée de répertoire). Même règle que
+// les niveaux du jeu (maps/mapFiles.mjs).
+const isValidMapName = (name: string): name is string => isMapFile(name)
 
 // Lit / écrit packages/maps/<name>.json côté serveur dev. Plusieurs maps peuvent
 // coexister (map.json, map2.json…) ; edition NE les importe PAS statiquement (sinon
@@ -21,9 +21,8 @@ const saveMapPlugin = (): Plugin => ({
   configureServer(server) {
     server.middlewares.use("/__list-maps", async (_req, res) => {
       try {
-        const files = (await readdir(MAPS_DIR)).filter((f) => MAP_NAME_RE.test(f))
         res.setHeader("Content-Type", "application/json")
-        res.end(JSON.stringify(files.sort()))
+        res.end(JSON.stringify(listMapFiles()))
       } catch (e) {
         res.statusCode = 500
         res.end(String(e))
@@ -62,6 +61,8 @@ const saveMapPlugin = (): Plugin => ({
       req.on("end", async () => {
         try {
           await writeFile(path.join(MAPS_DIR, name), body)
+          // nouvelle map → elle devient un niveau du jeu (index Metro de l'app)
+          writeLevelsIndex()
           res.statusCode = 200
           res.end("ok")
         } catch (e) {

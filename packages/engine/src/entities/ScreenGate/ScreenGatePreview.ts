@@ -54,8 +54,8 @@ export class ScreenGatePreview extends ScreenGate {
     ctx.save()
     ctx.translate(this._pt.x, this._pt.y)
     ctx.fillStyle = COLORS.white
-    ctx.strokeStyle = COLORS.grayLight
-    ctx.lineWidth = STROKE_WIDTHS.lineGlow
+    ctx.strokeStyle = COLORS.gate
+    ctx.lineWidth = STROKE_WIDTHS.gate
     ctx.setLineDash([])
     ctx.beginPath()
     ctx.roundRect(-GATE_W / 2, -GATE_H / 2, GATE_W, GATE_H, 5)

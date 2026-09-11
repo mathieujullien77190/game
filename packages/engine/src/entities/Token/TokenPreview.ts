@@ -11,6 +11,7 @@ import type { TransformerPreview } from "../Transformer/TransformerPreview"
 import type { ScreenGatePreview } from "../ScreenGate/ScreenGatePreview"
 import type { SwitchPreview } from "../Switch/SwitchPreview"
 import type { ClonerPreview } from "../Cloner/ClonerPreview"
+import type { SimEvent } from "../../Manager/simEvents"
 import { Token } from "./Token"
 
 // Symétrie rotationnelle par forme : période après laquelle l'orientation se répète visuellement
@@ -49,6 +50,8 @@ export type TransitionCtx = {
   isDark: boolean
   screenGateByLinkId: Record<string, ScreenGatePreview>
   screenGateByExitKey: Record<string, ScreenGatePreview>
+  events: SimEvent[]
+  elapsedSeconds: number
 }
 
 export class TokenPreview extends Token {
@@ -166,6 +169,10 @@ export class TokenPreview extends Token {
           arrival.flashColor = COLORS.red
           arrival.flashProgress = 0
         }
+        ctx.events.push({
+          type: "arrival", t: ctx.elapsedSeconds, arrivalId: arrival.id, ok: matches,
+          tokenColor, tokenType: this.type as string, expected: demand,
+        })
       }
       this.arrived = true
       this.direction = 0
